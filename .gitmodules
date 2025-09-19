@@ -1,0 +1,6 @@
+[submodule "explanations"]
+	path = explanations
+	url = https://github.com/pan2013e/sweb-agent-explanations.git
+[submodule "tracer"]
+	path = tracer
+	url = https://github.com/imamnurby/swe-bench-tracer-py.git
