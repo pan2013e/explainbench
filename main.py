@@ -76,6 +76,13 @@ def rewrite_test_entry_sympy(code, trace_output_path):
                         names=[cst.ImportAlias(name=cst.Name("ExecutionTracer"))]
                     )]
                 )
+                # add `ok = None`, to promote `ok` to the outer scope
+                assign_ok_none = cst.SimpleStatementLine(
+                    body=[cst.Assign(
+                        targets=[cst.AssignTarget(cst.Name("ok"))],
+                        value=cst.Name("None")
+                    )]
+                )
                 # wrap the assignment with `with ExecutionTracer(trace_output_path) as tracer:`
                 with_stmt = cst.With(
                     items=[cst.WithItem(
@@ -89,7 +96,7 @@ def rewrite_test_entry_sympy(code, trace_output_path):
                         body=[updated_node]
                     )
                 )
-                return cst.FlattenSentinel([import_stmt, with_stmt])
+                return cst.FlattenSentinel([import_stmt, assign_ok_none, with_stmt])
             return updated_node
     
     module = cst.parse_module(code)
@@ -111,6 +118,11 @@ def inject_tracer(container, test_spec, trace_output_path):
         copy_to_container(container, Path(f.name), entry_path)
     exec_run_with_timeout(container, f"chmod 755 {entry_path}")
     print(f"Tracer injected into test entry, output path: {trace_output_path}")
+
+def restore_injection(container, test_spec):
+    entry_path = get_test_entry_path(test_spec.instance_id)
+    exec_run_with_timeout(container, f"git restore {entry_path}")
+    print("Test entry restored")
 
 def run_buggy_code(log_dir, test_spec, logger, instance_id, container, timeout):
     # 1. Patch test code
@@ -147,6 +159,8 @@ def retrieve_fixed_trace(log_dir, container):
 def monkey_patch():
     when(run_instance, 156).do(install_tracer)
     when(run_instance, 159).do(run_buggy_code)
+    # Restore original test entry before running patched code tests
+    when(run_instance, 189).do(restore_injection)
     # Skip redundant test code patching
     when(run_instance, 198).goto(206)
     # Inject tracer for fixed code
@@ -155,6 +169,8 @@ def monkey_patch():
     when(run_instance, 209).do(retrieve_fixed_trace)
     # Redirect fixed code test output path
     when(run_instance, 211).do("test_output_path = log_dir / 'test_output_fixed.txt'")
+    # Restore original test entry after running patched code tests
+    when(run_instance, 223).do(restore_injection)
     print('Monkey patch applied')
     
 def main(**kwargs):
