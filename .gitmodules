@@ -4,6 +4,3 @@
 [submodule "py-tracer"]
 	path = py-tracer
 	url = https://github.com/imamnurby/swe-bench-tracer-py.git
-[submodule "swe-bench"]
-	path = swe-bench
-	url = https://github.com/imamnurby/SWE-bench.git
