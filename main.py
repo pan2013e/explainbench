@@ -1,9 +1,14 @@
 import os
+import ast
 import sys
+import libcst as cst
+import libcst.matchers as m
+import tempfile
 from pathlib import Path, PurePosixPath
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from dowhen import when
+from docker.models.containers import Container
 from swebench.harness.run_evaluation import (
     run_instance,
     main as run_evaluation_main
@@ -20,27 +25,108 @@ from swebench.harness.utils import (
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-def inject_tracer(container):
-    print("Injecting tracer into container")
-    # 1. Install tracer
+def read_from_docker(container: Container, path: PurePosixPath) -> str:
+    """Read a file from inside a Docker container."""
+    tar_stream, _ = container.get_archive(str(path))
+    file_content = b""
+    for chunk in tar_stream:
+        file_content += chunk
+    import tarfile
+    import io
+    with tarfile.open(fileobj=io.BytesIO(file_content)) as tar:
+        member = tar.getmembers()[0]
+        file = tar.extractfile(member)
+        return file.read().decode('utf-8')
+
+def get_test_entry_path(instance_id):
+    if 'sympy' in instance_id:
+        return PurePosixPath('/testbed/bin/test')
+    else:
+        raise NotImplementedError()
+
+def rewrite_test_entry(instance_id, test_entry_code, trace_output_path):
+    if 'sympy' in instance_id:
+        return rewrite_test_entry_sympy(test_entry_code, trace_output_path)
+    else:
+        raise NotImplementedError()
+
+def rewrite_test_entry_sympy(code, trace_output_path):
+    
+    class Transformer(cst.CSTTransformer):
+        def leave_SimpleStatementLine(self, original_node, updated_node):
+            # find assignment of `sympy.test`
+            if m.matches(
+                original_node,
+                m.SimpleStatementLine(
+                    body=[m.Assign(
+                        targets=[m.AssignTarget(m.Name("ok"))],
+                        value=m.Call(
+                            func=m.Attribute(
+                                value=m.Name("sympy"),
+                                attr=m.Name("test")
+                            )
+                        )
+                    )]
+                )
+            ):
+                # add `from tracer import ExecutionTracer` before the assignment
+                import_stmt = cst.SimpleStatementLine(
+                    body=[cst.ImportFrom(
+                        module=cst.Name("tracer"),
+                        names=[cst.ImportAlias(name=cst.Name("ExecutionTracer"))]
+                    )]
+                )
+                # wrap the assignment with `with ExecutionTracer(trace_output_path) as tracer:`
+                with_stmt = cst.With(
+                    items=[cst.WithItem(
+                        cst.Call(
+                            func=cst.Name("ExecutionTracer"),
+                            args=[cst.Arg(cst.SimpleString(f'"{trace_output_path}"'))]
+                        ),
+                        asname=cst.AsName(cst.Name("tracer"))
+                    )],
+                    body=cst.IndentedBlock(
+                        body=[updated_node]
+                    )
+                )
+                return cst.FlattenSentinel([import_stmt, with_stmt])
+            return updated_node
+    
+    module = cst.parse_module(code)
+    new_module = module.visit(Transformer())
+    return new_module.code
+    
+def install_tracer(container):
     copy_to_container(container, Path(f"{DIR}/py-tracer"), PurePosixPath('/root/py-tracer'))
     exec_run_with_timeout(container, '/opt/miniconda3/envs/testbed/bin/pip install -e /root/py-tracer')
-    # 2. Hijack test runner to use tracer
-    # TODO: hijack test runner
+    print("Tracer installed in container")
+
+def inject_tracer(container, test_spec, trace_output_path):
+    entry_path = get_test_entry_path(test_spec.instance_id)
+    entry_code = read_from_docker(container, entry_path)
+    hijacked = rewrite_test_entry(test_spec.instance_id, entry_code, trace_output_path)
+    with tempfile.NamedTemporaryFile("w") as f:
+        f.write(hijacked)
+        f.flush()
+        copy_to_container(container, Path(f.name), entry_path)
+    exec_run_with_timeout(container, f"chmod 755 {entry_path}")
+    print(f"Tracer injected into test entry, output path: {trace_output_path}")
 
 def run_buggy_code(log_dir, test_spec, logger, instance_id, container, timeout):
     # 1. Patch test code
     eval_file = Path(log_dir / "eval.sh")
-    print(eval_file)
     eval_file.write_text(test_spec.eval_script)
     logger.info(
         f"Eval script for {instance_id} written to {eval_file}; copying to container..."
     )
     copy_to_container(container, eval_file, PurePosixPath("/eval.sh"))
-    # 2. Run buggy code
+    # 2. Run buggy code and retrieve buggy code execution trace
+    inject_tracer(container, test_spec, "/trace_buggy.jsonl")
     buggy_test_output, buggy_timed_out, buggy_total_runtime = exec_run_with_timeout(
         container, "/bin/bash /eval.sh", timeout
     )
+    with open(log_dir / "trace_buggy.jsonl", "w") as f:
+        f.write(read_from_docker(container, PurePosixPath("/trace_buggy.jsonl")))
     test_output_path = log_dir / "test_output_buggy.txt"
     logger.info(f"Test runtime (BUGGY): {buggy_total_runtime:_.2f} seconds")
     with open(test_output_path, "w") as f:
@@ -53,14 +139,21 @@ def run_buggy_code(log_dir, test_spec, logger, instance_id, container, timeout):
                 f"Test (BUGGY) timed out after {timeout} seconds.",
                 logger,
             )
-    
+
+def retrieve_fixed_trace(log_dir, container):
+    with open(log_dir / "trace_fixed.jsonl", "w") as f:
+        f.write(read_from_docker(container, PurePosixPath("/trace_fixed.jsonl")))
 
 def monkey_patch():
-    when(run_instance, 156).do(inject_tracer)
+    when(run_instance, 156).do(install_tracer)
     when(run_instance, 159).do(run_buggy_code)
     # Skip redundant test code patching
     when(run_instance, 198).goto(206)
-    # Redirect fixed test output path
+    # Inject tracer for fixed code
+    when(run_instance, 206).do(lambda container, test_spec: inject_tracer(container, test_spec, '/trace_fixed.jsonl'))
+    # Retrieve fixed code execution trace
+    when(run_instance, 209).do(retrieve_fixed_trace)
+    # Redirect fixed code test output path
     when(run_instance, 211).do("test_output_path = log_dir / 'test_output_fixed.txt'")
     print('Monkey patch applied')
     
