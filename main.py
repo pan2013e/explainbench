@@ -1,11 +1,9 @@
 import os
 import sys
-import json
 from pathlib import Path, PurePosixPath
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from dowhen import when
-from datasets import load_dataset
 from swebench.harness.run_evaluation import (
     run_instance,
     main as run_evaluation_main
