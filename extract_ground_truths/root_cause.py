@@ -1,15 +1,107 @@
 import re
-from typing import List
-from extract_ground_truths.utils import remove_indentation
+import pprint
+from typing import Dict, List
 
-def extract_modified_filenames(patch_content: str) -> List[str]:
+def parse_patch(patch_content: str)->List[Dict]:
     """
-    Parses a diff/patch content and extracts the unique list of modified file paths.
-    """
-    patch_content = remove_indentation(patch_content)
-    pattern = r"^(?:--- a/|\+\+\+ b/)(?!/dev/null)([^\t\n]+)"
-    matches = re.findall(pattern, patch_content, re.MULTILINE)    
-    # Convert to a set to get unique file paths, then convert back to a list.
-    unique_files = list(set(matches))
-    return unique_files
+    Parses a patch file content and extracts metadata about the changes.
 
+    Args:
+        patch_content (str): A string containing the full content of a patch file.
+
+    Returns:
+        list: A list of dict containing the changed files, where each file
+              has details about the hunks of changes within it.
+        
+        Example Return Structure:
+        [
+            {
+              "old_path": "a/path/to/old_file.py",
+              "new_path": "b/path/to/new_file.py",
+              "is_new_file": False,
+              "is_deleted_file": False,
+              "hunks": [
+                {
+                  "context": "def function_name(args)",
+                  "scope_name": "function_name",
+                  "removals": {"start_line": 139, "count": 0},
+                  "additions": {"start_line": 140, "count": 8}
+                }
+              ]
+            }
+          ]
+    """
+    # Regex to find file headers (--- a/... +++ b/...)
+    file_header_pattern = re.compile(r'--- a/(.*?)\n\+\+\+ b/(.*?)\n', re.DOTALL)
+    
+    # Regex to find hunk headers (@@ -start,count +start,count @@ context)
+    hunk_header_pattern = re.compile(r'@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@(.*?)\n')
+    
+    # Regex to find function or class names from a context line
+    func_pattern = re.compile(r'^(?:async\s+)?def\s+([a-zA-Z_]\w*)')
+    class_pattern = re.compile(r'^class\s+([a-zA-Z_]\w*)')
+
+    result = []
+    
+    # Split the patch by 'diff --git' to process one file change at a time
+    file_patches = patch_content.split('diff --git ')[1:]
+
+    for file_patch in file_patches:
+        file_header_match = file_header_pattern.search(file_patch)
+        if not file_header_match:
+            continue
+
+        old_path = file_header_match.group(1)
+        new_path = file_header_match.group(2)
+        
+        file_info = {
+            "old_path": old_path,
+            "new_path": new_path,
+            "is_new_file": old_path == "/dev/null",
+            "is_deleted_file": new_path == "/dev/null",
+            "hunks": []
+        }
+
+        # Find all hunks within the current file patch
+        hunks = hunk_header_pattern.finditer(file_patch)
+        hunk_contents = hunk_header_pattern.split(file_patch)[1:]
+
+        for i, hunk_match in enumerate(hunks):
+            removal_start = int(hunk_match.group(1))
+            addition_start = int(hunk_match.group(2))
+            context = hunk_match.group(3).strip()
+            
+            scope_name = ''
+            func_match = func_pattern.match(context)
+            if func_match:
+                scope_name = func_match.group(1)
+            else:
+                class_match = class_pattern.match(context)
+                if class_match:
+                    scope_name = class_match.group(1)
+
+            hunk_body_index = (i * 4) + 3
+            hunk_body = hunk_contents[hunk_body_index]
+            
+            lines_in_hunk = hunk_body.split('\n')
+            
+            additions_count = sum(1 for line in lines_in_hunk if line.startswith('+'))
+            removals_count = sum(1 for line in lines_in_hunk if line.startswith('-'))
+
+            hunk_info = {
+                "context": context,
+                "scope_name": scope_name,
+                "removals": {
+                    "start_line": removal_start,
+                    "count": removals_count
+                },
+                "additions": {
+                    "start_line": addition_start,
+                    "count": additions_count
+                }
+            }
+            file_info["hunks"].append(hunk_info)
+
+        result.append(file_info)
+
+    return result
