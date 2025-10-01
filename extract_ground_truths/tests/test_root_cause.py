@@ -87,7 +87,7 @@ def test_extract_modified_files():
              'removals': {'count': 4,
                           'line_numbers': [2332, 2333, 2334, 2335],
                           'start_line': 2332},
-             'scope_name': 'get_db_prep_value'}],
+             'scope': {'name': 'get_db_prep_value', 'type': 'function'}}],
             'is_deleted_file': False,
             'is_new_file': False,
             'new_path': 'django/db/models/fields/__init__.py',
@@ -97,7 +97,7 @@ def test_extract_modified_files():
                                     'start_line': 101},
                         'context': 'def as_sql(self, compiler, connection):',
                         'removals': {'count': 1, 'line_numbers': [101], 'start_line': 101},
-                        'scope_name': 'as_sql'}],
+                        'scope': {'name': 'as_sql', 'type': 'function'}}],
             'is_deleted_file': False,
             'is_new_file': False,
             'new_path': 'django/db/models/fields/related_lookups.py',
@@ -110,7 +110,7 @@ def test_extract_modified_files():
                         'removals': {'count': 1,
                                     'line_numbers': [1702],
                                     'start_line': 1702},
-                        'scope_name': 'split_exclude'}],
+                        'scope': {'name': 'split_exclude', 'type': 'function'}}],
             'is_deleted_file': False,
             'is_new_file': False,
             'new_path': 'django/db/models/sql/query.py',
@@ -138,15 +138,10 @@ def test_extract_buggy_function_names():
     buggy_fnames = extract_buggy_function_names(patch_metadata)
     assert set(buggy_fnames) == set(expected_values)
     
-    # currently ignore the case when a function is fully removed
-    # @@ -1,2 +0,0 @@ 
-    # - def old_utility_function(a):
-    # -    pass
-    # when extracting function, i expect the function name to be one line with the beginning of the hunk @@ -1,2 +0,0 @@
-    # patch_metadata = parse_patch(sample_diff_2)
-    # expected_values = [("old_utility_function", "function"), ("get_db_prep_value", "function")]
-    # qna = extract_buggy_function_names(patch_metadata)
-    # assert set(qna) == set(expected_values)
+    patch_metadata = parse_patch(sample_diff_2)
+    expected_values = [("old_utility_function", "function"), ("get_db_prep_value", "function")]
+    qna = extract_buggy_function_names(patch_metadata)
+    assert set(qna) == set(expected_values)
     
 def test_extract_new_filenames():
     expected_new_files = ['new_service/api.py']

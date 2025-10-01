@@ -74,19 +74,40 @@ def parse_patch(patch_content: str)->List[Dict]:
             addition_start = int(hunk_match.group(2))
             context = hunk_match.group(3).strip()
             
-            scope_name = ''
+            scope_info = {"name": "", "type": ""}
             func_match = func_pattern.match(context)
             if func_match:
-                scope_name = func_match.group(1)
+                scope_info["name"] = func_match.group(1)
+                scope_info["type"] = "function"
             else:
                 class_match = class_pattern.match(context)
                 if class_match:
-                    scope_name = class_match.group(1)
+                    scope_info["name"] = class_match.group(1)
+                    scope_info["type"] = "class"
 
             hunk_body_index = (i * 4) + 3
             hunk_body = hunk_contents[hunk_body_index]
             
             lines_in_hunk = hunk_body.split('\n')
+            
+            if not scope_info["name"]:
+                for line in lines_in_hunk:
+                    if line.startswith(('+', '-')):
+                        code_line = line[1:].strip()
+                        
+                        func_match = func_pattern.match(code_line)
+                        if func_match:
+                            # Change: Populate scope_info dictionary and break
+                            scope_info["name"] = func_match.group(1)
+                            scope_info["type"] = "function"
+                            break
+
+                        class_match = class_pattern.match(code_line)
+                        if class_match:
+                            # Change: Populate scope_info dictionary and break
+                            scope_info["name"] = class_match.group(1)
+                            scope_info["type"] = "class"
+                            break
             
             # Track line numbers for additions and removals
             old_line_num = removal_start
@@ -111,7 +132,7 @@ def parse_patch(patch_content: str)->List[Dict]:
 
             hunk_info = {
                 "context": context,
-                "scope_name": scope_name,
+                "scope": scope_info,
                 "removals": {
                     "start_line": removal_start,
                     "count": removals_count,
@@ -150,25 +171,18 @@ def extract_buggy_function_names(parsed_patch_data: List[Dict]) -> List[Tuple[st
     """
     Extract the buggy function names from the parsed patch data.
     """
-    
-    ground_truth_fnames = []
+    buggy_scopes = set()
     for file_info in parsed_patch_data:
-        hunk_info = file_info.get("hunks", [])
-        is_new_file = file_info.get("is_new_file")
-        if len(hunk_info) > 0 and not is_new_file:
-            hunk_info = hunk_info[0]
-            scope_name = hunk_info.get("scope_name", "")
-            
-            if scope_name != "":
-                context = hunk_info.get("context")
-                context = context.strip()
-                scope_type = "function" if context.startswith("def ") else "class"
+        for hunk in file_info.get("hunks", []):
+            scope_info = hunk.get("scope", {})
+            scope_name = scope_info.get("name")
+            scope_type = scope_info.get("type")
+            is_new_file = file_info.get("is_new_file")
+            if scope_name and not is_new_file:
+                buggy_scopes.add((scope_name, scope_type))
 
-            ground_truth_fnames.append(
-                (scope_name, scope_type)
-            )
-        
-    return ground_truth_fnames
+    # Convert the set of tuples back to a list for the final return value
+    return list(buggy_scopes)
                 
 def extract_new_created_filenames(parsed_patch_data: List[Dict]) -> List[str]:
     """
