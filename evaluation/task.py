@@ -1,3 +1,6 @@
+import json
+
+from functools import lru_cache
 from typing import Generic, ClassVar, TypeVar
 from pydantic import BaseModel
 
@@ -14,21 +17,30 @@ class Task(Generic[Schema]):
     TEMPLATE: ClassVar[str] = (
         "An AI agent fixed a bug in a code repository and provided an explanation for the patch. "
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
-        "You should respond in JSON format.\n\n"
+        "You should respond in JSON format, complying with the following Pydantic schema: {schema}\n\n"
         "Patch Explanation:\n{explanation}\n\n"
         "Question:\n{question}\n"
     )
     QUESTION: ClassVar[str]
     SCHEMA: ClassVar[type[Schema]]
+
+    @classmethod
+    @lru_cache
+    def _schema_string(cls):
+        return json.dumps(cls.SCHEMA.model_json_schema(mode='serialization'))
     
     @classmethod
-    def build_prompt(cls, explanation: str):
-        return cls.TEMPLATE.format(explanation=explanation, question=cls.QUESTION)
+    def _build_prompt(cls, explanation: str):
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION)
     
     @classmethod
     def predict(cls, model: Model, explanation: str):
-        prompt = cls.build_prompt(explanation)
+        prompt = cls._build_prompt(explanation)
         return model.infer(prompt, cls.SCHEMA)
+    
+    @classmethod
+    def eval(cls, pred, gt, **kwargs):
+        raise NotImplementedError()
 
 class RootCause:
     class File(Task[schema.File]):
