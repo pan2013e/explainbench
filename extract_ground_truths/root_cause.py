@@ -131,7 +131,8 @@ def extract_buggy_function_names(parsed_patch_data: List[Dict]) -> List[Tuple[st
     ground_truth_fnames = []
     for file_info in parsed_patch_data:
         hunk_info = file_info.get("hunks", [])
-        if len(hunk_info) > 0:
+        is_new_file = file_info.get("is_new_file")
+        if len(hunk_info) > 0 and not is_new_file:
             hunk_info = hunk_info[0]
             scope_name = hunk_info.get("scope_name", "")
             
