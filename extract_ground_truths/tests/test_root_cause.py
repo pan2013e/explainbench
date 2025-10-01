@@ -1,4 +1,4 @@
-from extract_ground_truths.root_cause import parse_patch
+from extract_ground_truths.root_cause import *
 
 def test_extract_modified_files():
     sample_diff = """
@@ -73,3 +73,9 @@ query = Query(self.model)
     patch_metadata = parse_patch(sample_diff)
     assert patch_metadata == expected_values
     
+
+def test_generate_question_buggy_lines():
+    patch_metadata = parse_patch(sample_diff)
+    expected_values = ["django/db/models/sql/query.py", "django/db/models/fields/related_lookups.py", "django/db/models/fields/__init__.py"]
+    qna = generate_question_buggy_lines(patch_metadata)
+    assert set(qna.get("GroundTruth")) == set(expected_values)
