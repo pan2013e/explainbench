@@ -147,5 +147,17 @@ def extract_buggy_function_names(parsed_patch_data: List[Dict]) -> List[Tuple[st
         
     return ground_truth_fnames
                 
+def extract_new_created_filenames(parsed_patch_data: List[Dict]) -> List[str]:
+    """
+    Extract the filenames from the files that are newly created from the parsed patch data.
+    """
+    
+    ground_truth_filepaths = []
+    for file_info in parsed_patch_data:
+        is_new_file = file_info.get("is_new_file")
+        if is_new_file:
+            filename = file_info.get("new_path", "")
+            assert filename != ""
             
-            
+            ground_truth_filepaths.append(filename)
+    return ground_truth_filepaths
