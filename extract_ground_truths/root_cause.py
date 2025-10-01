@@ -105,3 +105,24 @@ def parse_patch(patch_content: str)->List[Dict]:
         result.append(file_info)
 
     return result
+
+def generate_question_buggy_lines(parsed_patch_data: List[Dict]) -> Dict:
+    """
+    Generates a question about the buggy lines from the parsed patch data.
+    """
+    
+    template = "Which files are buggy according to the patch explanation?"
+    ground_truth_filepaths = []
+    for file_info in parsed_patch_data:
+        
+        # avoid new created file
+        is_new_file = file_info.get("is_new_file")
+        if not is_new_file:
+            filename = file_info.get("old_path", "")
+            assert filename != ""
+            
+            ground_truth_filepaths.append(filename)
+    return {
+        "Question": template,
+        "GroundTruth": ground_truth_filepaths 
+    }
