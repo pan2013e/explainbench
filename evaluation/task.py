@@ -6,6 +6,10 @@ from pydantic import BaseModel
 
 from evaluation import schema
 from evaluation.inference import Model
+from evaluation.util import (
+    is_subpath,
+    set_f1_score,
+)
 
 __all__ = [
     'RootCause',
@@ -38,8 +42,8 @@ class Task(Generic[Schema]):
         prompt = cls._build_prompt(explanation)
         return model.infer(prompt, cls.SCHEMA)
     
-    @classmethod
-    def eval(cls, pred, gt, **kwargs):
+    @staticmethod
+    def eval(pred, gt, **kwargs):
         raise NotImplementedError()
 
 class RootCause:
@@ -47,10 +51,24 @@ class RootCause:
         QUESTION = 'Which files were buggy?'
         SCHEMA = schema.File
 
+        @staticmethod
+        def eval(pred: list[str], gt: list[str]):
+            pred = set(pred)
+            gt = set(gt)
+            return set_f1_score(pred, gt, is_subpath)
+
     class Region(Task[schema.Region]):
         QUESTION = 'Which classes or functions were buggy?'
         SCHEMA = schema.Region
+        
+        @staticmethod
+        def eval(pred, gt):
+            ...
 
     class Line(Task[schema.Line]):
         QUESTION = 'Which lines were buggy?'
         SCHEMA = schema.Line
+        
+        @staticmethod
+        def eval(pred, gt):
+            ...
