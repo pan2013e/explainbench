@@ -46,10 +46,10 @@ class RootCause:
     class File(Task[schema.File]):
         QUESTION = 'Which files were buggy?'
         SCHEMA = schema.File
-    
-    class Function(Task[schema.Function]):
+
+    class Region(Task[schema.Region]):
         QUESTION = 'Which classes or functions were buggy?'
-        SCHEMA = schema.Function
+        SCHEMA = schema.Region
 
     class Line(Task[schema.Line]):
         QUESTION = 'Which lines were buggy?'

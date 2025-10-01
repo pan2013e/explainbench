@@ -1,21 +1,27 @@
-from typing import List
+from typing import List, Literal
 from pydantic import BaseModel
 
 __all__ = [
-    'Function',
+    'Region',
     'File',
     'Line',
 ]
 
-class Function(BaseModel):
-    function: List[str]
+###### Buggy Location Schemas ######
+class RegionInfo(BaseModel):
+    type: Literal['class', 'function']
+    identifier: str
+
+class Region(BaseModel):
+    region: List[RegionInfo]
 
 class File(BaseModel):
     file: List[str]
 
-class Range(BaseModel):
+class LineInfo(BaseModel):
+    file: str
     start: int
     end: int
 
 class Line(BaseModel):
-    line: List[Range]
+    line: List[LineInfo]
