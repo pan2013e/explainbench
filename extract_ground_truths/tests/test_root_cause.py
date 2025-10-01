@@ -74,8 +74,8 @@ deleted file mode 100644
 index 9e6a0c5..0000000
 --- a/django/db/models/fields/old_utils.py
 +++ /dev/null
-@@ -1,2 +0,0 @@
--def old_utility_function():
+@@ -1,2 +0,0 @@ 
+- def old_utility_function(a):
 -    pass
 """
 
@@ -118,11 +118,23 @@ def test_extract_buggy_filenames():
     qna = extract_buggy_filenames(patch_metadata)
     assert set(qna) == set(expected_values)
     
+    patch_metadata = parse_patch(sample_diff_2)
+    expected_values = ["django/db/models/fields/__init__.py", "django/db/models/fields/old_utils.py"]
+    qna = extract_buggy_filenames(patch_metadata)
+    assert set(qna) == set(expected_values)
+    
+    
 def test_extract_buggy_function_names():
     patch_metadata = parse_patch(sample_diff_1)
     expected_values = [("get_db_prep_value", "function"), ("split_exclude", "function"), ("as_sql", "function")]
     buggy_fnames = extract_buggy_function_names(patch_metadata)
     assert set(buggy_fnames) == set(expected_values)
+    
+    # currently ignore the case when a function is fully removed
+    # patch_metadata = parse_patch(sample_diff_2)
+    # expected_values = [("old_utility_function", "function"), ("get_db_prep_value", "function")]
+    # qna = extract_buggy_filenames(patch_metadata)
+    # assert set(qna) == set(expected_values)
     
 def test_extract_new_filenames():
     expected_new_files = ['new_service/api.py']
