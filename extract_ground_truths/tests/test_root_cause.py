@@ -1,6 +1,6 @@
 from extract_ground_truths.root_cause import *
 
-sample_diff = """
+sample_diff_1 = """
 diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
 --- a/django/db/models/fields/__init__.py
 +++ b/django/db/models/fields/__init__.py
@@ -72,18 +72,18 @@ def test_extract_modified_files():
          'old_path': 'django/db/models/sql/query.py'}
     ]
     
-    patch_metadata = parse_patch(sample_diff)
+    patch_metadata = parse_patch(sample_diff_1)
     assert patch_metadata == expected_values
     
 
 def test_extract_buggy_filenames():
-    patch_metadata = parse_patch(sample_diff)
+    patch_metadata = parse_patch(sample_diff_1)
     expected_values = ["django/db/models/sql/query.py", "django/db/models/fields/related_lookups.py", "django/db/models/fields/__init__.py"]
     qna = extract_buggy_filenames(patch_metadata)
     assert set(qna) == set(expected_values)
     
 def test_extract_buggy_function_names():
-    patch_metadata = parse_patch(sample_diff)
+    patch_metadata = parse_patch(sample_diff_1)
     expected_values = [("get_db_prep_value", "function"), ("split_exclude", "function"), ("as_sql", "function")]
     buggy_fnames = extract_buggy_function_names(patch_metadata)
     assert set(buggy_fnames) == set(expected_values)
