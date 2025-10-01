@@ -81,32 +81,40 @@ index 9e6a0c5..0000000
 
 def test_extract_modified_files():
     
-    expected_values = [
-        {'hunks': [{'additions': {'count': 0, 'start_line': 2332},
-                    'context': 'def get_db_prep_value(self, value, connection, prepared=False):',
-                    'removals': {'count': 4, 'start_line': 2332},
-                    'scope_name': 'get_db_prep_value'}],
-         'is_deleted_file': False,
-         'is_new_file': False,
-         'new_path': 'django/db/models/fields/__init__.py',
-         'old_path': 'django/db/models/fields/__init__.py'},
-        {'hunks': [{'additions': {'count': 1, 'start_line': 101},
-                    'context': 'def as_sql(self, compiler, connection):',
-                    'removals': {'count': 1, 'start_line': 101},
-                    'scope_name': 'as_sql'}],
-         'is_deleted_file': False,
-         'is_new_file': False,
-         'new_path': 'django/db/models/fields/related_lookups.py',
-         'old_path': 'django/db/models/fields/related_lookups.py'},
-        {'hunks': [{'additions': {'count': 3, 'start_line': 1702},
-                    'context': 'def split_exclude(self, filter_expr, can_reuse, names_with_path):',
-                    'removals': {'count': 1, 'start_line': 1702},
-                    'scope_name': 'split_exclude'}],
-         'is_deleted_file': False,
-         'is_new_file': False,
-         'new_path': 'django/db/models/sql/query.py',
-         'old_path': 'django/db/models/sql/query.py'}
-    ]
+    expected_values = [{'hunks': [{'additions': {'count': 0, 'line_numbers': [], 'start_line': 2332},
+             'context': 'def get_db_prep_value(self, value, connection, '
+                        'prepared=False):',
+             'removals': {'count': 4,
+                          'line_numbers': [2332, 2333, 2334, 2335],
+                          'start_line': 2332},
+             'scope_name': 'get_db_prep_value'}],
+            'is_deleted_file': False,
+            'is_new_file': False,
+            'new_path': 'django/db/models/fields/__init__.py',
+            'old_path': 'django/db/models/fields/__init__.py'},
+            {'hunks': [{'additions': {'count': 1,
+                                    'line_numbers': [101],
+                                    'start_line': 101},
+                        'context': 'def as_sql(self, compiler, connection):',
+                        'removals': {'count': 1, 'line_numbers': [101], 'start_line': 101},
+                        'scope_name': 'as_sql'}],
+            'is_deleted_file': False,
+            'is_new_file': False,
+            'new_path': 'django/db/models/fields/related_lookups.py',
+            'old_path': 'django/db/models/fields/related_lookups.py'},
+            {'hunks': [{'additions': {'count': 3,
+                                    'line_numbers': [1702, 1703, 1704],
+                                    'start_line': 1702},
+                        'context': 'def split_exclude(self, filter_expr, can_reuse, '
+                                    'names_with_path):',
+                        'removals': {'count': 1,
+                                    'line_numbers': [1702],
+                                    'start_line': 1702},
+                        'scope_name': 'split_exclude'}],
+            'is_deleted_file': False,
+            'is_new_file': False,
+            'new_path': 'django/db/models/sql/query.py',
+            'old_path': 'django/db/models/sql/query.py'}]
     
     patch_metadata = parse_patch(sample_diff_1)
     assert patch_metadata == expected_values

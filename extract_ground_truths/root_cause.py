@@ -24,8 +24,8 @@ def parse_patch(patch_content: str)->List[Dict]:
                 {
                   "context": "def function_name(args)",
                   "scope_name": "function_name",
-                  "removals": {"start_line": 139, "count": 0},
-                  "additions": {"start_line": 140, "count": 8}
+                  "removals": {"start_line": 139, "count": 0, "line_numbers": []},
+                  "additions": {"start_line": 140, "count": 8, "line_numbers": [140, 141, 142, 143, 144, 145, 146, 147]}
                 }
               ]
             }
@@ -88,19 +88,39 @@ def parse_patch(patch_content: str)->List[Dict]:
             
             lines_in_hunk = hunk_body.split('\n')
             
-            additions_count = sum(1 for line in lines_in_hunk if line.startswith('+'))
-            removals_count = sum(1 for line in lines_in_hunk if line.startswith('-'))
+            # Track line numbers for additions and removals
+            old_line_num = removal_start
+            new_line_num = addition_start
+            removal_line_numbers = []
+            addition_line_numbers = []
+            
+            for line in lines_in_hunk:
+                if line.startswith('-'):
+                    removal_line_numbers.append(old_line_num)
+                    old_line_num += 1
+                elif line.startswith('+'):
+                    addition_line_numbers.append(new_line_num)
+                    new_line_num += 1
+                elif line.startswith(' '):
+                    # Context line - exists in both old and new
+                    old_line_num += 1
+                    new_line_num += 1
+            
+            additions_count = len(addition_line_numbers)
+            removals_count = len(removal_line_numbers)
 
             hunk_info = {
                 "context": context,
                 "scope_name": scope_name,
                 "removals": {
                     "start_line": removal_start,
-                    "count": removals_count
+                    "count": removals_count,
+                    "line_numbers": removal_line_numbers
                 },
                 "additions": {
                     "start_line": addition_start,
-                    "count": additions_count
+                    "count": additions_count,
+                    "line_numbers": addition_line_numbers
                 }
             }
             file_info["hunks"].append(hunk_info)
@@ -168,6 +188,21 @@ def extract_new_created_filenames(parsed_patch_data: List[Dict]) -> List[str]:
 def extract_deleted_filenames(parsed_patch_data: List[Dict]) -> List[str]:
     """
     Extract the filenames from the files that are deleted from the parsed patch data.
+    """
+    
+    ground_truth_filepaths = []
+    for file_info in parsed_patch_data:
+        is_deleted_file = file_info.get("is_deleted_file")
+        if is_deleted_file:
+            filename = file_info.get("old_path", "")
+            assert filename != ""
+            
+            ground_truth_filepaths.append(filename)
+    return ground_truth_filepaths
+
+def extract_deleted_filenames(parsed_patch_data: List[Dict]) -> List[int]:
+    """
+    Extract the buggy lines.
     """
     
     ground_truth_filepaths = []
