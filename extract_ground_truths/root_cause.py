@@ -106,7 +106,7 @@ def parse_patch(patch_content: str)->List[Dict]:
 
     return result
 
-def extract_function_names(parsed_patch_data: List[Dict]) -> List[str]:
+def extract_buggy_filenames(parsed_patch_data: List[Dict]) -> List[str]:
     """
     Extract the filenames from the parsed patch data.
     """
