@@ -169,3 +169,14 @@ def test_extract_deleted_filenames():
     patch_metadata = parse_patch(sample_diff_1)
     deleted_files = extract_deleted_filenames(patch_metadata)
     assert deleted_files == expected_deleted_files
+    
+def test_extract_buggy_line_numbers():
+    expected_buggy_line_numbers = {
+        "django/db/models/fields/__init__.py": [2332, 2333, 2334, 2335],
+        "django/db/models/fields/related_lookups.py": [101],
+        "django/db/models/sql/query.py": [1702]
+    }
+    
+    patch_metadata = parse_patch(sample_diff_1)
+    buggy_line_numbers = exract_buggy_line_numbers(patch_metadata)
+    assert buggy_line_numbers == expected_buggy_line_numbers
