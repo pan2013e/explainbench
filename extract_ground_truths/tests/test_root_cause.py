@@ -131,9 +131,13 @@ def test_extract_buggy_function_names():
     assert set(buggy_fnames) == set(expected_values)
     
     # currently ignore the case when a function is fully removed
+    # @@ -1,2 +0,0 @@ 
+    # - def old_utility_function(a):
+    # -    pass
+    # when extracting function, i expect the function name to be one line with the beginning of the hunk @@ -1,2 +0,0 @@
     # patch_metadata = parse_patch(sample_diff_2)
     # expected_values = [("old_utility_function", "function"), ("get_db_prep_value", "function")]
-    # qna = extract_buggy_filenames(patch_metadata)
+    # qna = extract_buggy_function_names(patch_metadata)
     # assert set(qna) == set(expected_values)
     
 def test_extract_new_filenames():
