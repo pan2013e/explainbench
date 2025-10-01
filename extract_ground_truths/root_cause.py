@@ -214,7 +214,7 @@ def extract_deleted_filenames(parsed_patch_data: List[Dict]) -> List[str]:
             ground_truth_filepaths.append(filename)
     return ground_truth_filepaths
 
-def exract_buggy_line_numbers(parsed_patch_data: List[Dict]) -> Dict[str, int]:
+def extract_buggy_line_numbers(parsed_patch_data: List[Dict]) -> Dict[str, int]:
     """
     Extract the buggy line numbers. The buggy line numbers are those with a prefix "-".
     """
@@ -226,18 +226,18 @@ def exract_buggy_line_numbers(parsed_patch_data: List[Dict]) -> Dict[str, int]:
         if not is_new_file:
             filename = file_info.get("old_path", "")
             assert filename != ""
+                        
+            hunk_list = file_info.get("hunks", [])
             
-            if filename not in ground_truths:
-                ground_truths[filename] = []
-            
-            hunk_info = file_info.get("hunks", [])
-            
-            if len(hunk_info) > 0:
-                hunk_info = hunk_info[0]
-                removals = hunk_info.get("removals", [])
-                
-                if len(removals) > 0:
-                    removed_lines = removals.get("line_numbers")
-                    ground_truths[filename].extend(removed_lines)
-    
+            if len(hunk_list) > 0:
+                for hunk_info in hunk_list:
+                    removals = hunk_info.get("removals", [])
+                    
+                    if len(removals) > 0:
+                        removed_lines = removals.get("line_numbers")
+                        if filename not in ground_truths:
+                            ground_truths[filename] = []
+
+                        ground_truths[filename].extend(removed_lines)
+    ground_truths = [(k, v) for k, v in ground_truths.items() if v]
     return ground_truths
