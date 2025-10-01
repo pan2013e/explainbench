@@ -76,7 +76,7 @@ def test_extract_modified_files():
     assert patch_metadata == expected_values
     
 
-def test_generate_question_buggy_lines():
+def test_extract_buggy_filenames():
     patch_metadata = parse_patch(sample_diff)
     expected_values = ["django/db/models/sql/query.py", "django/db/models/fields/related_lookups.py", "django/db/models/fields/__init__.py"]
     qna = extract_buggy_filenames(patch_metadata)
