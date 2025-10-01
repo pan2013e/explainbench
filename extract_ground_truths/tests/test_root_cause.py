@@ -81,3 +81,9 @@ def test_generate_question_buggy_lines():
     expected_values = ["django/db/models/sql/query.py", "django/db/models/fields/related_lookups.py", "django/db/models/fields/__init__.py"]
     qna = extract_buggy_filenames(patch_metadata)
     assert set(qna) == set(expected_values)
+    
+def test_extract_buggy_function_names():
+    patch_metadata = parse_patch(sample_diff)
+    expected_values = [("get_db_prep_value", "function"), ("split_exclude", "function"), ("as_sql", "function")]
+    buggy_fnames = extract_buggy_function_names(patch_metadata)
+    assert set(buggy_fnames) == set(expected_values)

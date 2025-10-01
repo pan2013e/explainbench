@@ -1,6 +1,6 @@
 import re
 import pprint
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 def parse_patch(patch_content: str)->List[Dict]:
     """
@@ -121,4 +121,30 @@ def extract_buggy_filenames(parsed_patch_data: List[Dict]) -> List[str]:
             assert filename != ""
             
             ground_truth_filepaths.append(filename)
-    return ground_truth_filepaths 
+    return ground_truth_filepaths   
+
+def extract_buggy_function_names(parsed_patch_data: List[Dict]) -> List[Tuple[str, str]]:
+    """
+    Extract the buggy function names from the parsed patch data.
+    """
+    
+    ground_truth_fnames = []
+    for file_info in parsed_patch_data:
+        hunk_info = file_info.get("hunks", [])
+        if len(hunk_info) > 0:
+            hunk_info = hunk_info[0]
+            scope_name = hunk_info.get("scope_name", "")
+            
+            if scope_name != "":
+                context = hunk_info.get("context")
+                context = context.strip()
+                scope_type = "function" if context.startswith("def ") else "class"
+
+            ground_truth_fnames.append(
+                (scope_name, scope_type)
+            )
+        
+    return ground_truth_fnames
+                
+            
+            
