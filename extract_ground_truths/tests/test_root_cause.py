@@ -1,4 +1,4 @@
-from extract_ground_truths.root_cause import extract_modified_files
+from extract_ground_truths.root_cause import extract_modified_filenames
 
 def test_extract_modified_files():
     sample_diff = """
@@ -19,6 +19,6 @@ def test_extract_modified_files():
     """
     
     expected_filenames = set(["docs/new_feature.txt", "django/http/response.py", "tests/test_old_feature.py"])
-    modified_filenames = extract_modified_files(sample_diff)
+    modified_filenames = extract_modified_filenames(sample_diff)
     assert set(modified_filenames) == expected_filenames
     

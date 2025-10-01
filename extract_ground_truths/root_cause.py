@@ -2,7 +2,7 @@ import re
 from typing import List
 from extract_ground_truths.utils import remove_indentation
 
-def extract_modified_files(patch_content: str) -> List[str]:
+def extract_modified_filenames(patch_content: str) -> List[str]:
     """
     Parses a diff/patch content and extracts the unique list of modified file paths.
     """
