@@ -1,7 +1,6 @@
 from extract_ground_truths.root_cause import *
 
-def test_extract_modified_files():
-    sample_diff = """
+sample_diff = """
 diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
 --- a/django/db/models/fields/__init__.py
 +++ b/django/db/models/fields/__init__.py
@@ -43,6 +42,9 @@ filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
 # Generate the inner query.
 query = Query(self.model)
 """
+
+def test_extract_modified_files():
+    
     expected_values = [
         {'hunks': [{'additions': {'count': 0, 'start_line': 2332},
                     'context': 'def get_db_prep_value(self, value, connection, prepared=False):',
