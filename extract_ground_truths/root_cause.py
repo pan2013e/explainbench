@@ -161,3 +161,18 @@ def extract_new_created_filenames(parsed_patch_data: List[Dict]) -> List[str]:
             
             ground_truth_filepaths.append(filename)
     return ground_truth_filepaths
+
+def extract_deleted_filenames(parsed_patch_data: List[Dict]) -> List[str]:
+    """
+    Extract the filenames from the files that are deleted from the parsed patch data.
+    """
+    
+    ground_truth_filepaths = []
+    for file_info in parsed_patch_data:
+        is_deleted_file = file_info.get("is_deleted_file")
+        if is_deleted_file:
+            filename = file_info.get("old_path", "")
+            assert filename != ""
+            
+            ground_truth_filepaths.append(filename)
+    return ground_truth_filepaths
