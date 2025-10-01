@@ -80,4 +80,4 @@ def test_generate_question_buggy_lines():
     patch_metadata = parse_patch(sample_diff)
     expected_values = ["django/db/models/sql/query.py", "django/db/models/fields/related_lookups.py", "django/db/models/fields/__init__.py"]
     qna = generate_question_buggy_lines(patch_metadata)
-    assert set(qna.get("GroundTruth")) == set(expected_values)
+    assert set(qna) == set(expected_values)
