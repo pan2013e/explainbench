@@ -32,7 +32,10 @@ def parse_patch(patch_content: str)->List[Dict]:
           ]
     """
     # Regex to find file headers (--- a/... +++ b/...)
-    file_header_pattern = re.compile(r'--- a/(.*?)\n\+\+\+ b/(.*?)\n', re.DOTALL)
+    # The prefixes `a/` and `b/` are in optional, non-capturing groups.
+    # (?:a/)?  => Match "a/" zero or one time, but don't capture it.
+    # (.*?)    => This becomes capture group 1 (the actual path).
+    file_header_pattern = re.compile(r'--- (?:a/)?(.*?)\n\+\+\+ (?:b/)?(.*?)\n')
     
     # Regex to find hunk headers (@@ -start,count +start,count @@ context)
     hunk_header_pattern = re.compile(r'@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@(.*?)\n')
