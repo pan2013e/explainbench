@@ -10,6 +10,7 @@ from pydantic import BaseModel
 __all__ = ['Model']
 
 litellm.enable_json_schema_validation=True
+litellm.drop_params=True
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_FILE = os.path.join(DIR, '..', '.env')
