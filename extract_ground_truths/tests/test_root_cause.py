@@ -173,5 +173,5 @@ def test_extract_buggy_line_numbers():
     }
     
     patch_metadata = parse_patch(sample_diff_1)
-    buggy_line_numbers = exract_buggy_line_numbers(patch_metadata)
+    buggy_line_numbers = extract_buggy_line_numbers(patch_metadata)
     assert buggy_line_numbers == expected_buggy_line_numbers
