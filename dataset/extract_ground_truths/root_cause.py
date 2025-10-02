@@ -114,14 +114,20 @@ def parse_patch(patch_content: str)->List[Dict]:
             new_line_num = addition_start
             removal_line_numbers = []
             addition_line_numbers = []
-            
+            removal_lines_content = []
+            addition_lines_content = []
             for line in lines_in_hunk:
+                content = line[1:].strip()
                 if line.startswith('-'):
-                    removal_line_numbers.append(old_line_num)
-                    old_line_num += 1
+                    if content:
+                        removal_line_numbers.append(old_line_num)
+                        removal_lines_content.append(content)
+                        old_line_num += 1
                 elif line.startswith('+'):
-                    addition_line_numbers.append(new_line_num)
-                    new_line_num += 1
+                    if content:
+                        addition_line_numbers.append(new_line_num)
+                        addition_lines_content.append(content)
+                        new_line_num += 1
                 elif line.startswith(' '):
                     # Context line - exists in both old and new
                     old_line_num += 1
@@ -136,12 +142,14 @@ def parse_patch(patch_content: str)->List[Dict]:
                 "removals": {
                     "start_line": removal_start,
                     "count": removals_count,
-                    "line_numbers": removal_line_numbers
+                    "line_numbers": removal_line_numbers,
+                    "lines": removal_lines_content
                 },
                 "additions": {
                     "start_line": addition_start,
                     "count": additions_count,
-                    "line_numbers": addition_line_numbers
+                    "line_numbers": addition_line_numbers,
+                    "lines": addition_lines_content
                 }
             }
             file_info["hunks"].append(hunk_info)

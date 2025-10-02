@@ -81,41 +81,93 @@ index 9e6a0c5..0000000
 
 def test_extract_modified_files():
     
-    expected_values = [{'hunks': [{'additions': {'count': 0, 'line_numbers': [], 'start_line': 2332},
-             'context': 'def get_db_prep_value(self, value, connection, '
-                        'prepared=False):',
-             'removals': {'count': 4,
-                          'line_numbers': [2332, 2333, 2334, 2335],
-                          'start_line': 2332},
-             'scope': {'name': 'get_db_prep_value', 'type': 'function'}}],
-            'is_deleted_file': False,
-            'is_new_file': False,
-            'new_path': 'django/db/models/fields/__init__.py',
-            'old_path': 'django/db/models/fields/__init__.py'},
-            {'hunks': [{'additions': {'count': 1,
-                                    'line_numbers': [101],
-                                    'start_line': 101},
-                        'context': 'def as_sql(self, compiler, connection):',
-                        'removals': {'count': 1, 'line_numbers': [101], 'start_line': 101},
-                        'scope': {'name': 'as_sql', 'type': 'function'}}],
-            'is_deleted_file': False,
-            'is_new_file': False,
-            'new_path': 'django/db/models/fields/related_lookups.py',
-            'old_path': 'django/db/models/fields/related_lookups.py'},
-            {'hunks': [{'additions': {'count': 3,
-                                    'line_numbers': [1702, 1703, 1704],
-                                    'start_line': 1702},
-                        'context': 'def split_exclude(self, filter_expr, can_reuse, '
-                                    'names_with_path):',
-                        'removals': {'count': 1,
-                                    'line_numbers': [1702],
-                                    'start_line': 1702},
-                        'scope': {'name': 'split_exclude', 'type': 'function'}}],
-            'is_deleted_file': False,
-            'is_new_file': False,
-            'new_path': 'django/db/models/sql/query.py',
-            'old_path': 'django/db/models/sql/query.py'}]
-    
+    expected_values = [
+        {
+            "old_path": "django/db/models/fields/__init__.py",
+            "new_path": "django/db/models/fields/__init__.py",
+            "is_new_file": False,
+            "is_deleted_file": False,
+            "hunks": [
+                {
+                    "context": "def get_db_prep_value(self, value, connection, prepared=False):",
+                    "scope": {"name": "get_db_prep_value", "type": "function"},
+                    "removals": {
+                        "start_line": 2332,
+                        "count": 3,
+                        "line_numbers": [2332, 2333, 2334],
+                        "lines": [
+                            "def get_prep_value(self, value):",
+                            "from django.db.models.expressions import OuterRef",
+                            "return value if isinstance(value, OuterRef) else super().get_prep_value(value)",
+                        ],
+                    },
+                    "additions": {
+                        "start_line": 2332,
+                        "count": 0,
+                        "line_numbers": [],
+                        "lines": [],
+                    },
+                }
+            ],
+        },
+        {
+            "old_path": "django/db/models/fields/related_lookups.py",
+            "new_path": "django/db/models/fields/related_lookups.py",
+            "is_new_file": False,
+            "is_deleted_file": False,
+            "hunks": [
+                {
+                    "context": "def as_sql(self, compiler, connection):",
+                    "scope": {"name": "as_sql", "type": "function"},
+                    "removals": {
+                        "start_line": 101,
+                        "count": 1,
+                        "line_numbers": [101],
+                        "lines": [
+                            "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():"
+                        ],
+                    },
+                    "additions": {
+                        "start_line": 101,
+                        "count": 1,
+                        "line_numbers": [101],
+                        "lines": [
+                            "if not isinstance(self.lhs, MultiColSource) and not hasattr(self.rhs, 'resolve_expression'):"
+                        ],
+                    },
+                }
+            ],
+        },
+        {
+            "old_path": "django/db/models/sql/query.py",
+            "new_path": "django/db/models/sql/query.py",
+            "is_new_file": False,
+            "is_deleted_file": False,
+            "hunks": [
+                {
+                    "context": "def split_exclude(self, filter_expr, can_reuse, names_with_path):",
+                    "scope": {"name": "split_exclude", "type": "function"},
+                    "removals": {
+                        "start_line": 1702,
+                        "count": 1,
+                        "line_numbers": [1702],
+                        "lines": ["if isinstance(filter_rhs, F):"],
+                    },
+                    "additions": {
+                        "start_line": 1702,
+                        "count": 3,
+                        "line_numbers": [1702, 1703, 1704],
+                        "lines": [
+                            "if isinstance(filter_rhs, OuterRef):",
+                            "filter_expr = (filter_lhs, OuterRef(filter_rhs))",
+                            "elif isinstance(filter_rhs, F):",
+                        ],
+                    },
+                }
+            ],
+        },
+    ]
+
     patch_metadata = parse_patch(sample_diff_1)
     assert patch_metadata == expected_values
     
@@ -167,7 +219,7 @@ def test_extract_deleted_filenames():
     
 def test_extract_buggy_line_numbers():
     expected_buggy_line_numbers = [
-        ("django/db/models/fields/__init__.py", [2332, 2333, 2334, 2335]),
+        ("django/db/models/fields/__init__.py", [2332, 2333, 2334]),
         ("django/db/models/fields/related_lookups.py", [101]),
         ("django/db/models/sql/query.py", [1702])
     ]
