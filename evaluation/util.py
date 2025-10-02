@@ -37,6 +37,6 @@ def load_explanation(split: str):
     return data
 
 def load_ground_truth():
-    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truths.jsonl')) as f:
+    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truth.jsonl')) as f:
         data = [json.loads(line) for line in f]
     return data
