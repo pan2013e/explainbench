@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from evaluation.inference import Model
 from evaluation.task import Task, NAME_TASK_MAP, TASK_NAME_MAP
-from evaluation.util import load_explanation, load_ground_truth
+from evaluation.util import load_explanation, load_ground_truth, result_statistics
 
 def get_path(task: Task, model: Model, agent_id: str, mode: str):
     return f'results/{mode}/{TASK_NAME_MAP[task].replace(".", "_")}/{agent_id}__{model.model_id.replace("/", "-")}.json'
@@ -61,7 +61,10 @@ def evaluate(task: Task, model: Model, agent_id: str):
     if os.path.exists(save_path):
         warnings.warn(f'Overwriting existing evaluation file: {save_path}')
     with open(save_path, 'w') as f:
-        json.dump(eval_results, f, indent=2)
+        json.dump({
+            'statistics': result_statistics(eval_results),
+            'raw': eval_results,
+        }, f, indent=2)
 
 def main(task: Task, model: Model, agent_id: str):
     generate(task, model, agent_id)

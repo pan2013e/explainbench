@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 
 from typing import Any, Callable
 
@@ -40,3 +41,14 @@ def load_ground_truth():
     with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truth.jsonl')) as f:
         data = [json.loads(line) for line in f]
     return data
+
+def result_statistics(data: dict[str, list]):
+    n_runs = list(zip(*data.values(), strict=True))
+    n_runs = [np.mean(run) for run in n_runs]
+    return {
+        'metric_values': n_runs,
+        'mean': np.mean(n_runs),
+        'std': np.std(n_runs),
+        'max': np.max(n_runs),
+        'min': np.min(n_runs),
+    }
