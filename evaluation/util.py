@@ -1,6 +1,6 @@
 import os
 
-from typing import Callable
+from typing import Any, Callable
 
 def is_subpath(abs: str, rel: str):
     if len(abs) < len(rel):
@@ -14,7 +14,7 @@ def f1_score(tp, fp, fn):
     r = tp / (tp + fn) if tp + fn > 0 else 0.0
     return 2 * p * r / (p + r) if p + r > 0 else 0.0
 
-def set_f1_score(pred: set, gt: set, equal_fn: Callable[[str, str], bool] = lambda x, y: x == y):
+def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = lambda x, y: x == y):
     matched_gt = set()
     tp = 0
     for p in pred:
@@ -26,3 +26,10 @@ def set_f1_score(pred: set, gt: set, equal_fn: Callable[[str, str], bool] = lamb
     fp = len(pred) - tp
     fn = len(gt) - tp
     return f1_score(tp, fp, fn)
+
+def load_explanation_dataset():
+    ...
+
+def load_ground_truth():
+    ...
+    

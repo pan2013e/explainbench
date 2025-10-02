@@ -12,6 +12,7 @@ from evaluation.util import (
 )
 
 __all__ = [
+    'ALL_TASKS',
     'RootCause',
 ]
 
@@ -72,3 +73,9 @@ class RootCause:
         @staticmethod
         def eval(pred, gt):
             ...
+
+ALL_TASKS = {
+    'rootcause.file': RootCause.File,
+    'rootcause.region': RootCause.Region,
+    'rootcause.line': RootCause.Line,
+}
