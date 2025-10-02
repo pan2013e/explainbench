@@ -227,3 +227,21 @@ def test_extract_buggy_line_numbers():
     patch_metadata = parse_patch(sample_diff_1)
     buggy_line_numbers = extract_buggy_line_numbers(patch_metadata)
     assert buggy_line_numbers == expected_buggy_line_numbers
+    
+def test_extract_buggy_line_contents():
+    expected_buggy_line_contents = [
+        ("django/db/models/fields/__init__.py", [
+                            "def get_prep_value(self, value):",
+                            "from django.db.models.expressions import OuterRef",
+                            "return value if isinstance(value, OuterRef) else super().get_prep_value(value)",
+                        ]),
+        ("django/db/models/fields/related_lookups.py", [
+                            "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():"
+                        ]),
+        ("django/db/models/sql/query.py", [
+                            "if isinstance(filter_rhs, F):",
+                        ])
+    ]
+    patch_metadata = parse_patch(sample_diff_1)
+    buggy_line_contents = extract_buggy_line_contents(patch_metadata)
+    assert buggy_line_contents == expected_buggy_line_contents
