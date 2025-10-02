@@ -14,7 +14,9 @@ def get_path(task: Task, model: Model, agent_id: str, mode: str):
 def generate(task: Task, model: Model, agent_id: str):
     explanations = load_explanation(agent_id)
     pred_results = {}
-    for idx, (instance_id, expl) in enumerate(tqdm(explanations.items())):
+    pbar = tqdm(explanations.items())
+    for idx, (instance_id, expl) in enumerate(pbar):
+        pbar.set_postfix(**model.tqdm_usage())
         # use subset for now
         if idx == 101: break
         expl = expl[0] if expl else ''
@@ -62,9 +64,9 @@ def main(task: Task, model: Model, agent_id: str):
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('task', type=str, required=True, help='Evaluation task to run')
+    argparser.add_argument('task', type=str, help='Evaluation task to run')
     argparser.add_argument('-a', '--agent', type=str, required=True, help='ID of agent producing the explanations')
-    argparser.add_argument('-m', '--model', type=str, default='gemini/gemini-2.5-flash', help='LLM used for question answering')
+    argparser.add_argument('-m', '--model', type=str, default='gemini/gemini-2.5-flash-lite', help='LLM used for question answering')
     argparser.add_argument('-n', '--num-generations', type=int, default=1, help='Number of generations per instance')
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
