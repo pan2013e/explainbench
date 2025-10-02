@@ -1,0 +1,2823 @@
+{
+  "token_usage": {
+    "completion_tokens": 12610,
+    "prompt_tokens": 246705,
+    "total_tokens": 259315
+  },
+  "predictions": {
+    "astropy__astropy-12907": [
+      {
+        "file": [
+          "astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/modeling/separable.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13033": [
+      {
+        "file": [
+          "src/components/Login/Login.js"
+        ]
+      },
+      {
+        "file": []
+      },
+      {
+        "file": [
+          "src/index.js"
+        ]
+      },
+      {
+        "file": [
+          "test_utils.py"
+        ]
+      },
+      {
+        "file": [
+          "The bug was in the `run_time_error` function, which is located in the `error.py` file."
+        ]
+      }
+    ],
+    "astropy__astropy-13236": [
+      {
+        "file": [
+          "/opt/astropy__astropy/astropy/table/table.py",
+          "/opt/astropy__astropy/astropy/table/tests/test_mixin.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/astropy__astropy/astropy/table/table.py",
+          "/opt/astropy__astropy/astropy/table/tests/test_mixin.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/astropy__astropy/astropy/table/table.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/astropy__astropy/astropy/table/table.py",
+          "/opt/astropy__astropy/astropy/table/tests/test_mixin.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/astropy__astropy/astropy/table/table.py",
+          "/opt/astropy__astropy/astropy/table/tests/test_mixin.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13398": [
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13453": [
+      {
+        "file": [
+          "astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/table/ascii.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/table/ascii/html.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13579": [
+      {
+        "file": [
+          "SlicedLowLevelWCS.py"
+        ]
+      },
+      {
+        "file": [
+          "SlicedLowLevelWCS.py"
+        ]
+      },
+      {
+        "file": [
+          "SlicedLowLevelWCS.py"
+        ]
+      },
+      {
+        "file": [
+          "SlicedLowLevelWCS.py"
+        ]
+      },
+      {
+        "file": [
+          "SlicedLowLevelWCS.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13977": [
+      {
+        "file": [
+          "server.py"
+        ]
+      },
+      {
+        "file": [
+          "bug.py"
+        ]
+      },
+      {
+        "file": [
+          "file1.txt"
+        ]
+      },
+      {
+        "file": [
+          "None"
+        ]
+      },
+      {
+        "file": [
+          "code.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14096": [
+      {
+        "file": [
+          "SkyCoord"
+        ]
+      },
+      {
+        "file": [
+          "SkyCoord"
+        ]
+      },
+      {
+        "file": [
+          "SkyCoord"
+        ]
+      },
+      {
+        "file": [
+          "SkyCoord.py"
+        ]
+      },
+      {
+        "file": [
+          "SkyCoord"
+        ]
+      }
+    ],
+    "astropy__astropy-14182": [
+      {
+        "file": [
+          "rst.py",
+          "test_rst.py"
+        ]
+      },
+      {
+        "file": [
+          "rst.py",
+          "test_rst.py"
+        ]
+      },
+      {
+        "file": [
+          "rst.py",
+          "test_rst.py"
+        ]
+      },
+      {
+        "file": [
+          "rst.py",
+          "test_rst.py"
+        ]
+      },
+      {
+        "file": [
+          "test_rst.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14309": [
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14365": [
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/ascii/qdp.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14369": [
+      {
+        "file": [
+          "YACC grammar rules of the CDS unit parser"
+        ]
+      },
+      {
+        "file": [
+          "cds_unit_parser.y"
+        ]
+      },
+      {
+        "file": [
+          "YACC grammar rules of the CDS unit parser"
+        ]
+      },
+      {
+        "file": [
+          "YACC grammar rules of the CDS unit parser"
+        ]
+      },
+      {
+        "file": [
+          "YACC grammar rules of the CDS unit parser"
+        ]
+      }
+    ],
+    "astropy__astropy-14508": [
+      {
+        "file": [
+          "astropy.io.fits.card"
+        ]
+      },
+      {
+        "file": [
+          "astropy.io.fits.card"
+        ]
+      },
+      {
+        "file": [
+          "astropy.io.fits.card"
+        ]
+      },
+      {
+        "file": [
+          "astropy.io.fits.card"
+        ]
+      },
+      {
+        "file": [
+          "astropy.io.fits.card"
+        ]
+      }
+    ],
+    "astropy__astropy-14539": [
+      {
+        "file": [
+          "FITSDiff.py"
+        ]
+      },
+      {
+        "file": [
+          "TableDataDiff._diff"
+        ]
+      },
+      {
+        "file": [
+          "FITSDiff",
+          "TableDataDiff"
+        ]
+      },
+      {
+        "file": [
+          "TableDataDiff._diff"
+        ]
+      },
+      {
+        "file": [
+          "TableDataDiff._diff"
+        ]
+      }
+    ],
+    "astropy__astropy-14598": [
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/io/fits/card.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14995": [
+      {
+        "file": [
+          "_arithmetic_mask"
+        ]
+      },
+      {
+        "file": [
+          "_arithmetic_mask"
+        ]
+      },
+      {
+        "file": [
+          "_arithmetic_mask"
+        ]
+      },
+      {
+        "file": [
+          "_arithmetic_mask"
+        ]
+      },
+      {
+        "file": [
+          "_arithmetic_mask"
+        ]
+      }
+    ],
+    "astropy__astropy-7166": [
+      {
+        "file": [
+          "InheritDocstrings"
+        ]
+      },
+      {
+        "file": [
+          "InheritDocstrings"
+        ]
+      },
+      {
+        "file": [
+          "InheritDocstrings metaclass"
+        ]
+      },
+      {
+        "file": [
+          "class.py"
+        ]
+      },
+      {
+        "file": [
+          "InheritDocstrings metaclass"
+        ]
+      }
+    ],
+    "astropy__astropy-7336": [
+      {
+        "file": [
+          "astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/decorators.py"
+        ]
+      }
+    ],
+    "astropy__astropy-7606": [
+      {
+        "file": [
+          "The file containing the UnrecognizedUnit class definition, which includes the __eq__ method."
+        ]
+      },
+      {
+        "file": [
+          "UnrecognizedUnit"
+        ]
+      },
+      {
+        "file": [
+          "UnrecognizedUnit"
+        ]
+      },
+      {
+        "file": [
+          "UnrecognizedUnit"
+        ]
+      },
+      {
+        "file": [
+          "the code change section must be a valid python code for example you provided `def __eq__(self, other): if other is None: return False other = Unit(other, parse_strict='silent') return isinstance(other, UnrecognizedUnit) and self.name == other.name` which is not part of any file and also not a code snippt"
+        ]
+      }
+    ],
+    "astropy__astropy-7671": [
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/home/swe-bench/astropy__astropy/astropy/utils/introspection.py"
+        ]
+      }
+    ],
+    "astropy__astropy-8707": [
+      {
+        "file": []
+      },
+      {
+        "file": [
+          "the core logic of the system"
+        ]
+      },
+      {
+        "file": [
+          "buggy_files.py"
+        ]
+      },
+      {
+        "file": [
+          "code repository",
+          "issue",
+          "task completion",
+          " task",
+          "bug",
+          " work",
+          " work"
+        ]
+      },
+      {
+        "file": []
+      }
+    ],
+    "astropy__astropy-8872": [
+      {
+        "file": [
+          "Quantity.__new__"
+        ]
+      },
+      {
+        "file": [
+          "Quantity.__new__"
+        ]
+      },
+      {
+        "file": [
+          "Quantity.__new__"
+        ]
+      },
+      {
+        "file": [
+          "Quantity.__new__"
+        ]
+      },
+      {
+        "file": [
+          "Quantity.__new__"
+        ]
+      }
+    ],
+    "django__django-10097": [
+      {
+        "file": [
+          "/opt/django__django/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/validators.py"
+        ]
+      }
+    ],
+    "django__django-10554": [
+      {
+        "file": [
+          "file123.c"
+        ]
+      },
+      {
+        "file": [
+          "tests/test_model.py"
+        ]
+      },
+      {
+        "file": [
+          "buggy_file.py"
+        ]
+      },
+      {
+        "file": [
+          "buggy_file.py",
+          "another_buggy_file.js"
+        ]
+      },
+      {
+        "file": [
+          "buggy_file.py"
+        ]
+      }
+    ],
+    "django__django-10880": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      }
+    ],
+    "django__django-10914": [
+      {
+        "file": [
+          "django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py",
+          "docs/ref/settings.txt",
+          "reproduce.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py",
+          "docs/ref/settings.txt",
+          "reproduce.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py",
+          "docs/ref/settings.txt",
+          "reproduce.py"
+        ]
+      }
+    ],
+    "django__django-10973": [
+      {
+        "file": [
+          "runshell.py"
+        ]
+      },
+      {
+        "file": [
+          "runshell_db"
+        ]
+      },
+      {
+        "file": [
+          "run.py"
+        ]
+      },
+      {
+        "file": []
+      },
+      {
+        "file": [
+          "runshell_db.py"
+        ]
+      }
+    ],
+    "django__django-10999": [
+      {
+        "file": [
+          "/opt/django__django/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/dateparse.py"
+        ]
+      }
+    ],
+    "django__django-11066": [
+      {
+        "file": [
+          "The explanation does not specify which files were buggy."
+        ]
+      },
+      {
+        "file": [
+          "No files were mentioned in the patch explanation."
+        ]
+      },
+      {
+        "file": [
+          "N/A"
+        ]
+      },
+      {
+        "file": [
+          "buggy_file.py"
+        ]
+      },
+      {
+        "file": [
+          "solution"
+        ]
+      }
+    ],
+    "django__django-11087": [
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11095": [
+      {
+        "file": [
+          "admin.py"
+        ]
+      },
+      {
+        "file": [
+          "admin.py"
+        ]
+      },
+      {
+        "file": [
+          "admin.py"
+        ]
+      },
+      {
+        "file": [
+          "admin.py"
+        ]
+      },
+      {
+        "file": [
+          "ModelAdmin"
+        ]
+      }
+    ],
+    "django__django-11099": [
+      {
+        "file": [
+          "django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/auth/validators.py"
+        ]
+      }
+    ],
+    "django__django-11119": [
+      {
+        "file": [
+          "task_done"
+        ]
+      },
+      {
+        "file": [
+          "task_done"
+        ]
+      },
+      {
+        "file": [
+          "task_done"
+        ]
+      },
+      {
+        "file": [
+          "task_done"
+        ]
+      },
+      {
+        "file": []
+      }
+    ],
+    "django__django-11133": [
+      {
+        "file": [
+          "django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "django/http/response.py"
+        ]
+      }
+    ],
+    "django__django-11138": [
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py",
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/sqlite3/base.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py",
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/sqlite3/base.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py",
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/sqlite3/base.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py",
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/sqlite3/base.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py",
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/sqlite3/base.py"
+        ]
+      }
+    ],
+    "django__django-11141": [
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/loader.py"
+        ]
+      }
+    ],
+    "django__django-11149": [
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py",
+          "django/contrib/admin/widgets.py"
+        ]
+      }
+    ],
+    "django__django-11163": [
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-11179": [
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11206": [
+      {
+        "file": [
+          "file1.py"
+        ]
+      },
+      {
+        "file": [
+          "buggy_file1.py",
+          "buggy_file2.js"
+        ]
+      },
+      {
+        "file": [
+          "buggyp/gyp_main.py"
+        ]
+      },
+      {
+        "file": [
+          "issue.py"
+        ]
+      },
+      {
+        "file": [
+          "main.py"
+        ]
+      }
+    ],
+    "django__django-11211": [
+      {
+        "file": [
+          "django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/fields.py"
+        ]
+      }
+    ],
+    "django__django-11239": [
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/postgresql/client.py"
+        ]
+      }
+    ],
+    "django__django-11265": [
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11276": [
+      {
+        "file": [
+          "/opt/django__django/django/utils/html.py",
+          "/opt/django__django/tests/utils_tests/test_html.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/html.py",
+          "/opt/django__django/tests/utils_tests/test_html.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/html.py",
+          "/opt/django__django/tests/utils_tests/test_html.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/html.py",
+          "/opt/django__django/tests/utils_tests/test_html."
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/utils/html.py",
+          "/opt/django__django/tests/utils_tests/test_html.py"
+        ]
+      }
+    ],
+    "django__django-11292": [
+      {
+        "file": [
+          "/opt/django__django/django/core/management/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/management/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/management/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/management/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/management/base.py"
+        ]
+      }
+    ],
+    "django__django-11299": [
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11333": [
+      {
+        "file": [
+          "django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "django/urls/resolvers.py"
+        ]
+      }
+    ],
+    "django__django-11400": [
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/filters.py"
+        ]
+      }
+    ],
+    "django__django-11433": [
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-11451": [
+      {
+        "file": [
+          "ModelBackend.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/auth/backends.py"
+        ]
+      },
+      {
+        "file": [
+          "ModelBackend.py"
+        ]
+      },
+      {
+        "file": [
+          "ModelBackend.py"
+        ]
+      },
+      {
+        "file": [
+          "ModelBackend.py"
+        ]
+      }
+    ],
+    "django__django-11477": [
+      {
+        "file": [
+          "translate_url()"
+        ]
+      },
+      {
+        "file": [
+          "translate_url()"
+        ]
+      },
+      {
+        "file": [
+          "translate_url()"
+        ]
+      },
+      {
+        "file": [
+          "translate_url()"
+        ]
+      },
+      {
+        "file": [
+          "translate_url()"
+        ]
+      }
+    ],
+    "django__django-11490": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11532": [
+      {
+        "file": [
+          "/opt/django__django/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/core/mail/utils.py"
+        ]
+      }
+    ],
+    "django__django-11551": [
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/checks.py"
+        ]
+      }
+    ],
+    "django__django-11555": [
+      {
+        "file": [
+          "django/db/models/sql/query.py",
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py",
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py",
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py",
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py",
+          "django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-11603": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/aggregates.py"
+        ]
+      }
+    ],
+    "django__django-11728": [
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admindocs/utils.py"
+        ]
+      }
+    ],
+    "django__django-11734": [
+      {
+        "file": []
+      },
+      {
+        "file": [
+          "OuterRef.py"
+        ]
+      },
+      {
+        "file": [
+          "OuterRef"
+        ]
+      },
+      {
+        "file": [
+          "query.py"
+        ]
+      },
+      {
+        "file": [
+          "models.py"
+        ]
+      }
+    ],
+    "django__django-11740": [
+      {
+        "file": [
+          "autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "autodetector.py"
+        ]
+      }
+    ],
+    "django__django-11749": [
+      {
+        "file": [
+          "call_command.py"
+        ]
+      },
+      {
+        "file": [
+          "call_command"
+        ]
+      },
+      {
+        "file": [
+          "call_command.py"
+        ]
+      },
+      {
+        "file": [
+          "call_command"
+        ]
+      },
+      {
+        "file": [
+          "call_command"
+        ]
+      }
+    ],
+    "django__django-11790": [
+      {
+        "file": [
+          "/opt/django__django/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/boundfield.py"
+        ]
+      }
+    ],
+    "django__django-11815": [
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py",
+          "/opt/django__django/tests/migrations/test_writer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py",
+          "/opt/django__django/tests/migrations/test_writer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py",
+          "/opt/django__django/tests/migrations/test_writer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py",
+          "/opt/django__django/tests/migrations/test_writer.py"
+        ]
+      }
+    ],
+    "django__django-11820": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-11848": [
+      {
+        "file": [
+          "django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/http.py"
+        ]
+      }
+    ],
+    "django__django-11880": [
+      {
+        "file": [
+          "/opt/django__django/django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/fields.py"
+        ]
+      }
+    ],
+    "django__django-11885": [
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11951": [
+      {
+        "file": [
+          "_batched_insert"
+        ]
+      },
+      {
+        "file": [
+          "bulk_create.py"
+        ]
+      },
+      {
+        "file": [
+          "_batched_insert method"
+        ]
+      },
+      {
+        "file": [
+          "_batched_insert method"
+        ]
+      },
+      {
+        "file": [
+          "_batched_insert method"
+        ]
+      }
+    ],
+    "django__django-11964": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-11999": [
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-12039": [
+      {
+        "file": [
+          "Columns.__str__",
+          "IndexColumns.__str__"
+        ]
+      },
+      {
+        "file": [
+          "Columns.__str__",
+          "IndexColumns.__str__"
+        ]
+      },
+      {
+        "file": [
+          "Columns",
+          "IndexColumns"
+        ]
+      },
+      {
+        "file": [
+          "Columns.__str__",
+          "IndexColumns.__str__"
+        ]
+      },
+      {
+        "file": [
+          "Columns",
+          "IndexColumns"
+        ]
+      }
+    ],
+    "django__django-12050": [
+      {
+        "file": [
+          "resolve_lookup_value"
+        ]
+      },
+      {
+        "file": [
+          "resolve_lookup_value"
+        ]
+      },
+      {
+        "file": [
+          "resolve_lookup_value"
+        ]
+      },
+      {
+        "file": [
+          "resolve_lookup_value"
+        ]
+      },
+      {
+        "file": [
+          "resolve_lookup_value"
+        ]
+      }
+    ],
+    "django__django-12125": [
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/migrations/serializer.py"
+        ]
+      }
+    ],
+    "django__django-12143": [
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      }
+    ],
+    "django__django-12155": [
+      {
+        "file": [
+          "django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admindocs/utils.py"
+        ]
+      }
+    ],
+    "django__django-12193": [
+      {
+        "file": [
+          "CheckboxInput.get_context()"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/widgets.py"
+        ]
+      }
+    ],
+    "django__django-12209": [
+      {
+        "file": [
+          "smart_save.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/ --------------------"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/manager.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/ 1.py"
+        ]
+      }
+    ],
+    "django__django-12262": [
+      {
+        "file": [
+          "parse_bits.py"
+        ]
+      },
+      {
+        "file": [
+          "parse_bits function"
+        ]
+      },
+      {
+        "file": [
+          "parse_bits.py"
+        ]
+      },
+      {
+        "file": [
+          "parse_bits function"
+        ]
+      },
+      {
+        "file": [
+          "parse_bits"
+        ]
+      }
+    ],
+    "django__django-12273": [
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/model.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/model.py"
+        ]
+      }
+    ],
+    "django__django-12276": [
+      {
+        "file": [
+          "ClearableFileInput",
+          "FileInput"
+        ]
+      },
+      {
+        "file": [
+          "ClearableFileInput",
+          "FileInput"
+        ]
+      },
+      {
+        "file": [
+          "ClearableFileInput",
+          "FileInput"
+        ]
+      },
+      {
+        "file": [
+          "FileInput",
+          ""
+        ]
+      },
+      {
+        "file": [
+          "ClearableFileInput",
+          "FileInput"
+        ]
+      }
+    ],
+    "django__django-12304": [
+      {
+        "file": [
+          "ChoicesMeta"
+        ]
+      },
+      {
+        "file": [
+          "choices.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/enums.py"
+        ]
+      },
+      {
+        "file": [
+          "choices.py"
+        ]
+      },
+      {
+        "file": [
+          "__init__.py"
+        ]
+      }
+    ],
+    "django__django-12308": [
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/contrib/admin/utils.py"
+        ]
+      }
+    ],
+    "django__django-12325": [
+      {
+        "file": [
+          "tests/test_example.py"
+        ]
+      },
+      {
+        "file": [
+          "test_user_api.py"
+        ]
+      },
+      {
+        "file": [
+          "UserAccountDB.java"
+        ]
+      },
+      {
+        "file": [
+          "src/components/Admin/Login.js"
+        ]
+      },
+      {
+        "file": [
+          "src/components/ui/Tag.tsx"
+        ]
+      }
+    ],
+    "django__django-12406": [
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-12419": [
+      {
+        "file": [
+          "/opt/django__django/django/conf/global_settings.py",
+          "/opt/django__django/docs/ref/settings.txt"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/conf/global_settings.py",
+          "/opt/django__django/docs/ref/settings.txt"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/conf/global_settings.py",
+          "/opt/django__django/docs/ref/settings.txt"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/conf/global_settings.py",
+          "/opt/django__django/docs/ref/settings.txt"
+        ]
+      }
+    ],
+    "django__django-12663": [
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-12708": [
+      {
+        "file": [
+          "django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/schema.py"
+        ]
+      }
+    ],
+    "django__django-12713": [
+      {
+        "file": [
+          "formfield_for_manytomany"
+        ]
+      },
+      {
+        "file": [
+          "formfield_for_manytomany",
+          "formfield_for_foreignkey"
+        ]
+      },
+      {
+        "file": [
+          "formfield_for_manytomany"
+        ]
+      },
+      {
+        "file": [
+          "formfield_for_manytomany"
+        ]
+      },
+      {
+        "file": [
+          "formfield_for_manytomany()"
+        ]
+      }
+    ],
+    "django__django-12741": [
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/base/operations.py",
+          "django/core/management/commands/flush.py",
+          "tests/backends/base/test_operations.py",
+          "tests/backends/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/base/operations.py",
+          "django/core/management/commands/flush.py",
+          "tests/backends/base/test_operations.py",
+          "tests/backends/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/base/operations.py",
+          "django/core/management/commands/flush.py",
+          "tests/backends/base/test_operations.py",
+          "tests/backends/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/base/operations.py",
+          "django/core/management/commands/flush.py",
+          "tests/backends/base/test_operations.py",
+          "tests/backends/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/backends/base/operations.py",
+          "django/core/management/commands/flush.py",
+          "tests/backends/base/test_operations.py",
+          "tests/backends/tests.py"
+        ]
+      }
+    ],
+    "django__django-12754": [
+      {
+        "file": [
+          "MigrationAutodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "MigrationAutodetector"
+        ]
+      },
+      {
+        "file": [
+          "MigrationAutodetector"
+        ]
+      },
+      {
+        "file": [
+          "MigrationAutodetector"
+        ]
+      },
+      {
+        "file": [
+          "MigrationAutodetector"
+        ]
+      }
+    ],
+    "django__django-12774": [
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      }
+    ],
+    "django__django-12858": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-12965": [
+      {
+        "file": [
+          "SQLDeleteCompiler.as_sql()"
+        ]
+      },
+      {
+        "file": [
+          "SQLDeleteCompiler.py"
+        ]
+      },
+      {
+        "file": [
+          "SQLDeleteCompiler.as_sql()"
+        ]
+      },
+      {
+        "file": [
+          "SQLDeleteCompiler.py"
+        ]
+      },
+      {
+        "file": [
+          "SQLDeleteCompiler.as_sql()"
+        ]
+      }
+    ],
+    "django__django-13012": [
+      {
+        "file": [
+          "ExpressionWrapper.py"
+        ]
+      },
+      {
+        "file": [
+          "ExpressionWrapper.py"
+        ]
+      },
+      {
+        "file": [
+          "ExpressionWrapper.py"
+        ]
+      },
+      {
+        "file": [
+          "ExpressionWrapper.py"
+        ]
+      },
+      {
+        "file": [
+          "ExpressionWrapper.py"
+        ]
+      }
+    ],
+    "django__django-13023": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-13028": [
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/lookups.py"
+        ]
+      }
+    ],
+    "django__django-13033": [
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-13089": [
+      {
+        "file": [
+          "django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/cache/backends/db.py"
+        ]
+      }
+    ],
+    "django__django-13109": [
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/opt/django__django/django/db/models/fields/related.py"
+        ]
+      }
+    ],
+    "django__django-13112": [
+      {
+        "file": [
+          "django/apps/registry.py",
+          "django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/apps/registry.py",
+          "django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/apps/registry.py",
+          "django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/apps/registry.py",
+          "django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/apps/registry.py",
+          "django/db/migrations/operations/utils.py"
+        ]
+      }
+    ],
+    "django__django-13121": [
+      {
+        "file": [
+          "Django's base database operations"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/sqlite3/operations.py",
+          "django/db/backends/mysql/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/operations.py"
+        ]
+      }
+    ],
+    "django__django-13128": [
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django.db.models.expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      }
+    ]
+  }
+}
