@@ -22,6 +22,7 @@ if os.path.exists(ENV_FILE):
 Schema = TypeVar('Schema', bound=BaseModel)
 
 COSTINFO = {
+    # https://ai.google.dev/gemini-api/docs/pricing#gemini-2.5-flash-lite
     'gemini/gemini-2.5-flash-lite': {
         'currency': '$',
         'unit': 1_000_000,
