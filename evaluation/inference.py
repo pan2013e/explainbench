@@ -23,11 +23,10 @@ Schema = TypeVar('Schema', bound=BaseModel)
 
 COSTINFO = {
     'gemini/gemini-2.5-flash-lite': {
-        'currency': 'USD',
-        'currency_symbol': '$',
+        'currency': '$',
         'unit': 1_000_000,
         'input_price': 0.10,
-        'output_price': 0.20,
+        'output_price': 0.40,
     }
 }
 
@@ -94,7 +93,7 @@ class Model:
             price = (info['input_price'] * self.token_usage['prompt_tokens'] +
                      info['output_price'] * self.token_usage['completion_tokens']) / info['unit']
             return {
-                'cost': f"{info['currency_symbol']}{price:.3f}",
+                'cost': f"{info['currency']}{price:.3f}",
             }
         else:
             return {
