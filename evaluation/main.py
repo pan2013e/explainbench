@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import warnings
 
 from tqdm.auto import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -24,6 +25,8 @@ def generate(task: Task, model: Model, agent_id: str):
         pred_results[instance_id] = [p.model_dump() for p in pred]
     save_path = get_path(task, model, agent_id, 'generation')
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    if os.path.exists(save_path):
+        warnings.warn(f'Overwriting existing generation file: {save_path}')
     with open(save_path, 'w') as f:
         json.dump({
             'token_usage': model.token_usage,
@@ -55,6 +58,8 @@ def evaluate(task: Task, model: Model, agent_id: str):
                 print(f'Error evaluating instance {instance_id}: {e}')
     save_path = get_path(task, model, agent_id, 'evaluation')
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    if os.path.exists(save_path):
+        warnings.warn(f'Overwriting existing evaluation file: {save_path}')
     with open(save_path, 'w') as f:
         json.dump(eval_results, f, indent=2)
 

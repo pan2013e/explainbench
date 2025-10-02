@@ -21,6 +21,16 @@ if os.path.exists(ENV_FILE):
 
 Schema = TypeVar('Schema', bound=BaseModel)
 
+COSTINFO = {
+    'gemini/gemini-2.5-flash-lite': {
+        'currency': 'USD',
+        'currency_symbol': '$',
+        'unit': 1_000_000,
+        'input_price': 0.10,
+        'output_price': 0.20,
+    }
+}
+
 class Model:
     def __init__(self, model_id: str, **kwargs):
         self.model_id = model_id
@@ -70,18 +80,28 @@ class Model:
         return generations
     
     def tqdm_usage(self):
-        def fmt(num):
+        
+        def fmt_token(num):
             if num >= 1_000_000:
-                return f'{num/1_000_000:.2f}M'
+                return f'{num/1_000_000:.2f}Mt'
             elif num >= 1_000:
-                return f'{num/1_000:.2f}K'
+                return f'{num/1_000:.2f}Kt'
             else:
-                return str(num)
-        return {
-            'p': fmt(self.token_usage['prompt_tokens']),
-            'c': fmt(self.token_usage['completion_tokens']),
-            't': fmt(self.token_usage['total_tokens']),
-        }
+                return f'{num}t'
+        
+        if self.model_id in COSTINFO:
+            info = COSTINFO[self.model_id]
+            price = (info['input_price'] * self.token_usage['prompt_tokens'] +
+                     info['output_price'] * self.token_usage['completion_tokens']) / info['unit']
+            return {
+                'cost': f"{info['currency_symbol']}{price:.3f}",
+            }
+        else:
+            return {
+                'p': fmt_token(self.token_usage['prompt_tokens']),
+                'c': fmt_token(self.token_usage['completion_tokens']),
+                't': fmt_token(self.token_usage['total_tokens']),
+            }
 
     def clear_usage(self):
         self.token_usage = {
