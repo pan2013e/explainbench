@@ -1,0 +1,2803 @@
+{
+  "token_usage": {
+    "completion_tokens": 15997,
+    "prompt_tokens": 276710,
+    "total_tokens": 292707
+  },
+  "predictions": {
+    "astropy__astropy-12907": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/modeling/separable.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/modeling/separable.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13033": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/timeseries/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/timeseries/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/timeseries/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/timeseries/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__4.3/astropy/timeseries/core.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13236": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/table/table.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/table/table.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/table/table.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/table/table.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/table/table.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13398": [
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+          "astropy/coordinates/builtin_frames/__init__.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13453": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/io/ascii/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/io/ascii/html.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13579": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.0/astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+        ]
+      }
+    ],
+    "astropy__astropy-13977": [
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14096": [
+      {
+        "file": [
+          "astropy/coordinates/sky_coordinate.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/sky_coordinate.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/sky_coordinate.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/sky_coordinate.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/coordinates/sky_coordinate.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14182": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/rst.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/rst.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/rst.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/rst.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/rst.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14309": [
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py",
+          "astropy/io/misc/hdf5.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py",
+          "astropy/io/misc/hdf5.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py",
+          "astropy/io/misc/hdf5.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py",
+          "astropy/io/misc/hdf5.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/connect.py",
+          "astropy/io/votable/connect.py",
+          "astropy/io/misc/hdf5.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14365": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/qdp.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/ascii/qdp.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14369": [
+      {
+        "file": [
+          "astropy/units/format/cds.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/format/cds.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/format/cds.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/format/cds.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/format/cds.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14508": [
+      {
+        "file": [
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/card.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14539": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/fits/diff.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/fits/diff.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/fits/diff.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/fits/diff.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.1/astropy/io/fits/diff.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14598": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/io/fits/card.py"
+        ]
+      }
+    ],
+    "astropy__astropy-14995": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/nddata/mixins/ndarithmetic.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/nddata/mixins/ndarithmetic.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/nddata/mixins/ndarithmetic.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/nddata/mixins/ndarithmetic.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__5.2/astropy/nddata/mixins/ndarithmetic.py"
+        ]
+      }
+    ],
+    "astropy__astropy-7166": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/misc.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/misc.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/misc.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/misc.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/misc.py"
+        ]
+      }
+    ],
+    "astropy__astropy-7336": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/decorators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/decorators.py"
+        ]
+      }
+    ],
+    "astropy__astropy-7606": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/core.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/units/core.py"
+        ]
+      }
+    ],
+    "astropy__astropy-7671": [
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/introspection.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/astropy__astropy__1.3/astropy/utils/introspection.py"
+        ]
+      }
+    ],
+    "astropy__astropy-8707": [
+      {
+        "file": [
+          "astropy/io/fits/header.py",
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/header.py",
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/header.py",
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/header.py",
+          "astropy/io/fits/card.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/io/fits/header.py",
+          "astropy/io/fits/card.py"
+        ]
+      }
+    ],
+    "astropy__astropy-8872": [
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      },
+      {
+        "file": [
+          "astropy/units/quantity.py"
+        ]
+      }
+    ],
+    "django__django-10097": [
+      {
+        "file": [
+          "/workspace/django__django__2.2/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__2.2/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__2.2/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__2.2/django/core/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__2.2/django/core/validators.py"
+        ]
+      }
+    ],
+    "django__django-10554": [
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-10880": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      }
+    ],
+    "django__django-10914": [
+      {
+        "file": [
+          "django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/conf/global_settings.py"
+        ]
+      }
+    ],
+    "django__django-10973": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/backends/postgresql/client.py"
+        ]
+      }
+    ],
+    "django__django-10999": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/dateparse.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/dateparse.py"
+        ]
+      }
+    ],
+    "django__django-11066": [
+      {
+        "file": [
+          "django/contrib/contenttypes/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/contenttypes/management/__init__.py"
+        ]
+      }
+    ],
+    "django__django-11087": [
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11095": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/options.py"
+        ]
+      }
+    ],
+    "django__django-11099": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/validators.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/validators.py"
+        ]
+      }
+    ],
+    "django__django-11119": [
+      {
+        "file": [
+          "django/template/engine.py"
+        ]
+      },
+      {
+        "file": [
+          "django/template/engine.py"
+        ]
+      },
+      {
+        "file": [
+          "django/template/engine.py"
+        ]
+      },
+      {
+        "file": [
+          "django/template/engine.py"
+        ]
+      },
+      {
+        "file": [
+          "django/template/engine.py"
+        ]
+      }
+    ],
+    "django__django-11133": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/http/response.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/http/response.py"
+        ]
+      }
+    ],
+    "django__django-11138": [
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/mysql/operations.py",
+          "django/db/backends/oracle/operations.py"
+        ]
+      }
+    ],
+    "django__django-11141": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/loader.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/loader.py"
+        ]
+      }
+    ],
+    "django__django-11149": [
+      {
+        "file": [
+          "django/contrib/admin/options.py",
+          "tests/admin_inlines/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/admin/options.py",
+          "/tests/admin_inlines/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/admin/options.py",
+          "/tests/admin_inlines/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py",
+          "tests/admin_inlines/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/admin/options.py",
+          "/tests/admin_inlines/tests.py"
+        ]
+      }
+    ],
+    "django__django-11163": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-11179": [
+      {
+        "file": [
+          "/testbed/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11206": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/numberformat.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/numberformat.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/numberformat.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/numberformat.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/numberformat.py"
+        ]
+      }
+    ],
+    "django__django-11211": [
+      {
+        "file": [
+          "/testbed/django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/contenttypes/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/contenttypes/fields.py"
+        ]
+      }
+    ],
+    "django__django-11239": [
+      {
+        "file": [
+          "django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/postgresql/client.py",
+          "tests/dbshell/test_postgresql.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/postgresql/client.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/postgresql/client.py"
+        ]
+      }
+    ],
+    "django__django-11265": [
+      {
+        "file": [
+          "/testbed/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11276": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/html.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/utils/html.py"
+        ]
+      }
+    ],
+    "django__django-11292": [
+      {
+        "file": [
+          "django/core/management/base.py",
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/base.py",
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/base.py",
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/base.py",
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/base.py",
+          "django/core/management/__init__.py"
+        ]
+      }
+    ],
+    "django__django-11299": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11333": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/resolvers.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/resolvers.py"
+        ]
+      }
+    ],
+    "django__django-11400": [
+      {
+        "file": [
+          "/testbed/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "testbed/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/admin/filters.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/contrib/admin/filters.py",
+          "/testbed/tests/admin_filters/models.py",
+          "/testbed/tests/admin_filters/tests.py"
+        ]
+      }
+    ],
+    "django__django-11433": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-11451": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/backends.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/backends.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/backends.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/backends.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/auth/backends.py"
+        ]
+      }
+    ],
+    "django__django-11477": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/urls/base.py"
+        ]
+      }
+    ],
+    "django__django-11490": [
+      {
+        "file": [
+          "/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-11532": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/core/mail/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/core/mail/utils.py"
+        ]
+      }
+    ],
+    "django__django-11551": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/checks.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admin/checks.py"
+        ]
+      }
+    ],
+    "django__django-11555": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-11603": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/models/aggregates.py"
+        ]
+      }
+    ],
+    "django__django-11728": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/contrib/admindocs/utils.py"
+        ]
+      }
+    ],
+    "django__django-11734": [
+      {
+        "file": [
+          "/testbed/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "testbed/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/expressions.py"
+        ]
+      }
+    ],
+    "django__django-11740": [
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.0/django/db/migrations/autodetector.py"
+        ]
+      }
+    ],
+    "django__django-11749": [
+      {
+        "file": [
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/core/management/__init__.py"
+        ]
+      }
+    ],
+    "django__django-11790": [
+      {
+        "file": [
+          "/django/contrib/auth/forms.py",
+          "/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/auth/forms.py",
+          "/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/auth/forms.py",
+          "/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/auth/forms.py",
+          "/django/forms/boundfield.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/contrib/auth/forms.py",
+          "/django/forms/boundfield.py"
+        ]
+      }
+    ],
+    "django__django-11815": [
+      {
+        "file": [
+          "django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/migrations/serializer.py",
+          "tests/migrations/test_writer.py"
+        ]
+      },
+      {
+        "file": [
+          "Core Fix - `django/db/migrations/serializer.py`",
+          "Updated Tests - `tests/migrations/test_writer.py`"
+        ]
+      },
+      {
+        "file": [
+          "django/db/migrations/serializer.py",
+          "tests/migrations/test_writer.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/migrations/serializer.py"
+        ]
+      }
+    ],
+    "django__django-11820": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-11848": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/utils/http.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/utils/http.py"
+        ]
+      }
+    ],
+    "django__django-11880": [
+      {
+        "file": [
+          "django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/fields.py"
+        ]
+      },
+      {
+        "file": [
+          "django/forms/fields.py"
+        ]
+      }
+    ],
+    "django__django-11885": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/deletion.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/deletion.py"
+        ]
+      }
+    ],
+    "django__django-11951": [
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/query.py"
+        ]
+      }
+    ],
+    "django__django-11964": [
+      {
+        "file": [
+          "django/db/models/base.py",
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/base.py",
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/base.py",
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/base.py",
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/base.py",
+          "django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-11999": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-12039": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/ddl_references.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/ddl_references.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/ddl_references.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/ddl_references.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/ddl_references.py"
+        ]
+      }
+    ],
+    "django__django-12050": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-12125": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/serializer.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/migrations/serializer.py"
+        ]
+      }
+    ],
+    "django__django-12143": [
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      }
+    ],
+    "django__django-12155": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admindocs/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admindocs/utils.py"
+        ]
+      }
+    ],
+    "django__django-12193": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/postgres/forms/array.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/postgres/forms/array.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/postgres/forms/array.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/postgres/forms/array.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/postgres/forms/array.py"
+        ]
+      }
+    ],
+    "django__django-12209": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-12262": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/template/library.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/template/library.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/template/library.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/template/library.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/template/library.py"
+        ]
+      }
+    ],
+    "django__django-12273": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-12276": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/widgets.py",
+          "/workspace/django__django__3.1/tests/forms_tests/widget_tests/test_fileinput.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/widgets.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/widgets.py",
+          "/workspace/django__django__3.1/tests/forms_tests/widget_tests/test_fileinput.py"
+        ]
+      }
+    ],
+    "django__django-12304": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/enums.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/enums.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/enums.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/enums.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/enums.py"
+        ]
+      }
+    ],
+    "django__django-12308": [
+      {
+        "file": [
+          "django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/utils.py",
+          "tests/admin_utils/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "django/contrib/admin/utils.py"
+        ]
+      }
+    ],
+    "django__django-12325": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-12406": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/models.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/forms/models.py"
+        ]
+      }
+    ],
+    "django__django-12419": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/conf/global_settings.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/conf/global_settings.py"
+        ]
+      }
+    ],
+    "django__django-12663": [
+      {
+        "file": [
+          "django/utils/functional.py",
+          "django/db/models/lookups.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/functional.py",
+          "django/db/models/lookups.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/functional.py",
+          "django/db/models/lookups.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/functional.py",
+          "django/db/models/lookups.py"
+        ]
+      },
+      {
+        "file": [
+          "django/utils/functional.py",
+          "django/db/models/lookups.py"
+        ]
+      }
+    ],
+    "django__django-12708": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/base/schema.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/backends/base/schema.py"
+        ]
+      }
+    ],
+    "django__django-12713": [
+      {
+        "file": [
+          "django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admin/options.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/contrib/admin/options.py"
+        ]
+      }
+    ],
+    "django__django-12741": [
+      {
+        "file": [
+          "/testbed/django/db/backends/base/operations.py",
+          "/testbed/django/core/management/commands/flush.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/backends/base/operations.py",
+          "/testbed/django/core/management/commands/flush.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/backends/base/operations.py",
+          "/testbed/django/core/management/commands/flush.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/backends/base/operations.py",
+          "/testbed/django/core/management/commands/flush.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/backends/base/operations.py",
+          "/testbed/django/core/management/commands/flush.py"
+        ]
+      }
+    ],
+    "django__django-12754": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/autodetector.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/autodetector.py"
+        ]
+      }
+    ],
+    "django__django-12774": [
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.1/django/db/models/query.py"
+        ]
+      }
+    ],
+    "django__django-12858": [
+      {
+        "file": [
+          "/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/base.py"
+        ]
+      },
+      {
+        "file": [
+          "/django/db/models/base.py"
+        ]
+      }
+    ],
+    "django__django-12965": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-13012": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/expressions.py"
+        ]
+      }
+    ],
+    "django__django-13023": [
+      {
+        "file": [
+          "/testbed/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/fields/__init__.py"
+        ]
+      },
+      {
+        "file": [
+          "/testbed/django/db/models/fields/__init__.py"
+        ]
+      }
+    ],
+    "django__django-13028": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/query.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/sql/query.py"
+        ]
+      }
+    ],
+    "django__django-13033": [
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/sql/compiler.py"
+        ]
+      }
+    ],
+    "django__django-13089": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/core/cache/backends/db.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/core/cache/backends/db.py"
+        ]
+      }
+    ],
+    "django__django-13109": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/fields/related.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/models/fields/related.py"
+        ]
+      }
+    ],
+    "django__django-13112": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/operations/utils.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/migrations/operations/utils.py"
+        ]
+      }
+    ],
+    "django__django-13121": [
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/backends/base/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/backends/base/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/backends/base/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/backends/base/operations.py"
+        ]
+      },
+      {
+        "file": [
+          "/workspace/django__django__3.2/django/db/backends/base/operations.py"
+        ]
+      }
+    ],
+    "django__django-13128": [
+      {
+        "file": [
+          "django/db/models/expressions.py",
+          "tests/expressions/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py",
+          "tests/expressions/tests.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py"
+        ]
+      },
+      {
+        "file": [
+          "django/db/models/expressions.py",
+          "tests/expressions/tests.py"
+        ]
+      }
+    ]
+  }
+}
