@@ -1,6 +1,10 @@
 import os
+import json
 
 from typing import Any, Callable
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+DATASET_DIR = os.path.join(DIR, '..', 'dataset')
 
 def is_subpath(abs: str, rel: str):
     if len(abs) < len(rel):
@@ -27,9 +31,12 @@ def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = lamb
     fn = len(gt) - tp
     return f1_score(tp, fp, fn)
 
-def load_explanation_dataset():
-    ...
+def load_explanation(split: str):
+    with open(os.path.join(DATASET_DIR, 'explanations', 'dataset.json')) as f:
+        data = json.load(f)[split]
+    return data
 
 def load_ground_truth():
-    ...
-    
+    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truths.jsonl')) as f:
+        data = [json.loads(line) for line in f]
+    return data

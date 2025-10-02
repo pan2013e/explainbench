@@ -36,7 +36,7 @@ class Model:
         self.sampling_params.update(kwargs)
 
     @backoff.on_exception(backoff.expo, Exception, max_tries=3)
-    def infer(self, messages: str | list[dict[str, str]], schema: type[Schema]) -> Schema:
+    def infer(self, messages: str | list[dict[str, str]], schema: type[Schema]) -> list[Schema]:
         if isinstance(messages, str):
             messages = [{"role": "user", "content": messages}]
         response = completion(
@@ -48,5 +48,12 @@ class Model:
         self.token_usage['completion_tokens'] += response.usage.completion_tokens
         self.token_usage['prompt_tokens'] += response.usage.prompt_tokens
         self.token_usage['total_tokens'] += response.usage.total_tokens
-        content = response.choices[0].message.content
-        return schema.model_validate_json(content)
+        contents = [choice.message.content for choice in response.choices]
+        return [schema.model_validate_json(content) for content in contents]
+
+    def clear_usage(self):
+        self.token_usage = {
+            'completion_tokens': 0,
+            'prompt_tokens': 0,
+            'total_tokens': 0
+        }

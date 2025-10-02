@@ -12,7 +12,8 @@ from evaluation.util import (
 )
 
 __all__ = [
-    'ALL_TASKS',
+    'NAME_TASK_MAP',
+    'TASK_NAME_MAP',
     'RootCause',
 ]
 
@@ -44,7 +45,7 @@ class Task(Generic[Schema]):
         return model.infer(prompt, cls.SCHEMA)
     
     @staticmethod
-    def eval(pred, gt, **kwargs):
+    def eval(pred, gt, **kwargs) -> list:
         raise NotImplementedError()
 
 class RootCause:
@@ -53,17 +54,17 @@ class RootCause:
         SCHEMA = schema.File
 
         @staticmethod
-        def eval(pred: schema.File, gt: list[str]):
-            pred = set(pred.file)
-            gt = set(gt)
-            return set_f1_score(pred, gt, is_subpath)
+        def eval(pred: list[schema.File], gt: dict):
+            pred = [set(p.file) for p in pred]
+            gt = set(gt['buggy_file_names'])
+            return [set_f1_score(p, gt, is_subpath) for p in pred]
 
     class Region(Task[schema.Region]):
         QUESTION = 'Which classes or functions were buggy? If not applicable, please respond with an empty list.'
         SCHEMA = schema.Region
         
         @staticmethod
-        def eval(pred: schema.Region, gt: list[str]):
+        def eval(pred: schema.Region, gt: dict):
             ...
 
     class Line(Task[schema.Line]):
@@ -74,8 +75,9 @@ class RootCause:
         def eval(pred, gt):
             ...
 
-ALL_TASKS = {
+NAME_TASK_MAP = {
     'rootcause.file': RootCause.File,
     'rootcause.region': RootCause.Region,
     'rootcause.line': RootCause.Line,
 }
+TASK_NAME_MAP = {v: k for k, v in NAME_TASK_MAP.items()}
