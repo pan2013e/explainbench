@@ -1,5 +1,5 @@
 [submodule "explanations"]
-	path = explanations
+	path = dataset/explanations
 	url = https://github.com/pan2013e/sweb-agent-explanations.git
 [submodule "py-tracer"]
 	path = py-tracer
