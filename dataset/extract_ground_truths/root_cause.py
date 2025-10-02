@@ -94,20 +94,22 @@ def parse_patch(patch_content: str)->List[Dict]:
                 for line in lines_in_hunk:
                     if line.startswith(('+', '-')):
                         code_line = line[1:].strip()
-                        
-                        func_match = func_pattern.match(code_line)
-                        if func_match:
-                            # Change: Populate scope_info dictionary and break
-                            scope_info["name"] = func_match.group(1)
-                            scope_info["type"] = "function"
-                            break
+                    else:
+                        code_line = line.strip()
+                    
+                    func_match = func_pattern.match(code_line)
+                    if func_match:
+                        # Change: Populate scope_info dictionary and break
+                        scope_info["name"] = func_match.group(1)
+                        scope_info["type"] = "function"
+                        break
 
-                        class_match = class_pattern.match(code_line)
-                        if class_match:
-                            # Change: Populate scope_info dictionary and break
-                            scope_info["name"] = class_match.group(1)
-                            scope_info["type"] = "class"
-                            break
+                    class_match = class_pattern.match(code_line)
+                    if class_match:
+                        # Change: Populate scope_info dictionary and break
+                        scope_info["name"] = class_match.group(1)
+                        scope_info["type"] = "class"
+                        break
             
             # Track line numbers for additions and removals
             old_line_num = removal_start
