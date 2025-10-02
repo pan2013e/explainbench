@@ -1,6 +1,5 @@
 {
     "python.analysis.extraPaths": [
-        "${workspaceFolder}/swe-bench",
         "${workspaceFolder}/py-tracer",
     ]
 }
