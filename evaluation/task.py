@@ -52,17 +52,17 @@ class RootCause:
         SCHEMA = schema.File
 
         @staticmethod
-        def eval(pred: list[str], gt: list[str]):
-            pred = set(pred)
+        def eval(pred: schema.File, gt: list[str]):
+            pred = set(pred.file)
             gt = set(gt)
             return set_f1_score(pred, gt, is_subpath)
 
     class Region(Task[schema.Region]):
-        QUESTION = 'Which classes or functions were buggy?'
+        QUESTION = 'Which classes or functions were buggy? If not applicable, please respond with an empty list.'
         SCHEMA = schema.Region
         
         @staticmethod
-        def eval(pred, gt):
+        def eval(pred: schema.Region, gt: list[str]):
             ...
 
     class Line(Task[schema.Line]):
