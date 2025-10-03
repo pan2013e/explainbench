@@ -44,7 +44,7 @@ class Model:
             "n": 1,
             "temperature": 1.0,
             "top_p": 1.0,
-            "max_tokens": 2048,
+            "max_tokens": 4096,
         }
         self.sampling_params.update(kwargs)
 
