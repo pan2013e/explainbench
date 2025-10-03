@@ -18,8 +18,6 @@ def generate(task: Task, model: Model, agent_id: str):
     pbar = tqdm(explanations.items())
     for idx, (instance_id, expl) in enumerate(pbar):
         pbar.set_postfix(**model.tqdm_usage())
-        # use subset for now
-        if idx == 101: break
         expl = expl[0] if expl else ''
         pred = task.predict(model, expl)
         pred_results[instance_id] = [p.model_dump() for p in pred]
@@ -75,7 +73,7 @@ if __name__ == '__main__':
     argparser.add_argument('task', type=str, help='Evaluation task to run')
     argparser.add_argument('-a', '--agent', type=str, required=True, help='ID of agent producing the explanations')
     argparser.add_argument('-m', '--model', type=str, default='gemini/gemini-2.5-flash-lite', help='LLM used for question answering')
-    argparser.add_argument('-n', '--num-generations', type=int, default=1, help='Number of generations per instance')
+    argparser.add_argument('-n', '--num-generations', type=int, default=5, help='Number of generations per instance')
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
     args = argparser.parse_args()
