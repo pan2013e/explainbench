@@ -50,7 +50,7 @@ class Task(Generic[Schema]):
 
 class RootCause:
     class File(Task[schema.File]):
-        QUESTION = 'Which files were buggy?'
+        QUESTION = 'Which files were buggy? Please exclude any test files from your response.'
         SCHEMA = schema.File
 
         @staticmethod
