@@ -77,8 +77,8 @@ if __name__ == '__main__':
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
     args = argparser.parse_args()
-    if args.task not in NAME_TASK_MAP:
-        raise ValueError(f'Unknown task {args.task}, available tasks: {list(NAME_TASK_MAP.keys())}')
+    if args.task.lower() not in NAME_TASK_MAP:
+        raise ValueError(f'Unknown task {args.task.lower()}, available tasks: {list(NAME_TASK_MAP.keys())}')
     if args.gen_only and args.eval_only:
         raise ValueError('Cannot set both --gen-only and --eval-only')
     if args.num_generations < 1:
@@ -90,4 +90,4 @@ if __name__ == '__main__':
         entry_fn = evaluate
     else:
         entry_fn = main
-    entry_fn(NAME_TASK_MAP[args.task], model, args.agent)
+    entry_fn(NAME_TASK_MAP[args.task.lower()], model, args.agent)
