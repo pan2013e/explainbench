@@ -8,6 +8,7 @@ from evaluation import schema
 from evaluation.inference import Model
 from evaluation.util import (
     is_subpath,
+    is_line_equal,
     set_f1_score,
 )
 
@@ -45,12 +46,16 @@ class Task(Generic[Schema]):
         return model.infer(prompt, cls.SCHEMA)
     
     @staticmethod
-    def eval(pred, gt, **kwargs) -> list:
+    def eval(pred, gt, **kwargs) -> list[float]:
         raise NotImplementedError()
 
 class RootCause:
     class File(Task[schema.File]):
-        QUESTION = 'Which files were buggy? Please exclude any test files from your response.'
+        QUESTION = (
+            'Which files were buggy? '
+            'Please answer with the file paths, and exclude any test files or doc files from your response. '
+            'If you cannot infer from the explanation, please answer with an empty list.'
+        )
         SCHEMA = schema.File
 
         @staticmethod
@@ -60,20 +65,49 @@ class RootCause:
             return [set_f1_score(p, gt, is_subpath) for p in pred]
 
     class Region(Task[schema.Region]):
-        QUESTION = 'Which classes or functions were buggy? If not applicable, please respond with an empty list.'
+        QUESTION = (
+            'Which classes or functions were buggy? '
+            'If a method of a class is buggy, you only need to answer with the method name. '
+            'If not applicable or you cannot infer from the explanation, please answer with an empty list.'
+        )
         SCHEMA = schema.Region
         
         @staticmethod
-        def eval(pred: schema.Region, gt: dict):
-            ...
+        def eval(pred: list[schema.Region], gt: dict):
+            def postprocess(qualified_name: str):
+                qualified_name = qualified_name.strip()
+                if qualified_name.endswith('()'):
+                    qualified_name = qualified_name[:-2]
+                return qualified_name.split('.')[-1]
+            pred = [set((postprocess(r.identifier), r.type) for r in p.region) for p in pred]
+            gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
+            return [set_f1_score(p, gt) for p in pred]
 
     class Line(Task[schema.Line]):
-        QUESTION = 'Which lines were buggy?'
+        QUESTION = (
+            'Which lines were buggy? '
+            'You can either answer with line numbers or line contents. '
+            'Please exclude any test code or docstrings.'
+        )
         SCHEMA = schema.Line
         
         @staticmethod
-        def eval(pred, gt):
-            ...
+        def eval(pred: list[schema.Line], gt: dict):
+            pred_sets = []
+            for p in pred:
+                pred_set = set()
+                for line in p.line:
+                    if isinstance(line, schema.LineRange):
+                        pred_set.update((line.file, n) for n in range(line.start, line.end + 1))
+                    elif isinstance(line, schema.LineContent):
+                        pred_set.add((line.file, line.content))
+                pred_sets.append(pred_set)
+            gt_set = set()
+            for line_info, content_info in zip(gt['buggy_line_numbers'], gt['buggy_line_contents'], strict=True):
+                assert line_info[0] == content_info[0]
+                for lineno, content in zip(line_info[1], content_info[1], strict=True):
+                    gt_set.add((line_info[0], lineno, content))
+            return [set_f1_score(p, gt_set, is_line_equal) for p in pred_sets]
 
 NAME_TASK_MAP = {
     'rootcause.file': RootCause.File,
