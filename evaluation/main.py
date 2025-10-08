@@ -4,7 +4,6 @@ import argparse
 import warnings
 
 from tqdm.auto import tqdm
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from evaluation.inference import Model
 from evaluation.task import Task, NAME_TASK_MAP, TASK_NAME_MAP
 from evaluation.util import load_explanation, load_ground_truth, result_statistics
@@ -16,7 +15,7 @@ def generate(task: Task, model: Model, agent_id: str):
     explanations = load_explanation(agent_id)
     pred_results = {}
     pbar = tqdm(explanations.items())
-    for idx, (instance_id, expl) in enumerate(pbar):
+    for instance_id, expl in enumerate(pbar):
         pbar.set_postfix(**model.tqdm_usage())
         expl = expl[0] if expl else ''
         pred = task.predict(model, expl)
@@ -45,15 +44,8 @@ def evaluate(task: Task, model: Model, agent_id: str):
             raise ValueError(f'Instance ID {instance_id} not found in ground truth')
         zipped.append((instance_id, pred, gt_data[instance_id]))
     eval_results = {}
-    with ProcessPoolExecutor(max_workers=os.cpu_count()//4) as executor:
-        futures = {executor.submit(task.eval, pred, gt): instance_id for instance_id, pred, gt in zipped}
-        for future in tqdm(as_completed(list(futures.keys())), total=len(futures)):
-            instance_id = futures[future]
-            try:
-                result = future.result()
-                eval_results[instance_id] = result
-            except Exception as e:
-                print(f'Error evaluating instance {instance_id}: {e}')
+    for instance_id, pred, gt in tqdm(zipped):
+        eval_results[instance_id] = task.eval(pred, gt)
     save_path = get_path(task, model, agent_id, 'evaluation')
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     if os.path.exists(save_path):
