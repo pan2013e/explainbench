@@ -1,7 +1,11 @@
 import os
 import json
+import signal
+import inspect
+import warnings
 import numpy as np
 
+from functools import wraps
 from operator import eq
 from typing import Any, Callable
 
@@ -77,3 +81,35 @@ def result_statistics(data: dict[str, list]):
         'max': np.max(n_runs),
         'min': np.min(n_runs),
     }
+
+def timeout(seconds=15):
+    def decorator(func: Callable[[list, dict], list[float]]):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            def handler(signum, frame):
+                warnings.warn(f'{func.__qualname__} timed out after {seconds} seconds. Setting result to zeros.')
+                raise TimeoutError()
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            except TimeoutError:
+                bound = inspect.signature(func).bind(*args, **kwargs)
+                bound.apply_defaults()
+                pred = bound.arguments.get('pred', None)
+                assert pred is not None and isinstance(pred, list)
+                result = [0.0] * len(pred)
+            finally:
+                signal.alarm(0)
+            return result
+        return wrapper
+    return decorator
+
+class EvalTimeout(type):
+    def __new__(mcls, name, bases, namespace):
+        func = namespace.get('eval', None)
+        assert func is not None and callable(func)
+        assert isinstance(func, staticmethod)
+        wrapped = staticmethod(timeout()(func.__func__))
+        namespace['eval'] = wrapped
+        return super().__new__(mcls, name, bases, namespace)

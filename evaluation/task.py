@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from evaluation import schema
 from evaluation.inference import Model
 from evaluation.util import (
+    EvalTimeout,
     is_subpath,
     is_line_equal,
     set_f1_score,
@@ -20,7 +21,7 @@ __all__ = [
 
 Schema = TypeVar('Schema', bound=BaseModel)
 
-class Task(Generic[Schema]):
+class Task(Generic[Schema], metaclass=EvalTimeout):
     TEMPLATE: ClassVar[str] = (
         "An AI agent fixed a bug in a code repository and provided an explanation for the patch. "
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
@@ -46,7 +47,7 @@ class Task(Generic[Schema]):
         return model.infer(prompt, cls.SCHEMA)
     
     @staticmethod
-    def eval(pred, gt, **kwargs) -> list[float]:
+    def eval(pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
 class RootCause:
