@@ -44,11 +44,11 @@ class Model:
             "n": 1,
             "temperature": 1.0,
             "top_p": 1.0,
-            "max_tokens": 4096,
+            "max_tokens": 8192,
         }
         self.sampling_params.update(kwargs)
 
-    @backoff.on_exception(backoff.expo, Exception, max_tries=3)
+    @backoff.on_exception(backoff.expo, Exception, max_tries=5)
     def infer_once(self, messages: str | list[dict[str, str]], schema: type[Schema]) -> Schema:
         if isinstance(messages, str):
             messages = [{"role": "user", "content": messages}]
