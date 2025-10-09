@@ -61,7 +61,10 @@ def main(task: type[Task], model: Model, agent_id: str):
     evaluate(task, model, agent_id)
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser(
+        prog='evaluation.main',
+        epilog='Available tasks: ' + ', '.join(Task._registry.keys()),
+    )
     argparser.add_argument('task', type=str, help='Evaluation task to run')
     argparser.add_argument('-a', '--agent', type=str, required=True, help='ID of agent producing the explanations')
     argparser.add_argument('-m', '--model', type=str, default='gemini/gemini-2.5-flash-lite', help='LLM used for question answering')
