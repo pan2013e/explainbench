@@ -13,11 +13,7 @@ from evaluation.util import (
     set_f1_score,
 )
 
-__all__ = [
-    'NAME_TASK_MAP',
-    'TASK_NAME_MAP',
-    'RootCause',
-]
+__all__ = ['Task']
 
 Schema = TypeVar('Schema', bound=BaseModel)
 
@@ -31,6 +27,12 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     )
     QUESTION: ClassVar[str]
     SCHEMA: ClassVar[type[Schema]]
+    
+    _registry = {} # type: dict[str, type[Task]]
+    
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._registry[cls.__qualname__.lower()] = cls
 
     @classmethod
     @lru_cache
@@ -40,7 +42,18 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     @classmethod
     def _build_prompt(cls, explanation: str):
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION)
+
+    @classmethod
+    def repr(cls):
+        return cls.__qualname__.lower().replace('.', '_')
     
+    @classmethod
+    def get_task(cls, name: str):
+        name = name.lower()
+        if name not in cls._registry:
+            raise ValueError(f'Unknown task name: {name}, available tasks: {list(cls._registry.keys())}')
+        return cls._registry[name]
+
     @classmethod
     def predict(cls, model: Model, explanation: str):
         prompt = cls._build_prompt(explanation)
@@ -109,10 +122,3 @@ class RootCause:
                 for lineno, content in zip(line_info[1], content_info[1], strict=True):
                     gt_set.add((line_info[0], lineno, content))
             return [set_f1_score(p, gt_set, is_line_equal) for p in pred_sets]
-
-NAME_TASK_MAP = {
-    'rootcause.file': RootCause.File,
-    'rootcause.region': RootCause.Region,
-    'rootcause.line': RootCause.Line,
-}
-TASK_NAME_MAP = {v: k for k, v in NAME_TASK_MAP.items()}
