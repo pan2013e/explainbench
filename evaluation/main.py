@@ -5,13 +5,13 @@ import warnings
 
 from tqdm.auto import tqdm
 from evaluation.inference import Model
-from evaluation.task import Task, NAME_TASK_MAP, TASK_NAME_MAP
+from evaluation.task import Task
 from evaluation.util import load_explanation, load_ground_truth, result_statistics
 
-def get_path(task: Task, model: Model, agent_id: str, mode: str):
-    return f'results/{mode}/{TASK_NAME_MAP[task].replace(".", "_")}/{agent_id}__{model.model_id.replace("/", "-")}.json'
+def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
+    return f'results/{mode}/{task.repr()}/{agent_id}__{model.model_id.replace("/", "-")}.json'
 
-def generate(task: Task, model: Model, agent_id: str):
+def generate(task: type[Task], model: Model, agent_id: str):
     explanations = load_explanation(agent_id)
     pred_results = {}
     pbar = tqdm(explanations.items())
@@ -30,7 +30,7 @@ def generate(task: Task, model: Model, agent_id: str):
             'predictions': pred_results
         }, f, indent=2)
 
-def evaluate(task: Task, model: Model, agent_id: str):
+def evaluate(task: type[Task], model: Model, agent_id: str):
     pred_path = get_path(task, model, agent_id, 'generation')
     if not os.path.exists(pred_path):
         raise FileNotFoundError(f'Prediction file not found: {pred_path}')
@@ -56,7 +56,7 @@ def evaluate(task: Task, model: Model, agent_id: str):
             'raw': eval_results,
         }, f, indent=2)
 
-def main(task: Task, model: Model, agent_id: str):
+def main(task: type[Task], model: Model, agent_id: str):
     generate(task, model, agent_id)
     evaluate(task, model, agent_id)
 
@@ -69,8 +69,7 @@ if __name__ == '__main__':
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
     args = argparser.parse_args()
-    if args.task.lower() not in NAME_TASK_MAP:
-        raise ValueError(f'Unknown task {args.task.lower()}, available tasks: {list(NAME_TASK_MAP.keys())}')
+    task = Task.get_task(args.task)
     if args.gen_only and args.eval_only:
         raise ValueError('Cannot set both --gen-only and --eval-only')
     if args.num_generations < 1:
@@ -82,4 +81,4 @@ if __name__ == '__main__':
         entry_fn = evaluate
     else:
         entry_fn = main
-    entry_fn(NAME_TASK_MAP[args.task.lower()], model, args.agent)
+    entry_fn(task, model, args.agent)
