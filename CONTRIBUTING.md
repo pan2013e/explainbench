@@ -20,7 +20,7 @@ class MyTask(Task[schema.MySchema]):
     def eval(pred: list[schema.MySchema], gt: dict): # Should return list[float]
         '''
         Batched evaluation function.
-        
+
         Args:
         - pred: List of model predictions with length n (repeated n times for a dataset instance)
         - gt: Ground truth data for the dataset instance. Please refer to [dataset/extract_ground_truths/ground_truth.jsonl](dataset/extract_ground_truths/ground_truth.jsonl).
@@ -28,4 +28,4 @@ class MyTask(Task[schema.MySchema]):
         # Evaluation logic here
         pass
 ```
-No further steps are required after this. The task class will be automatically inferred at evaluation entry with its lowercase qualified name.
+No further steps are required after this. The task class will be automatically inferred at evaluation entry with its lowercase qualified name (e.g. `MyTask` -> `mytask`, `RootCause.File` -> `rootcause.file`).
