@@ -4,7 +4,7 @@
 
 1. Install dependencies in `requirements.txt`.
 2. Create `.env` file in the root directory and add your API keys in `KEY=VALUE` format.
-3. Run `python evaluation.main` in the root directory to execute the evaluation.
+3. Run `python -m evaluation.main` with args in the root directory to execute the evaluation.
 ```
 usage: evaluation.main [-h] -a AGENT [-m MODEL] [-n NUM_GENERATIONS] [-go] [-eo] task
 
