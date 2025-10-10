@@ -32,24 +32,27 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
     
     for action_data in actions:
         action = GumTreeAction(**action_data)
-        if not action.action.startswith('insert'):
-            # query = post_patch_query if action.action.startswith('insert') else pre_patch_query
-            query = pre_patch_query
+        try:
+            action = GumTreeAction(**action_data)
+            query = post_patch_query if action.action.startswith('insert') else pre_patch_query
             start, end = action.affected_range()
             search_end = end - 1 if end > start else start
             
             affected_node = query.smallest_covering_ancestor(start, search_end)
-            enclosing_scopes = find_enclosing_scopes(affected_node)
-
-            # This take care of the newly created functions. Ignore for now.
-            # if not enclosing_scopes and action.action == 'insert-tree' and ('function_definition' in action.tree or 'class_definition' in action.tree):
-                    
-            #     # ...then find the closest function/class node by its start position.
-            #     closest_node = find_closest_node(query, start)
-            #     if closest_node:
-            #         enclosing_scopes = find_enclosing_scopes(closest_node)
+            enclosing_scopes = find_enclosing_scopes(affected_node, path_before)
+            
+            # if the first try fails, try to use the parent
+            if not enclosing_scopes and action.action.startswith('insert') and action.parent:
+                parent_range = GumTreeAction._parse_range(action.parent)
+                if parent_range:
+                    p_start, p_end = parent_range
+                    parent_node = query.smallest_covering_ancestor(p_start, p_end - 1 if p_end > p_start else p_start)
+                    enclosing_scopes = find_enclosing_scopes(parent_node, path_before)
 
             results_per_action.append(enclosing_scopes)
+        except Exception as e:
+            print(f"Error processing action {action}: {e}")
+
     return results_per_action
 
 def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[str, str]]]) -> str:
