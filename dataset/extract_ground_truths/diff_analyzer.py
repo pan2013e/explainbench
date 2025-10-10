@@ -32,9 +32,9 @@ class Parentage(ast.NodeTransformer):
 class TreeQuery:
     def __init__(self, code):
         self.code = code
-        self.atok = asttokens.ASTTokens(code, parse=True)
-        assert self.atok.tree is not None, "Failed to parse code"
-        self.atok._tree = Parentage().visit(self.atok.tree)
+        parsed_tree = ast.parse(code)    
+        tree_with_parents = Parentage().visit(parsed_tree)
+        self.atok = asttokens.ASTTokens(code, tree=tree_with_parents)
     
     def offset_to_line(self, offset: int):
         return self.atok._line_numbers.offset_to_line(offset)
