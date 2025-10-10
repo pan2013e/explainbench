@@ -36,6 +36,9 @@ class TreeQuery:
         assert self.atok.tree is not None, "Failed to parse code"
         self.atok._tree = Parentage().visit(self.atok.tree)
     
+    def offset_to_line(self, offset: int):
+        return self.atok._line_numbers.offset_to_line(offset)
+    
     def character_offsets(self, node: ast.AST):
         return self.atok.get_text_range(node)
     
