@@ -3,7 +3,7 @@ import ast
 import asttokens
 
 from pydantic import BaseModel
-from typing import Callable, Optional, Literal
+from typing import Callable, Optional, Literal, Tuple, List
 
 class GumTreeAction(BaseModel):
     action: Literal['insert-node', 'insert-tree', 'delete-node', 'delete-tree', 'move-tree', 'update-node']
@@ -70,3 +70,19 @@ class TreeQuery:
                     changed = True
                     break
         return cur
+
+def find_enclosing_scopes(node: ast.AST) -> List[Tuple[str, str]]:
+    """
+    Traces the ancestry of an AST node and collects the types and names
+    of all enclosing functions and classes, INCLUDING the node itself if it is a scope.
+    """
+    scopes = []
+    current_node = node
+    while current_node:
+        if isinstance(current_node, ast.FunctionDef):
+            scopes.append(['function', current_node.name])
+        elif isinstance(current_node, ast.ClassDef):
+            scopes.append(['class', current_node.name])
+        current_node = getattr(current_node, 'parent', None)
+    scopes.reverse()  
+    return scopes
