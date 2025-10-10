@@ -111,11 +111,10 @@ def copy_files_to_target(
             continue
 
         target_path = (target_instance_dir / rel_path).resolve()
-        
         target_dir = target_path.parent
         target_dir.mkdir(parents=True, exist_ok=True)
-        
-        new_stem = f"{target_path.stem}{suffix}"        
+
+        new_stem = f"{suffix}_{target_path.stem}"
         final_target_path = target_path.with_stem(new_stem)
 
         try:
@@ -160,7 +159,7 @@ def process_swe_bench_instance(
         source_repo_path=repo_path,
         relative_paths=old_files_relative,
         target_instance_dir=target_instance_dir,
-        suffix=".old"
+        suffix="old"
     )
 
     # # 4. Apply the patch to get the "after" state
@@ -177,7 +176,7 @@ def process_swe_bench_instance(
         source_repo_path=repo_path,
         relative_paths=new_files_relative,
         target_instance_dir=target_instance_dir,
-        suffix=".new"
+        suffix="new"
     )
 
     # # 6. Construct the result
