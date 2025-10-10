@@ -55,7 +55,7 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
 
     return results_per_action
 
-def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[str, str]]]) -> str:
+def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[str, str, str]]]) -> List:
     """
     Takes a nested list of scope tuples, creates unique, fully-typed 
     hierarchical contexts, and formats them into a single, sorted string.
@@ -65,8 +65,11 @@ def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[st
     for action_scopes in detailed_scopes:
         if not action_scopes:
             continue        
-        context_parts = [f"{scope_type}:{scope_name}" for scope_type, scope_name in action_scopes]  
-        all_context_strings.append(".".join(context_parts))
+        context_parts = [f"{scope_type}:{scope_name}" for filename, scope_type, scope_name in action_scopes]
+        # it is a guarantee that all action_scopes are from the same file, so the following is ok
+        filename = action_scopes[0][0].split("/")[-1]
+        context_string = filename + "::" + ".".join(context_parts)
+        all_context_strings.append(context_string)
 
     unique_contexts = set(all_context_strings)
-    return ", ".join(sorted(list(unique_contexts)))
+    return list(unique_contexts)
