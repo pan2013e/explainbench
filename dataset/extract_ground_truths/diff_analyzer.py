@@ -12,11 +12,16 @@ class GumTreeAction(BaseModel):
     at: Optional[int] = None
     label: Optional[str] = None
 
-    def affected_range(self):
-        pattern = re.compile(r'.*?\[(\d+),(\d+)\]')
-        m = pattern.match(self.tree)
-        assert m
+    @staticmethod
+    def _parse_range(gt_string: str) -> Optional[Tuple[int, int]]:
+        m = re.compile(r'.*?\[(\d+),(\d+)\]').match(gt_string)
+        if not m: return None
         return int(m.group(1)), int(m.group(2))
+
+    def affected_range(self) -> Tuple[int, int]:
+        res = self._parse_range(self.tree)
+        if res is None: raise ValueError(f"Could not parse range from tree string: {self.tree}")
+        return res    
 
 class Parentage(ast.NodeTransformer):
     parent = None
