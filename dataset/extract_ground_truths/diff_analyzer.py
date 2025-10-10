@@ -76,18 +76,19 @@ class TreeQuery:
                     break
         return cur
 
-def find_enclosing_scopes(node: ast.AST) -> List[Tuple[str, str]]:
+def find_enclosing_scopes(node: ast.AST, filename: str) -> List[Tuple[str, str, str]]:
     """
-    Traces the ancestry of an AST node and collects the types and names
-    of all enclosing functions and classes, INCLUDING the node itself if it is a scope.
+    Traces the ancestry of an AST node and collects the filename, types, and names
+    of all enclosing functions and classes.
     """
     scopes = []
     current_node = node
+    filename = filename.replace("old_", "").strip()
     while current_node:
         if isinstance(current_node, ast.FunctionDef):
-            scopes.append(['function', current_node.name])
+            scopes.append((filename, 'function', current_node.name))
         elif isinstance(current_node, ast.ClassDef):
-            scopes.append(['class', current_node.name])
+            scopes.append((filename, 'class', current_node.name))
         current_node = getattr(current_node, 'parent', None)
-    scopes.reverse()  
+    scopes.reverse()
     return scopes
