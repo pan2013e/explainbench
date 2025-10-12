@@ -1,6 +1,7 @@
 import ast
 import json
 from typing import List, Tuple
+from pathlib import Path
 
 from extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
 
@@ -112,3 +113,32 @@ def filter_scopes_to_existing_or_ancestors(
             # If no ancestor found, skip entirely (i.e., new top-level addition)
     
     return sorted(filtered_contexts)
+
+def process_instance(record: dict, dataset_root: str) -> dict:
+    """
+    Processes a single record from the dataset to find and format the
+    names of all modified functions/classes.
+    """
+    all_detailed_scopes = []
+    all_defs = []
+    gumtree_files = record.get('gumtree_files', [])
+    
+    for rel_path_g in gumtree_files:
+        rel_path_g = Path(dataset_root, rel_path_g)
+
+        filename = rel_path_g.name
+        rel_path_b = rel_path_g.parent / Path("old_" + filename.replace('.json', '.py'))
+        rel_path_a = rel_path_g.parent / Path("new_" + filename.replace('.json', '.py'))
+        
+        detailed_scopes_for_file = identify_context(str(rel_path_b), str(rel_path_a), str(rel_path_g))       
+        all_detailed_scopes.extend(detailed_scopes_for_file)
+
+        defs = extract_fn_class_definitions(str(rel_path_b))
+        all_defs.extend(defs)
+
+    formatted_scopes = format_scopes_to_string_typed_contextual(all_detailed_scopes)    
+    final_formatted_string = filter_scopes_to_existing_or_ancestors(formatted_scopes, all_defs)
+    
+    record['buggy_function_names'] = final_formatted_string
+    
+    return record
