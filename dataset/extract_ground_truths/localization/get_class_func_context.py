@@ -3,7 +3,7 @@ import json
 from typing import List, Tuple, Dict, Any
 from pathlib import Path
 
-from extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
+from dataset.extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
 
 def identify_context(path_before: str, path_after: str, path_gumtree: str) -> List[Tuple[str, str]]:
     """

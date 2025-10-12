@@ -4,7 +4,7 @@ import argparse
 from typing import List, Dict, Any
 from collections import defaultdict
 
-from extract_ground_truths.localization.get_class_func_context import process_instance
+from dataset.extract_ground_truths.localization.get_class_func_context import process_instance
 
 def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
     """
@@ -36,6 +36,7 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
                     instance_data[instance_id]["gumtree"].append(gumtree_path)
 
     instances = []
+    count = 0
     for instance_id in sorted(instance_data.keys()):
         data = instance_data[instance_id]
         record = {
@@ -46,7 +47,9 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
         }
         record = process_instance(record, dataset_dir)
         instances.append(record)
-        
+        count += 1
+        if count == 10:
+            break
     return instances
 
 
