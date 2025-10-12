@@ -77,3 +77,38 @@ def format_scopes_to_string_typed_contextual(detailed_scopes: List[Tuple[str, st
 
     unique_contexts = set(all_context_strings)
     return list(unique_contexts)
+
+def filter_scopes_to_existing_or_ancestors(
+    formatted_scopes: List[str], 
+    existing_definitions: List[str]
+) -> List[str]:
+    """
+    Filters a list of formatted scope strings to only include those that either:
+    1. Already existed in the 'before' version (i.e., are in existing_definitions), or
+    2. Have an ancestor (by progressively removing trailing segments) that existed.
+    """
+    filtered_contexts = set()
+
+    for ctx in formatted_scopes:
+        if ctx in existing_definitions:
+            # Already existed before → keep as is
+            filtered_contexts.add(ctx)
+        else:
+            # Try to find an existing ancestor
+            parts = ctx.split("::", 1)  # Split only on first occurrence
+            if len(parts) != 2:
+                continue
+            
+            filename, hierarchy = parts
+            segments = hierarchy.split(".")
+            
+            # Progressively strip trailing segments (deepest → higher)
+            while len(segments) > 1:
+                segments = segments[:-1]
+                ancestor = filename + "::" + ".".join(segments)
+                if ancestor in existing_definitions:
+                    filtered_contexts.add(ancestor)
+                    break
+            # If no ancestor found, skip entirely (i.e., new top-level addition)
+    
+    return sorted(filtered_contexts)
