@@ -2,7 +2,7 @@ import ast
 import json
 from typing import List, Tuple
 
-from extract_ground_truths.diff_analyzer import TreeQuery, find_enclosing_scopes, GumTreeAction
+from extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
 
 def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Set[Tuple[str, str]]:
     """
@@ -37,23 +37,35 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
             query = post_patch_query if action.action.startswith('insert') else pre_patch_query
             start, end = action.affected_range()
             search_end = end - 1 if end > start else start
-            
             affected_node = query.smallest_covering_ancestor(start, search_end)
             enclosing_scopes = find_enclosing_scopes(affected_node, path_before)
-            
-            # if the first try fails, try to use the parent
-            if not enclosing_scopes and action.action.startswith('insert') and action.parent:
-                parent_range = GumTreeAction._parse_range(action.parent)
-                if parent_range:
-                    p_start, p_end = parent_range
-                    parent_node = query.smallest_covering_ancestor(p_start, p_end - 1 if p_end > p_start else p_start)
-                    enclosing_scopes = find_enclosing_scopes(parent_node, path_before)
-
             results_per_action.append(enclosing_scopes)
         except Exception as e:
             print(f"Error processing action {action}: {e}")
-
     return results_per_action
+
+def extract_fn_class_definitions(filepath: str) -> List[str]:
+    """
+    Parses a Python source code string and returns a list of all
+    class and function definitions in the specified format.
+    """
+
+    with open(filepath, 'r', encoding='utf-8') as f:
+        source_code = f.read()
+
+    filename = filepath.split("/")[-1]
+    if filename.startswith("old_") or filename.startswith("new_"):
+        filename = filename[4:]    
+
+    try:
+        tree = ast.parse(source_code)
+    except SyntaxError as e:
+        print(f"Error parsing {filename}: {e}")
+        return []
+
+    visitor = CodeVisitor(filename)
+    visitor.visit(tree)
+    return visitor.results
 
 def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[str, str, str]]]) -> List:
     """
