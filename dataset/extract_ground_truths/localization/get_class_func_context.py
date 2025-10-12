@@ -59,7 +59,7 @@ def extract_fn_class_definitions(filepath: str) -> List[str]:
     visitor.visit(tree)
     return visitor.results
 
-def format_scopes_to_string_typed_contextual(detailed_scopes: List[List[Tuple[str, str, str]]]) -> List:
+def format_scopes_to_string_typed_contextual(detailed_scopes: List[Tuple[str, str, str]]) -> List[str]:
     """
     Takes a nested list of scope tuples, creates unique, fully-typed 
     hierarchical contexts, and formats them into a single, sorted string.
