@@ -4,7 +4,7 @@ import argparse
 from typing import List, Dict, Any
 from collections import defaultdict
 
-from dataset.extract_ground_truths.localization.get_class_func_context import process_instance
+from dataset.extract_ground_truths.localization.get_class_func_context import get_buggy_class_or_fn_names_with_context
 
 def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
     """
@@ -45,7 +45,7 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
             "files_after": sorted(data["after"]),
             "gumtree_files": sorted(data["gumtree"])
         }
-        record = process_instance(record, dataset_dir)
+        record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
         instances.append(record)
         count += 1
         if count == 10:
