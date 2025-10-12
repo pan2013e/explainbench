@@ -4,6 +4,8 @@ import argparse
 from typing import List, Dict, Any
 from collections import defaultdict
 
+from extract_ground_truths.localization.get_class_func_context import process_instance
+
 def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
     """
     Scans a directory to create a ground_truth.jsonl file.
@@ -42,8 +44,9 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
             "files_after": sorted(data["after"]),
             "gumtree_files": sorted(data["gumtree"])
         }
+        record = process_instance(record, dataset_dir)
         instances.append(record)
-    
+        
     return instances
 
 
