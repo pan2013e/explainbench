@@ -47,6 +47,7 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
             "gumtree_files": sorted(data["gumtree"])
         }
         record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
+        record = get_buggy_filenames(record)
         instances.append(record)
         count += 1
         if count == 10:
