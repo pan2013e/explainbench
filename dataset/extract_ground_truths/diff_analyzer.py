@@ -92,3 +92,44 @@ def find_enclosing_scopes(node: ast.AST, filename: str) -> List[Tuple[str, str, 
         current_node = getattr(current_node, 'parent', None)
     scopes.reverse()
     return scopes
+
+class CodeVisitor(ast.NodeVisitor):
+    """
+    An AST visitor that traverses the code tree to find all class and
+    function definitions.
+    """
+    def __init__(self, filename: str):
+        self.filename = filename
+        self.results: List[str] = []
+        self.path: List[Tuple[str, str]] = []
+
+    def _process_node(self, node: ast.AST, node_type: str):
+        """
+        Handler for both FunctionDef, AsyncFunctionDef, and ClassDef nodes.
+        """
+        self.path.append((node_type, node.name))
+
+        # path = [('class', 'Table'), ('function', '_convert')]
+        # becomes "class:Table.function:_convert"
+        path_segments = [f"{t}:{n}" for t, n in self.path]
+        structured_path = ".".join(path_segments)
+
+        self.results.append(f"{self.filename}::{structured_path}")
+
+        # Continue traversing into the children of this node to find nested items.
+        self.generic_visit(node)
+
+        # After visiting children, pop from the path to return to the parent scope.
+        self.path.pop()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        """Called when a standard 'def' is found."""
+        self._process_node(node, 'function')
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+        """Called when an 'async def' is found."""
+        self._process_node(node, 'function')
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        """Called when a 'class' is found."""
+        self._process_node(node, 'class')
