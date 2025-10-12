@@ -8,7 +8,6 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
     """
     Analyzes a single file change to identify all modified functions and classes.
     """
-
     with open(path_before, 'r', encoding='utf-8') as f:
         before_code = f.read()
     with open(path_after, 'r', encoding='utf-8') as f:
@@ -21,13 +20,6 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
     pre_patch_query = TreeQuery(before_code)
     post_patch_query = TreeQuery(after_code)
 
-    # Identify all functions/classes that existed in the original file.
-    original_scopes = set()
-    for node in ast.walk(pre_patch_query.atok.tree):
-        if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-            scope_type = 'function' if isinstance(node, ast.FunctionDef) else 'class'
-            original_scopes.add((scope_type, node.name))
-    
     results_per_action = []
     
     for action_data in actions:
@@ -36,7 +28,7 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Se
             action = GumTreeAction(**action_data)
             query = post_patch_query if action.action.startswith('insert') else pre_patch_query
             start, end = action.affected_range()
-            search_end = end - 1 if end > start else start
+            search_end = end - 1 if end > start else start                
             affected_node = query.smallest_covering_ancestor(start, search_end)
             enclosing_scopes = find_enclosing_scopes(affected_node, path_before)
             results_per_action.append(enclosing_scopes)
