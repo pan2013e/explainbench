@@ -114,7 +114,7 @@ def filter_scopes_to_existing_or_ancestors(
     
     return sorted(filtered_contexts)
 
-def process_instance(record: dict, dataset_root: str) -> Dict[str, Any]:
+def get_buggy_class_or_fn_names_with_context(record: dict, dataset_root: str) -> Dict[str, Any]:
     """
     Processes a single record from the dataset to find and format the
     names of all modified functions/classes.
