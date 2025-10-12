@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
 
-def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Set[Tuple[str, str]]:
+def identify_context(path_before: str, path_after: str, path_gumtree: str) -> List[Tuple[str, str]]:
     """
     Analyzes a single file change to identify all modified functions and classes.
     """
