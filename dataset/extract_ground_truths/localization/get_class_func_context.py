@@ -1,6 +1,6 @@
 import ast
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 from pathlib import Path
 
 from extract_ground_truths.diff_analyzer import TreeQuery, GumTreeAction, CodeVisitor, find_enclosing_scopes
@@ -114,7 +114,7 @@ def filter_scopes_to_existing_or_ancestors(
     
     return sorted(filtered_contexts)
 
-def process_instance(record: dict, dataset_root: str) -> dict:
+def process_instance(record: dict, dataset_root: str) -> Dict[str, Any]:
     """
     Processes a single record from the dataset to find and format the
     names of all modified functions/classes.
