@@ -4,7 +4,8 @@ import argparse
 from typing import List, Dict, Any
 from collections import defaultdict
 
-from dataset.extract_ground_truths.localization.get_class_func_context import get_buggy_class_or_fn_names_with_context
+from dataset.extract_ground_truths.localization.get_class_func_names import get_buggy_class_or_fn_names_with_context
+from dataset.extract_ground_truths.localization.get_buggy_file_names import get_buggy_filenames
 
 def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
     """
