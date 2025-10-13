@@ -7,7 +7,7 @@ Please refer to [README.md](README.md).
 ## Add a task
 
 1. In `evaluation/schema.py`, create a new class inheriting from `BaseModel`. This defines the output schema of the LLM's response. Make sure the class is JSON-serializable.
-2. In `evaluation/tasks.py`, create a new class inheriting from `Task`. Implement the three following fields and methods:
+2. In `evaluation/task.py`, create a new class inheriting from `Task`. Implement the three following fields and methods:
 ```py
 from evaluation import schema
 
