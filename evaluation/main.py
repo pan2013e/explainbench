@@ -6,19 +6,26 @@ import warnings
 from tqdm.auto import tqdm
 from evaluation.inference import Model
 from evaluation.task import Task
-from evaluation.util import load_explanation, load_ground_truth, result_statistics
+from evaluation.util import (
+    load_context,
+    load_explanation,
+    load_ground_truth,
+    result_statistics,
+)
 
 def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
     return f'results/{mode}/{task.repr()}/{agent_id}__{model.model_id.replace("/", "-")}.json'
 
 def generate(task: type[Task], model: Model, agent_id: str):
     explanations = load_explanation(agent_id)
+    context = load_context(task)
+    assert len(explanations) == len(context), f'Number of context items ({len(context)}) does not match number of explanations ({len(explanations)})'
     pred_results = {}
-    pbar = tqdm(explanations.items())
-    for instance_id, expl in enumerate(pbar):
+    pbar = tqdm(zip(explanations.items(), context), total=len(explanations))
+    for (instance_id, expl), ctx in pbar:
         pbar.set_postfix(**model.tqdm_usage())
         expl = expl[0] if expl else ''
-        pred = task.predict(model, expl)
+        pred = task.predict(model, expl, **ctx)
         pred_results[instance_id] = [p.model_dump() for p in pred]
     save_path = get_path(task, model, agent_id, 'generation')
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
