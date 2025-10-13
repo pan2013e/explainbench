@@ -130,3 +130,14 @@ class RootCause:
                 for lineno, content in zip(line_info[1], content_info[1], strict=True):
                     gt_set.add((line_info[0], lineno, content))
             return [set_f1_score(p, gt_set, is_line_equal) for p in pred_sets]
+
+class Intent:
+    class PBTAssertion(Task[schema.PBTAssertion]):
+        QUESTION = (
+            'For the provided test, what should the masked expression be?'
+        )
+        SCHEMA = schema.PBTAssertion
+
+        @staticmethod
+        def eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
+            return [(p.assertion == gt['masked_assertion']) for p in pred]

@@ -29,3 +29,7 @@ class LineContent(BaseModel):
 
 class Line(BaseModel):
     line: List[LineRange | LineContent]
+
+###### Intent Schemas ######
+class PBTAssertion(BaseModel):
+    assertion: str
