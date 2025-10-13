@@ -9,6 +9,8 @@ from functools import wraps
 from operator import eq
 from typing import Any, Callable
 
+from evaluation.task import Task
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(DIR, '..', 'dataset')
 
@@ -61,14 +63,20 @@ def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = eq):
     fn = len(gt) - tp
     return f1_score(tp, fp, fn)
 
-def load_explanation(split: str):
+def load_explanation(split: str) -> dict[str, list[str]]:
     with open(os.path.join(DATASET_DIR, 'explanations', 'dataset.json')) as f:
         data = json.load(f)[split]
     return data
 
-def load_ground_truth():
+def load_ground_truth() -> list[dict]:
     with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truth.jsonl')) as f:
         data = [json.loads(line) for line in f]
+    return data
+
+def load_context(task: Task) -> list[dict]:
+    with open(os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')) as f:
+        data = json.load(f)
+    assert isinstance(data, list) and all(isinstance(item, dict) for item in data)
     return data
 
 def result_statistics(data: dict[str, list]):
