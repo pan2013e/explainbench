@@ -106,8 +106,8 @@ if __name__ == "__main__":
     sys.argv = ["swebench.harness.run_evaluation",
             "--predictions_path", "gold",
             "--max_workers", "1",
-            "--instance_ids", "sympy__sympy-20590",
-            "--report_dir", "results",
+            "--instance_ids", "astropy__astropy-12907",
+            "--report_dir", "reports",
             "--run_id", "validate-gold"]
     args = parser.parse_args()
     main(**vars(args))
