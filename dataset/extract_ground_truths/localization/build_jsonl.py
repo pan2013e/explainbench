@@ -60,6 +60,10 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
         record = get_buggy_filenames(record)
         record["buggy_function_names"] = [reformat_buggy_class_or_fn_for_inference(x) for x in record["buggy_function_names"]]
 
+        del record["files_before"]
+        del record["files_after"]
+        del record["gumtree_files"]
+
         instances.append(record)
         if debug:
             count += 1
