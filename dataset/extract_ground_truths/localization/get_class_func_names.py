@@ -46,17 +46,22 @@ def extract_fn_class_definitions(filepath: str) -> List[str]:
     with open(filepath, 'r', encoding='utf-8') as f:
         source_code = f.read()
 
-    filename = filepath.split("/")[-1]
+    filepath = Path(filepath).parts[5:]
+    filepath = Path(*filepath)
+    parent_dir = filepath.parent
+    filename = str(filepath.name)
     if filename.startswith("old_") or filename.startswith("new_"):
-        filename = filename[4:]    
+        filename = filename[4:]  
+
+    filepath = Path(parent_dir, filename)  
 
     try:
         tree = ast.parse(source_code)
     except SyntaxError as e:
-        print(f"Error parsing {filename}: {e}")
+        print(f"Error parsing {filepath}: {e}")
         return []
 
-    visitor = CodeVisitor(filename)
+    visitor = CodeVisitor(filepath)
     visitor.visit(tree)
     return visitor.results
 
@@ -72,8 +77,10 @@ def format_scopes_to_string_typed_contextual(detailed_scopes: List[Tuple[str, st
             continue        
         context_parts = [f"{scope_type}:{scope_name}" for filename, scope_type, scope_name in action_scopes]
         # it is a guarantee that all action_scopes are from the same file, so the following is ok
-        filename = action_scopes[0][0].split("/")[-1]
-        context_string = filename + "::" + ".".join(context_parts)
+        filepath = Path(action_scopes[0][0])
+        filepath = filepath.parts[5:]
+        filepath = Path(*filepath)
+        context_string = str(filepath) + "::" + ".".join(context_parts)
         all_context_strings.append(context_string)
 
     unique_contexts = set(all_context_strings)
