@@ -61,7 +61,7 @@ def extract_fn_class_definitions(input_filepath: str) -> List[str]:
         print(f"Error parsing {filepath}: {e}")
         return []
 
-    visitor = CodeVisitor(filepath)
+    visitor = CodeVisitor(str(filepath))
     visitor.visit(tree)
     return visitor.results
 
