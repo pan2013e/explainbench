@@ -70,10 +70,8 @@ def get_buggy_lines(record: Dict[str, Any], dataset_dir: str)->Dict[str, Any]:
         basename = path.stem
         parent_dir = path.parent
         old_path = Path(parent_dir, f"old_{basename}.py")
-
-        buggy_lines = get_buggy_lines_from_gumtree(str(path), str(old_path))
-        buggy_filename_current = f"{basename}.py"
-        if buggy_lines and buggy_filename_current in buggy_filenames:
-            output.add((buggy_filename_current, tuple(buggy_lines)))
+        new_path = Path(parent_dir, f"new_{basename}.py")
+        buggy_lines = process_file(str(path), str(old_path), str(new_path))
+        output.add((f"{basename}.py", tuple(buggy_lines)))
     record["buggy_lines_by_file"] = sorted(list(output))
     return record
