@@ -37,16 +37,16 @@ def identify_context(path_before: str, path_after: str, path_gumtree: str) -> Li
             print(f"Error processing action {action}: {e}")
     return results_per_action
 
-def extract_fn_class_definitions(filepath: str) -> List[str]:
+def extract_fn_class_definitions(input_filepath: str) -> List[str]:
     """
     Parses a Python source code string and returns a list of all
     class and function definitions in the specified format.
     """
 
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(input_filepath, 'r', encoding='utf-8') as f:
         source_code = f.read()
 
-    filepath = Path(filepath).parts[5:]
+    filepath = Path(input_filepath).parts[5:]
     filepath = Path(*filepath)
     parent_dir = filepath.parent
     filename = str(filepath.name)
@@ -121,6 +121,17 @@ def filter_scopes_to_existing_or_ancestors(
     
     return sorted(filtered_contexts)
 
+def reformat_string(input_string: str) -> List[str]:
+    """Reformat the list of function names into the format suitable for the evaluation"""
+    data_part = input_string.split('::')[1]
+    components = data_part.split('.')    
+    names = [c.split(':')[1] for c in components]
+    item1 = '.'.join(names)
+    last_component = components[-1]
+    item2 = last_component.split(':')[0]    
+    return [item1, item2]
+
+
 def get_buggy_class_or_fn_names_with_context(record: dict, dataset_root: str) -> Dict[str, Any]:
     """
     Processes a single record from the dataset to find and format the
@@ -144,7 +155,8 @@ def get_buggy_class_or_fn_names_with_context(record: dict, dataset_root: str) ->
         all_defs.extend(defs)
 
     formatted_scopes = format_scopes_to_string_typed_contextual(all_detailed_scopes)    
-    final_formatted_string = filter_scopes_to_existing_or_ancestors(formatted_scopes, all_defs)
+    formatted_scopes = filter_scopes_to_existing_or_ancestors(formatted_scopes, all_defs)
+    final_formatted_string = [reformat_string(x) for x in formatted_scopes]
     
     record['buggy_function_names'] = final_formatted_string
     
