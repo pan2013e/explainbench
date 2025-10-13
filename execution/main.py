@@ -18,7 +18,7 @@ from swebench.harness.utils import (
     optional_str,
 )
 
-from util import copy_directory_from_docker, TestCodeInjector
+from execution.util import copy_directory_from_docker, TestCodeInjector
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
