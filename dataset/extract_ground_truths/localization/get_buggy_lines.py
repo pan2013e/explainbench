@@ -4,6 +4,7 @@ from pathlib import Path
 from bisect import bisect_right
 from typing import List, Dict, Any
 
+from dataset.extract_ground_truths.localization.exclude_lines import process_file
 
 RELEVANT_ACTIONS = ['delete-node', 'delete-tree', 'move-tree', 'update-node']
 
@@ -53,6 +54,17 @@ def get_buggy_lines(record: Dict[str, Any], dataset_dir: str)->Dict[str, Any]:
     gumtree_files = record.get("gumtree_files", [])
     buggy_filenames = record.get("buggy_file_names", [])
     output = set()
+    # for gumtree_path in gumtree_files:
+    #     path = Path(dataset_dir, gumtree_path)
+    #     basename = path.stem
+    #     parent_dir = path.parent
+    #     old_path = Path(parent_dir, f"old_{basename}.py")
+
+    #     buggy_lines = get_buggy_lines_from_gumtree(str(path), str(old_path))
+
+    #     output.add((f"{basename}.py", tuple(buggy_lines)))
+    # record["buggy_lines_by_file"] = sorted(list(output))
+    # return record
     for gumtree_path in gumtree_files:
         path = Path(dataset_dir, gumtree_path)
         basename = path.stem
@@ -65,11 +77,3 @@ def get_buggy_lines(record: Dict[str, Any], dataset_dir: str)->Dict[str, Any]:
             output.add((buggy_filename_current, tuple(buggy_lines)))
     record["buggy_lines_by_file"] = sorted(list(output))
     return record
-
-
-
-# if __name__ == "__main__":
-#     gumtree_path = "/home/yusuf/explainbench/dataset/extract_ground_truths/localization/swe_bench_files/django__django-10973/django/db/backends/postgresql/client.json"
-#     before_file_path = "/home/yusuf/explainbench/dataset/extract_ground_truths/localization/swe_bench_files/django__django-10973/django/db/backends/postgresql/old_client.py"
-#     buggy_lines = get_buggy_lines_from_gumtree(gumtree_path, before_file_path)
-#     print(buggy_lines)
