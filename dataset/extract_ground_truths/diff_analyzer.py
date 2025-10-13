@@ -14,7 +14,7 @@ class GumTreeAction(BaseModel):
 
     @staticmethod
     def _parse_range(gt_string: str) -> Optional[Tuple[int, int]]:
-        m = re.compile(r'.*?\[(\d+),(\d+)\]').match(gt_string)
+        m = re.compile(r'.*?\[(\d+),(\d+)\]', flags=re.DOTALL).match(gt_string)
         if not m: return None
         return int(m.group(1)), int(m.group(2))
 
@@ -42,12 +42,15 @@ class TreeQuery:
         self.atok = asttokens.ASTTokens(code, tree=tree_with_parents)
     
     def offset_to_line(self, offset: int):
+        '''Convert a character offset to `(line, column)`. Lines and columns are 1-indexed.'''
         return self.atok._line_numbers.offset_to_line(offset)
     
     def character_offsets(self, node: ast.AST):
+        '''Get the `(start, end)` character offsets of a node.'''
         return self.atok.get_text_range(node)
     
     def line_col_offsets(self, node: ast.AST):
+        '''Get the `((start_line, start_col), (end_line, end_col))` of a node. Lines and columns are 1-indexed.'''
         return self.atok.get_text_positions(node, padded=True)
     
     def children_in_order(self, node: ast.AST, ordering: Callable[[ast.AST], int]=id):
