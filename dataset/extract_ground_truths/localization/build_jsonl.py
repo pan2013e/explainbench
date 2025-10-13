@@ -8,7 +8,7 @@ from dataset.extract_ground_truths.localization.get_class_func_names import get_
 from dataset.extract_ground_truths.localization.get_buggy_file_names import get_buggy_filenames
 from dataset.extract_ground_truths.localization.get_buggy_lines import get_buggy_lines
 
-def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
+def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str, Any]]:
     """
     Scans a directory to create a ground_truth.jsonl file.
     """
@@ -51,9 +51,11 @@ def build_ground_truth_instances(dataset_dir: str) -> List[Dict[str, Any]]:
         record = get_buggy_filenames(record)
         record = get_buggy_lines(record, dataset_dir)
         instances.append(record)
-        count += 1
-        if count == 10:
-            break
+        if debug:
+            count += 1
+            if count >= 10:
+                print("DEBUG mode: Stopping after 10 instances.")
+                break
     return instances
 
 
@@ -71,9 +73,14 @@ def main():
         default="ground_truth.jsonl",
         help="Path to the output .jsonl file (default: ground_truth.jsonl)."
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="If set, use a small subset of the data for debugging."
+    )
     args = parser.parse_args()
 
-    all_records = build_ground_truth_instances(args.input_dir)
+    all_records = build_ground_truth_instances(args.input_dir, args.debug)
 
     print(f"Found {len(all_records)} instances.")
     print(f"Writing records to {args.output_file}...")
