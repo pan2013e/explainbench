@@ -46,21 +46,21 @@ def get_buggy_lines_from_gumtree(gumtree_path: str, before_file_path: str) -> Li
 
     return sorted(buggy_lines)
 
-def get_buggy_lines(record: Dict[str, Any])->Dict[str, Any]:
+def get_buggy_lines(record: Dict[str, Any], dataset_dir: str)->Dict[str, Any]:
     """
     Get the lines from a gumtree diff
     """
     gumtree_files = record.get("gumtree_files", [])
     output = set()
     for gumtree_path in gumtree_files:
-        path = Path(gumtree_path)
+        path = Path(dataset_dir, gumtree_path)
         basename = path.stem
         parent_dir = path.parent
         old_path = Path(parent_dir, f"old_{basename}.py")
 
-        buggy_lines = get_buggy_lines_from_gumtree(gumtree_path, str(old_path))
+        buggy_lines = get_buggy_lines_from_gumtree(str(path), str(old_path))
 
-        output.add((str(old_path), tuple(buggy_lines)))
+        output.add((f"{basename}.py", tuple(buggy_lines)))
     record["buggy_lines_by_file"] = sorted(list(output))
     return record
 
