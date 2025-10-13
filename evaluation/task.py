@@ -23,6 +23,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
         "You should respond in JSON format, complying with the following Pydantic schema: {schema}\n\n"
         "Patch Explanation:\n{explanation}\n\n"
+        "{context}"
         "Question:\n{question}\n"
     )
     QUESTION: ClassVar[str]
@@ -40,8 +41,15 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         return json.dumps(cls.SCHEMA.model_json_schema(mode='serialization'))
     
     @classmethod
-    def _build_prompt(cls, explanation: str):
-        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION)
+    def _build_context(cls, **kwargs):
+        if not kwargs:
+            return ''
+        key_formatter = lambda key: ' '.join([word.capitalize() for word in key.split('_')])
+        return '\n\n'.join(f'{key_formatter(k)}:\n{v}' for k, v in kwargs.items()) + '\n\n'
+    
+    @classmethod
+    def _build_prompt(cls, explanation: str, **kwargs):
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION, context=cls._build_context(**kwargs))
 
     @classmethod
     def repr(cls):
@@ -55,8 +63,8 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         return cls._registry[name]
 
     @classmethod
-    def predict(cls, model: Model, explanation: str):
-        prompt = cls._build_prompt(explanation)
+    def predict(cls, model: Model, explanation: str, **kwargs):
+        prompt = cls._build_prompt(explanation, **kwargs)
         return model.infer(prompt, cls.SCHEMA)
     
     @staticmethod
