@@ -6,7 +6,6 @@ from collections import defaultdict
 
 from dataset.extract_ground_truths.localization.get_class_func_names import get_buggy_class_or_fn_names_with_context
 from dataset.extract_ground_truths.localization.get_buggy_file_names import get_buggy_filenames
-from dataset.extract_ground_truths.localization.get_buggy_lines import get_buggy_lines
 
 def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str, Any]]:
     """
@@ -49,7 +48,6 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
         }
         record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
         record = get_buggy_filenames(record)
-        record = get_buggy_lines(record, dataset_dir)
         instances.append(record)
         if debug:
             count += 1
