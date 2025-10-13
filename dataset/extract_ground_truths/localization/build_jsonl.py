@@ -7,6 +7,16 @@ from collections import defaultdict
 from dataset.extract_ground_truths.localization.get_class_func_names import get_buggy_class_or_fn_names_with_context
 from dataset.extract_ground_truths.localization.get_buggy_file_names import get_buggy_filenames
 
+def reformat_buggy_class_or_fn_for_inference(input_string: str) -> List[str]:
+    """Reformat the list of function names into the format suitable for the evaluation"""
+    data_part = input_string.split('::')[1]
+    components = data_part.split('.')    
+    names = [c.split(':')[1] for c in components]
+    item1 = '.'.join(names)
+    last_component = components[-1]
+    item2 = last_component.split(':')[0]    
+    return [item1, item2]
+
 def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str, Any]]:
     """
     Scans a directory to create a ground_truth.jsonl file.
@@ -48,6 +58,8 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
         }
         record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
         record = get_buggy_filenames(record)
+        record["buggy_function_names"] = [reformat_buggy_class_or_fn_for_inference(x) for x in record["buggy_function_names"]]
+
         instances.append(record)
         if debug:
             count += 1

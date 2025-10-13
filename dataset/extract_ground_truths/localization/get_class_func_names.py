@@ -121,16 +121,6 @@ def filter_scopes_to_existing_or_ancestors(
     
     return sorted(filtered_contexts)
 
-def reformat_string(input_string: str) -> List[str]:
-    """Reformat the list of function names into the format suitable for the evaluation"""
-    data_part = input_string.split('::')[1]
-    components = data_part.split('.')    
-    names = [c.split(':')[1] for c in components]
-    item1 = '.'.join(names)
-    last_component = components[-1]
-    item2 = last_component.split(':')[0]    
-    return [item1, item2]
-
 
 def get_buggy_class_or_fn_names_with_context(record: dict, dataset_root: str) -> Dict[str, Any]:
     """
@@ -155,8 +145,7 @@ def get_buggy_class_or_fn_names_with_context(record: dict, dataset_root: str) ->
         all_defs.extend(defs)
 
     formatted_scopes = format_scopes_to_string_typed_contextual(all_detailed_scopes)    
-    formatted_scopes = filter_scopes_to_existing_or_ancestors(formatted_scopes, all_defs)
-    final_formatted_string = [reformat_string(x) for x in formatted_scopes]
+    final_formatted_string = filter_scopes_to_existing_or_ancestors(formatted_scopes, all_defs)
     
     record['buggy_function_names'] = final_formatted_string
     
