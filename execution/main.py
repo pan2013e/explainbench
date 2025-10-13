@@ -1,100 +1,17 @@
-import os
 import sys
-from pathlib import Path, PurePosixPath
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from swebench.harness.run_evaluation import main as run_evaluation_main
+from swebench.harness.utils import str2bool, optional_str
 
-from dowhen import when
-from swebench.harness.run_evaluation import (
-    run_instance,
-    main as run_evaluation_main
-)
-from swebench.harness.docker_utils import (
-    copy_to_container,
-    exec_run_with_timeout
-)
-from swebench.harness.utils import (
-    EvaluationError,
-    str2bool,
-    optional_str,
-)
-
-from execution.util import copy_directory_from_docker, TestCodeInjector
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-
-def get_test_entry_path(instance_id):
-    if 'sympy' in instance_id:
-        return PurePosixPath('/testbed/bin/test')
-    else:
-        raise NotImplementedError()
-
-def install_tracer(container):
-    copy_to_container(container, Path(f"{DIR}/py-tracer"), PurePosixPath('/root/py-tracer'))
-    exec_run_with_timeout(container, '/opt/miniconda3/envs/testbed/bin/pip install -e /root/py-tracer')
-    print("Tracer installed in container")
-
-def inject_tracer(container, test_spec, prefix):
-    injector = TestCodeInjector(container, test_spec.instance_id)
-    injector(prefix)
-
-def restore_injection(container, test_spec):
-    entry_path = get_test_entry_path(test_spec.instance_id)
-    exec_run_with_timeout(container, f"git restore {entry_path}")
-    print("Test entry restored")
-
-def run_buggy_code(log_dir, test_spec, logger, instance_id, container, timeout):
-    # 1. Patch test code
-    eval_file = Path(log_dir / "eval.sh")
-    eval_file.write_text(test_spec.eval_script)
-    logger.info(
-        f"Eval script for {instance_id} written to {eval_file}; copying to container..."
-    )
-    copy_to_container(container, eval_file, PurePosixPath("/eval.sh"))
-    # 2. Run buggy code and retrieve buggy code execution trace
-    inject_tracer(container, test_spec, "/buggy_traces")
-    buggy_test_output, buggy_timed_out, buggy_total_runtime = exec_run_with_timeout(
-        container, "/bin/bash /eval.sh", timeout
-    )
-    copy_directory_from_docker(container, PurePosixPath("/buggy_traces"), log_dir)
-    test_output_path = log_dir / "test_output_buggy.txt"
-    logger.info(f"Test runtime (BUGGY): {buggy_total_runtime:_.2f} seconds")
-    with open(test_output_path, "w") as f:
-        f.write(buggy_test_output)
-        logger.info(f"Test output (BUGGY) for {instance_id} written to {test_output_path}")
-        if buggy_timed_out:
-            f.write(f"\n\nTimeout error: {timeout} seconds exceeded.")
-            raise EvaluationError(
-                instance_id,
-                f"Test (BUGGY) timed out after {timeout} seconds.",
-                logger,
-            )
-
-def retrieve_fixed_trace(log_dir, container):
-    breakpoint()   
-    copy_directory_from_docker(container, PurePosixPath("/fixed_traces"), log_dir)
-
-def monkey_patch():
-    when(run_instance, 156).do(install_tracer)
-    when(run_instance, 159).do(run_buggy_code)
-    # Restore original test entry before running patched code tests
-    when(run_instance, 189).do(restore_injection)
-    # Skip redundant test code patching
-    when(run_instance, 198).goto(206)
-    # Inject tracer for fixed code
-    when(run_instance, 206).do(lambda container, test_spec: inject_tracer(container, test_spec, '/fixed_traces'))
-    # Retrieve fixed code execution trace
-    when(run_instance, 209).do(retrieve_fixed_trace)
-    # Redirect fixed code test output path
-    when(run_instance, 211).do("test_output_path = log_dir / 'test_output_fixed.txt'")
-    # Restore original test entry after running patched code tests
-    when(run_instance, 223).do(restore_injection)
-    print('Monkey patch applied')
+from execution.monkey_patch import monkey_patch
     
 def main(**kwargs):
     monkey_patch()
     run_evaluation_main(**kwargs)
 
 if __name__ == "__main__":
+    # Copied from swebench.harness.run_evaluation:__main__
     parser = ArgumentParser(
         description="Run evaluation harness for the given dataset and predictions.",
         formatter_class=ArgumentDefaultsHelpFormatter,

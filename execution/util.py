@@ -1,7 +1,9 @@
 import json
+import tarfile
 import tempfile
 import libcst as cst
 
+from io import BytesIO
 from collections import defaultdict
 from pathlib import PurePosixPath, Path
 from datasets import load_dataset
@@ -17,9 +19,7 @@ def read_from_docker(container: Container, path: PurePosixPath) -> str:
     file_content = b""
     for chunk in tar_stream:
         file_content += chunk
-    import tarfile
-    import io
-    with tarfile.open(fileobj=io.BytesIO(file_content)) as tar:
+    with tarfile.open(fileobj=BytesIO(file_content)) as tar:
         member = tar.getmembers()[0]
         file = tar.extractfile(member)
         return file.read().decode('utf-8')
@@ -29,9 +29,7 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
     file_content = b""
     for chunk in tar_stream:
         file_content += chunk
-    import tarfile
-    import io
-    with tarfile.open(fileobj=io.BytesIO(file_content)) as tar:
+    with tarfile.open(fileobj=BytesIO(file_content)) as tar:
         tar.extractall(path=dst_path)
 
 def write_to_docker(container: Container, path: str, content: str, perm: str = None):
@@ -74,7 +72,7 @@ class TestCodeInjector:
         else:
             raise NotImplementedError()
     
-    def _get_raw(self) -> list[str]:
+    def _get_test_names(self) -> list[str]:
         instance = self.dataset.filter(lambda x: x["instance_id"] == self.instance_id)
         assert len(instance) == 1, f"Instance {self.instance_id} not found"
         instance = instance[0]
@@ -90,7 +88,7 @@ class TestCodeInjector:
         write_to_docker(self.container, PurePosixPath(file), code)
 
     def _astropy(self, prefix: str):
-        test_funcs = self._get_raw()
+        test_funcs = self._get_test_names()
         cleaned = []
         for func in test_funcs:
             if '[' in func:
@@ -104,6 +102,6 @@ class TestCodeInjector:
             self._inject_file(file, funcs, prefix)
     
     def _sympy(self, prefix: str):
-        test_funcs = self._get_raw()
+        test_funcs = self._get_test_names()
         self._inject_file('sympy/core/tests/test_basic.py', test_funcs, prefix)
     
