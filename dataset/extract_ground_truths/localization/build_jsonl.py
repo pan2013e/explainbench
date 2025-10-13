@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+from tqdm import tqdm
 from typing import List, Dict, Any
 from collections import defaultdict
 
@@ -48,7 +49,8 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
 
     instances = []
     count = 0
-    for instance_id in sorted(instance_data.keys()):
+    iterable = sorted(instance_data.keys())
+    for instance_id in tqdm(iterable, desc="Processing instances"):
         data = instance_data[instance_id]
         record = {
             "instance_id": instance_id,
