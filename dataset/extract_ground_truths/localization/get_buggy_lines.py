@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from bisect import bisect_right
 from typing import List, Dict, Any
@@ -33,16 +34,15 @@ def get_buggy_lines_from_gumtree(gumtree_path: str, before_file_path: str) -> Li
     actions = [x for x in actions if x.get("action") in RELEVANT_ACTIONS]
     for change in actions:
         tree_str = change.get('tree', '')
-        if '[' in tree_str and ']' in tree_str:
-            # Extract the start and end character offsets
-            start_char, end_char = tree_str.split('[')[1].split(']')[0].split(',')
-            start_char = int(start_char)
-            end_char = int(end_char)
+        match = re.search(r'\[(\d+),\s*(\d+)\]', tree_str)
+        start_char_str, end_char_str = match.groups()
+        start_char = int(start_char_str)
+        end_char = int(end_char_str)
 
-            start_line = offset_to_line(start_char, cum_offsets)
-            end_line = offset_to_line(end_char, cum_offsets)
+        start_line = offset_to_line(start_char, cum_offsets)
+        end_line = offset_to_line(end_char, cum_offsets)
 
-            buggy_lines.update(range(start_line, end_line + 1))
+        buggy_lines.update(range(start_line, end_line + 1))
 
     return sorted(buggy_lines)
 
