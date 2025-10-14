@@ -36,15 +36,6 @@ def is_subpath(abs: str, rel: str):
     rel = os.path.normpath(rel)
     return abs == rel or (any(rel.startswith(prefix) for prefix in SWEBENCH_VERIFIED_PROJECT_PREFIX) and abs.endswith(os.path.sep + rel))
 
-def is_line_equal(pred, gt):
-    if not is_subpath(pred[0], gt[0]):
-        return False
-    if isinstance(pred[1], int):
-        return pred[1] == gt[1]
-    elif isinstance(pred[1], str):
-        return pred[1].strip() == gt[2].strip()
-    raise ValueError(f'Unknown line type: {type(pred[1])}')
-
 def f1_score(tp, fp, fn):
     p = tp / (tp + fp) if tp + fp > 0 else 0.0
     r = tp / (tp + fn) if tp + fn > 0 else 0.0

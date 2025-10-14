@@ -17,15 +17,3 @@ class Region(BaseModel):
 
 class File(BaseModel):
     file: List[str]
-
-class LineRange(BaseModel):
-    file: str
-    start: int
-    end: int
-
-class LineContent(BaseModel):
-    file: str
-    content: str
-
-class Line(BaseModel):
-    line: List[LineRange | LineContent]

@@ -104,29 +104,3 @@ class RootCause:
             pred = [set((postprocess(r.identifier), r.type) for r in p.region) for p in pred]
             gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
             return [set_f1_score(p, gt) for p in pred]
-
-    class Line(Task[schema.Line]):
-        QUESTION = (
-            'Which lines were buggy? '
-            'You can either answer with line numbers or line contents. '
-            'Please exclude any test code or docstrings.'
-        )
-        SCHEMA = schema.Line
-        
-        @staticmethod
-        def eval(pred: list[schema.Line], gt: dict):
-            pred_sets = []
-            for p in pred:
-                pred_set = set()
-                for line in p.line:
-                    if isinstance(line, schema.LineRange):
-                        pred_set.update((line.file, n) for n in range(line.start, line.end + 1))
-                    elif isinstance(line, schema.LineContent):
-                        pred_set.add((line.file, line.content))
-                pred_sets.append(pred_set)
-            gt_set = set()
-            for line_info, content_info in zip(gt['buggy_line_numbers'], gt['buggy_line_contents'], strict=True):
-                assert line_info[0] == content_info[0]
-                for lineno, content in zip(line_info[1], content_info[1], strict=True):
-                    gt_set.add((line_info[0], lineno, content))
-            return [set_f1_score(p, gt_set, is_line_equal) for p in pred_sets]
