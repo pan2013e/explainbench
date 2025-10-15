@@ -1,76 +1,104 @@
-import json
 import os
-import io
-import tokenize
+import ast
+from typing import List
+from tqdm import tqdm
+
+class DocstringReplacer(ast.NodeTransformer):
+    """
+    An AST visitor that replaces docstrings with a placeholder.
+    It visits every Function, Class, and Module node, checks for a docstring,
+    and if one is found, replaces it with ast.Expr(ast.Constant(value="Docstring")).
+    """
+    def _replace_docstring_if_present(self, node):
+        """Helper to check for and replace a docstring on a given node."""
+        if (node.body and
+                isinstance(node.body[0], ast.Expr) and
+                isinstance(node.body[0].value, ast.Constant) and
+                isinstance(node.body[0].value.value, str)):
+            node.body[0] = ast.Expr(value=ast.Constant(value="Docstring"))
+
+        self.generic_visit(node)
+        return node
+
+    def visit_FunctionDef(self, node):
+        return self._replace_docstring_if_present(node)
+
+    def visit_AsyncFunctionDef(self, node):
+        return self._replace_docstring_if_present(node)
+
+    def visit_ClassDef(self, node):
+        return self._replace_docstring_if_present(node)
+        
+    def visit_Module(self, node):
+        return self._replace_docstring_if_present(node)
+
 
 def remove_comments_and_docstrings(source: str) -> str:
     """
-    Remove all comments and docstrings from a Python source string.
+    Removes all comments and replaces all docstrings in a Python source string.
     """
-    io_obj = io.StringIO(source)
-    output_tokens = []
-
-    prev_toktype = tokenize.INDENT
-    last_lineno = -1
-    last_col = 0
-
     try:
-        for tok in tokenize.generate_tokens(io_obj.readline):
-            token_type, token_string, (start_line, start_col), (end_line, end_col), _ = tok
+        tree = ast.parse(source)
 
-            # Remove comments
-            if token_type == tokenize.COMMENT:
-                continue
+        transformer = DocstringReplacer()
+        new_tree = transformer.visit(tree)
+        
+        ast.fix_missing_locations(new_tree)
 
-            # Remove docstrings (triple-quoted strings that appear at module, class, or function start)
-            if token_type == tokenize.STRING:
-                if prev_toktype == tokenize.INDENT or last_lineno == 0:
-                    # Likely a module-level docstring
-                    continue
-                elif prev_toktype == tokenize.NEWLINE:
-                    # Function/class docstring
-                    continue
+        return ast.unparse(new_tree)
+    except (SyntaxError, ValueError):
+        return source
 
-            # Keep other tokens
-            if start_line > last_lineno:
-                last_col = 0
-            if start_col > last_col:
-                output_tokens.append(" " * (start_col - last_col))
-            output_tokens.append(token_string)
-            prev_toktype = token_type
-            last_col = end_col
-            last_lineno = end_line
-    except tokenize.TokenError:
-        # In case of malformed input
-        pass
-
-    return "".join(output_tokens)
-
+def collect_py_files(input_dir: str)->List[str]:
+    py_files = []
+    for root, dirs, files in os.walk(input_dir):
+        for f in files:
+            if f.endswith(".py"):
+                py_files.append(os.path.join(root, f))
+    return py_files
 
 def main():
-    PATH = "/home/yusuf/explainbench/dataset/extract_ground_truths/localization/swe_bench_files/modified_files.jsonl"
+    """
+    Reads file paths from a JSONL file, cleans the Python code in each file
+    by removing comments and docstrings, and writes the cleaned code back
+    to the original file.
+    """
+    PATH = "/home/yusuf/explainbench/dataset/extract_ground_truths/localization/swe_bench_files"
+    py_files = collect_py_files(PATH)
+    
+    if not os.path.exists(PATH):
+        print(f"Error: The input file was not found at {PATH}")
+        return
 
-    with open(PATH, "r") as f:
-        lines = f.readlines()
+    parsable_count = 0
+    unparsable_count = 0
+    files_processed_count = 0
+    for temp_path in tqdm(py_files, desc="Cleaning files", unit="file"):
+        try:
+            with open(temp_path, "r", encoding="utf-8") as f1:
+                code = f1.read()
 
-    for l in lines:
-        item_dict = json.loads(l)
-
-        for key in ("old_files", "new_files"):
-            file_list = item_dict.get(key, [])
-
-            for temp_path in file_list:
-                if not os.path.exists(temp_path):
-                    print(f"Warning: file not found: {temp_path}")
-                    continue
-
-                with open(temp_path, "r", encoding="utf-8") as f1:
-                    code = f1.read()
-
-                cleaned_code = remove_comments_and_docstrings(code)
-
+            cleaned_code = remove_comments_and_docstrings(code)
+            try:
+                ast.parse(cleaned_code)
+                
+                parsable_count += 1
+                
                 with open(temp_path, "w", encoding="utf-8") as f1:
                     f1.write(cleaned_code)
+
+            except SyntaxError as se:
+                unparsable_count += 1
+                tqdm.write(f"    CRITICAL ERROR: Generated code for {temp_path} is invalid and will NOT be saved.")
+                tqdm.write(f"    Parser error: {se}")
+        except Exception as e:
+            tqdm.write(f"    ERROR processing file {temp_path}: {e}")
+
+    print("Processing complete.")
+    print("\n--- Verification Summary ---")
+    print(f"Total files attempted: {files_processed_count}")
+    print(f"Successfully verified and written: {parsable_count} files")
+    print(f"Failed verification (invalid code generated): {unparsable_count} files")
 
 
 if __name__ == "__main__":
