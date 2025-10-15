@@ -87,9 +87,10 @@ class RootCause:
 
     class Region(Task[schema.Region]):
         QUESTION = (
-            'Which classes or functions were buggy? '
-            'If a method of a class is buggy, you only need to answer with the method name. '
-            'If not applicable or you cannot infer from the explanation, please answer with an empty list.'
+            'Which existing classes or functions were buggy? '
+            'Please answer with simple identifier names (without higher-level namespaces) and their types (class or function). '
+            'If you cannot infer from the explanation, please answer with an empty list. '
+            'You don\'t need to consider newly added classes or functions.' 
         )
         SCHEMA = schema.Region
         
