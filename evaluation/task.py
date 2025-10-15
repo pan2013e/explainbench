@@ -9,7 +9,6 @@ from evaluation.inference import Model
 from evaluation.util import (
     EvalTimeout,
     is_subpath,
-    is_line_equal,
     set_f1_score,
 )
 
