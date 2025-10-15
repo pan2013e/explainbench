@@ -1,10 +1,10 @@
 import json
 import docker
 import argparse
-import re
 from pathlib import Path
 from typing import Dict, Tuple, Optional
 from tqdm import tqdm
+from multiprocessing import Pool, cpu_count
 
 def find_common_files(item_input: Dict) -> Dict:
     """
@@ -83,45 +83,56 @@ def run_gumtree_diff(filepath_pair: Tuple[str, str]) -> Optional[str]:
         print(f"\nAn unexpected error occurred: {e}")
         return None
 
+def process_single_item(line: str) -> str:
+    """
+    Processes a single JSONL line: finds common files, runs Gumtree diffs,
+    and returns the updated item as a JSON string.
+    """
+    try:
+        item = json.loads(line)
+        item = find_common_files(item)
+
+        gumtree_paths = []
+        if "common_files" in item and item["common_files"]:
+            for pair in item["common_files"]:
+                output_path = run_gumtree_diff(pair)
+                if output_path:
+                    gumtree_paths.append(output_path)
+        item["gumtree_diff_files"] = gumtree_paths
+        return json.dumps(item)
+    except Exception as e:
+        print(f"Error processing line: {e}")
+        return json.dumps({"error": str(e)})
+
 def process_file(input_filepath: str) -> None:
     """
-    Main processing function. Reads the input file line-by-line, processes each line,
-    and writes the result immediately to an output file.
+    Processes multiple lines in parallel using multiprocessing.
     """
     filepath = Path(input_filepath)
     output_filename = filepath.stem + "_gumtree.jsonl"
-    
+
     print(f"Reading from '{filepath}' and writing to '{output_filename}'...")
 
     with open(filepath, 'r', encoding='utf-8') as f:
-        total_lines = sum(1 for _ in f)
+        lines = f.readlines()
 
-    with open(filepath, 'r', encoding='utf-8') as input_f, \
-         open(output_filename, 'w', encoding='utf-8') as output_f:
+    total_lines = len(lines)
+    num_workers = min(cpu_count(), 16)
 
-        for line in tqdm(input_f, desc="Processing lines", total=total_lines, unit="line"):
-            item = json.loads(line)
-            # Step 1: Find common files for the current item
-            item = find_common_files(item)
-            
-            # Step 2: Run Gumtree on common files and save output paths, with filtering
-            gumtree_paths = []
-            if "common_files" in item:
-                for pair in item["common_files"]:
-                    old_file, _ = pair
-                    expected_output = old_file.replace("old_", "").strip()
-                    expected_output = expected_output.replace(".py", ".json")
-                    
-                    # if Path(expected_output).exists():
-                        # tqdm.write(f"Skipping (already exists): {expected_output}")
-                        # gumtree_paths.append(expected_output)
-                    # else:
-                    output_path = run_gumtree_diff(pair)
-                    if output_path:
-                        gumtree_paths.append(output_path)
-            
-            item["gumtree_diff_files"] = gumtree_paths
-            output_f.write(json.dumps(item) + '\n')
+    with Pool(processes=num_workers) as pool:
+        results = list(
+            tqdm(
+                pool.imap(process_single_item, lines),
+                total=total_lines,
+                desc="Processing lines in parallel",
+                unit="line"
+            )
+        )
+
+    # Write all outputs sequentially
+    with open(output_filename, 'w', encoding='utf-8') as output_f:
+        for result in results:
+            output_f.write(result + '\n')
 
     print(f"\nProcessing complete. Results saved in '{output_filename}'.")
 
