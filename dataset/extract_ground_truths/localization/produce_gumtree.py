@@ -2,7 +2,7 @@ import json
 import docker
 import argparse
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional
 from tqdm import tqdm
 
 def find_common_files(item_input: Dict) -> Dict:
