@@ -1,7 +1,5 @@
-import re
 import json
 import os
-
 import io
 import tokenize
 
