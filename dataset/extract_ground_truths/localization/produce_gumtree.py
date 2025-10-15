@@ -1,10 +1,49 @@
 import json
 import docker
 import argparse
+import os
+from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List, Any
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
+
+def build_ground_truth_instances_jsonl(dataset_dir: str) -> List[Dict[str, Any]]:
+    """
+    Scans a directory to create a ground_truth.jsonl file.
+    """
+    print(f"Scanning directory: {dataset_dir}")
+    instance_data = defaultdict(lambda: {"before": [], "after": [], "gumtree": []})
+    for root, _, files in os.walk(dataset_dir):
+
+        for filename in files:
+            if filename.startswith('old_') and filename.endswith('.py'):
+                
+                base_name = filename[4:]  # Remove 'old_' prefix (e.g., "misc.py")
+                expected_after_file = f"new_{base_name}"
+
+                if expected_after_file in files:
+                    
+                    relative_path_from_root = os.path.relpath(root, dataset_dir)
+                    instance_id = relative_path_from_root.split(os.sep)[0]
+                    
+                    before_path = os.path.join(dataset_dir, relative_path_from_root, filename)
+                    after_path = os.path.join(dataset_dir, relative_path_from_root, expected_after_file)
+
+                    instance_data[instance_id]["before"].append(before_path)
+                    instance_data[instance_id]["after"].append(after_path)
+    
+    instances = []
+    iterable = sorted(instance_data.keys())
+    for instance_id in tqdm(iterable, desc="Processing instances"):
+        data = instance_data[instance_id]
+        record = {
+            "instance_id": instance_id,
+            "old_files": sorted(data["before"]), # Sort file lists for consistency
+            "new_files": sorted(data["after"]),
+         }
+        instances.append(record)    
+    return instances
 
 def find_common_files(item_input: Dict) -> Dict:
     """
@@ -62,7 +101,7 @@ def run_gumtree_diff(filepath_pair: Tuple[str, str]) -> Optional[str]:
             f"/right/{right_filename}",
         ]
 
-        print(f"Running container 'gumtreediff/gumtree' with command: {' '.join(gumtree_command)}")
+        tqdm.write(f"Running container 'gumtreediff/gumtree' with command: {' '.join(gumtree_command)}")
         
         container_output = client.containers.run(
             image="gumtreediff/gumtree",
@@ -77,21 +116,19 @@ def run_gumtree_diff(filepath_pair: Tuple[str, str]) -> Optional[str]:
         with open(output_path_str, mode="w", encoding='utf-8') as f:
             f.write(decoded_output)
 
-        print(f"Success! Diff output saved to '{output_path_str}'")
+        tqdm.write(f"Success! Diff output saved to '{output_path_str}'")
         return output_path_str        
     except Exception as e:
-        print(f"\nAn unexpected error occurred: {e}")
+        tqdm.write(f"\nAn unexpected error occurred: {e}")
         return None
 
-def process_single_item(line: str) -> str:
+def process_single_item(record: Dict[str, Any]) -> str:
     """
-    Processes a single JSONL line: finds common files, runs Gumtree diffs,
+    Processes a single record: finds common files, runs Gumtree diffs,
     and returns the updated item as a JSON string.
     """
     try:
-        item = json.loads(line)
-        item = find_common_files(item)
-
+        item = find_common_files(record)
         gumtree_paths = []
         if "common_files" in item and item["common_files"]:
             for pair in item["common_files"]:
@@ -108,21 +145,18 @@ def process_file(input_filepath: str) -> None:
     """
     Processes multiple lines in parallel using multiprocessing.
     """
+    records = build_ground_truth_instances_jsonl(input_filepath)
+    breakpoint()
     filepath = Path(input_filepath)
     output_filename = filepath.stem + "_gumtree.jsonl"
 
-    print(f"Reading from '{filepath}' and writing to '{output_filename}'...")
-
-    with open(filepath, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-
-    total_lines = len(lines)
+    total_lines = len(records)
     num_workers = min(cpu_count(), 16)
 
     with Pool(processes=num_workers) as pool:
         results = list(
             tqdm(
-                pool.imap(process_single_item, lines),
+                pool.imap(process_single_item, records),
                 total=total_lines,
                 desc="Processing lines in parallel",
                 unit="line"
