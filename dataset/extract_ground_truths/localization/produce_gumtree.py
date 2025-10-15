@@ -146,7 +146,6 @@ def process_file(input_filepath: str) -> None:
     Processes multiple lines in parallel using multiprocessing.
     """
     records = build_ground_truth_instances_jsonl(input_filepath)
-    breakpoint()
     filepath = Path(input_filepath)
     output_filename = filepath.stem + "_gumtree.jsonl"
 
