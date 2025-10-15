@@ -1,6 +1,7 @@
 import json
 import docker
 import argparse
+import re
 from pathlib import Path
 from typing import Dict, Tuple, Optional
 from tqdm import tqdm
@@ -82,12 +83,12 @@ def run_gumtree_diff(filepath_pair: Tuple[str, str]) -> Optional[str]:
         print(f"\nAn unexpected error occurred: {e}")
         return None
 
-def process_file(filepath: str) -> None:
+def process_file(input_filepath: str) -> None:
     """
     Main processing function. Reads the input file line-by-line, processes each line,
     and writes the result immediately to an output file.
     """
-    filepath = Path(filepath)
+    filepath = Path(input_filepath)
     output_filename = filepath.stem + "_gumtree.jsonl"
     
     print(f"Reading from '{filepath}' and writing to '{output_filename}'...")
