@@ -37,7 +37,7 @@ def get_injected_script(instance_id: str, mode: str):
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
             'python -m pip install -e /root/py-tracer\n'
-            f'export PYTEST_ADDOPTS="-p tracer_pytest --output=/{mode}_traces"'
+            f'export PYTEST_ADDOPTS="-p tracer_plugin --output=/{mode}_traces"'
         )
 
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
