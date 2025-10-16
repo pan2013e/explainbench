@@ -22,6 +22,16 @@ def get_injected_script(instance_id: str, mode: str):
         raise NotImplementedError("Django test suites are not supported yet.")
     elif 'sphinx' in instance_id:
         raise NotImplementedError("Sphinx test suites are not supported yet.")
+    elif 'sympy' in instance_id:
+        return (
+            'source /opt/miniconda3/bin/activate\n'
+            'conda activate testbed\n'
+            'python -m pip install -e /root/py-tracer\n'
+            'SITEPKG=$(python -c "import site;print(site.getsitepackages()[0])")\n'
+            'echo \'import runpy; runpy.run_path("/root/py-tracer/tracer_plugin/sympy_plugin.py", run_name="__main__")\' > "${SITEPKG}/zzz_tracer_boot.pth"\n'
+            'export ENABLE_TRACER=1\n'
+            f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+        )
     else:
         return (
             'source /opt/miniconda3/bin/activate\n'
