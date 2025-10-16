@@ -50,7 +50,7 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
     instances = []
     count = 0
     iterable = sorted(instance_data.keys())
-    for instance_id in tqdm(iterable, desc="Processing instances"):
+    for idx, instance_id in enumerate(tqdm(iterable, desc="Processing instances")):
         data = instance_data[instance_id]
         record = {
             "instance_id": instance_id,
@@ -58,9 +58,12 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
             "files_after": sorted(data["after"]),
             "gumtree_files": sorted(data["gumtree"])
         }
-        record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
-        record = get_buggy_filenames(record)
-        record["buggy_function_names"] = [reformat_buggy_class_or_fn_for_inference(x) for x in record["buggy_function_names"]]
+        try:
+            record = get_buggy_class_or_fn_names_with_context(record, dataset_dir)
+            record = get_buggy_filenames(record, dataset_dir)
+            record["buggy_function_names"] = [reformat_buggy_class_or_fn_for_inference(x) for x in record["buggy_function_names"]]
+        except:
+            count += 1
 
         del record["files_before"]
         del record["files_after"]
@@ -68,10 +71,10 @@ def build_ground_truth_instances(dataset_dir: str, debug: bool) -> List[Dict[str
 
         instances.append(record)
         if debug:
-            count += 1
-            if count >= 10:
+            if idx >= 10:
                 print("DEBUG mode: Stopping after 10 instances.")
                 break
+    print(f"Total error: {count}")
     return instances
 
 
@@ -95,14 +98,17 @@ def main():
         help="If set, use a small subset of the data for debugging."
     )
     args = parser.parse_args()
+    try:
+        all_records = build_ground_truth_instances(args.input_dir, args.debug)
+    except:
+        import pdb
+        pdb.post_mortem()
 
-    all_records = build_ground_truth_instances(args.input_dir, args.debug)
-
-    print(f"Found {len(all_records)} instances.")
+    print(f"Found {len(all_records)} instances.") # type: ignore
     print(f"Writing records to {args.output_file}...")
     
     with open(args.output_file, 'w') as f:
-        for record in all_records:
+        for record in all_records: # type: ignore
             f.write(json.dumps(record) + '\n')
 
     print("Done.")
