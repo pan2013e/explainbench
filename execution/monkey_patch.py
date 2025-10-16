@@ -15,18 +15,31 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 
 def install_tracer(container, logger):
     copy_to_container(container, Path(f"{DIR}/../py-tracer"), PurePosixPath('/root/py-tracer'))
-    exec_run_with_timeout(container, '/opt/miniconda3/envs/testbed/bin/pip install -e /root/py-tracer')
-    logger.info("Tracer installed in container")
+    logger.info("Tracer code copied to container")
 
-def install_env_variable(eval_script: str, mode: str):
+def get_injected_script(instance_id: str, mode: str):
+    if 'django' in instance_id:
+        raise NotImplementedError("Django test suites are not supported yet.")
+    elif 'sphinx' in instance_id:
+        raise NotImplementedError("Sphinx test suites are not supported yet.")
+    else:
+        return (
+            'source /opt/miniconda3/bin/activate\n'
+            'conda activate testbed\n'
+            'python -m pip install -e /root/py-tracer\n'
+            f'export PYTEST_ADDOPTS="-p tracer_pytest --output=/{mode}_traces"'
+        )
+
+def update_eval_script(instance_id: str, eval_script: str, mode: str):
     lines = eval_script.splitlines()
-    # Insert before `set -uxo pipefail`
-    lines.insert(2, f'export PYTEST_ADDOPTS=\"-p tracer_pytest --output=/{mode}_traces\"')
+    # Insert before the test runner call
+    idx = lines.index(": '>>>>> Start Test Output'")
+    lines.insert(idx, get_injected_script(instance_id, mode))
     return "\n".join(lines)
 
 def run_buggy_code(container, instance_id, test_spec, logger, log_dir, timeout):
     eval_file = Path(log_dir / "eval.sh")
-    eval_file.write_text(install_env_variable(test_spec.eval_script, "buggy"))
+    eval_file.write_text(update_eval_script(instance_id, test_spec.eval_script, "buggy"))
     logger.info(
         f"Eval script for {instance_id} written to {eval_file}; copying to container..."
     )
@@ -48,8 +61,8 @@ def run_buggy_code(container, instance_id, test_spec, logger, log_dir, timeout):
                 logger,
             )
 
-def run_patched_write_script(eval_file, test_spec):
-    eval_file.write_text(install_env_variable(test_spec.eval_script, "patched"))
+def run_patched_write_script(instance_id, eval_file, test_spec):
+    eval_file.write_text(update_eval_script(instance_id, test_spec.eval_script, "patched"))
 
 def run_patched_copy_out(container, log_dir):
     copy_directory_from_docker(container, PurePosixPath(f"/patched_traces"), log_dir)
