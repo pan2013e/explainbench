@@ -4,3 +4,5 @@ dataset/extract_ground_truths/localization/swe_bench_files/*
 dataset/extract_ground_truths/localization/swe_bench_files_bak/*
 dataset/extract_ground_truths/localization/swe_bench_repos/*
 dataset/extract_ground_truths/localization/misc/*
+logs/
+gold.validate-gold.json
