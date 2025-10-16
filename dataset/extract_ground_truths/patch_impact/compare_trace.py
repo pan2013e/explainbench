@@ -2,7 +2,7 @@
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 def load_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -31,7 +31,7 @@ def get_event_key(event: Dict[str, Any]) -> tuple:
 def normalize(value: Any) -> Any:
     """Recursively normalize values for order-insensitive comparison."""
     if isinstance(value, list):
-        return tuple(sorted((json.dumps(normalize(v), sort_keys=True) for v in value)))
+        return tuple(sorted(json.dumps(normalize(v), sort_keys=True) for v in value))
     elif isinstance(value, dict):
         return tuple(sorted(
             (k, json.dumps(normalize(v), sort_keys=True)) for k, v in value.items()
@@ -78,7 +78,6 @@ def compare_traces(buggy_path: str, fixed_path: str):
         (get_event_key(ev), ev["_occurrence"]): ev for ev in fixed_events
     }
 
-    # Compare and collect results
     buggy_unique, fixed_unique = [], []
     matched_keys = set()
 
