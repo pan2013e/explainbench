@@ -22,7 +22,7 @@ def get_event_key(event: Dict[str, Any]) -> tuple:
     """Return a key representing a program location."""
     return (
         event.get("filepath"),
-        event.get("line_number"),
+        # event.get("line_number"),
         event.get("statement"),
         event.get("function_name"),
         event.get("event_type"),
