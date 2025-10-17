@@ -9,7 +9,7 @@ from swebench.harness.docker_utils import (
 )
 from swebench.harness.utils import EvaluationError
 
-from execution.util import copy_directory_from_docker
+from execution.util import copy_directory_from_docker, get_fail_to_pass_tests
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -40,11 +40,30 @@ def get_injected_script(instance_id: str, mode: str):
             f'export PYTEST_ADDOPTS="-p tracer_plugin --output=/{mode}_traces"'
         )
 
+def get_hijacked_test_runner_call(instance_id: str):
+    fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
+    if 'astropy' in instance_id:
+        return f'pytest -rA {" ".join(fail_to_pass_tests)}'
+    else:
+        raise NotImplementedError()
+
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
     lines = eval_script.splitlines()
     # Insert before the test runner call
     idx = lines.index(": '>>>>> Start Test Output'")
+    # Replace the test runner call to only run the fail-to-pass tests
+    lines[idx + 1] = get_hijacked_test_runner_call(instance_id)
+    # Inject tracer setup script
     lines.insert(idx, get_injected_script(instance_id, mode))
+    # For patched code testing, no need to install repo dependencies again
+    if mode == "patched":
+        install_line_idx = -1
+        for idx, line in enumerate(lines):
+            if line.startswith("python -m pip install"):
+                install_line_idx = idx
+                break
+        assert install_line_idx != -1, "Install line not found in eval script"
+        lines[install_line_idx] = "# " + lines[install_line_idx]
     return "\n".join(lines)
 
 def run_buggy_code(container, instance_id, test_spec, logger, log_dir, timeout):
