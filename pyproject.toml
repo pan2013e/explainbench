@@ -1,6 +1,7 @@
 [project]
 name = "explainbench"
 version = "0.1.0"
+"requires-python" = ">=3.12"
 dependencies = [
     "swebench == 4.1.0",
     "docker == 7.1.0",
