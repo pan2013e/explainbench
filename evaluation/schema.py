@@ -17,3 +17,10 @@ class Region(BaseModel):
 
 class File(BaseModel):
     file: List[str]
+
+###### Effect Schemas ######
+class Value(BaseModel):
+    value: str
+
+class Variable(BaseModel):
+    value: str

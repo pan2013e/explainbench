@@ -104,3 +104,60 @@ class RootCause:
             pred = [set((postprocess(r.identifier), r.type) for r in p.region) for p in pred]
             gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
             return [set_f1_score(p, gt) for p in pred]
+
+class Effect:
+    class Variable(Task[schema.Variable]):
+        QUESTION = (
+            'Given the function and inputs, after the given executed line, what is the value of the given variable?'
+        )
+        SCHEMA = schema.Variable
+        
+        @staticmethod
+        def eval(pred: list[schema.Variable], gt: dict, **kwargs):
+            ...
+
+if __name__ == "__main__":
+    t = Effect.Variable
+    model = Model('gemini/gemini-2.5-flash', n=10)
+    # explanation = "EMPTY"
+    explanation = "Now let me summarize what I've accomplished:\n\n## Summary\n\nI successfully fixed the bug in the `separability_matrix` function for nested CompoundModels. \n\n### Problem\nThe issue was that `separability_matrix(m.Pix2Sky_TAN() & cm)` where `cm = m.Linear1D(10) & m.Linear1D(5)` was incorrectly showing coupled inputs/outputs for the Linear1D models:\n\n**Before fix:**\n```\n[[ True  True False False]\n [ True  True False False]\n [False False  True  True]   # Wrong: should be [False False  True False]\n [False False  True  True]]  # Wrong: should be [False False False  True]\n```\n\n**After fix:**\n```\n[[ True  True False False]\n [ True  True False False]\n [False False  True False]   # Correct\n [False False False  True]]  # Correct\n```\n\n### Root Cause\nThe bug was in the `_cstack` function in `astropy/modeling/separable.py` at line 245. When handling the `&` (concatenation) operator with a right operand that was already a computed matrix (from a nested CompoundModel), the code was overwriting the matrix values with all 1s instead of preserving the separability structure.\n\n### Fix\nI changed line 245 from:\n```python\ncright[-right.shape[0]:, -right.shape[1]:] = 1\n```\nto:\n```python\ncright[-right.shape[0]:, -right.shape[1]:] = right\n```\n\nThis preserves the separability information from nested CompoundModels instead of overwriting it.\n\n### Verification\n1. \u2705 Original reproduce script now shows correct behavior\n2. \u2705 All existing separability tests pass\n3. \u2705 Additional edge cases tested and pass\n4. \u2705 No regressions in the broader modeling test suite (unrelated numpy deprecation warnings don't affect functionality)\n\nThe fix is minimal, targeted, and resolves the specific issue while maintaining backward compatibility."
+    patch = '''diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -242,7 +242,7 @@ def _cstack(left, right):
+         cright = _coord_matrix(right, 'right', noutp)
+     else:
+         cright = np.zeros((noutp, right.shape[1]))
+-        cright[-right.shape[0]:, -right.shape[1]:] = 1
++        cright[-right.shape[0]:, -right.shape[1]:] = right
+ 
+     return np.hstack([cleft, cright])
+ 
+'''
+    context = {
+        'patch': patch,
+        'function_code': '''def _cstack(left, right):
+    noutp = _compute_n_outputs(left, right)
+    if isinstance(left, Model):
+        cleft = _coord_matrix(left, 'left', noutp)
+    else:
+        cleft = np.zeros((noutp, left.shape[1]))
+        cleft[: left.shape[0], : left.shape[1]] = left
+    if isinstance(right, Model):
+        cright = _coord_matrix(right, 'right', noutp)
+    else:
+        cright = np.zeros((noutp, right.shape[1]))
+        cright[-right.shape[0]:, -right.shape[1]:] = right
+
+    return np.hstack([cleft, cright])''',
+        'function_input': '''{'left': array([[1., 1., 0.],
+       [1., 1., 0.],
+       [0., 0., 1.]]), 'right': array([[1., 0.],
+       [0., 1.]])}''',
+        'executed_line': 'cright[-right.shape[0]:, -right.shape[1]:] = right',
+        'variable_in_question': 'cright'
+    }
+    prompt = t._build_prompt(explanation, **context)
+    print(prompt)
+    res = t.predict(model, explanation, **context)
+    print(res)
