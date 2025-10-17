@@ -1,0 +1,19 @@
+[project]
+name = "explainbench"
+version = "0.1.0"
+dependencies = [
+    "swebench == 4.1.0",
+    "docker == 7.1.0",
+    "dowhen == 0.1.0",
+    "litellm == 1.77.1",
+    "backoff == 2.2.1",
+    "python-dotenv == 1.1.1",
+    "pydantic == 2.11.9",
+    "tqdm == 4.67.1",
+    "numpy == 2.3.3",
+    "jq == 1.10.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
