@@ -17,6 +17,7 @@ dependencies = [
     "pandas == 2.3.2",
     "gitpython == 3.1.45",
     "deepdiff == 8.6.1",
+    "datasets == 4.2.0",
 ]
 
 [build-system]
