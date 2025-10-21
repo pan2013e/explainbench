@@ -36,14 +36,16 @@ def get_injected_script(instance_id: str, mode: str):
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
-            'python -m pip install -e /root/py-tracer\n'
-            f'export PYTEST_ADDOPTS="-p tracer_plugin --output=/{mode}_traces"'
+            'python -m pip install -e /root/py-tracer'
         )
 
-def get_hijacked_test_runner_call(instance_id: str):
+def get_hijacked_test_runner_call(instance_id: str, mode: str):
     fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
     if 'astropy' in instance_id:
-        return f'pytest -rA {" ".join(fail_to_pass_tests)}'
+        return f'pytest -rA {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
+    elif 'sympy' in instance_id:
+        # sympy test runner does not support specifying function names directly
+        return None
     else:
         raise NotImplementedError()
 
@@ -52,7 +54,9 @@ def update_eval_script(instance_id: str, eval_script: str, mode: str):
     # Insert before the test runner call
     idx = lines.index(": '>>>>> Start Test Output'")
     # Replace the test runner call to only run the fail-to-pass tests
-    lines[idx + 1] = get_hijacked_test_runner_call(instance_id)
+    subset_call = get_hijacked_test_runner_call(instance_id, mode)
+    if subset_call is not None:
+        lines[idx + 1] = subset_call
     # Inject tracer setup script
     lines.insert(idx, get_injected_script(instance_id, mode))
     # For patched code testing, no need to install repo dependencies again
