@@ -9,8 +9,6 @@ from functools import wraps
 from operator import eq
 from typing import Any, Callable
 
-from evaluation.task import Task
-
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(DIR, '..', 'dataset')
 
@@ -73,7 +71,7 @@ def load_ground_truth() -> list[dict]:
         data = [json.loads(line) for line in f]
     return data
 
-def load_context(task: Task) -> list[dict]:
+def load_context(task) -> list[dict]:
     with open(os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')) as f:
         data = json.load(f)
     assert isinstance(data, list) and all(isinstance(item, dict) for item in data)

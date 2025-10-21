@@ -134,10 +134,25 @@ class RootCause:
 class Intent:
     class PBTAssertion(Task[schema.PBTAssertion]):
         QUESTION = (
-            'For the provided test, what should the masked expression be?'
+            'For the provided test, what expression should go in [[MASKED 1]]?'
         )
         SCHEMA = schema.PBTAssertion
 
         @staticmethod
         def eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
-            return [(p.assertion == gt['masked_assertion']) for p in pred]
+            import ast
+            def _norm_code(snippet: str) -> str:
+                try:
+                    return ast.unparse(ast.parse(snippet))
+                except SyntaxError:
+                    return snippet # leave invalid Python code alone, wrong anyway
+            return [_norm_code(p.assertion) == _norm_code(gt['answers'][0])
+                    for p in pred]
+        
+        @classmethod
+        def predict(cls, model: Model, explanation: str, **kwargs):
+            masked_test = kwargs["test"]
+            for idx, answer in enumerate(kwargs["answers"]):
+                masked_test = masked_test.replace(answer, f"[[MASKED {idx+1}]]")
+            prompt = cls._build_prompt(explanation, masked_test=masked_test)
+            return model.infer(prompt, cls.SCHEMA)
