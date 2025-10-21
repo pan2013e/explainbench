@@ -9,6 +9,7 @@ from evaluation.inference import Model
 from evaluation.util import (
     EvalTimeout,
     is_subpath,
+    simple_name_eq,
     set_f1_score,
 )
 
@@ -87,23 +88,27 @@ class RootCause:
 
     class Region(Task[schema.Region]):
         QUESTION = (
-            'Which existing classes or functions were buggy? '
-            'Please answer with simple identifier names (without higher-level namespaces) and their types (class or function). '
-            'If you cannot infer from the explanation, please answer with an empty list. '
-            'You don\'t need to consider newly added classes or functions.' 
+            'Which existing classes or functions were buggy?\n\n'
+            'Please follow these formatting rules strictly:\n'
+            '1. For methods: use `<simple_class_name>.<method_name>`.\n'
+            '  - Example: Bar.foo\n'
+            '2. For functions: use `<function_name>`.\n'
+            '  - Example: my_function\n'
+            '  - If the function is nested inside another function, use `<outer_function>.<inner_function>`.\n'
+            '3. For classes: use `<simple_class_name>`.\n'
+            '  - Only include classes if the bug affects the class itself (e.g., class variables, decorators), not methods within it.\n\n'
+            'Additional rules:\n'
+            '1. If the bug is outside any existing classes or functions (e.g., in the global scope), answer with an empty list.\n'
+            '2. If you cannot infer from the explanation, answer with an empty list.\n'
+            '3. Do not include classes or functions that were newly added in the patch.'
         )
         SCHEMA = schema.Region
         
         @staticmethod
         def eval(pred: list[schema.Region], gt: dict):
-            def postprocess(qualified_name: str):
-                qualified_name = qualified_name.strip()
-                if qualified_name.endswith('()'):
-                    qualified_name = qualified_name[:-2]
-                return qualified_name.split('.')[-1]
-            pred = [set((postprocess(r.identifier), r.type) for r in p.region) for p in pred]
+            pred = [set((r.identifier, r.type) for r in p.region) for p in pred]
             gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
-            return [set_f1_score(p, gt) for p in pred]
+            return [set_f1_score(p, gt, simple_name_eq) for p in pred]
 
 class Effect:
     class Variable(Task[schema.Variable]):

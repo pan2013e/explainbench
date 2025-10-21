@@ -34,6 +34,13 @@ def is_subpath(abs: str, rel: str):
     rel = os.path.normpath(rel)
     return abs == rel or (any(rel.startswith(prefix) for prefix in SWEBENCH_VERIFIED_PROJECT_PREFIX) and abs.endswith(os.path.sep + rel))
 
+def simple_name_eq(a: tuple[str, str], b: tuple[str, str]):
+    if a[1] != b[1]:
+        return False
+    a_simple = a[0].split('.')[-1]
+    b_simple = b[0].split('.')[-1]
+    return a_simple == b_simple
+
 def f1_score(tp, fp, fn):
     p = tp / (tp + fp) if tp + fp > 0 else 0.0
     r = tp / (tp + fn) if tp + fn > 0 else 0.0
@@ -58,11 +65,14 @@ def load_explanation(split: str) -> dict[str, list[str]]:
     return data
 
 def load_ground_truth() -> list[dict]:
-    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'ground_truth.jsonl')) as f:
+    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'localization', 'ground_truth.jsonl')) as f:
         data = [json.loads(line) for line in f]
     return data
 
 def load_context(task) -> list[dict]:
+    path = os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')
+    if not os.path.exists(path):
+        return None
     with open(os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')) as f:
         data = json.load(f)
     assert isinstance(data, list) and all(isinstance(item, dict) for item in data)
