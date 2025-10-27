@@ -28,6 +28,7 @@ def get_injected_script(instance_id: str, mode: str):
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             # f'echo \'import runpy; runpy.run_path("/root/py-tracer/tracer_plugin/{project}_plugin.py", run_name="__main__")\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACER=1\n'
+            f'export INSTANCE_ID={instance_id}\n'
             f'export TRACER_OUTPUT_DIR=/{mode}_traces'
         )
     else:
@@ -38,10 +39,13 @@ def get_injected_script(instance_id: str, mode: str):
         )
 
 def get_hijacked_test_runner_call(instance_id: str, mode: str):
-    fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
     if any(project in instance_id for project in ['django', 'sphinx', 'sympy']):
+        # For other projects, run all tests, but only fail-to-pass tests are traced
+        # This should be handled within the tracer plugin
         return None
     else:
+        # For pytest projects, only run the fail-to-pass tests
+        fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
         return f'pytest -rA {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
 
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
@@ -58,7 +62,7 @@ def update_eval_script(instance_id: str, eval_script: str, mode: str):
     if mode == "patched":
         install_line_idx = -1
         for idx, line in enumerate(lines):
-            if line.startswith("python -m pip install"):
+            if line.startswith("python -m pip install") or line.startswith("python setup.py install"):
                 install_line_idx = idx
                 break
         assert install_line_idx != -1, "Install line not found in eval script"
