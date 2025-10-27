@@ -18,19 +18,17 @@ def install_tracer(container, logger):
     logger.info("Tracer code copied to container")
 
 def get_injected_script(instance_id: str, mode: str):
-    if 'django' in instance_id:
-        raise NotImplementedError("Django test suites are not supported yet.")
-    elif 'sphinx' in instance_id:
-        raise NotImplementedError("Sphinx test suites are not supported yet.")
-    elif 'sympy' in instance_id:
+    if 'django' in instance_id or 'sympy' in instance_id:
+        project = 'django' if 'django' in instance_id else 'sympy'
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
             'python -m pip install -e /root/py-tracer\n'
             'SITEPKG=$(python -c "import site;print(site.getsitepackages()[0])")\n'
-            'echo \'import runpy; runpy.run_path("/root/py-tracer/tracer_plugin/sympy_plugin.py", run_name="__main__")\' > "${SITEPKG}/zzz_tracer_boot.pth"\n'
+            f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
+            # f'echo \'import runpy; runpy.run_path("/root/py-tracer/tracer_plugin/{project}_plugin.py", run_name="__main__")\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACER=1\n'
-            f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+            f'export TRACER_OUTPUT_DIR=/{mode}_traces'
         )
     else:
         return (
@@ -41,13 +39,10 @@ def get_injected_script(instance_id: str, mode: str):
 
 def get_hijacked_test_runner_call(instance_id: str, mode: str):
     fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
-    if 'astropy' in instance_id:
-        return f'pytest -rA {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
-    elif 'sympy' in instance_id:
-        # sympy test runner does not support specifying function names directly
+    if any(project in instance_id for project in ['django', 'sphinx', 'sympy']):
         return None
     else:
-        raise NotImplementedError()
+        return f'pytest -rA {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
 
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
     lines = eval_script.splitlines()
