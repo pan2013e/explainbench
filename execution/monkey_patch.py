@@ -26,7 +26,6 @@ def get_injected_script(instance_id: str, mode: str):
             'python -m pip install -e /root/py-tracer\n'
             'SITEPKG=$(python -c "import site;print(site.getsitepackages()[0])")\n'
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
-            # f'echo \'import runpy; runpy.run_path("/root/py-tracer/tracer_plugin/{project}_plugin.py", run_name="__main__")\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACER=1\n'
             f'export INSTANCE_ID={instance_id}\n'
             f'export TRACER_OUTPUT_DIR=/{mode}_traces'
@@ -38,11 +37,15 @@ def get_injected_script(instance_id: str, mode: str):
             'python -m pip install -e /root/py-tracer'
         )
 
-def get_hijacked_test_runner_call(instance_id: str, mode: str):
-    if any(project in instance_id for project in ['django', 'sphinx', 'sympy']):
+def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
+    if any(project in instance_id for project in ['django', 'sympy']):
         # For other projects, run all tests, but only fail-to-pass tests are traced
         # This should be handled within the tracer plugin
         return None
+    elif 'sphinx' in instance_id:
+        fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
+        prefix = orig_line.split(' -- ')[0].strip()
+        return f'{prefix} -- {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
     else:
         # For pytest projects, only run the fail-to-pass tests
         fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
@@ -53,7 +56,7 @@ def update_eval_script(instance_id: str, eval_script: str, mode: str):
     # Insert before the test runner call
     idx = lines.index(": '>>>>> Start Test Output'")
     # Replace the test runner call to only run the fail-to-pass tests
-    subset_call = get_hijacked_test_runner_call(instance_id, mode)
+    subset_call = get_hijacked_test_runner_call(instance_id, mode, lines[idx + 1])
     if subset_call is not None:
         lines[idx + 1] = subset_call
     # Inject tracer setup script
