@@ -1,3 +1,4 @@
+import os
 import sys
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -5,9 +6,11 @@ from swebench.harness.run_evaluation import main as run_evaluation_main
 from swebench.harness.utils import str2bool, optional_str
 
 from execution.monkey_patch import monkey_patch
-    
+from execution.util import all_instances, prepare_tracer
+
 def main(**kwargs):
     monkey_patch()
+    prepare_tracer()
     run_evaluation_main(**kwargs)
 
 if __name__ == "__main__":
@@ -106,8 +109,8 @@ if __name__ == "__main__":
     sys.argv = ["swebench.harness.run_evaluation",
             "--predictions_path", "gold",
             "--max_workers", "1",
-            "--instance_ids", "astropy__astropy-12907",
+            "--instance_ids", *all_instances(),
             "--report_dir", "reports",
-            "--run_id", "validate-gold"]
+            "--run_id", f"validate-gold.{os.getuid()}"]
     args = parser.parse_args()
     main(**vars(args))

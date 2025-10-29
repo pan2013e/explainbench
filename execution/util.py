@@ -1,4 +1,6 @@
+import os
 import json
+import atexit
 import tarfile
 
 from io import BytesIO
@@ -7,6 +9,17 @@ from datasets import load_dataset
 from docker.models.containers import Container
 
 SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
+DIR = os.path.dirname(os.path.abspath(__file__))
+
+def prepare_tracer():
+    src = Path(f"{DIR}/../py-tracer")
+    dst = PurePosixPath('/root/py-tracer')
+    tmp_dir = f'/tmp/py-tracer.tar'
+    if os.path.exists(tmp_dir):
+        os.unlink(tmp_dir)
+    with tarfile.open(tmp_dir, 'w') as tar:
+        tar.add(src, arcname=dst.name)
+    atexit.register(lambda: os.unlink(tmp_dir) if os.path.exists(tmp_dir) else None)
 
 def copy_directory_from_docker(container: Container, src_path: PurePosixPath, dst_path: Path):
     tar_stream, _ = container.get_archive(str(src_path))
@@ -19,3 +32,6 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
 def get_fail_to_pass_tests(instance_id: str) -> list[str]:
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
     return json.loads(instance['FAIL_TO_PASS'])
+
+def all_instances():
+    return [data['instance_id'] for data in SWEBENCH]
