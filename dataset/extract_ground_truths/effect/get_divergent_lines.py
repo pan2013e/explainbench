@@ -41,3 +41,7 @@ def main(instance_id, test_id=0):
                     print('====')
                     print('Variables: ', patched_event.deserialized().seen_variables)
                 input('===')
+
+
+if __name__ == "__main__":
+    main("astropy__astropy-7166")
