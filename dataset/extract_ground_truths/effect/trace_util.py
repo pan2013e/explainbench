@@ -63,28 +63,5 @@ class Traces:
         for block in self.blocks:
             yield block
 
-if __name__ == "__main__":
-    buggy_traces = Traces("buggy.jsonl")
-    patched_traces = Traces("fixed.jsonl")
-    for buggy_block, patched_block in zip(buggy_traces, patched_traces):
-        # Before the divergence point, the function call chain should be the same
-        if buggy_block.function_name != patched_block.function_name:
-            exit(0)
-        for buggy_event, patched_event in zip(buggy_block, patched_block):
-            # If code lines differ, stop comparing further for now
-            if buggy_event.statement != patched_event.statement:
-                exit(0)
-            diff = DeepDiff(buggy_event.model_dump(), patched_event.model_dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, exclude_paths=["root['line_number]"])
-            if 'seen_variables' in diff.affected_root_keys:
-                print('In function: ', patched_block.function_name)
-                print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
-                print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
-                print('Diff: ', diff)
-                print('Diff dict: ', diff.to_dict())
-                # assert patched_block.params == buggy_block.params, f"Function parameters differ, buggy: {buggy_block.params}, patched: {patched_block.params}"
-                print('Function parameters: ', patched_block.params)
-                if hasattr(patched_event, 'seen_variables'):
-                    print('Buggy Variables: ', buggy_event.seen_variables)
-                    print('====')
-                    print('Variables: ', patched_event.seen_variables)
-                input('===')
+def diff_events(buggy: Event, patched: Event, **kwargs):
+    return DeepDiff(buggy.model_dump(), patched.model_dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, exclude_paths=["root['line_number]"], **kwargs)
