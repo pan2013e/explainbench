@@ -1,14 +1,12 @@
 import os
 
-from datasets import load_dataset
 from dataset.extract_ground_truths.effect.trace_util import (
     load_traces,
     diff_events,
 )
 from execution.util import get_fail_to_pass_tests
 
-SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
-BASE = "logs/run_evaluation/validate-gold/gold"
+BASE = "logs/run_evaluation/validate-gold.1021/gold"
 
 def load_trace_pair(instance_id, test_id=0):
     # test_id refers to the index of FAIL_TO_PASS tests
