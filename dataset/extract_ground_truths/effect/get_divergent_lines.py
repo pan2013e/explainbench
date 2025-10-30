@@ -1,20 +1,20 @@
 import os
 
 from dataset.extract_ground_truths.effect.trace_util import (
-    load_traces,
+    Traces,
     diff_events,
 )
 from execution.util import get_fail_to_pass_tests
 
-BASE = "logs/run_evaluation/validate-gold.1021/gold"
+BASE = "logs_zhiyuan/logs/run_evaluation/validate-gold.1021/gold"
 
 def load_trace_pair(instance_id, test_id=0):
     # test_id refers to the index of FAIL_TO_PASS tests
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
     buggy_path = os.path.join(BASE, instance_id, "buggy_traces", f"{test_name}.jsonl")
     patched_path = os.path.join(BASE, instance_id, "patched_traces", f"{test_name}.jsonl")
-    buggy_traces = load_traces(buggy_path)
-    patched_traces = load_traces(patched_path)
+    buggy_traces = Traces(buggy_path)
+    patched_traces = Traces(patched_path)
     return buggy_traces, patched_traces
 
 def main(instance_id, test_id=0):
@@ -44,4 +44,4 @@ def main(instance_id, test_id=0):
 
 
 if __name__ == "__main__":
-    main("astropy__astropy-7166")
+    main("astropy__astropy-12907")
