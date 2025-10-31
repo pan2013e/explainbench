@@ -24,22 +24,26 @@ from test_execution.util import FullReproResult
 RUN_ID = "test-execution"
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-def run_test(container: Container, test_content: str, patch: str = ""):
+def inject_file(container: Container, test_content: str, test_loc: str) -> None:
     with NamedTemporaryFile(
         buffering=0, prefix="reproducer-", suffix=".py"
     ) as f:
         f.write(test_content.encode())
-        copy_to_container(container, Path(f.name), PurePosixPath("/testbed/reproducer.py"))
-        if patch != "":
-            with NamedTemporaryFile(
-                buffering=0, prefix="patch-", suffix=".patch"
-            ) as patch_f:
-                patch_f.write(patch.encode())
-                copy_to_container(container, Path(patch_f.name), PurePosixPath("/testbed/dev_patch.patch"))
-                container.exec_run("git apply dev_patch.patch", workdir="/testbed")
-        exit_code, response = container.exec_run(
-            "bash -c \"source ~/.bashrc && python reproducer.py\"", workdir="/testbed"
-        )
+        copy_to_container(container, Path(f.name), PurePosixPath(test_loc))
+
+def run_test(container: Container, test_content: str, patch: str = ""):
+    test_loc = "/testbed/reproducer.py"
+    inject_file(container, test_content, test_loc)
+    if patch != "":
+        with NamedTemporaryFile(
+            buffering=0, prefix="patch-", suffix=".patch"
+        ) as patch_f:
+            patch_f.write(patch.encode())
+            copy_to_container(container, Path(patch_f.name), PurePosixPath("/testbed/dev_patch.patch"))
+            container.exec_run("git apply dev_patch.patch", workdir="/testbed")
+    exit_code, response = container.exec_run(
+        f"bash -c \"source ~/.bashrc && timeout 300s python {test_loc}\"", workdir="/testbed"
+    )
     return exit_code, response  
 
 
@@ -65,6 +69,11 @@ def setup(instance_id: str) -> tuple[Container, dict]:
         test_spec, client, RUN_ID, logger, False, False
     )
     container.start()
+
+    # install necessaries
+    container.exec_run(
+        "bash -c \"source ~/.bashrc && python -m pip install hypothesis\"", workdir="/testbed"
+    )
     return container, relevant_instance
 
 
@@ -95,14 +104,14 @@ def evaluate_test(
             container.remove()
 
 if __name__ == '__main__':
-    real_test = """
-from astropy.modeling import models as m
-from astropy.modeling.separable import separability_matrix
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run_file")
+    parser.add_argument("--instance_id")
+    args = parser.parse_args()
 
-cm = m.Linear1D(10) & m.Linear1D(5)
-
-sep_matrix = separability_matrix(m.Pix2Sky_TAN() & cm)
-assert sep_matrix[3][2] == False
-"""
-    reproresult = evaluate_test("astropy__astropy-12907", real_test)
+    with open(args.run_file) as f:
+        real_test = f.read()
+    
+    reproresult = evaluate_test(args.instance_id, real_test)
     print(reproresult)

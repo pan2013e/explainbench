@@ -1,0 +1,136 @@
+import json
+from dataclasses import dataclass
+import io, tarfile
+import ast
+from pathlib import Path, PurePosixPath
+
+from docker.models.containers import Container
+from swebench.harness.docker_utils import copy_to_container
+from tempfile import NamedTemporaryFile
+
+from test_execution.test_runner import setup, inject_file
+
+DEBUGGER_OPERATION_SCRIPT = r"""
+import subprocess as sp
+from subprocess import Popen
+import json
+
+def read_output(p: Popen[str]) -> tuple[bool, str]:
+    output = ""
+    while not output.endswith("(Pdb) "):
+        char = p.stdout.read(1)
+        if not char:
+            return True, output
+        else:
+            output += char
+    return False, output.removesuffix("(Pdb) ").strip()
+
+def get_pdb_response(p: Popen[str], prog_input: str) -> tuple[bool, str]:
+    if not prog_input.endswith("\n"):
+        prog_input += "\n"
+    p.stdin.write(prog_input)
+    p.stdin.flush()
+
+    return read_output(p)
+
+p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
+read_output(p) # flush initial setup string
+
+MAX_NUM = 10
+PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, locals()[param.name])"
+for idx in range(MAX_NUM):
+    get_pdb_response(p, "import inspect")
+    _, param_values = get_pdb_response(p, PORTABLE_PARAMS_CMD)
+    print(json.dumps({{
+        "value_type": "parameter_values",
+        "iteration_no": idx,
+        "value_str": param_values
+    }}))
+    get_pdb_response(p, "r")
+    _, return_value = get_pdb_response(p, '__return__')
+    print(json.dumps({{
+        "value_type": "return_value",
+        "iteration_no": idx,
+        "value_str": return_value
+    }}))
+    proc_end, _ = get_pdb_response(p, "c")
+    if proc_end:
+        break
+"""
+
+@dataclass
+class FunctionInfo():
+    file: str
+    func_name: str
+
+def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
+    bugloc_infos = []
+    with open("./dataset/extract_ground_truths/localization/ground_truth.jsonl") as f:
+        for line in f:
+            bugloc_infos.append(json.loads(line))
+    raise NotImplementedError
+
+def read_from_container(container: Container, pathname: str) -> str:
+    abs_pathname = "/testbed/" + pathname
+    stream, stat = container.get_archive(abs_pathname)
+
+    file_like = io.BytesIO(b"".join(stream))
+    with tarfile.open(fileobj=file_like) as tar:
+        member = tar.getmembers()[0]
+        file_content = tar.extractfile(member).read().decode("utf-8")
+    return file_content
+
+def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> None:
+    file_content = read_from_container(
+        container, target_func.file
+    )
+    ast_root = ast.parse(file_content)
+    name_match_funcs = [
+        node for node in ast.walk(ast_root)
+        if (isinstance(node, ast.FunctionDef) and
+            node.name == target_func.func_name)
+    ]
+    assert len(name_match_funcs) == 1, "Multiple functions matching name in file"
+    target_func_node = name_match_funcs[0]
+    target_func_node.body.insert(0, ast.Import([ast.alias("pdb")])) # import pdb
+    target_func_node.body.insert(1, ast.Expr(ast.Call(ast.Attribute(ast.Name("pdb"), "set_trace"), [], [])))
+    injected_file_content = ast.unparse(ast_root)
+    with NamedTemporaryFile(
+        buffering=0, prefix="instrumented-func-", suffix=".py"
+    ) as f:
+        f.write(injected_file_content.encode())
+        print(f.name, target_func.file)
+        copy_to_container(container, Path(f.name), "/testbed" / PurePosixPath(target_func.file))
+
+if __name__ == '__main__':
+    DEBUG=False
+    MY_TEST = """
+from astropy.modeling import models as m
+from astropy.modeling.separable import separability_matrix
+cm = m.Linear1D(10) & m.Linear1D(5)
+print(separability_matrix(m.Pix2Sky_TAN() & cm))
+"""
+    MY_INSTANCE_ID = "astropy__astropy-12907"
+    my_container, _ = setup(MY_INSTANCE_ID)
+    try:
+        my_funcinfo = FunctionInfo(file="astropy/modeling/separable.py", func_name="_cstack")
+        inject_pdb_statement(my_container, my_funcinfo)
+        reproducer_loc = "/testbed/reproducer.py"
+        inject_file(my_container, MY_TEST, reproducer_loc)
+        debugger_op_script = DEBUGGER_OPERATION_SCRIPT.format(
+            test_loc = reproducer_loc,
+            func_name = my_funcinfo.func_name,
+        )
+        inject_file(my_container, debugger_op_script, "/testbed/pdb_operator.py")
+        exec_result = my_container.exec_run("python pdb_operator.py", workdir="/testbed")
+        print(exec_result.output.decode())
+    except:
+        raise
+    finally:
+        if not DEBUG:
+            my_container.stop()
+            my_container.remove()
+        else:
+            pass
+        
+    
