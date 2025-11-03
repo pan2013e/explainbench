@@ -31,16 +31,20 @@ def inject_file(container: Container, test_content: str, test_loc: str) -> None:
         f.write(test_content.encode())
         copy_to_container(container, Path(f.name), PurePosixPath(test_loc))
 
+def apply_patch(container: Container, patch_content: str) -> None:
+    with NamedTemporaryFile(
+        buffering=0, prefix="patch-", suffix=".patch"
+    ) as patch_f:
+        patch_f.write(patch_content.encode())
+        copy_to_container(container, Path(patch_f.name), PurePosixPath("/testbed/dev_patch.patch"))
+        exit_code, _ = container.exec_run("git apply dev_patch.patch", workdir="/testbed")
+        assert exit_code == 0
+
 def run_test(container: Container, test_content: str, patch: str = ""):
     test_loc = "/testbed/reproducer.py"
     inject_file(container, test_content, test_loc)
     if patch != "":
-        with NamedTemporaryFile(
-            buffering=0, prefix="patch-", suffix=".patch"
-        ) as patch_f:
-            patch_f.write(patch.encode())
-            copy_to_container(container, Path(patch_f.name), PurePosixPath("/testbed/dev_patch.patch"))
-            container.exec_run("git apply dev_patch.patch", workdir="/testbed")
+        apply_patch(container, patch)
     exit_code, response = container.exec_run(
         f"bash -c \"source ~/.bashrc && timeout 300s python {test_loc}\"", workdir="/testbed"
     )
