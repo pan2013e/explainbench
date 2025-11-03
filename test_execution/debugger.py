@@ -77,6 +77,18 @@ class FunctionInfo():
     file: str
     func_name: str
 
+class AncestryVisitor(ast.NodeVisitor):
+    def __init__(self):
+        self.parent_stack = []
+    
+    def generic_visit(self, node):
+        self.parent_stack.append(node)
+        super().generic_visit(node)
+        self.parent_stack.pop()
+    
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        node.__setattr__("ancestor_types", [type(elem) for elem in self.parent_stack])
+
 def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
     bugloc_infos = []
     with open("./dataset/extract_ground_truths/localization/ground_truth.jsonl") as f:
@@ -94,7 +106,8 @@ def read_from_container(container: Container, pathname: str) -> str:
         file_content = tar.extractfile(member).read().decode("utf-8")
     return file_content
 
-def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> None:
+def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> str:
+    """Returns qualified function name."""
     file_content = read_from_container(
         container, target_func.file
     )
@@ -114,6 +127,10 @@ def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> Non
     ) as f:
         f.write(injected_file_content.encode())
         copy_to_container(container, Path(f.name), "/testbed" / PurePosixPath(target_func.file))
+    ast_root = AncestryVisitor().visit(ast_root)
+    ancestor_types = target_func_node.__getattribute__("ancestor_types")
+    qual_func_name = ("self." if (ast.ClassDef) in ancestor_types else "") + target_func.func_name
+    return qual_func_name
 
 def get_test(instance_id: str) -> str:
     with open("dataset/context/intent_pbtassertion.json") as f:
@@ -123,17 +140,17 @@ def get_test(instance_id: str) -> str:
 
 if __name__ == '__main__':
     DEBUG=True
-    MY_INSTANCE_ID = "sympy__sympy-14248"
-    my_funcinfo = FunctionInfo(file="sympy/printing/str.py", func_name="_print_MatAdd")
+    MY_INSTANCE_ID = "sympy__sympy-13551"
+    my_funcinfo = FunctionInfo(file="sympy/concrete/products.py", func_name="_eval_product")
     my_container, _ = setup(MY_INSTANCE_ID)
     try:
         my_test = get_test(MY_INSTANCE_ID)
-        inject_pdb_statement(my_container, my_funcinfo)
+        qual_func_name = inject_pdb_statement(my_container, my_funcinfo)
         reproducer_loc = "/testbed/reproducer.py"
         inject_file(my_container, my_test, reproducer_loc)
         debugger_op_script = DEBUGGER_OPERATION_SCRIPT.format(
             test_loc = reproducer_loc,
-            func_name = "self."+my_funcinfo.func_name,
+            func_name = qual_func_name,
         )
         inject_file(my_container, debugger_op_script, "/testbed/pdb_operator.py")
         exec_result = my_container.exec_run("python pdb_operator.py", workdir="/testbed")
