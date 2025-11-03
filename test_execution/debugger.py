@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 import io, tarfile
 import ast
+import re
 from pathlib import Path, PurePosixPath
 
 from docker.models.containers import Container
@@ -90,11 +91,22 @@ class AncestryVisitor(ast.NodeVisitor):
         node.__setattr__("ancestor_types", [type(elem) for elem in self.parent_stack])
 
 def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
-    bugloc_infos = []
-    with open("./dataset/extract_ground_truths/localization/ground_truth.jsonl") as f:
+    bugloc_infos: list[dict] = []
+    with open("./dataset/extract_ground_truths/localization/ground_truth_w_fullname.jsonl") as f:
         for line in f:
             bugloc_infos.append(json.loads(line))
-    raise NotImplementedError
+    target_bugloc_info = [info for info in bugloc_infos 
+                          if info["instance_id"] == instance_id]
+    assert len(target_bugloc_info) == 1, f"Target bug locations non-singular: {target_bugloc_info}"
+    buggy_methods = []
+    for buggy_func_full_name in target_bugloc_info[0]["buggy_function_names"]:
+        m = re.match(rf"{instance_id}/(.+)::.+function:(.+)", buggy_func_full_name)
+        assert m is not None
+        buggy_methods.append(FunctionInfo(
+            file=m.group(1),
+            func_name=m.group(2)
+        ))
+    return buggy_methods
 
 def read_from_container(container: Container, pathname: str) -> str:
     abs_pathname = "/testbed/" + pathname
@@ -139,9 +151,10 @@ def get_test(instance_id: str) -> str:
     return target_test_info[0]["test"]
 
 if __name__ == '__main__':
-    DEBUG=True
+    DEBUG=False
     MY_INSTANCE_ID = "sympy__sympy-13551"
-    my_funcinfo = FunctionInfo(file="sympy/concrete/products.py", func_name="_eval_product")
+    buggy_funcs = get_buggy_methods(MY_INSTANCE_ID)
+    my_funcinfo = buggy_funcs[0]
     my_container, _ = setup(MY_INSTANCE_ID)
     try:
         my_test = get_test(MY_INSTANCE_ID)
