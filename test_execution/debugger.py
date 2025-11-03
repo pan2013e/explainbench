@@ -41,11 +41,14 @@ def return_stack(p: Popen[str]) -> None:
     def _get_stack_depth(stack: str) -> int:
         return stack.count("\n->")
     _, current_stack = get_pdb_response(p, "w")
-    new_stack_depth = 0
-    while new_stack_depth != _get_stack_depth(current_stack):
+    new_stack_depth = 999
+    has_return_value = False
+    while not ((new_stack_depth == _get_stack_depth(current_stack)) and has_return_value):
+        assert new_stack_depth >= _get_stack_depth(current_stack), new_stack
         get_pdb_response(p, "r")
         _, new_stack = get_pdb_response(p, "w")
         new_stack_depth = _get_stack_depth(new_stack)
+        has_return_value = ")->" in new_stack
 
 
 MAX_NUM = 10
