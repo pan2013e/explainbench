@@ -36,6 +36,17 @@ def get_pdb_response(p: Popen[str], prog_input: str) -> tuple[bool, str]:
 p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
 read_output(p) # flush initial setup string
 
+def return_stack(p: Popen[str]) -> None:
+    def _get_stack_depth(stack: str) -> int:
+        return stack.count("\n->")
+    _, current_stack = get_pdb_response(p, "w")
+    new_stack_depth = 0
+    while new_stack_depth != _get_stack_depth(current_stack):
+        get_pdb_response(p, "r")
+        _, new_stack = get_pdb_response(p, "w")
+        new_stack_depth = _get_stack_depth(new_stack)
+
+
 MAX_NUM = 10
 PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, '=', locals()[param.name])"
 for idx in range(MAX_NUM):
@@ -46,7 +57,8 @@ for idx in range(MAX_NUM):
         "iteration_no": idx,
         "value_str": param_values
     }}))
-    get_pdb_response(p, "r")
+    
+    return_stack(p)
     _, return_value = get_pdb_response(p, '__return__')
     if return_value == "":
         return_value = "None"
