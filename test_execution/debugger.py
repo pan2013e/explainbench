@@ -37,7 +37,7 @@ p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp
 read_output(p) # flush initial setup string
 
 MAX_NUM = 10
-PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, locals()[param.name])"
+PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, '=', locals()[param.name])"
 for idx in range(MAX_NUM):
     get_pdb_response(p, "import inspect")
     _, param_values = get_pdb_response(p, PORTABLE_PARAMS_CMD)
@@ -48,6 +48,8 @@ for idx in range(MAX_NUM):
     }}))
     get_pdb_response(p, "r")
     _, return_value = get_pdb_response(p, '__return__')
+    if return_value == "":
+        return_value = "None"
     print(json.dumps({{
         "value_type": "return_value",
         "iteration_no": idx,
@@ -99,31 +101,32 @@ def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> Non
         buffering=0, prefix="instrumented-func-", suffix=".py"
     ) as f:
         f.write(injected_file_content.encode())
-        print(f.name, target_func.file)
         copy_to_container(container, Path(f.name), "/testbed" / PurePosixPath(target_func.file))
 
+def get_test(instance_id: str) -> str:
+    with open("dataset/context/intent_pbtassertion.json") as f:
+        all_test_info = json.load(f)
+    target_test_info = [t_info for t_info in all_test_info if t_info["instance_id"] == instance_id]
+    return target_test_info[0]["test"]
+
 if __name__ == '__main__':
-    DEBUG=False
-    MY_TEST = """
-from astropy.modeling import models as m
-from astropy.modeling.separable import separability_matrix
-cm = m.Linear1D(10) & m.Linear1D(5)
-print(separability_matrix(m.Pix2Sky_TAN() & cm))
-"""
-    MY_INSTANCE_ID = "astropy__astropy-12907"
+    DEBUG=True
+    MY_INSTANCE_ID = "sympy__sympy-14248"
+    my_funcinfo = FunctionInfo(file="sympy/printing/str.py", func_name="_print_MatAdd")
     my_container, _ = setup(MY_INSTANCE_ID)
     try:
-        my_funcinfo = FunctionInfo(file="astropy/modeling/separable.py", func_name="_cstack")
+        my_test = get_test(MY_INSTANCE_ID)
         inject_pdb_statement(my_container, my_funcinfo)
         reproducer_loc = "/testbed/reproducer.py"
-        inject_file(my_container, MY_TEST, reproducer_loc)
+        inject_file(my_container, my_test, reproducer_loc)
         debugger_op_script = DEBUGGER_OPERATION_SCRIPT.format(
             test_loc = reproducer_loc,
-            func_name = my_funcinfo.func_name,
+            func_name = "self."+my_funcinfo.func_name,
         )
         inject_file(my_container, debugger_op_script, "/testbed/pdb_operator.py")
         exec_result = my_container.exec_run("python pdb_operator.py", workdir="/testbed")
-        print(exec_result.output.decode())
+        with open(f"debugger_output/{MY_INSTANCE_ID}.txt", "w") as f:
+            print(exec_result.output.decode().strip(), file=f)
     except:
         raise
     finally:
