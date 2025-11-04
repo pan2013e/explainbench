@@ -2,11 +2,14 @@ import os
 import json
 import atexit
 import tarfile
+import datasets
 
 from io import BytesIO
 from pathlib import PurePosixPath, Path
 from datasets import load_dataset
 from docker.models.containers import Container
+
+datasets.disable_progress_bars()
 
 SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,3 +38,12 @@ def get_fail_to_pass_tests(instance_id: str) -> list[str]:
 
 def all_instances():
     return [data['instance_id'] for data in SWEBENCH]
+
+def instances_by_repo(repo_name: str | list[str]):
+    if isinstance(repo_name, str):
+        repo_name = [repo_name]
+    return [
+        data['instance_id']
+        for data in SWEBENCH
+        if any(rn in data['repo'] for rn in repo_name)
+    ]
