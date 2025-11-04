@@ -63,7 +63,7 @@ def main(instance_id, test_id=0):
                     print('Buggy Variables: ', buggy_event.deserialized().seen_variables)
                     print('====')
                     print('Variables: ', patched_event.deserialized().seen_variables)
-            input("....")
+                input("....")
 
 if __name__ == "__main__":
-    main("astropy__astropy-7166")
+    main("astropy__astropy-14508")
