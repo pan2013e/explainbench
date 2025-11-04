@@ -82,7 +82,9 @@ def get_diff_info_per_instance(agent_output_dir: Path, instance_id: Path)->Dict[
         modified_lines = extract_modified_lines(patch_content)
         return modified_lines
     except FileNotFoundError:
-        print(f"{patch_path} does not exists")
+        # ignore warning for now due to incomplete data
+        # print(f"{patch_path} does not exists")
+        pass
     return {}
 
 def get_all_instance_ids(agent_output_dir: Path)->List[Path]:
@@ -90,7 +92,7 @@ def get_all_instance_ids(agent_output_dir: Path)->List[Path]:
     for dir in agent_output_dir.iterdir():
         if dir.is_dir():
             outputs.append(Path(agent_output_dir, dir))
-    return outputs
+    return sorted(outputs)
 
 def get_diff_info_per_agent(output_dir: str, run_id: str, agent_id: str)->Dict:
     agent_output_dir = Path(output_dir, run_id, agent_id)
