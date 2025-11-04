@@ -180,7 +180,9 @@ def filter_based_on_vars_at_current_line(
 
     return filtered
 
-def filter_based_on_type_changes(diffs_by_kind: Dict[str, Any]) -> Dict[str, Any]:
+# the event param is unused here
+# this is temporary fix, to make sure it has the same signature as the other filtering functions to avoid error when calling each filtering function in get_divergent_line.py
+def filter_based_on_type_changes(diffs_by_kind: Dict[str, Any], event: Event) -> Dict[str, Any]:
     n_type_changes = len(diffs_by_kind.keys())
     if n_type_changes < 2:
         return diffs_by_kind
