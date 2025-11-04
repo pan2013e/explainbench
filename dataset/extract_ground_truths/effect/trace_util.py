@@ -1,6 +1,6 @@
 import os
 import json
-
+import re
 from typing import Any, Dict, List, Literal, Optional, Tuple
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
@@ -160,3 +160,49 @@ def lcs_event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
 
 def diff_events(buggy: Event, patched: Event, **kwargs):
     return DeepDiff(buggy.dump(), patched.dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, ignore_private_variables=False, exclude_paths=["root['seen_variables']['transform']"], **kwargs)
+
+_BRACKETED_NAME_RE = re.compile(r"\[['\"]([^'\"]+)['\"]\]")
+_VAR_NAME_INDEX = 1
+
+def filter_based_on_vars_at_current_line(
+    diffs_by_kind: Dict[str, Any], event: Event
+) -> Dict[str, Any]:
+
+    referenced_vars = set(event.vars_used or []) | set(event.vars_defined or [])
+    filtered: Dict[str, Dict[str, Any]] = {}
+
+    for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
+        for full_path, change_payload in changes_for_kind.items():
+            tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+            var_name = tokens[_VAR_NAME_INDEX]
+            if var_name in referenced_vars:
+                filtered.setdefault(change_kind, {})[full_path] = change_payload
+
+    return filtered
+
+def filter_based_on_type_changes(diffs_by_kind: Dict[str, Any]) -> Dict[str, Any]:
+    n_type_changes = len(diffs_by_kind.keys())
+    if n_type_changes < 2:
+        return diffs_by_kind
+    
+    assert "type_changes" in diffs_by_kind
+    filtered = {}
+    for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
+        if change_kind == "type_changes":
+            filtered[change_kind] = changes_for_kind
+    return filtered
+    
+def filter_based_on_used_vars(
+    diffs_by_kind: Dict[str, Any], event: Event
+) -> Dict[str, Any]:
+    referenced_vars = set(event.vars_used or [])
+    filtered: Dict[str, Dict[str, Any]] = {}
+
+    for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
+        for full_path, change_payload in changes_for_kind.items():
+            tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+            var_name = tokens[_VAR_NAME_INDEX]
+            if var_name in referenced_vars:
+                filtered.setdefault(change_kind, {})[full_path] = change_payload
+
+    return filtered
