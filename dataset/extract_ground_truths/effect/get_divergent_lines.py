@@ -4,7 +4,11 @@ from pathlib import Path
 from dataset.extract_ground_truths.effect.trace_util import (
     Traces,
     diff_events,
-    lcs_event_match
+    lcs_event_match,
+    filter_based_on_type_changes,
+    filter_based_on_used_vars,
+    filter_based_on_vars_at_current_line,
+    count_changed_vars
 )
 from dataset.extract_ground_truths.effect.process_agent_patch import (
     get_diff_info_per_instance
@@ -37,12 +41,21 @@ def main(instance_id, test_id=0):
             # Exit when event types differ, usually means test exception raised
             if buggy_event.event_type != patched_event.event_type:
                 break
-            diff = diff_events(buggy_event, patched_event)
+            diff = diff_events(buggy_event, patched_event)            
             print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
             print('In function: ', patched_block.function_name)
             print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
             print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
+            
             if 'seen_variables' in diff.affected_root_keys:
+                n_changed = count_changed_vars(diff)
+                filtered_diff = diff.copy()
+                for filter_func in (filter_based_on_vars_at_current_line, filter_based_on_type_changes, filter_based_on_used_vars):
+                    filtered_diff = filter_func(filtered_diff, patched_event)
+                    n_changed = count_changed_vars(filtered_diff)
+                    if n_changed == 1:
+                        diff = filtered_diff.copy()
+                        break
                 print('Diff: ', diff)
                 # assert patched_block.params == buggy_block.params, f"CHECK: Function parameters differ in prepatch and postpatch, buggy: {buggy_block.params}, patched: {patched_block.params}"
                 print('Function parameters: ', patched_block.params)
