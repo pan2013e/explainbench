@@ -159,4 +159,4 @@ def lcs_event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
     return pairs
 
 def diff_events(buggy: Event, patched: Event, **kwargs):
-    return DeepDiff(buggy.model_dump(), patched.model_dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, exclude_paths=["root['line_number']", "root['event_id']", "root['seen_variables']['transform']"], **kwargs)
+    return DeepDiff(buggy.dump(), patched.dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, ignore_private_variables=False, exclude_paths=["root['seen_variables']['transform']"], **kwargs)
