@@ -1,17 +1,17 @@
 import os
 
+from pathlib import Path
 from dataset.extract_ground_truths.effect.trace_util import (
     Traces,
     diff_events,
     lcs_event_match
 )
-from dataset.extract_ground_truths.effect.dataset_util import (
-    get_diff_info_per_agent
+from dataset.extract_ground_truths.effect.process_agent_patch import (
+    get_diff_info_per_instance
 )
 from execution.util import get_fail_to_pass_tests
 
-BASE = "logs/run_evaluation/validate-gold.1021/gold"
-get_diff_info = get_diff_info_per_agent('mock')
+BASE = "/home/zhiyuan/explainbench/logs/run_evaluation/validate-gold.1021/gold"
 
 def load_trace_pair(instance_id, diff_lines, test_id=0):
     # test_id refers to the index of FAIL_TO_PASS tests
@@ -23,7 +23,10 @@ def load_trace_pair(instance_id, diff_lines, test_id=0):
     return buggy_traces, patched_traces
 
 def main(instance_id, test_id=0):
-    diff_lines = get_diff_info(instance_id)['diff_lines']
+    diff_lines = get_diff_info_per_instance(
+        Path(BASE),
+        Path(instance_id)
+    )
     # use the first FAIL_TO_PASS test case, should allow specifying test_id later
     buggy_traces, patched_traces = load_trace_pair(instance_id, diff_lines, test_id)
     for buggy_block, patched_block in zip(buggy_traces, patched_traces):
@@ -31,6 +34,9 @@ def main(instance_id, test_id=0):
         assert buggy_block.function_name == patched_block.function_name
         for buggy_event, patched_event in lcs_event_match(buggy_block, patched_block):
             assert buggy_event.statement == patched_event.statement
+            # Exit when event types differ, usually means test exception raised
+            if buggy_event.event_type != patched_event.event_type:
+                break
             diff = diff_events(buggy_event, patched_event)
             print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
             print('In function: ', patched_block.function_name)
@@ -47,4 +53,4 @@ def main(instance_id, test_id=0):
             input("....")
 
 if __name__ == "__main__":
-    main("astropy__astropy-12907")
+    main("astropy__astropy-7166")
