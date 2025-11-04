@@ -206,3 +206,10 @@ def filter_based_on_used_vars(
                 filtered.setdefault(change_kind, {})[full_path] = change_payload
 
     return filtered
+
+def count_changed_vars(diffs_by_kind: Dict[str, Any]) -> int:
+    n_var = 0
+    for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
+        for full_path, change_payload in changes_for_kind.items():
+            n_var += 1
+    return n_var 
