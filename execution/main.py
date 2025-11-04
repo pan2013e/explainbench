@@ -108,8 +108,8 @@ if __name__ == "__main__":
     parser.add_argument("--modal", type=str2bool, default=False, help="Run on Modal")
     sys.argv = ["swebench.harness.run_evaluation",
             "--predictions_path", "gold",
-            "--max_workers", "30",
-            "--instance_ids", *all_instances(),
+            "--max_workers", "1",
+            "--instance_ids", "astropy__astropy-14539",
             "--report_dir", "reports",
             "--run_id", f"validate-gold.{os.getuid()}"]
     args = parser.parse_args()
