@@ -1,12 +1,10 @@
-import os
 import json
+import os
 import re
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, Iterator, List, Literal, Optional, Tuple
+
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
-
-import re
-from typing import Any, Dict, Iterator, Tuple, Callable
 
 def load_traces(file_path):
     with open(file_path, 'r') as f:
