@@ -14,10 +14,13 @@ datasets.disable_progress_bars()
 SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+def get_tmp_tracer_path():
+    return f'/tmp/py-tracer.{os.getpid()}.tar'
+
 def prepare_tracer():
     src = Path(f"{DIR}/../py-tracer")
     dst = PurePosixPath('/root/py-tracer')
-    tmp_dir = f'/tmp/py-tracer.tar'
+    tmp_dir = get_tmp_tracer_path()
     if os.path.exists(tmp_dir):
         os.unlink(tmp_dir)
     with tarfile.open(tmp_dir, 'w') as tar:

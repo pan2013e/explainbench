@@ -1,4 +1,5 @@
 from pathlib import Path, PurePosixPath
+from typing import Literal
 
 from dowhen import when
 from swebench.harness.run_evaluation import (
@@ -11,10 +12,14 @@ from swebench.harness.docker_utils import (
 )
 from swebench.harness.utils import EvaluationError
 
-from execution.util import copy_directory_from_docker, get_fail_to_pass_tests
+from execution.util import (
+    copy_directory_from_docker,
+    get_fail_to_pass_tests,
+    get_tmp_tracer_path,
+)
 
 def install_tracer(container, logger):
-    with open('/tmp/py-tracer.tar', 'rb') as f:
+    with open(get_tmp_tracer_path(), 'rb') as f:
         data = f.read()
     container.put_archive('/root', data)
     logger.info("Tracer code copied to container")
@@ -104,7 +109,7 @@ def run_patched_write_script(instance_id, eval_file, test_spec):
 def run_patched_copy_out(container, log_dir):
     copy_directory_from_docker(container, PurePosixPath(f"/patched_traces"), log_dir)
 
-def monkey_patch():
+def monkey_patch(tool: Literal['tracer', 'inspector']='tracer'):
     # Skip docker communication after evaluation
     when(main, 569).do("client = None")
     # Install tracer and the pytest plugin
