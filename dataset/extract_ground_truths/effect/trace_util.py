@@ -169,15 +169,23 @@ def filter_based_on_vars_at_current_line(
 ) -> Dict[str, Any]:
 
     referenced_vars = set(event.vars_used or []) | set(event.vars_defined or [])
-    filtered: Dict[str, Dict[str, Any]] = {}
+    filtered: Dict[str, Dict[str, Any] | List[str]] = {}
 
     for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
-        for full_path, change_payload in changes_for_kind.items():
-            tokens = _BRACKETED_NAME_RE.findall(str(full_path))
-            var_name = tokens[_VAR_NAME_INDEX]
-            if var_name in referenced_vars:
-                filtered.setdefault(change_kind, {})[full_path] = change_payload
-
+        if isinstance(changes_for_kind, dict):
+            for full_path, change_payload in changes_for_kind.items():
+                tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+                var_name = tokens[_VAR_NAME_INDEX]
+                if var_name in referenced_vars:
+                    filtered.setdefault(change_kind, {})[full_path] = change_payload
+        else:
+            for change_payload in changes_for_kind:
+                tokens = _BRACKETED_NAME_RE.findall(str(change_payload))
+                var_name = tokens[_VAR_NAME_INDEX]
+                if var_name in referenced_vars:
+                    if change_kind not in filtered:
+                        filtered[change_kind] = []
+                    filtered[change_kind].append(change_payload)
     return filtered
 
 # the event param is unused here
@@ -201,17 +209,27 @@ def filter_based_on_used_vars(
     filtered: Dict[str, Dict[str, Any]] = {}
 
     for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
-        for full_path, change_payload in changes_for_kind.items():
-            tokens = _BRACKETED_NAME_RE.findall(str(full_path))
-            var_name = tokens[_VAR_NAME_INDEX]
-            if var_name in referenced_vars:
-                filtered.setdefault(change_kind, {})[full_path] = change_payload
-
+        if isinstance(changes_for_kind, dict):
+            for full_path, change_payload in changes_for_kind.items():
+                tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+                var_name = tokens[_VAR_NAME_INDEX]
+                if var_name in referenced_vars:
+                    filtered.setdefault(change_kind, {})[full_path] = change_payload
+        else:
+            for change_payload in changes_for_kind:
+                tokens = _BRACKETED_NAME_RE.findall(str(change_payload))
+                var_name = tokens[_VAR_NAME_INDEX]
+                if var_name in referenced_vars:
+                    if change_kind not in filtered:
+                        filtered[change_kind] = []
+                    filtered[change_kind].append(change_payload)
     return filtered
 
 def count_changed_vars(diffs_by_kind: Dict[str, Any]) -> int:
     n_var = 0
     for change_kind, changes_for_kind in (diffs_by_kind or {}).items():
-        for full_path, change_payload in changes_for_kind.items():
-            n_var += 1
-    return n_var 
+        if isinstance(changes_for_kind, dict):
+            for full_path, change_payload in changes_for_kind.items():
+                n_var += 1
+            return n_var
+        return len(changes_for_kind) 
