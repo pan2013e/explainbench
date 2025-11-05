@@ -15,7 +15,7 @@ from dataset.extract_ground_truths.effect.process_agent_patch import (
 )
 from execution.util import get_fail_to_pass_tests
 
-BASE = "/home/zhiyuan/explainbench/logs/run_evaluation/validate-gold.1021/gold"
+BASE = "/home/yusuf/explainbench/logs/run_evaluation/validate-gold.1020/gold"
 
 def load_trace_pair(instance_id, diff_lines, test_id=0):
     # test_id refers to the index of FAIL_TO_PASS tests
@@ -50,7 +50,7 @@ def main(instance_id, test_id=0):
             if 'seen_variables' in diff.affected_root_keys:
                 n_changed = count_changed_vars(diff)
                 filtered_diff = diff.copy()
-                for filter_func in (filter_based_on_vars_at_current_line, filter_based_on_type_changes, filter_based_on_used_vars):
+                for filter_func in (filter_based_on_vars_at_current_line, filter_based_on_used_vars):
                     filtered_diff = filter_func(filtered_diff, patched_event)
                     n_changed = count_changed_vars(filtered_diff)
                     if n_changed == 1:
