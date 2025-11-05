@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
-from execution.monkey_patch import monkey_patch
+from execution.monkey_patch.trace import monkey_patch
 from execution.util import all_instances, prepare_tracer
 
 def main(**kwargs):
