@@ -284,7 +284,7 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
     # Step 1
     step1 = filter_added_dict_based_on_seen_variables(diffs_by_kind, event)
     n1 = count_changed_vars(step1)
-    if n1 == 0 or n1 == 1:
+    if n1 <= 1:
         return step1 or {}
 
     # Step 3
