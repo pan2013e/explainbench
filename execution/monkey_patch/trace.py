@@ -31,7 +31,7 @@ def get_injected_script(instance_id: str, mode: str):
             'conda activate testbed\n'
             'python -m pip install -e /root/py-tracer\n'
             'SITEPKG=$(python -c "import site;print(site.getsitepackages()[0])")\n'
-            f'echo \'_path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
+            f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACER=1\n'
             f'export INSTANCE_ID={instance_id}\n'
             f'export TRACER_OUTPUT_DIR=/{mode}_traces'
