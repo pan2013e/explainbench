@@ -8,6 +8,7 @@ from io import BytesIO
 from pathlib import PurePosixPath, Path
 from datasets import load_dataset
 from docker.models.containers import Container
+from tracer_plugin.django_plugin import FAIL_TO_PASS_TESTS as DJANGO_FAIL_TO_PASS_TESTS
 
 datasets.disable_progress_bars()
 
@@ -36,6 +37,8 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
         tar.extractall(path=dst_path)
 
 def get_fail_to_pass_tests(instance_id: str) -> list[str]:
+    if 'django__django' in instance_id:
+        return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
     return json.loads(instance['FAIL_TO_PASS'])
 
