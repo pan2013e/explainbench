@@ -108,7 +108,7 @@ def run_patched_write_script(instance_id, eval_file, test_spec):
 def run_patched_copy_out(container, log_dir):
     copy_directory_from_docker(container, PurePosixPath(f"/patched_traces"), log_dir)
 
-def monkey_patch():
+def monkey_patch_execution():
     # Skip docker communication after evaluation
     when(main, 569).do("client = None")
     # Install tracer and the pytest plugin
@@ -119,4 +119,4 @@ def monkey_patch():
     when(run_instance, 200).do(run_patched_write_script)
     when(run_instance, 209).do(run_patched_copy_out)
     when(run_instance, 211).do('test_output_path = log_dir / "test_output_patched.txt"')
-    print('Monkey patch applied')
+    print('Monkey patch applied to run_instance and main in swebench.harness.run_evaluation')
