@@ -4,17 +4,19 @@ import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
-from execution.monkey_patch.trace import monkey_patch
+from execution.monkey_patch.dataset import monkey_patch_dataset
+from execution.monkey_patch.trace import monkey_patch_execution
 from execution.util import all_instances, prepare_tracer, instances_by_repo
 
 def main(**kwargs):
-    monkey_patch()
+    monkey_patch_dataset()
+    monkey_patch_execution()
     prepare_tracer()
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
         open_file_limit=4096,
-        timeout=3600,
+        timeout=7200,
         force_rebuild=False,
         cache_level="env",
         clean=False,

@@ -4,11 +4,13 @@ import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
-from execution.monkey_patch.inspect import monkey_patch
+from execution.monkey_patch.dataset import monkey_patch_dataset
+from execution.monkey_patch.inspect import monkey_patch_execution
 from execution.util import all_instances, prepare_tracer
 
 def main(**kwargs):
-    monkey_patch(**kwargs)
+    monkey_patch_dataset()
+    monkey_patch_execution(**kwargs)
     prepare_tracer()
     for key in ['bp_file', 'pre_bp_line', 'post_bp_line', 'expr', 'pre_count', 'post_count', 'inspector_mode']:
         kwargs.pop(key, None)
