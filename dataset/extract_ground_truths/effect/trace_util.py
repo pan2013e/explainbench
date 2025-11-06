@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, Iterator, List, Literal, Optional, Tuple
 
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
+from dataset.extract_ground_truths.effect.diff_util import sequence_match
 
 def load_traces(file_path):
     with open(file_path, 'r') as f:
@@ -125,38 +126,25 @@ class Traces:
                 continue
             yield block
 
-# TODO: Here LCS does in-block alignment. Function-level alignment may still be necessary.
-def lcs_event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
-    '''
-    After the exclusion process, the remaining code is the same between buggy and patched. However, after the diff lines are encountered, the traces may still differ because the patch can change the control flow (e.g., leading to different branching or different number of loop iterations). To align the remaining events within a function block, we use the Longest Common Subsequence algorithm to find matching events based on their statements.
-    
-    TODO: Locate variables bounded inside the loops. These variables should be ignored in state diffing since they may differ due to different loop iterations.
-    '''
-    def eq(buggy: Event, patched: Event) -> bool:
-        return buggy.statement == patched.statement
-    # the buggy and patched events after exclusion
-    buggy = [event for event in buggy_block]
-    patched = [event for event in patched_block]
-    n, m = len(buggy), len(patched)
-    dp = [[0]*(m+1) for _ in range(n+1)]
-    for i in range(n):
-        for j in range(m):
-            if eq(buggy[i], patched[j]):
-                dp[i+1][j+1] = dp[i][j] + 1
-            else:
-                dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
-    pairs = [] # type: List[Tuple[Event, Event]]
-    i, j = n, m
-    while i > 0 and j > 0:
-        if eq(buggy[i-1], patched[j-1]):
-            pairs.append((buggy[i-1], patched[j-1]))
-            i -= 1
-            j -= 1
-        elif dp[i-1][j] >= dp[i][j-1]:
-            i -= 1
-        else:
-            j -= 1
-    pairs.reverse()
+def function_match(buggy_traces: Traces, patched_traces: Traces):
+    buggy_blocks = [block for block in buggy_traces]
+    patched_blocks = [block for block in patched_traces]
+    idx_pairs = sequence_match(
+        buggy_blocks, patched_blocks,
+        key=lambda block: block.function_name
+    )
+    print(idx_pairs)
+    pairs = [(buggy_blocks[i], patched_blocks[j]) for i, j in idx_pairs]
+    return pairs  
+
+def event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
+    buggy_events = [event for event in buggy_block]
+    patched_events = [event for event in patched_block]
+    idx_pairs = sequence_match(
+        buggy_events, patched_events,
+        key=lambda event: event.statement
+    )
+    pairs = [(buggy_events[i], patched_events[j]) for i, j in idx_pairs]
     return pairs
 
 def diff_events(buggy: Event, patched: Event, **kwargs):
