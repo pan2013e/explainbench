@@ -15,7 +15,7 @@ def main(**kwargs):
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
-        open_file_limit=8192,
+        open_file_limit=4096,
         timeout=3600,
         force_rebuild=False,
         cache_level="env",

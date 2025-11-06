@@ -5,7 +5,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
 from execution.monkey_patch.trace import monkey_patch
-from execution.util import all_instances, prepare_tracer
+from execution.util import all_instances, prepare_tracer, instances_by_repo
 
 def main(**kwargs):
     monkey_patch()
@@ -13,7 +13,7 @@ def main(**kwargs):
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
-        open_file_limit=8192,
+        open_file_limit=4096,
         timeout=3600,
         force_rebuild=False,
         cache_level="env",
@@ -57,8 +57,8 @@ if __name__ == "__main__":
     )
     sys.argv = ["swebench.harness.run_evaluation",
             "--predictions_path", "gold",
-            "--max_workers", "1",
-            "--instance_ids", "astropy__astropy-7166",
-            "--run_id", f"validate-gold.{os.getuid()}"]
+            "--max_workers", "10",
+            "--instance_ids", *instances_by_repo(['astropy', 'django']),
+            "--run_id", f"trace.validate-gold.{os.getuid()}"]
     args = parser.parse_args()
     main(**vars(args))
