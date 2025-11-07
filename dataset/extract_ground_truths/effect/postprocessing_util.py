@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Optional, Set, Dict, Callable, Any, Iterator, Tuple
+from typing import Iterable, Optional, Set, Dict, Callable, Any, Iterator, Tuple, MutableMapping
 from collections.abc import Sequence
 
 BASE_IGNORE_FIELDS: Set[str] = {"vars_used", "vars_defined"}
@@ -133,9 +133,28 @@ def filter_based_on_type_changes(diff_dict: Dict[str, Any], event) -> Dict[str, 
         return {"type_changes": diff_dict["type_changes"]}
     return diff_dict
 
+def filter_docstring_changes(diff_dict: Dict[str, Any], event) ->Dict[str, Any]:
+    """
+    Filter the docstring changes using heuristics number of words
+    """
+    MAX_WORDS = 50
+    out: Dict[str, Any] = {}
+    if "values_changed" in diff_dict:
+        for change_key, change_val in diff_dict.items():
+            if isinstance(change_val, dict):
+                kept = {}
+                for full_path, values_dict in change_val.items():
+                    if isinstance(values_dict["new_value"], str):
+                        if len(values_dict["new_value"].split()) < MAX_WORDS or len(values_dict["old_value"].split()) < MAX_WORDS:
+                            kept[full_path] = values_dict
+                if kept:
+                    out[change_key] = kept
+    return out
+
 def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
     """
     Pipeline:
+      0) omit the docstring changes
       1) filter_added_dict_based_on_seen_variables
       2) if empty OR <=1 change -> return
       3) filter_based_on_vars_at_current_line
@@ -148,8 +167,11 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
     if not diffs_by_kind:
         return {}
 
+    # Step 0
+    step0 = filter_docstring_changes(diffs_by_kind, event)
+
     # Step 1
-    step1 = filter_added_dict_based_on_seen_variables(diffs_by_kind, event)
+    step1 = filter_added_dict_based_on_seen_variables(step0, event)
     n1 = count_changed_vars(step1)
     if n1 <= 1:
         return step1 or {}
@@ -167,3 +189,44 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
         return step5 or {}
 
     return filter_based_on_type_changes(step5, event)
+
+# EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
+#     "astropy__astropy-14182": {
+#         "astropy.table.connect.TableRead": {"__doc__", "description"}
+#     },
+# }
+
+# def make_excluder() -> Callable[[str, Dict[str, Any]], Dict[str, Any]]:
+#     def _recursive_clean(data: Any) -> None:
+#         """
+#         Recursively traverse `data` and delete attributes according to `EXCLUSION_RULES`.
+#         """
+#         if isinstance(data, MutableMapping):
+#             # Check if this dict represents an object or function
+#             obj_name = data.get("py/object") or data.get("py/function")
+#             if isinstance(obj_name, str) and obj_name in EXCLUSION_RULES:
+#                 for attr in EXCLUSION_RULES[obj_name]:
+#                     if attr in data:
+#                         del data[attr]
+
+#             # Continue recursion for nested structures
+#             for value in list(data.values()):
+#                 if isinstance(value, (MutableMapping, list)):
+#                     _recursive_clean(value)
+
+#         elif isinstance(data, list):
+#             for item in data:
+#                 if isinstance(item, (MutableMapping, list)):
+#                     _recursive_clean(item)
+
+#     def excluder(instance_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+#         """
+#         Apply exclusion rules for a specific instance.
+#         """
+#         if instance_id not in EXCLUSION_RULES:
+#             return data
+#         _recursive_clean(data)
+#         return data
+
+#     return excluder
+
