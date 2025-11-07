@@ -6,7 +6,7 @@ from dataset.extract_ground_truths.effect.trace_util import (
     event_match,
     function_match,
 )
-from postprocessing_util import(
+from dataset.extract_ground_truths.effect.postprocessing_util import(
     apply_trace_filters, 
 )
 from dataset.extract_ground_truths.effect.process_agent_patch import (

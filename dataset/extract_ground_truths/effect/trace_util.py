@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
 from dataset.extract_ground_truths.effect.diff_util import sequence_match
-from postprocessing_util import get_ignore_order_func
+from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_order_func
 
 def load_traces(file_path):
     with open(file_path, 'r') as f:
