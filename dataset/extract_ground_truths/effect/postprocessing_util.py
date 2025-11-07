@@ -142,17 +142,12 @@ def filter_docstring_changes(diff_dict: Dict[str, Any]) ->Dict[str, Any]:
     if "values_changed" in diff_dict:
         for change_key, change_val in diff_dict.items():
             if isinstance(change_val, dict):
-                kept = {}
                 for full_path, values_dict in change_val.items():
-                    try:
-                        if isinstance(values_dict, dict) and isinstance(values_dict.get("new_value", None), str):
-                            if len(values_dict["new_value"].split()) < MAX_WORDS or len(values_dict["old_value"].split()) < MAX_WORDS:
-                                kept[full_path] = values_dict
-                    except:
-                        breakpoint()
-                if kept:
-                    out[change_key] = kept
-    return out
+                    if (isinstance(values_dict, dict) and 
+                        isinstance(values_dict.get("new_value", None), str) and 
+                        (len(values_dict["new_value"].split()) > MAX_WORDS or len(values_dict["old_value"].split()) > MAX_WORDS)):
+                            del change_val[full_path]
+    return diff_dict
 
 def extract_attribute_name(full_path: str) -> str:
     tokens = _BRACKETED_NAME_RE.findall(str(full_path))
