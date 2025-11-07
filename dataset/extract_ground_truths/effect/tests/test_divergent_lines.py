@@ -15,7 +15,6 @@ if __name__ == "__main__":
     try:
         test_astropy_7166()
         test_astropy_12907()
-        print("all tests passed")
     except:
         import pdb
         pdb.post_mortem()
