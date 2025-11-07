@@ -76,6 +76,7 @@ for idx in range({max_iter}):
 @dataclass
 class FunctionInfo():
     file: str
+    class_name: str | None
     func_name: str
 
 @dataclass
@@ -90,6 +91,8 @@ class IOInfo():
         }
 
 class AncestryVisitor(ast.NodeVisitor):
+    ATTR_NAME="included_class"
+
     def __init__(self):
         self.parent_stack = []
     
@@ -99,7 +102,12 @@ class AncestryVisitor(ast.NodeVisitor):
         self.parent_stack.pop()
     
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        node.__setattr__("ancestor_types", [type(elem) for elem in self.parent_stack])
+        class_ancestry = [
+            elem.name for elem in self.parent_stack
+            if isinstance(elem, ast.ClassDef)
+        ]
+        class_name = None if len(class_ancestry) == 0 else class_ancestry[-1]
+        node.__setattr__(AncestryVisitor.ATTR_NAME, class_name)
 
 def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
     bugloc_infos: list[dict] = []
@@ -115,9 +123,13 @@ def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
         if m is None:
             print(f"Function name {buggy_func_full_name} could not be parsed! Check if this is expected.")
             continue
+        file_name, func_name = m.group(1), m.group(2)
+        m = re.match(rf"{instance_id}/(.+)::class:(.+)\.function", buggy_func_full_name)
+        class_name = None if m is None else m.group(2)
         buggy_methods.append(FunctionInfo(
-            file=m.group(1),
-            func_name=m.group(2)
+            file=file_name,
+            class_name=class_name,
+            func_name=func_name
         ))
     return buggy_methods
 
@@ -142,19 +154,31 @@ def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> str
         if (isinstance(node, ast.FunctionDef) and
             node.name == target_func.func_name)
     ]
-    assert len(name_match_funcs) == 1, "Multiple functions matching name in file"
+    AncestryVisitor().visit(ast_root)
+    if target_func.class_name != "":
+        name_match_funcs = [
+            node for node in name_match_funcs
+            if node.__getattribute__(AncestryVisitor.ATTR_NAME) == target_func.class_name
+        ]
+    assert len(name_match_funcs) == 1, f"Multiple functions matching {target_func} in file: {name_match_funcs}"
+
     target_func_node = name_match_funcs[0]
-    target_func_node.body.insert(0, ast.Import([ast.alias("pdb")])) # import pdb
-    target_func_node.body.insert(1, ast.Expr(ast.Call(ast.Attribute(ast.Name("pdb"), "set_trace"), [], [])))
+    target_func_node.body.insert(0, ast.Expr(ast.Call(ast.Name("breakpoint"), [], [])))
     injected_file_content = ast.unparse(ast_root)
     with NamedTemporaryFile(
         buffering=0, prefix="instrumented-func-", suffix=".py"
     ) as f:
         f.write(injected_file_content.encode())
         copy_to_container(container, Path(f.name), "/testbed" / PurePosixPath(target_func.file))
-    ast_root = AncestryVisitor().visit(ast_root)
-    ancestor_types = target_func_node.__getattribute__("ancestor_types")
-    qual_func_name = ("self." if (ast.ClassDef) in ancestor_types else "") + target_func.func_name
+    arg_names = [arg.arg for arg in target_func_node.args.args]
+    qualifier = ""
+    if arg_names[0] == "self":
+        qualifier = "self."
+    elif arg_names[0] == "cls":
+        qualifier = "cls."
+    elif target_func.class_name is not None:
+        qualifier = target_func.class_name + "."
+    qual_func_name = qualifier + target_func.func_name
     return qual_func_name
 
 def get_test(instance_id: str) -> str:
@@ -223,6 +247,12 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
 
     buggy_funcs = get_buggy_methods(instance_id)
     for buggy_func in buggy_funcs:
+        class_name = "" if buggy_func.class_name is None else buggy_func.class_name
+        func_full_name = buggy_func.file.removesuffix(".py").replace("/", ".") + "." + class_name + "." + buggy_func.func_name
+        save_file = save_bug_dir / (func_full_name + ".json")
+        if save_file.exists():
+            print(save_file, "exists! Skipping")
+            continue
         try:
             buggy_io = get_function_io(
                 instance_id = instance_id,
@@ -240,8 +270,6 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
         except Exception as e:
             print(f"Oh no, exception for {instance_id} - {type(e)}: {e}")
             continue
-        func_full_name = buggy_func.file.removesuffix(".py").replace("/", ".") + "." + buggy_func.func_name
-        save_file = save_bug_dir / (func_full_name + ".json")
         save_file.write_text(json.dumps({
             "buggy_io": [info.to_dict() for info in buggy_io],
             "fixed_io": [info.to_dict() for info in fixed_io],
@@ -252,7 +280,7 @@ if __name__ == '__main__':
     with open("dataset/context/intent_pbtassertion.json") as f:
         all_test_info = json.load(f)
     instance_list = [e["instance_id"] for e in all_test_info 
-                     if "sympy" in e["instance_id"] and int(e["instance_id"].split("-")[-1]) >= 13878]
+                     if "sympy" in e["instance_id"]]
     
     for target_instance in instance_list:
         print(f"========== [{target_instance}] ==========")
