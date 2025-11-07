@@ -130,7 +130,6 @@ def function_match(buggy_traces: Traces, patched_traces: Traces):
         buggy_blocks, patched_blocks,
         key=lambda block: block.function_name
     )
-    print(idx_pairs)
     pairs = [(buggy_blocks[i], patched_blocks[j]) for i, j in idx_pairs]
     return pairs  
 
