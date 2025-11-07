@@ -144,14 +144,33 @@ def filter_docstring_changes(diff_dict: Dict[str, Any], event) ->Dict[str, Any]:
             if isinstance(change_val, dict):
                 kept = {}
                 for full_path, values_dict in change_val.items():
-                    if isinstance(values_dict["new_value"], str):
-                        if len(values_dict["new_value"].split()) < MAX_WORDS or len(values_dict["old_value"].split()) < MAX_WORDS:
-                            kept[full_path] = values_dict
+                    try:
+                        if isinstance(values_dict, dict) and isinstance(values_dict.get("new_value", None), str):
+                            if len(values_dict["new_value"].split()) < MAX_WORDS or len(values_dict["old_value"].split()) < MAX_WORDS:
+                                kept[full_path] = values_dict
+                    except:
+                        breakpoint()
                 if kept:
                     out[change_key] = kept
     return out
 
-def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
+def extract_attribute_name(full_path: str) -> str:
+    tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+    return tokens[-1]
+
+def filter_hash_attribute(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def keep(kind: str, path: str, payload: Any)  -> bool:
+        attribute_name = extract_attribute_name(path)
+        return attribute_name == "_hash"
+    return _filter_by_predicate(diff_dict, keep)
+
+def filter_perinstance(diffs_by_kind, instance_id: str):
+    if instance_id == "astropy__astropy7336":
+        diffs_by_kind = filter_hash_attribute(diffs_by_kind)
+    
+    return diffs_by_kind
+
+def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) -> Dict[str, Any]:
     """
     Pipeline:
       0) omit the docstring changes
@@ -166,6 +185,9 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event) -> Dict[str, Any]:
     """
     if not diffs_by_kind:
         return {}
+    
+    # instance unique filtering
+    step0 = filter_perinstance(diffs_by_kind, instance_id)
 
     # Step 0
     step0 = filter_docstring_changes(diffs_by_kind, event)
