@@ -124,7 +124,7 @@ def filter_based_on_used_vars(diff_dict: Dict[str, Any], event) -> Dict[str, Any
 
     return _filter_by_predicate(diff_dict, keep)
 
-def filter_based_on_type_changes(diff_dict: Dict[str, Any], event) -> Dict[str, Any]:
+def filter_based_on_type_changes(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Last resort: if >1 changes remain and 'type_changes' exists, keep ONLY 'type_changes'.
     Otherwise return input unchanged.
@@ -133,7 +133,7 @@ def filter_based_on_type_changes(diff_dict: Dict[str, Any], event) -> Dict[str, 
         return {"type_changes": diff_dict["type_changes"]}
     return diff_dict
 
-def filter_docstring_changes(diff_dict: Dict[str, Any], event) ->Dict[str, Any]:
+def filter_docstring_changes(diff_dict: Dict[str, Any]) ->Dict[str, Any]:
     """
     Filter the docstring changes using heuristics number of words
     """
@@ -159,58 +159,54 @@ def extract_attribute_name(full_path: str) -> str:
     return tokens[-1]
 
 def filter_hash_attribute(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
-    def keep(kind: str, path: str, payload: Any)  -> bool:
-        attribute_name = extract_attribute_name(path)
-        return attribute_name == "_hash"
+    def keep(kind: str, path: str, payload: Any) -> bool:
+        return extract_attribute_name(path) == "_hash"
     return _filter_by_predicate(diff_dict, keep)
 
-def filter_perinstance(diffs_by_kind, instance_id: str):
+def filter_perinstance(diffs_by_kind: Dict[str, Any], instance_id: str) -> Dict[str, Any]:
     if instance_id == "astropy__astropy7336":
-        diffs_by_kind = filter_hash_attribute(diffs_by_kind)
-    
+        return filter_hash_attribute(diffs_by_kind)
     return diffs_by_kind
 
 def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) -> Dict[str, Any]:
     """
-    Pipeline:
-      0) omit the docstring changes
-      1) filter_added_dict_based_on_seen_variables
-      2) if empty OR <=1 change -> return
+    Pipeline (early-exits when <=1 change remains):
+      0) instance-specific tweaks
+      1) omit/trim docstring 'values_changed' entries via heuristic
+      2) filter_added_dict_based_on_seen_variables
       3) filter_based_on_vars_at_current_line
-      4) if <=1 change -> return
-      5) filter_based_on_used_vars
-      6) last-resort: type_changes only if still >1 changes and key exists
+      4) filter_based_on_used_vars
+      5) last-resort: type_changes only (if still >1)
     Always returns a dict (possibly empty).
-    Focus is LineEvent; if event lacks expected fields, gracefully degrades to {}.
     """
     if not diffs_by_kind:
         return {}
-    
-    # instance unique filtering
-    step0 = filter_perinstance(diffs_by_kind, instance_id)
 
-    # Step 0
-    step0 = filter_docstring_changes(diffs_by_kind, event)
+    # Step 0: per-instance
+    cur = filter_perinstance(diffs_by_kind, instance_id)
 
-    # Step 1
-    step1 = filter_added_dict_based_on_seen_variables(step0, event)
-    n1 = count_changed_vars(step1)
-    if n1 <= 1:
-        return step1 or {}
+    # Step 1: docstring-specific trimming (returns {} if nothing applicable)
+    cur = filter_docstring_changes(cur)
+    if count_changed_vars(cur) <= 1:
+        return cur or {}
+
+    # Step 2
+    cur = filter_added_dict_based_on_seen_variables(cur, event)
+    if count_changed_vars(cur) <= 1:
+        return cur or {}
 
     # Step 3
-    step3 = filter_based_on_vars_at_current_line(step1, event)
-    n3 = count_changed_vars(step3)
-    if n3 <= 1:
-        return step3 or {}
+    cur = filter_based_on_vars_at_current_line(cur, event)
+    if count_changed_vars(cur) <= 1:
+        return cur or {}
+
+    # Step 4
+    cur = filter_based_on_used_vars(cur, event)
+    if count_changed_vars(cur) <= 1:
+        return cur or {}
 
     # Step 5
-    step5 = filter_based_on_used_vars(step3, event)
-    n5 = count_changed_vars(step5)
-    if n5 <= 1:
-        return step5 or {}
-
-    return filter_based_on_type_changes(step5, event)
+    return filter_based_on_type_changes(cur)
 
 # EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
 #     "astropy__astropy-14182": {
