@@ -112,7 +112,9 @@ def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
     buggy_methods = []
     for buggy_func_full_name in target_bugloc_info[0]["buggy_function_names"]:
         m = re.match(rf"{instance_id}/(.+)::.*function:(.+)", buggy_func_full_name)
-        assert m is not None, buggy_func_full_name
+        if m is None:
+            print(f"Function name {buggy_func_full_name} could not be parsed! Check if this is expected.")
+            continue
         buggy_methods.append(FunctionInfo(
             file=m.group(1),
             func_name=m.group(2)
@@ -203,7 +205,7 @@ def get_function_io(
         )
         pdb_script_loc = "/testbed/pdb_operator.py"
         inject_file(container, debugger_op_script, pdb_script_loc)
-        exec_result = container.exec_run(f"python {pdb_script_loc}", workdir="/testbed")
+        exec_result = container.exec_run(f"timeout 60s python {pdb_script_loc}", workdir="/testbed")
         return exec_result.output.decode()
 
     container, setup_info = setup(instance_id)
@@ -221,19 +223,23 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
 
     buggy_funcs = get_buggy_methods(instance_id)
     for buggy_func in buggy_funcs:
-        buggy_io = get_function_io(
-            instance_id = instance_id,
-            func_info = buggy_func,
-            max_iter = max_iter,
-            debug = debug
-        )
-        fixed_io = get_function_io(
-            instance_id = instance_id,
-            func_info = buggy_func,
-            from_fixed = True,
-            max_iter = max_iter,
-            debug = debug
-        )
+        try:
+            buggy_io = get_function_io(
+                instance_id = instance_id,
+                func_info = buggy_func,
+                max_iter = max_iter,
+                debug = debug
+            )
+            fixed_io = get_function_io(
+                instance_id = instance_id,
+                func_info = buggy_func,
+                from_fixed = True,
+                max_iter = max_iter,
+                debug = debug
+            )
+        except Exception as e:
+            print(f"Oh no, exception for {instance_id} - {type(e)}: {e}")
+            continue
         func_full_name = buggy_func.file.removesuffix(".py").replace("/", ".") + "." + buggy_func.func_name
         save_file = save_bug_dir / (func_full_name + ".json")
         save_file.write_text(json.dumps({
@@ -243,8 +249,12 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
 
 
 if __name__ == '__main__':
-    DEBUG=False
-    MY_INSTANCE_ID = "sympy__sympy-14531"
+    with open("dataset/context/intent_pbtassertion.json") as f:
+        all_test_info = json.load(f)
+    instance_list = [e["instance_id"] for e in all_test_info 
+                     if "sympy" in e["instance_id"] and int(e["instance_id"].split("-")[-1]) >= 13878]
     
-    main(MY_INSTANCE_ID, Path("./debugger_output/"))
+    for target_instance in instance_list:
+        print(f"========== [{target_instance}] ==========")
+        main(target_instance, Path("./debugger_output/"))
     
