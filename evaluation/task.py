@@ -13,11 +13,13 @@ from evaluation.util import (
     set_f1_score,
 )
 
+from test_execution.test_runner import evaluate_test
+
 __all__ = ['Task']
 
 Schema = TypeVar('Schema', bound=BaseModel)
 
-class Task(Generic[Schema], metaclass=EvalTimeout):
+class Task(Generic[Schema]):
     TEMPLATE: ClassVar[str] = (
         "An AI agent fixed a bug in a code repository and provided an explanation for the patch. "
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
@@ -139,7 +141,10 @@ class Intent:
         SCHEMA = schema.PBTAssertion
 
         @staticmethod
-        def eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
+        def text_eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
+            '''
+            Legacy syntax exact-match evaluation logic.
+            '''
             import ast
             def _norm_code(snippet: str) -> str:
                 try:
@@ -148,6 +153,19 @@ class Intent:
                     return snippet # leave invalid Python code alone, wrong anyway
             return [_norm_code(p.assertion) == _norm_code(gt['answers'][0])
                     for p in pred]
+        
+        @staticmethod
+        def eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
+            instance_id = gt['instance_id']
+            template_test = gt['test']
+            replace_answer = gt['answers'][0]
+            grades = []
+            for idx, indiv_pred in enumerate(pred):
+                predict_answer = indiv_pred.assertion
+                predicted_test = template_test.replace(replace_answer, predict_answer)
+                reproduce_result = evaluate_test(instance_id, predicted_test)
+                grades.append(reproduce_result.reproduced)
+            return grades
         
         @classmethod
         def predict(cls, model: Model, explanation: str, **kwargs):
