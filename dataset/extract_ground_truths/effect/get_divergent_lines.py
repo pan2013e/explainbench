@@ -7,7 +7,7 @@ from dataset.extract_ground_truths.effect.trace_util import (
     function_match,
 )
 from postprocessing_util import(
-    apply_trace_filters
+    apply_trace_filters, 
 )
 from dataset.extract_ground_truths.effect.process_agent_patch import (
     get_diff_info_per_instance
@@ -58,7 +58,7 @@ def main(instance_id, test_id=0):
             print('In function: ', patched_block.function_name)
             print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
             print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
-            filtered_diff = apply_trace_filters(diff, patched_event)            
+            filtered_diff = apply_trace_filters(diff, patched_event, instance_id)            
             if 'seen_variables' in diff.affected_root_keys and filtered_diff:
                 # return {
                 #     'buggy': buggy_event.model_dump(),
@@ -81,4 +81,4 @@ def main(instance_id, test_id=0):
 
 
 if __name__ == "__main__":
-    main("astropy__astropy-13453")
+    main("astropy__astropy-7336")
