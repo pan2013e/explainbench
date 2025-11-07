@@ -182,8 +182,6 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
 
     # Step 1: docstring-specific trimming (returns {} if nothing applicable)
     cur = filter_docstring_changes(cur)
-    if count_changed_vars(cur) <= 1:
-        return cur or {}
 
     # Step 2
     cur = filter_added_dict_based_on_seen_variables(cur, event)
