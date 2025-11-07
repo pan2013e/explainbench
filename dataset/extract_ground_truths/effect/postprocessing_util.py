@@ -7,6 +7,7 @@ BASE_IGNORE_FIELDS: Set[str] = {"vars_used", "vars_defined"}
 # "<reponame>": {"<target_field_name>"}
 IGNORE_ORDER_REGISTRY: Dict[str, Set[str]] = {
     "astropy": {"attr_names"},
+    "django": {"_property_names"}
 }
 
 def make_ignore_order_func(extra_fields: Optional[Iterable[str]] = None):
