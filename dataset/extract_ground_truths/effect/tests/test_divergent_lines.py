@@ -9,10 +9,13 @@ def test_astropy_7166():
 def test_astropy_12907():    
     expected = {'values_changed': {"root['seen_variables']['cright']['values'][2][1]": {'new_value': 0.0, 'old_value': 1.0}, "root['seen_variables']['cright']['values'][3][0]": {'new_value': 0.0, 'old_value': 1.0}}}
     line = main("astropy__astropy-12907", 0, True)
+    assert expected == line
+    
 if __name__ == "__main__":
     try:
         test_astropy_7166()
         test_astropy_12907()
+        print("all tests passed")
     except:
         import pdb
         pdb.post_mortem()
