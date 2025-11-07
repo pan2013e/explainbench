@@ -26,7 +26,7 @@ def load_trace_pair(instance_id, diff_lines, test_id=0):
     patched_traces = Traces(patched_path, diff_lines, 'patched')
     return buggy_traces, patched_traces
 
-def main(instance_id, test_id=0):
+def main(instance_id, test_id=0, is_return=False):
     diff_lines = get_diff_info_per_instance(
         Path(BASE),
         Path(instance_id)
@@ -72,6 +72,8 @@ def main(instance_id, test_id=0):
                     print('Buggy Variables: ', buggy_event.seen_variables)
                     print('====')
                     print('Patched Variables: ', patched_event.seen_variables)
+                if is_return:
+                    return filtered_diff
                 input('...')
             # input("....")
         #         is_break = True
@@ -81,4 +83,4 @@ def main(instance_id, test_id=0):
 
 
 if __name__ == "__main__":
-    main("astropy__astropy-7336")
+    main("astropy__astropy-7166", is_return=True)
