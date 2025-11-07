@@ -154,11 +154,11 @@ def extract_attribute_name(full_path: str) -> str:
 
 def filter_hash_attribute(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
     def keep(kind: str, path: str, payload: Any) -> bool:
-        return extract_attribute_name(path) == "_hash"
+        return extract_attribute_name(path) != "_hash"
     return _filter_by_predicate(diff_dict, keep)
 
 def filter_perinstance(diffs_by_kind: Dict[str, Any], instance_id: str) -> Dict[str, Any]:
-    if instance_id == "astropy__astropy7336":
+    if instance_id == "astropy__astropy-7336":
         return filter_hash_attribute(diffs_by_kind)
     return diffs_by_kind
 
