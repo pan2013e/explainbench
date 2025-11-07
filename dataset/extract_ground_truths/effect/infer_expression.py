@@ -8,11 +8,12 @@ class Expression(BaseModel):
     
     @field_validator('expr')
     def validate_expr(cls, v: str):
-        try:
-            ast.parse(v, mode='eval')
-        except SyntaxError as e:
-            raise ValueError(f"Invalid Python expression: {v}") from e
+        tree = ast.parse(v, mode='eval')
+        assert isinstance(tree, ast.Expression)
         return v
+    
+    def as_ast(self):
+        return ast.parse(self.expr, mode='eval')
 
 # TODO: Check the prompt quality and improve it if necessary.
 # TODO: Check if the answer candidates are too diverse
