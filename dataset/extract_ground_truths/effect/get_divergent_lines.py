@@ -65,10 +65,11 @@ def main(instance_id, test_id=0, is_return=False):
                 #     'patched': patched_event.model_dump(),
                 #     'filtered_diff': serialize(filtered_diff),
                 # }
-                print('Diff: ', filtered_diff)
+                if not is_return:
+                    print('Diff: ', filtered_diff)
                 # assert patched_block.params == buggy_block.params, f"CHECK: Function parameters differ in prepatch and postpatch, buggy: {buggy_block.params}, patched: {patched_block.params}"
                 # print('Function parameters: ', patched_block.params)
-                if hasattr(patched_event, 'seen_variables'):
+                if hasattr(patched_event, 'seen_variables') and not is_return:
                     print('Buggy Variables: ', buggy_event.seen_variables)
                     print('====')
                     print('Patched Variables: ', patched_event.seen_variables)
