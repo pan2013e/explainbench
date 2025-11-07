@@ -50,7 +50,8 @@ def main(instance_id, test_id=0):
             # Exit when event types differ, usually means test exception raised
             if buggy_event.event_type != patched_event.event_type:
                 break
-            diff = diff_events(buggy_event, patched_event)            
+            repo_name = instance_id.split("__")[0]
+            diff = diff_events(buggy_event, patched_event, repo_name)            
             print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
             print('In function: ', patched_block.function_name)
             print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
@@ -78,4 +79,4 @@ def main(instance_id, test_id=0):
 
 
 if __name__ == "__main__":
-    main("astropy__astropy-7671")
+    main("astropy__astropy-13453")

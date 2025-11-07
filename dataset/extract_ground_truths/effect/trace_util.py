@@ -6,15 +6,12 @@ from typing import Any, Callable, Dict, Iterator, List, Literal, Optional, Tuple
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
 from dataset.extract_ground_truths.effect.diff_util import sequence_match
+from postprocessing_util import get_ignore_order_func
 
 def load_traces(file_path):
     with open(file_path, 'r') as f:
         traces = [Event.from_dict(json.loads(line)) for line in f]
     return traces
-
-def ignore_order_func(level):
-    unordered_fields = ['vars_used', 'vars_defined']
-    return any(field in level.path() for field in unordered_fields)
 
 class FunctionBlock:
     def __init__(self, file_path: str, function_name: str, params: Dict[str, Any], trace_type: Literal['buggy', 'patched'], caller: Optional['FunctionBlock']):
@@ -147,8 +144,17 @@ def event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
     pairs = [(buggy_events[i], patched_events[j]) for i, j in idx_pairs]
     return pairs
 
-def diff_events(buggy: Event, patched: Event, **kwargs):
-    return DeepDiff(buggy.dump(), patched.dump(), significant_digits=3, ignore_order=False, ignore_order_func=ignore_order_func, ignore_private_variables=False, exclude_paths=["root['seen_variables']['transform']"], **kwargs)
+def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
+    return DeepDiff(
+        buggy.dump(),
+        patched.dump(),
+        significant_digits=3,
+        ignore_order=False,                           
+        ignore_order_func=get_ignore_order_func(repo_name),
+        ignore_private_variables=False,
+        # exclude_paths=["root['seen_variables']['transform']"],
+        **kwargs,
+    )
 
 _BRACKETED_NAME_RE = re.compile(r"\[['\"]([^'\"]+)['\"]\]")
 _VAR_NAME_INDEX = 1
