@@ -55,25 +55,33 @@ def main(instance_id, agent='gold', test_id=0, is_return=False):
                 print('In function: ', patched_block.function_name)
                 print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
                 print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
-            filtered_diff = apply_trace_filters(diff, patched_event, instance_id)            
-            if 'seen_variables' in diff.affected_root_keys and filtered_diff:
-                # return {
-                #     'buggy': buggy_event.model_dump(),
-                #     'patched': patched_event.model_dump(),
-                #     'filtered_diff': serialize(filtered_diff),
-                # }
-                if not is_return:
-                    print('Diff: ', filtered_diff)
-                # assert patched_block.params == buggy_block.params, f"CHECK: Function parameters differ in prepatch and postpatch, buggy: {buggy_block.params}, patched: {patched_block.params}"
-                # print('Function parameters: ', patched_block.params)
-                if hasattr(patched_event, 'seen_variables') and not is_return:
+            filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
+            if is_return:
+                return filtered_diff
+            
+            # Debugging
+            if filtered_diff:
+                print("Diff: ", filtered_diff)            
+                input('...')
+                if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
+                    print('Buggy Variables: ', buggy_event.return_value)
+                    print('====')
+                    print('Patched Variables: ', patched_event.return_value)
+                    input('...')
+
+                if 'seen_variables' in diff.affected_root_keys and hasattr(patched_event, 'seen_variables'):
+                    # return {
+                    #     'buggy': buggy_event.model_dump(),
+                    #     'patched': patched_event.model_dump(),
+                    #     'filtered_diff': serialize(filtered_diff),
+                    # }
+                    # assert patched_block.params == buggy_block.params, f"CHECK: Function parameters differ in prepatch and postpatch, buggy: {buggy_block.params}, patched: {patched_block.params}"
+                    # print('Function parameters: ', patched_block.params)
                     print('Buggy Variables: ', buggy_event.seen_variables)
                     print('====')
                     print('Patched Variables: ', patched_event.seen_variables)
-                if is_return:
-                    return filtered_diff
-                input('...')
-            # input("....")
+                    input('...')
+                # input("....")
         #         is_break = True
         #         break
         # if is_break:
