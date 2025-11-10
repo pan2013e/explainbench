@@ -30,8 +30,8 @@ def main(**kwargs):
         env_image_tag="latest",
         report_dir=".",
     )
-
-if __name__ == "__main__":
+    
+def main(args=None):
     parser = ArgumentParser(
         description="Run evaluation harness for the given dataset and predictions.",
         formatter_class=ArgumentDefaultsHelpFormatter,
@@ -70,5 +70,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--inspector-mode", type=str, choices=['before', 'after'], default='before',
     )
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     main(**vars(args))
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv)
