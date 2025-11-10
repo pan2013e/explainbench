@@ -1,12 +1,11 @@
 import os
-import sys
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
 from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.monkey_patch.trace import monkey_patch_execution
-from execution.util import all_instances, prepare_tracer, instances_by_repo
+from execution.util import prepare_tracer, get_instance_ids, get_predictions_path
 
 def main(**kwargs):
     monkey_patch_dataset()
@@ -15,18 +14,21 @@ def main(**kwargs):
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
-        open_file_limit=4096,
-        timeout=7200,
+        instance_ids=get_instance_ids(kwargs["instance_ids"]),
+        predictions_path=get_predictions_path(kwargs["agent"]),
+        max_workers=kwargs["max_workers"],
         force_rebuild=False,
         cache_level="env",
         clean=False,
+        open_file_limit=4096,
+        run_id=f"trace.{kwargs["agent"]}.{os.getuid()}",
+        timeout=10800,
         namespace="swebench",
-        instance_image_tag="latest",
-        env_image_tag="latest",
         rewrite_reports=False,
         modal=False,
+        instance_image_tag="latest",
+        env_image_tag="latest",
         report_dir=".",
-        **kwargs
     )
 
 if __name__ == "__main__":
@@ -39,13 +41,12 @@ if __name__ == "__main__":
         "--instance_ids",
         nargs="+",
         type=str,
-        help="Instance IDs to run (space separated)",
+        help="Instance IDs to run (space separated) - 'all' for all instances; repo name(s) for all instances in the repo(s); or specific instance IDs",
     )
     parser.add_argument(
-        "-p",
-        "--predictions_path",
+        "--agent",
         type=str,
-        help="Path to predictions file - if 'gold', uses gold predictions",
+        help="Agent submission ID - if 'gold', uses gold predictions",
         required=True,
     )
     parser.add_argument(
@@ -54,13 +55,5 @@ if __name__ == "__main__":
         default=4,
         help="Maximum number of workers (should be <= 75%% of CPU cores)",
     )
-    parser.add_argument(
-        "-id", "--run_id", type=str, required=True, help="Run ID - identifies the run"
-    )
-    sys.argv = ["swebench.harness.run_evaluation",
-            "--predictions_path", "gold",
-            "--max_workers", "10",
-            "--instance_ids", *instances_by_repo(['astropy', 'django']),
-            "--run_id", f"trace.validate-gold.{os.getuid()}"]
     args = parser.parse_args()
     main(**vars(args))

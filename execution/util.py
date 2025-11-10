@@ -14,6 +14,7 @@ datasets.disable_progress_bars()
 
 SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
+AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
 
 def get_tmp_tracer_path():
     return f'/tmp/py-tracer.{os.getpid()}.tar'
@@ -42,6 +43,13 @@ def get_fail_to_pass_tests(instance_id: str) -> list[str]:
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
     return json.loads(instance['FAIL_TO_PASS'])
 
+def get_instance_ids(value: list[str]) -> list[str]:
+    if value == ["all"]:
+        return all_instances()
+    if all('__' not in v and '-' not in v for v in value):
+        return instances_by_repo(value)
+    return value
+
 def all_instances():
     return [data['instance_id'] for data in SWEBENCH]
 
@@ -53,3 +61,8 @@ def instances_by_repo(repo_name: str | list[str]):
         for data in SWEBENCH
         if any(rn in data['repo'] for rn in repo_name)
     ]
+
+def get_predictions_path(agent: str):
+    if agent == "gold":
+        return "gold"
+    return os.path.join(AGENT_PATCH_DIR, f"{agent}.json")
