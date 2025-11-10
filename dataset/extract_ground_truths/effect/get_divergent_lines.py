@@ -68,25 +68,11 @@ def main(instance_id, agent='gold', test_id=0, is_return=False):
                     print('====')
                     print('Patched Variables: ', patched_event.return_value)
                     input('...')
-
                 if 'seen_variables' in diff.affected_root_keys and hasattr(patched_event, 'seen_variables'):
-                    # return {
-                    #     'buggy': buggy_event.model_dump(),
-                    #     'patched': patched_event.model_dump(),
-                    #     'filtered_diff': serialize(filtered_diff),
-                    # }
-                    # assert patched_block.params == buggy_block.params, f"CHECK: Function parameters differ in prepatch and postpatch, buggy: {buggy_block.params}, patched: {patched_block.params}"
-                    # print('Function parameters: ', patched_block.params)
                     print('Buggy Variables: ', buggy_event.seen_variables)
                     print('====')
                     print('Patched Variables: ', patched_event.seen_variables)
                     input('...')
-                # input("....")
-        #         is_break = True
-        #         break
-        # if is_break:
-        #     break
-
 
 if __name__ == "__main__":
     main("astropy__astropy-7166", is_return=True)
