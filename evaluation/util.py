@@ -69,11 +69,15 @@ def load_ground_truth() -> list[dict]:
         data = [json.loads(line) for line in f]
     return data
 
-def load_context(task) -> list[dict]:
-    path = os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')
+def load_context(task, agent_id=None) -> list[dict]:
+    if not task.is_context_agent_specific():
+        path = os.path.join(DATASET_DIR, f'context/{task.repr()}.json')
+    else:
+        assert agent_id is not None, "agent_id must be provided for agent-specific context"
+        path = os.path.join(DATASET_DIR, f'context/{task.repr()}__{agent_id}.json')
     if not os.path.exists(path):
         return None
-    with open(os.path.join(DATASET_DIR, 'context', f'{task.repr()}.json')) as f:
+    with open(path) as f:
         data = json.load(f)
     assert isinstance(data, list) and all(isinstance(item, dict) for item in data)
     return data

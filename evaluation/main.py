@@ -18,7 +18,7 @@ def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
 
 def generate(task: type[Task], model: Model, agent_id: str):
     explanations = load_explanation(agent_id)
-    context = load_context(task)
+    context = load_context(task, agent_id)
     if context is None:
         context = [{}] * len(explanations)
     assert len(explanations) == len(context), f'Number of context items ({len(context)}) does not match number of explanations ({len(explanations)})'

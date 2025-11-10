@@ -56,6 +56,10 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         return cls.__qualname__.lower().replace('.', '_')
     
     @classmethod
+    def is_context_agent_specific(cls) -> bool:
+        return False
+    
+    @classmethod
     def get_task(cls, name: str):
         name = name.lower()
         if name not in cls._registry:
