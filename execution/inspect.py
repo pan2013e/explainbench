@@ -7,7 +7,7 @@ from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.monkey_patch.inspect import monkey_patch_execution
 from execution.util import prepare_tracer, get_predictions_path
 
-def main(**kwargs):
+def inspect(**kwargs):
     monkey_patch_dataset()
     monkey_patch_execution(**kwargs)
     prepare_tracer()
@@ -71,7 +71,7 @@ def main(args=None):
         "--inspector-mode", type=str, choices=['before', 'after'], default='before',
     )
     args = parser.parse_args(args)
-    main(**vars(args))
+    inspect(**vars(args))
 
 if __name__ == "__main__":
     import sys
