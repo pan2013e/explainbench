@@ -4,6 +4,8 @@ dataset/extract_ground_truths/localization/swe_bench_files/*
 dataset/extract_ground_truths/localization/swe_bench_files_bak/*
 dataset/extract_ground_truths/localization/swe_bench_repos/*
 dataset/extract_ground_truths/localization/misc/*
+dataset/extract_ground_truths/effect/tmp/*
 logs*/
 *.json
 !results/**/*.json
+!dataset/context/*.json
