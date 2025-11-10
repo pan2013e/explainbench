@@ -8,10 +8,15 @@ from tracer.protocol import Event, FunctionEvent, ReturnEvent
 from dataset.extract_ground_truths.effect.diff_util import sequence_match
 from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_order_func
 
+DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_traces(file_path):
     with open(file_path, 'r') as f:
         traces = [Event.from_dict(json.loads(line)) for line in f]
     return traces
+
+def get_trace_dir(agent='gold'):
+    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.{agent}.{os.getuid()}/{agent}')
 
 class FunctionBlock:
     def __init__(self, file_path: str, function_name: str, params: Dict[str, Any], trace_type: Literal['buggy', 'patched'], caller: Optional['FunctionBlock']):

@@ -1,10 +1,10 @@
 import os
-from pathlib import Path
 from dataset.extract_ground_truths.effect.trace_util import (
     Traces,
     diff_events,
     event_match,
     function_match,
+    get_trace_dir,
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import(
     apply_trace_filters, 
@@ -15,24 +15,20 @@ from dataset.extract_ground_truths.effect.process_agent_patch import (
 from execution.util import get_fail_to_pass_tests
 from tracer.serializer import serialize
 
-BASE = "/home/zhiyuan/explainbench/logs/run_evaluation/trace.validate-gold.1021/gold"
-
-def load_trace_pair(instance_id, diff_lines, test_id=0):
+def load_trace_pair(base_dir, instance_id, diff_lines, test_id=0):
     # test_id refers to the index of FAIL_TO_PASS tests
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
-    buggy_path = os.path.join(BASE, instance_id, "buggy_traces", f"{test_name}.jsonl")
-    patched_path = os.path.join(BASE, instance_id, "patched_traces", f"{test_name}.jsonl")
+    buggy_path = os.path.join(base_dir, instance_id, f"buggy_traces/{test_name}.jsonl")
+    patched_path = os.path.join(base_dir, instance_id, f"patched_traces/{test_name}.jsonl")
     buggy_traces = Traces(buggy_path, diff_lines, 'buggy')
     patched_traces = Traces(patched_path, diff_lines, 'patched')
     return buggy_traces, patched_traces
 
-def main(instance_id, test_id=0, is_return=False):
-    diff_lines = get_diff_info_per_instance(
-        Path(BASE),
-        Path(instance_id)
-    )
+def main(instance_id, agent='gold', test_id=0, is_return=False):
+    base_dir = get_trace_dir(agent)
+    diff_lines = get_diff_info_per_instance(base_dir, instance_id)
     # use the first FAIL_TO_PASS test case, should allow specifying test_id later
-    buggy_traces, patched_traces = load_trace_pair(instance_id, diff_lines, test_id)
+    buggy_traces, patched_traces = load_trace_pair(base_dir, instance_id, diff_lines, test_id)
     # for buggy_block in buggy_traces:
     #     print(buggy_block.function_name)
     # print("=====")
