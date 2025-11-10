@@ -57,10 +57,10 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                 print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
                 print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
             filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
-            if is_return:
-                return filtered_diff
             # Debugging
             if filtered_diff:
+                if is_return:
+                    return filtered_diff
                 print("Diff: ", filtered_diff)            
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
                     print('Buggy Variables: ', buggy_event.return_value)
