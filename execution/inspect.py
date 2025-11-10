@@ -5,7 +5,7 @@ from swebench.harness.run_evaluation import main as run_evaluation_main
 
 from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.monkey_patch.inspect import monkey_patch_execution
-from execution.util import prepare_tracer, get_instance_ids, get_predictions_path
+from execution.util import prepare_tracer, get_predictions_path
 
 def main(**kwargs):
     monkey_patch_dataset()
@@ -14,9 +14,9 @@ def main(**kwargs):
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
-        instance_ids=get_instance_ids(kwargs["instance_ids"]),
+        instance_ids=[kwargs["instance_id"]],
         predictions_path=get_predictions_path(kwargs["agent"]),
-        max_workers=kwargs["max_workers"],
+        max_workers=0,
         force_rebuild=False,
         cache_level="env",
         clean=False,
@@ -38,22 +38,16 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-i",
-        "--instance_ids",
-        nargs="+",
+        "--instance_id",
         type=str,
-        help="Instance IDs to run (space separated)",
+        help="Instance ID to run",
+        required=True,
     )
     parser.add_argument(
         "--agent",
         type=str,
         help="Agent submission ID - if 'gold', uses gold predictions",
         required=True,
-    )
-    parser.add_argument(
-        "--max_workers",
-        type=int,
-        default=4,
-        help="Maximum number of workers (should be <= 75%% of CPU cores)",
     )
     parser.add_argument(
         "--bp-file", type=str, required=True, help="Path to source file with breakpoint",
