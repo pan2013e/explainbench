@@ -24,8 +24,9 @@ def load_trace_pair(base_dir, instance_id, diff_lines, test_id=0):
     patched_traces = Traces(patched_path, diff_lines, 'patched')
     return buggy_traces, patched_traces
 
-def main(instance_id, agent='gold', test_id=0, is_return=False):
-    base_dir = get_trace_dir(agent)
+def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
+    if not base_dir:
+        base_dir = get_trace_dir(agent)
     diff_lines = get_diff_info_per_instance(base_dir, instance_id)
     # use the first FAIL_TO_PASS test case, should allow specifying test_id later
     buggy_traces, patched_traces = load_trace_pair(base_dir, instance_id, diff_lines, test_id)
@@ -58,11 +59,9 @@ def main(instance_id, agent='gold', test_id=0, is_return=False):
             filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
             if is_return:
                 return filtered_diff
-            
             # Debugging
             if filtered_diff:
                 print("Diff: ", filtered_diff)            
-                input('...')
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
                     print('Buggy Variables: ', buggy_event.return_value)
                     print('====')
@@ -75,4 +74,4 @@ def main(instance_id, agent='gold', test_id=0, is_return=False):
                     input('...')
 
 if __name__ == "__main__":
-    main("astropy__astropy-7166", is_return=True)
+    main("astropy__astropy-7166", is_return=False, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.gold.1021/gold")
