@@ -134,19 +134,32 @@ def filter_based_on_type_changes(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
         return {"type_changes": diff_dict["type_changes"]}
     return diff_dict
 
-def filter_docstring_changes(diff_dict: Dict[str, Any]) ->Dict[str, Any]:
+def filter_docstring_changes(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Filter the docstring changes using heuristics number of words
     """
-    MAX_WORDS = 50
-    for change_key, change_val in diff_dict.items():
-        if isinstance(change_val, dict) and change_key == "values_changed":
-            for full_path, values_dict in change_val.items():
-                if (isinstance(values_dict, dict) and 
-                    isinstance(values_dict.get("new_value", None), str) and 
-                    isinstance(values_dict.get("old_value", None), str) and
-                    (len(values_dict["new_value"].split()) > MAX_WORDS or len(values_dict["old_value"].split()) > MAX_WORDS)):
-                        del change_val[full_path]
+    MAX_WORDS = 10
+    for change_key, change_val in list(diff_dict.items()):
+        if change_key == "values_changed" and isinstance(change_val, dict):
+            to_delete = []
+            for full_path, values_dict in list(change_val.items()):
+                if (
+                    isinstance(values_dict, dict)
+                    and isinstance(values_dict.get("new_value"), str)
+                    and isinstance(values_dict.get("old_value"), str)
+                    and (
+                        len(values_dict["new_value"].split()) > MAX_WORDS
+                        or len(values_dict["old_value"].split()) > MAX_WORDS
+                    )
+                ):
+                    to_delete.append(full_path)
+
+            for k in to_delete:
+                change_val.pop(k, None)
+
+            if not change_val:
+                diff_dict.pop(change_key, None)
+
     return diff_dict
 
 def extract_attribute_name(full_path: str) -> str:
