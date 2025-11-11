@@ -19,8 +19,6 @@ class File(BaseModel):
     file: List[str]
 
 ###### Effect Schemas ######
-class Value(BaseModel):
-    value: str
-
-class Variable(BaseModel):
-    value: str
+class Effect(BaseModel):
+    value_before: str
+    value_after: str
