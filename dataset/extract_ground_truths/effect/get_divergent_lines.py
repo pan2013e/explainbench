@@ -76,6 +76,7 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                     patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
                     return {
                         "file_path": patched_event.filepath,
+                        "statement": patched_event.statement,
                         "buggy_lineno": buggy_event.line_number,
                         "buggy_line_count": get_event_count(buggy_event, buggy_traces),
                         "patched_lineno": patched_event.line_number,
