@@ -27,6 +27,9 @@ def process_agent(agent, instance_ids):
             results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent, is_return=True))
         except FileNotFoundError:
             results[instance_id] = None
+        except AssertionError as e:
+            print(f"AssertionError for {instance_id} with agent {agent}: {e}")
+            results[instance_id] = None
     return results
 
 if __name__ == "__main__":
