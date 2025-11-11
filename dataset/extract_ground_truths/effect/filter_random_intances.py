@@ -8,6 +8,60 @@ import sys
 
 _REMOVE = object()
 
+def filter_dict_keys_like(A: Any, B: Any, *, strict: bool = True, _path: str = "") -> Any:
+    """
+    Recursively build a NEW object from A that keeps only dictionary entries
+    whose keys ALSO exist in the corresponding dictionary in B.
+
+    Assumptions:
+      - A and B have the same overall structure (same container types, same list/tuple lengths).
+      - Only dict keys may differ.
+
+    Rules:
+      - dict vs dict: keep k: A[k] only if k in B; recurse on values.
+      - list/tuple vs list/tuple: recurse positionally on each element.
+      - all other types: return A unchanged.
+    """
+    # Dict case
+    if isinstance(A, dict):
+        if strict and not isinstance(B, dict):
+            raise TypeError(f"Structure mismatch at {_path or '<root>'}: A is dict, B is {type(B).__name__}")
+        if not isinstance(B, dict):
+            return {}
+
+        out = {}
+        # intersection is sufficient since we only keep keys present in B
+        for k in A.keys() & B.keys():  
+            next_path = f"{_path}.{k}" if _path else str(k)
+            out[k] = filter_dict_keys_like(A[k], B[k], strict=strict, _path=next_path)
+        return out
+
+    # List case
+    if isinstance(A, list):
+        if strict and not isinstance(B, list):
+            raise TypeError(f"Structure mismatch at {_path or '<root>'}: A is list, B is {type(B).__name__}")
+        if not isinstance(B, list):
+            return list(A)
+        if strict and len(A) != len(B):
+            raise ValueError(f"Length mismatch at {_path or '<root>'}: len(A)={len(A)} != len(B)={len(B)}")
+        n = min(len(A), len(B))
+        return [filter_dict_keys_like(A[i], B[i], strict=strict, _path=f"{_path}[{i}]") for i in range(n)] + (A[n:] if len(A) > n else [])
+
+    # Tuple case
+    if isinstance(A, tuple):
+        if strict and not isinstance(B, tuple):
+            raise TypeError(f"Structure mismatch at {_path or '<root>'}: A is tuple, B is {type(B).__name__}")
+        if not isinstance(B, tuple):
+            return tuple(A)
+        if strict and len(A) != len(B):
+            raise ValueError(f"Length mismatch at {_path or '<root>'}: len(A)={len(A)} != len(B)={len(B)}")
+        n = min(len(A), len(B))
+        filtered = tuple(filter_dict_keys_like(A[i], B[i], strict=strict, _path=f"{_path}[{i}]") for i in range(n))
+        if len(A) > n:
+            filtered += tuple(A[n:])
+        return filtered
+    return A
+
 def prune_equal_leaves(a: Any, b: Any) -> Any:
     """
     Return a new structure from `a` that keeps only leaves equal to the
@@ -115,7 +169,9 @@ def main(argv: List[str]) -> int:
     pruned: List[Dict[str, Any]] = []
     for idx, (a, b) in enumerate(zip(a_list, b_list)):
         try:
-            pruned.append(prune_equal_leaves(a, b))
+            temp_dict = filter_dict_keys_like(a, b)
+            temp_dict = prune_equal_leaves(a, b)
+            pruned.append(temp_dict)
         except Exception as e:
             raise RuntimeError(f"Error pruning record at index {idx} (line {idx+1}): {e}") from e
 
