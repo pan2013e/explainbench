@@ -62,7 +62,7 @@ def filter_dict_keys_like(A: Any, B: Any, *, strict: bool = True, _path: str = "
         return filtered
     return A
 
-def prune_equal_leaves(a: Any, b: Any) -> Any:
+def prune_equal_leaves(a: Any, b: Any, *, strict: bool = False) -> Any:
     """
     Return a new structure from `a` that keeps only leaves equal to the
     corresponding leaves in `b`. Containers (dict/list/tuple) are preserved
@@ -76,45 +76,55 @@ def prune_equal_leaves(a: Any, b: Any) -> Any:
         if not isinstance(x, (dict, list, tuple)):
             return x if x == y else _REMOVE
 
+        # Container type check (only when both are containers)
+        if not isinstance(y, (dict, list, tuple)):
+            # x is container but y is not: no equal leaves possible under x
+            return _REMOVE
+
         if type(x) is not type(y):
-            raise TypeError(f"Type mismatch: {type(x).__name__} vs {type(y).__name__}")
+            if strict:
+                raise TypeError(f"Type mismatch: {type(x).__name__} vs {type(y).__name__}")
+            # Permissive: no structural overlap to compare
+            return _REMOVE
 
         if isinstance(x, dict):
-            if x.keys() != y.keys():
+            if strict and x.keys() != y.keys():
                 missing_in_y = x.keys() - y.keys()
                 missing_in_x = y.keys() - x.keys()
                 raise KeyError(f"Dict keys differ. Missing_in_y={missing_in_y}, Missing_in_x={missing_in_x}")
+            keys = (x.keys() & y.keys()) if not strict else x.keys()
             out = {}
-            for k in x:
+            for k in keys:
                 child = _prune(x[k], y[k])
                 if child is not _REMOVE:
                     out[k] = child
             return out
 
         if isinstance(x, list):
-            if len(x) != len(y):
+            if strict and len(x) != len(y):
                 raise ValueError(f"List length mismatch: {len(x)} vs {len(y)}")
+            n = min(len(x), len(y)) if not strict else len(x)
             out = []
-            for i in range(len(x)):
+            for i in range(n):
                 child = _prune(x[i], y[i])
                 if child is not _REMOVE:
                     out.append(child)
             return out
 
         if isinstance(x, tuple):
-            if len(x) != len(y):
+            if strict and len(x) != len(y):
                 raise ValueError(f"Tuple length mismatch: {len(x)} vs {len(y)}")
+            n = min(len(x), len(y)) if not strict else len(x)
             out_items = []
-            for i in range(len(x)):
+            for i in range(n):
                 child = _prune(x[i], y[i])
                 if child is not _REMOVE:
                     out_items.append(child)
             return tuple(out_items)
 
-        raise TypeError(f"Unsupported container type: {type(x).__name__}")
+        return _REMOVE
 
     return _prune(a, b)
-
 
 def load_jsonl(path: Path) -> List[Dict[str, Any]]:
     """Load a JSON Lines file into a list of dicts."""
@@ -165,15 +175,17 @@ def main(argv: List[str]) -> int:
     if len(a_list) != len(b_list):
         raise ValueError(f"Input JSONL files must have the same number of lines: "
                          f"{args.input1} has {len(a_list)}, {args.input2} has {len(b_list)}")
-
     pruned: List[Dict[str, Any]] = []
     for idx, (a, b) in enumerate(zip(a_list, b_list)):
-        try:
-            temp_dict = filter_dict_keys_like(a, b)
-            temp_dict = prune_equal_leaves(a, b)
-            pruned.append(temp_dict)
-        except Exception as e:
-            raise RuntimeError(f"Error pruning record at index {idx} (line {idx+1}): {e}") from e
+            try:
+                if "seen_variables" in a and a["seen_variables"] != b["seen_variables"]:
+                    new_seen_variables = {}
+                    new_seen_variables = filter_dict_keys_like(a["seen_variables"], b["seen_variables"])
+                    new_seen_variables = prune_equal_leaves(new_seen_variables, b["seen_variables"]) if new_seen_variables else {}
+                    a["seen_variables"] = new_seen_variables
+                pruned.append(a)
+            except Exception as e:
+                raise RuntimeError(f"Error pruning record at index {idx} (line {idx+1}): {e}") from e
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     write_jsonl(pruned, args.out)
