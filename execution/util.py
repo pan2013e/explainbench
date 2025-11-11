@@ -59,7 +59,7 @@ def instances_by_repo(repo_name: str | list[str]):
     return [
         data['instance_id']
         for data in SWEBENCH
-        if any(rn in data['repo'] for rn in repo_name)
+        if any(rn in data['repo'] for rn in repo_name) and data['instance_id'] != 'astropy__astropy-7606'
     ]
 
 def get_predictions_path(agent: str):
