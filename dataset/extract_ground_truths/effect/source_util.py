@@ -1,5 +1,6 @@
 import os
 import ast
+import uuid
 import tarfile
 import tempfile
 import docker
@@ -86,7 +87,7 @@ def start_docker_container(instance_id: str):
     try:
         container = client.containers.create(
             image=image_name,
-            name=f'sweb.eval.{instance_id}.effect_ground_truth',
+            name=f'sweb.eval.{instance_id}.effect_ground_truth.{uuid.uuid4()}',
             user='root',
             detach=True,
             command="tail -f /dev/null",
@@ -157,18 +158,25 @@ def get_func_code_impl(code: str, fn_name: str, line_hint: int = None):
     return ast.unparse(chosen)
 
 def get_function_code(instance_id: str, file_path: str, fn_name: str, 
-                      *, patch: str = None, line_hint: int = None, remove_doc=False):
+                      *, patch: str = None, line_hint: tuple[int, int] = None, remove_doc=False):
     assert os.path.isabs(file_path), "file_path must be absolute"
+    if line_hint:
+        pre_hint, post_hint = line_hint
+    else:
+        pre_hint = post_hint = None
     container = start_docker_container(instance_id)
     try:
+        pre_file = read_from_container(container, file_path)
         if patch: apply_patch(container, patch)
-        code = read_from_container(container, file_path)
+        post_file = read_from_container(container, file_path)
     finally:
         cleanup_container(container.client, container, 'quiet')
-    code = get_func_code_impl(code, fn_name, line_hint)
+    pre_code = get_func_code_impl(pre_file, fn_name, pre_hint)
+    post_code = get_func_code_impl(post_file, fn_name, post_hint)
     if remove_doc:
-        code = remove_docstrings(code)
-    return code
+        pre_code = remove_docstrings(pre_code)
+        post_code = remove_docstrings(post_code)
+    return pre_code, post_code
 
 if __name__ == "__main__":
     instance_id = "astropy__astropy-12907"
@@ -187,5 +195,6 @@ if __name__ == "__main__":
      return np.hstack([cleft, cright])
  
 '''
-    code = get_function_code(instance_id, file_path, fn_name, remove_doc=True, patch=patch)
-    print(code)
+    pre_code, post_code = get_function_code(instance_id, file_path, fn_name, remove_doc=True, patch=patch)
+    print(pre_code)
+    print(post_code)
