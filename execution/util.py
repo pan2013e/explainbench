@@ -24,7 +24,10 @@ def prepare_tracer():
     dst = PurePosixPath('/root/py-tracer')
     tmp_dir = get_tmp_tracer_path()
     if os.path.exists(tmp_dir):
-        os.unlink(tmp_dir)
+        try:
+            os.unlink(tmp_dir)
+        except Exception:
+            pass
     with tarfile.open(tmp_dir, 'w') as tar:
         tar.add(src, arcname=dst.name)
     atexit.register(lambda: os.unlink(tmp_dir) if os.path.exists(tmp_dir) else None)
