@@ -226,7 +226,7 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
     cur = filter_parameter_sources(cur)
     
     # Step 2
-    cur = filter_added_dict_based_on_seen_variables(diffs_by_kind, event)
+    cur = filter_added_dict_based_on_seen_variables(cur, event)
     if count_changed_vars(cur) <= 1:
         return cur or {}
 
