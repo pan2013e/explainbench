@@ -252,11 +252,11 @@ def get_complete_variable_view(event, query: str) -> Dict[str, Any]:
 
 def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
     diff_iterator = iter_diff_items(diff)
-    output = []
+    output = {}
     for change_kind, full_path, payload in diff_iterator:
         query = extract_var_name(full_path)
         variable_view = get_complete_variable_view(event, query)
-        output.append(variable_view)
+        output.update(variable_view)
     return output
 
 # EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
