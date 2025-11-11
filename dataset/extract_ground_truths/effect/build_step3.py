@@ -37,6 +37,7 @@ def process_agent_read_values(data, agent, instance_ids):
     for instance_id in instance_ids:
         metadata = data[agent][instance_id]
         if metadata is None:
+            results[instance_id] = None
             continue
         buggy_value, patched_value = read_inspect_values(agent, instance_id, metadata["test_id"], expr_id=0)
         results[instance_id] = {
