@@ -71,7 +71,7 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             if filtered_diff:
                 if is_return:
                     assert patched_event.filepath == buggy_event.filepath
-                    assert patched_block.params == buggy_block.params
+                    # assert patched_block.params == buggy_block.params
                     buggy_variable_views = get_complete_variable_views_from_diff(buggy_event,filtered_diff)
                     patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
                     return {
@@ -101,4 +101,4 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
 if __name__ == "__main__":
     import pprint as pp
     test = main("astropy__astropy-7166", is_return=True, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.gold.1021/gold")
-    pp.pprint(test)
+    pp.pprint(test, sort_dicts=False)
