@@ -33,11 +33,7 @@ MODEL = Model("gemini/gemini-2.5-flash", n=5)
 
 def main(code, line, diff, before, after):
     prompt = TEMPLATE.format(code=code, line=line, diff=diff, before=before, after=after)
-    print(prompt)
-    print("-----")
     response = MODEL.infer(prompt, Expression)
-    print(response)
-    input()
     return response
 
 if __name__ == "__main__":
