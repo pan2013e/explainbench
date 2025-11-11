@@ -28,7 +28,7 @@ def load_trace_pair(base_dir, instance_id, diff_lines, test_id=0):
 def get_event_count(event, traces: Traces):
     count = 0
     for e in traces.events:
-        if e.line_number == event.line_number:
+        if e.line_number == event.line_number and e.event_type == event.event_type:
             count += 1
         if e is event:
             break
