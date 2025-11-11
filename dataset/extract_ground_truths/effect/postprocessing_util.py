@@ -33,6 +33,11 @@ def get_ignore_order_func(repo: Optional[str]):
 _BRACKETED_NAME_RE = re.compile(r"\[['\"]([^'\"]+)['\"]\]")
 _VAR_NAME_INDEX = 1
 
+
+def extract_all_keys(full_path: str) -> str:
+    tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+    return tokens
+
 def extract_var_name(full_path: str) -> str:
     tokens = _BRACKETED_NAME_RE.findall(str(full_path))
     if len(tokens) > _VAR_NAME_INDEX:
@@ -96,6 +101,19 @@ def filter_added_dict_based_on_seen_variables(diff_dict: Dict[str, Any], event) 
         # keep only if var NOT already seen
         return var_name and (var_name not in seen)
 
+    return _filter_by_predicate(diff_dict, keep)
+
+def filter_cached_properties(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Remove changes to cached properties (identified by leading underscore).
+    """
+    def keep(kind: str, path: str, payload: Any) -> bool:
+        all_keys = extract_all_keys(path)
+        for key in all_keys:
+            if "cache" in key:
+                return False
+        return True
+    
     return _filter_by_predicate(diff_dict, keep)
 
 def filter_based_on_vars_at_current_line(diff_dict: Dict[str, Any], event) -> Dict[str, Any]:
@@ -171,10 +189,10 @@ def filter_hash_attribute(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
         return extract_attribute_name(path) != "_hash"
     return _filter_by_predicate(diff_dict, keep)
 
-def filter_perinstance(diffs_by_kind: Dict[str, Any], instance_id: str) -> Dict[str, Any]:
-    if instance_id == "astropy__astropy-7336":
-        return filter_hash_attribute(diffs_by_kind)
-    return diffs_by_kind
+# def filter_perinstance(diffs_by_kind: Dict[str, Any], instance_id: str) -> Dict[str, Any]:
+#     if instance_id == "astropy__astropy-7336":
+#         return filter_hash_attribute(diffs_by_kind)
+#     return diffs_by_kind
 
 def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) -> Dict[str, Any]:
     """
@@ -195,6 +213,9 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
 
     # Step 1: docstring-specific trimming (returns {} if nothing applicable)
     cur = filter_docstring_changes(cur)
+    
+    cur = filter_cached_properties(cur)
+    cur = filter_hash_attribute(cur)
 
     # Step 2
     cur = filter_added_dict_based_on_seen_variables(cur, event)
