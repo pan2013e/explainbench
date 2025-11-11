@@ -214,6 +214,22 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
     # Step 5
     return filter_based_on_type_changes(cur)
 
+def get_complete_variable_view(event, query: str) -> Dict[str, Any]:
+    """
+    Return a dict of all variables seen at this event, with their complete details.
+    """
+    seen_vars = getattr(event, "seen_variables", {})
+    return {var_name: seen_vars[var_name] for var_name in seen_vars if var_name == query}
+
+def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
+    diff_iterator = iter_diff_items(diff)
+    output = []
+    for change_kind, full_path, payload in diff_iterator:
+        query = extract_var_name(full_path)
+        variable_view = get_complete_variable_view(event, query)
+        output.append(variable_view)
+    return output
+
 # EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
 #     "astropy__astropy-14182": {
 #         "astropy.table.connect.TableRead": {"__doc__", "description"}

@@ -8,6 +8,7 @@ from dataset.extract_ground_truths.effect.trace_util import (
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import(
     apply_trace_filters, 
+    get_complete_variable_views_from_diff
 )
 from dataset.extract_ground_truths.effect.process_agent_patch import (
     get_diff_info_per_instance
@@ -71,6 +72,8 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                 if is_return:
                     assert patched_event.filepath == buggy_event.filepath
                     assert patched_block.params == buggy_block.params
+                    buggy_variable_views = get_complete_variable_views_from_diff(buggy_event,filtered_diff)
+                    patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
                     return {
                         "file_path": patched_event.filepath,
                         "buggy_lineno": buggy_event.line_number,
@@ -80,6 +83,8 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                         "filtered_diff": filtered_diff,
                         "function_name": patched_block.function_name,
                         "function_param": patched_block.params,
+                        "buggy_variables": buggy_variable_views,
+                        "patched_variables": patched_variable_views,
                     }
                 print("Diff: ", filtered_diff)            
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
