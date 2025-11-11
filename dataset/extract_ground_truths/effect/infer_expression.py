@@ -23,16 +23,21 @@ TEMPLATE = (
     "You will be given a Python function in the repository, a specific line in this function, and the state differences at this line before and after the patch. The expression you design should reflect such differences. Make sure the value of the expression are primitive types (i.e., None, int, float, str, bool) or collections (e.g., list, dict) of primitive types.\n\n"
     "Function:\n{code}\n\n"
     "Line:\n{line}\n\n"
-    "States before and after patch:\n"
+    "State Differences:\n{diff}\n\n"
+    "Complete Variable States before and after patch:\n"
     "Before:\n{before}\n"
     "After:\n{after}\n\n"
 )
 
-MODEL = Model("gpt-5", n=5)
+MODEL = Model("gemini/gemini-2.5-flash", n=5)
 
-def main(code, line, before, after):
-    prompt = TEMPLATE.format(code=code, line=line, before=before, after=after)
+def main(code, line, diff, before, after):
+    prompt = TEMPLATE.format(code=code, line=line, diff=diff, before=before, after=after)
+    print(prompt)
+    print("-----")
     response = MODEL.infer(prompt, Expression)
+    print(response)
+    input()
     return response
 
 if __name__ == "__main__":
