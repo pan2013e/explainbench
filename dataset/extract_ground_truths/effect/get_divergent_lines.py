@@ -24,6 +24,15 @@ def load_trace_pair(base_dir, instance_id, diff_lines, test_id=0):
     patched_traces = Traces(patched_path, diff_lines, 'patched')
     return buggy_traces, patched_traces
 
+def get_event_count(event, traces: Traces):
+    count = 0
+    for e in traces.events:
+        if e.line_number == event.line_number:
+            count += 1
+        if e is event:
+            break
+    return count
+
 def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
     if not base_dir:
         base_dir = get_trace_dir(agent)
@@ -60,7 +69,15 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             # Debugging
             if filtered_diff:
                 if is_return:
-                    return filtered_diff
+                    assert patched_event.filepath == buggy_event.filepath
+                    return {
+                        "file_path": patched_event.filepath,
+                        "buggy_lineno": buggy_event.line_number,
+                        "buggy_line_count": get_event_count(buggy_event, buggy_traces),
+                        "patched_lineno": patched_event.line_number,
+                        "patched_line_count": get_event_count(patched_event, patched_traces),
+                        "filtered_diff": filtered_diff
+                    }
                 print("Diff: ", filtered_diff)            
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
                     print('Buggy Variables: ', buggy_event.return_value)
