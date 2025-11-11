@@ -116,6 +116,14 @@ def filter_cached_properties(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
     
     return _filter_by_predicate(diff_dict, keep)
 
+def filter_parameter_sources(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def keep(kind: str, path: str, payload: Any) -> bool:
+        all_keys = extract_all_keys(path)
+        if all_keys and all_keys[0] == "parameter_sources": 
+            return False
+        return True
+    return _filter_by_predicate(diff_dict, keep)
+
 def filter_based_on_vars_at_current_line(diff_dict: Dict[str, Any], event) -> Dict[str, Any]:
     """
     Keep entries whose var is referenced on the current line:
@@ -211,14 +219,14 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
     # Step 0: per-instance
     # cur = filter_perinstance(diffs_by_kind, instance_id)
 
-    # Step 1: docstring-specific trimming (returns {} if nothing applicable)
-    cur = filter_docstring_changes(cur)
-    
+    # Step 1
+    cur = filter_docstring_changes(diffs_by_kind)
     cur = filter_cached_properties(cur)
     cur = filter_hash_attribute(cur)
-
+    cur = filter_parameter_sources(cur)
+    
     # Step 2
-    cur = filter_added_dict_based_on_seen_variables(cur, event)
+    cur = filter_added_dict_based_on_seen_variables(diffs_by_kind, event)
     if count_changed_vars(cur) <= 1:
         return cur or {}
 
