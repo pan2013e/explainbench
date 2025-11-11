@@ -34,7 +34,7 @@ def process_agent(agent, instance_ids):
 
 if __name__ == "__main__":
     results = {}
-    instance_ids = get_instance_ids("astropy")
+    instance_ids = get_instance_ids(["astropy__astropy-12907"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, agent, instance_ids): agent
@@ -43,6 +43,7 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
+    os.makedirs(os.path.join(DIR, "tmp"), exist_ok=True)
     with open(os.path.join(DIR, "tmp/step1.json"), "w") as f:
         json.dump(results, f, indent=2)
     print("Saved step1 results to tmp/step1.json")

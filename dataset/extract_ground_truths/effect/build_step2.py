@@ -5,7 +5,7 @@ import json
 
 from tqdm.auto import tqdm
 from functools import lru_cache
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect import infer_expression
@@ -70,18 +70,15 @@ def process_agent(data, agent, instance_ids):
 if __name__ == "__main__":
     step1 = read_step1_results()
     results = {}
-    instance_ids = get_instance_ids("astropy")
-    for agent in AGENTS:
-        result = process_agent(step1, agent, instance_ids)
-        results[agent] = result
-    # with ProcessPoolExecutor(max_workers=10) as executor:
-    #     futures = {
-    #         executor.submit(process_agent, step1, agent, instance_ids): agent
-    #         for agent in AGENTS if agent
-    #     }
-    #     for future in tqdm(as_completed(futures), total=len(futures)):
-    #         agent = futures[future]
-    #         results[agent] = future.result()
-    # with open(os.path.join(DIR, "tmp/step2.json"), "w") as f:
-    #     json.dump(results, f, indent=2)
-    # print("Saved step2 results to tmp/step2.json")
+    instance_ids = get_instance_ids(["astropy__astropy-12907"])
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {
+            executor.submit(process_agent, step1, agent, instance_ids): agent
+            for agent in AGENTS if agent
+        }
+        for future in tqdm(as_completed(futures), total=len(futures)):
+            agent = futures[future]
+            results[agent] = future.result()
+    with open(os.path.join(DIR, "tmp/step2.json"), "w") as f:
+        json.dump(results, f, indent=2)
+    print("Saved step2 results to tmp/step2.json")
