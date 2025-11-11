@@ -209,7 +209,7 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
         return {}
 
     # Step 0: per-instance
-    cur = filter_perinstance(diffs_by_kind, instance_id)
+    # cur = filter_perinstance(diffs_by_kind, instance_id)
 
     # Step 1: docstring-specific trimming (returns {} if nothing applicable)
     cur = filter_docstring_changes(cur)
