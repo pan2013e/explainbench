@@ -32,9 +32,8 @@ MODEL = Model("gpt-5", n=5)
 
 def main(code, line, before, after):
     prompt = TEMPLATE.format(code=code, line=line, before=before, after=after)
-    print(prompt)
     response = MODEL.infer(prompt, Expression)
-    print("Inferred Expression:", response)
+    return response
 
 if __name__ == "__main__":
     code = '''def is_separable(transform):

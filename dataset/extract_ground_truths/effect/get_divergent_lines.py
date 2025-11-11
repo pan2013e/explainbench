@@ -83,7 +83,8 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                         "patched_line_count": get_event_count(patched_event, patched_traces),
                         "filtered_diff": filtered_diff,
                         "function_name": patched_block.function_name,
-                        "function_param": patched_block.params,
+                        "buggy_function_param": buggy_block.params,
+                        "patched_function_param": patched_block.params,
                         "buggy_variables": buggy_variable_views,
                         "patched_variables": patched_variable_views,
                     }
