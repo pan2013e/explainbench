@@ -70,13 +70,16 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             if filtered_diff:
                 if is_return:
                     assert patched_event.filepath == buggy_event.filepath
+                    assert patched_block.params == buggy_block.params
                     return {
                         "file_path": patched_event.filepath,
                         "buggy_lineno": buggy_event.line_number,
                         "buggy_line_count": get_event_count(buggy_event, buggy_traces),
                         "patched_lineno": patched_event.line_number,
                         "patched_line_count": get_event_count(patched_event, patched_traces),
-                        "filtered_diff": filtered_diff
+                        "filtered_diff": filtered_diff,
+                        "function_name": patched_block.function_name,
+                        "function_param": patched_block.params,
                     }
                 print("Diff: ", filtered_diff)            
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
@@ -91,4 +94,6 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                     input('...')
 
 if __name__ == "__main__":
-    main("astropy__astropy-7166", is_return=False, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.gold.1021/gold")
+    import pprint as pp
+    test = main("astropy__astropy-7166", is_return=True, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.gold.1021/gold")
+    pp.pprint(test)
