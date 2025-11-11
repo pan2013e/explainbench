@@ -21,7 +21,7 @@ def inspect(**kwargs):
         cache_level="env",
         clean=False,
         open_file_limit=4096,
-        run_id=f"inspect.{kwargs["agent"]}.{os.getuid()}",
+        run_id=f"inspect.{kwargs["agent"]}.{os.getuid()}.{kwargs["expr_id"]}",
         timeout=10800,
         namespace="swebench",
         rewrite_reports=False,
@@ -60,6 +60,9 @@ def main(args=None):
     )
     parser.add_argument(
         "--expr", type=str, required=True, help="Expression to inspect at breakpoint"
+    )
+    parser.add_argument(
+        "--expr-id", type=int, default=0,
     )
     parser.add_argument(
         "--pre-count", type=int, default=1,
