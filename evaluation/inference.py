@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 __all__ = ['Model']
 
+litellm._logging._disable_debugging()
 litellm.enable_json_schema_validation=True
 litellm.drop_params=True
 
