@@ -66,10 +66,18 @@ def prune_equal_leaves(a: Any, b: Any, *, strict: bool = False) -> Any:
     """
     Return a new structure from `a` that keeps only leaves equal to the
     corresponding leaves in `b`. Containers (dict/list/tuple) are preserved
-    structurally and may become empty. Assumes:
-      - dict keys match at each level
-      - corresponding types match
-      - corresponding list/tuple lengths match
+    structurally and may become empty.
+
+    Behavior (default, permissive):
+      - Dicts: traverse intersection of keys (x.keys() & y.keys()).
+      - Lists/Tuples: traverse positionally up to min(len(x), len(y)).
+      - Leaves: keep x if x == y, else drop.
+      - Containers may become empty.
+
+    If strict=True:
+      - Dicts: keys must match exactly, else raise KeyError.
+      - Lists/Tuples: lengths must match exactly, else raise ValueError.
+      - Types of corresponding containers must match, else raise TypeError.
     """
     def _prune(x: Any, y: Any):
         # Leaves: anything that's not dict/list/tuple
