@@ -19,13 +19,14 @@ def get_trace_dir(agent='gold'):
     return os.path.join(DIR, f'../../../logs/run_evaluation/trace.{agent}.{os.getuid()}/{agent}')
 
 class FunctionBlock:
-    def __init__(self, file_path: str, function_name: str, params: Dict[str, Any], trace_type: Literal['buggy', 'patched'], caller: Optional['FunctionBlock']):
+    def __init__(self, file_path: str, function_name: str, params: Dict[str, Any], trace_type: Literal['buggy', 'patched'], caller: Optional['FunctionBlock'], call_depth: int = 0):
         self.events = [] # type: List[Event]
         self.file_path = os.path.relpath(file_path, '/testbed')
         self.function_name = function_name
         self.params = params
         self.trace_type = trace_type
         self.caller = caller
+        self.call_depth = call_depth
     
     def add_event(self, event: Event):
         self.events.append(event)
@@ -58,7 +59,8 @@ class Traces:
         current_block = self.blocks[0]
         for idx, event in enumerate(events):
             if isinstance(event, FunctionEvent):
-                block = FunctionBlock(event.filepath, event.function_name, event.parameters, self.trace_type, current_block)
+                call_depth = current_block.call_depth + 1 if current_block is not self.blocks[0] and idx > 0 else 0
+                block = FunctionBlock(event.filepath, event.function_name, event.parameters, self.trace_type, call_depth)
                 self.blocks.append(block)
                 # Record call sites (except the test function call)
                 if current_block is not self.blocks[0]:
@@ -69,7 +71,7 @@ class Traces:
                 current_block.add_event(event)
                 caller = current_block.caller
                 assert caller, "Return without caller"
-                block = FunctionBlock(event.filepath, caller.function_name, caller.params, caller.trace_type, caller.caller)
+                block = FunctionBlock(event.filepath, caller.function_name, caller.params, caller.trace_type, caller.caller, call_depth=max(caller.call_depth - 1, 0))
                 self.blocks.append(block)
                 current_block = block
             else:
