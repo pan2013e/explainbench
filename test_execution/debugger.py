@@ -4,6 +4,7 @@ import io, tarfile
 import ast
 import re
 from pathlib import Path, PurePosixPath
+import argparse
 
 from docker.models.containers import Container
 from swebench.harness.docker_utils import copy_to_container
@@ -53,6 +54,9 @@ read_output(p) # flush initial setup string
 for idx in range({max_iter}):
     get_pdb_response(p, "import inspect")
     _, param_values = get_pdb_response(p, PORTABLE_PARAMS_CMD)
+    if "{func_name}".startswith("self."):
+        _, self_value = get_pdb_response(p, "self")
+        param_values += "\nself = " + self_value
     print(json.dumps({{
         "value_type": "parameter_values",
         "iteration_no": idx,
@@ -91,7 +95,7 @@ class IOInfo():
         }
 
 class AncestryVisitor(ast.NodeVisitor):
-    ATTR_NAME="included_class"
+    CLASS_SCOPES="included_class"
 
     def __init__(self):
         self.parent_stack = []
@@ -107,7 +111,8 @@ class AncestryVisitor(ast.NodeVisitor):
             if isinstance(elem, ast.ClassDef)
         ]
         class_name = None if len(class_ancestry) == 0 else class_ancestry[-1]
-        node.__setattr__(AncestryVisitor.ATTR_NAME, class_name)
+        node.__setattr__(AncestryVisitor.CLASS_SCOPES, class_name)
+        self.generic_visit(node)
 
 def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
     bugloc_infos: list[dict] = []
@@ -119,13 +124,20 @@ def get_buggy_methods(instance_id: str) -> list[FunctionInfo]:
     assert len(target_bugloc_info) == 1, f"Target bug locations non-singular: {target_bugloc_info}"
     buggy_methods = []
     for buggy_func_full_name in target_bugloc_info[0]["buggy_function_names"]:
-        m = re.match(rf"{instance_id}/(.+)::.*function:(.+)", buggy_func_full_name)
+        if "function:" not in buggy_func_full_name:
+            continue # non-function locations should be ignored
+        m = re.match(rf"{instance_id}/(.+)::(.*?)function:(.+?)\.", buggy_func_full_name)
+        if m is None:
+            m = re.match(rf"{instance_id}/(.+)::(.*?)function:(.+?)$", buggy_func_full_name)
         if m is None:
             print(f"Function name {buggy_func_full_name} could not be parsed! Check if this is expected.")
             continue
-        file_name, func_name = m.group(1), m.group(2)
-        m = re.match(rf"{instance_id}/(.+)::class:(.+)\.function", buggy_func_full_name)
-        class_name = None if m is None else m.group(2)
+        file_name, func_scope_str, func_name = m.group(1), m.group(2), m.group(3)
+        func_scopes = func_scope_str.removesuffix(".").removeprefix("class:")
+        if func_scopes:
+            class_name = func_scopes.split("class:")[-1] # closest class to function
+        else:
+            class_name = None
         buggy_methods.append(FunctionInfo(
             file=file_name,
             class_name=class_name,
@@ -158,7 +170,7 @@ def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> str
     if target_func.class_name != "":
         name_match_funcs = [
             node for node in name_match_funcs
-            if node.__getattribute__(AncestryVisitor.ATTR_NAME) == target_func.class_name
+            if node.__getattribute__(AncestryVisitor.CLASS_SCOPES) == target_func.class_name
         ]
     assert len(name_match_funcs) == 1, f"Multiple functions matching {target_func} in file: {name_match_funcs}"
 
@@ -171,12 +183,17 @@ def inject_pdb_statement(container: Container, target_func: FunctionInfo) -> str
         f.write(injected_file_content.encode())
         copy_to_container(container, Path(f.name), "/testbed" / PurePosixPath(target_func.file))
     arg_names = [arg.arg for arg in target_func_node.args.args]
+    decorator_names = [
+        decorator.id for decorator in target_func_node.decorator_list
+        if isinstance(decorator, ast.Name)
+    ]
     qualifier = ""
-    if arg_names[0] == "self":
+    # if not target_func.containing_funcs:
+    if len(arg_names) > 0 and arg_names[0] == "self":
         qualifier = "self."
-    elif arg_names[0] == "cls":
+    elif len(arg_names) > 0 and arg_names[0] == "cls" and "classmethod" in decorator_names:
         qualifier = "cls."
-    elif target_func.class_name is not None:
+    elif target_func.class_name is not None and "staticmethod" in decorator_names:
         qualifier = target_func.class_name + "."
     qual_func_name = qualifier + target_func.func_name
     return qual_func_name
@@ -250,9 +267,6 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
         class_name = "" if buggy_func.class_name is None else buggy_func.class_name
         func_full_name = buggy_func.file.removesuffix(".py").replace("/", ".") + "." + class_name + "." + buggy_func.func_name
         save_file = save_bug_dir / (func_full_name + ".json")
-        if save_file.exists():
-            print(save_file, "exists! Skipping")
-            continue
         try:
             buggy_io = get_function_io(
                 instance_id = instance_id,
@@ -277,12 +291,21 @@ def main(instance_id: str, save_dir: Path, max_iter: int = 10, debug: bool = Fal
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--target_instance", type=int, default=-1)
+    parser.add_argument("--debug", action='store_true')
+    args = parser.parse_args()
+
     with open("dataset/context/intent_pbtassertion.json") as f:
         all_test_info = json.load(f)
     instance_list = [e["instance_id"] for e in all_test_info 
-                     if "sympy" in e["instance_id"]]
+                     if "sympy" not in e["instance_id"]]
+    if args.target_instance != -1:
+        instance_list = [
+            e for e in instance_list if int(e.split("-")[-1]) == args.target_instance
+        ]
     
     for target_instance in instance_list:
         print(f"========== [{target_instance}] ==========")
-        main(target_instance, Path("./debugger_output/"))
+        main(target_instance, Path("./debugger_output2/"), debug=args.debug)
     
