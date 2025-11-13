@@ -174,3 +174,30 @@ class Intent:
                 masked_test = masked_test.replace(answer, f"[[MASKED {idx+1}]]")
             prompt = cls._build_prompt(explanation, masked_test=masked_test)
             return model.infer(prompt, cls.SCHEMA)
+
+    class FunctionOutput(Task[schema.FunctionOutputs]):
+        QUESTION = (
+            'For the provided method and inputs, what are the **intended return values**? Return one value per input.'
+        )
+        SCHEMA = schema.FunctionOutputs
+
+        @staticmethod
+        def eval(pred: list[schema.FunctionOutputs], gt: dict, **kwargs):
+            answer_list = gt["answers"]
+            got_all_correct = [
+                all(pred_output == true_output
+                    for pred_output, true_output in zip(pred_func_output.outputs, answer_list))
+                for pred_func_output in pred
+            ]
+            return got_all_correct
+    
+        @classmethod
+        def predict(cls, model: Model, explanation: str, **kwargs):
+            method_signature = kwargs["signature"]
+            example_inputs = kwargs["example_inputs"]
+            prompt = cls._build_prompt(
+                explanation,
+                method_signature = method_signature,
+                example_inputs = example_inputs
+            )
+            return model.infer(prompt, cls.SCHEMA)

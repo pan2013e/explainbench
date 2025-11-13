@@ -33,3 +33,6 @@ class Line(BaseModel):
 ###### Intent Schemas ######
 class PBTAssertion(BaseModel):
     assertion: str
+
+class FunctionOutputs(BaseModel):
+    outputs: list[str]
