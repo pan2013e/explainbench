@@ -60,7 +60,7 @@ class Traces:
         for idx, event in enumerate(events):
             if isinstance(event, FunctionEvent):
                 call_depth = current_block.call_depth + 1 if current_block is not self.blocks[0] and idx > 0 else 0
-                block = FunctionBlock(event.filepath, event.function_name, event.parameters, self.trace_type, call_depth)
+                block = FunctionBlock(event.filepath, event.function_name, event.parameters, self.trace_type, current_block, call_depth)
                 self.blocks.append(block)
                 # Record call sites (except the test function call)
                 if current_block is not self.blocks[0]:
@@ -130,12 +130,25 @@ class Traces:
                 continue
             yield block
 
+def block_key(block: FunctionBlock):
+    if not block.caller or not getattr(block, "call_event", None):
+        return ("<root>", block.file_path, block.function_name, block.call_depth)
+
+    caller = block.caller
+    return (
+        block.file_path,                # callee file
+        block.function_name,            # callee name
+        caller.file_path,               # caller file
+        caller.function_name,           # caller name
+        block.call_depth,               # stack depth
+    )
+
 def function_match(buggy_traces: Traces, patched_traces: Traces):
     buggy_blocks = [block for block in buggy_traces]
     patched_blocks = [block for block in patched_traces]
     idx_pairs = sequence_match(
         buggy_blocks, patched_blocks,
-        key=lambda block: block.function_name
+        key=block_key
     )
     pairs = [(buggy_blocks[i], patched_blocks[j]) for i, j in idx_pairs]
     return pairs  
