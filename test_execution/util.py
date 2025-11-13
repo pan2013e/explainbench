@@ -1,9 +1,59 @@
 import tarfile
 
 from enum import Enum
+import io, tarfile
 from io import BytesIO
 from pathlib import PurePosixPath, Path
+import docker
 from docker.models.containers import Container
+from tempfile import NamedTemporaryFile
+
+from swebench.harness.constants import (
+    LOG_INSTANCE,
+    RUN_EVALUATION_LOG_DIR,
+)
+from swebench.harness.test_spec.test_spec import make_test_spec
+from swebench.harness.docker_utils import (
+    copy_to_container,
+    exec_run_with_timeout
+)
+from swebench.harness.docker_build import (
+    build_container,
+    setup_logger,
+)
+from swebench.harness.utils import load_swebench_dataset
+
+RUN_ID = "test-execution"
+REPRODUCER_LOC = "/testbed/reproducer.py"
+
+def setup(instance_id: str) -> tuple[Container, dict]:
+    all_instances = load_swebench_dataset(
+        instance_ids = [instance_id]
+    )
+    assert len(all_instances) == 1
+    relevant_instance = all_instances[0]
+
+    client = docker.from_env()
+    log_dir = RUN_EVALUATION_LOG_DIR / RUN_ID / instance_id
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / LOG_INSTANCE
+    logger = setup_logger(instance_id, log_file)
+    test_spec = make_test_spec(
+        relevant_instance,
+        namespace="swebench",
+        instance_image_tag="latest",
+        env_image_tag="latest",
+    )
+    container = build_container(
+        test_spec, client, RUN_ID, logger, False, False
+    )
+    container.start()
+
+    # install necessaries
+    container.exec_run(
+        "bash -c \"source ~/.bashrc && python -m pip install hypothesis\"", workdir="/testbed"
+    )
+    return container, relevant_instance
 
 def copy_directory_from_docker(container: Container, src_path: PurePosixPath, dst_path: Path):
     tar_stream, _ = container.get_archive(str(src_path))
@@ -12,6 +62,30 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
         file_content += chunk
     with tarfile.open(fileobj=BytesIO(file_content)) as tar:
         tar.extractall(path=dst_path)
+
+def read_from_container(container: Container, pathname: str) -> str:
+    abs_pathname = "/testbed/" + pathname
+    stream, stat = container.get_archive(abs_pathname)
+
+    file_like = io.BytesIO(b"".join(stream))
+    with tarfile.open(fileobj=file_like) as tar:
+        member = tar.getmembers()[0]
+        file_content = tar.extractfile(member).read().decode("utf-8")
+    return file_content
+
+def write_to_container(container: Container, content: str, pathname: Path) -> None:
+    with NamedTemporaryFile(buffering=0) as f:
+        f.write(content.encode())
+        copy_to_container(container, Path(f.name), pathname)
+
+def apply_patch(container: Container, patch_content: str) -> None:
+    with NamedTemporaryFile(
+        buffering=0, prefix="patch-", suffix=".patch"
+    ) as patch_f:
+        patch_f.write(patch_content.encode())
+        copy_to_container(container, Path(patch_f.name), PurePosixPath("/testbed/dev_patch.patch"))
+        exit_code, _ = container.exec_run("git apply dev_patch.patch", workdir="/testbed")
+        assert exit_code == 0
 
 class ReproStatus(Enum):
     REPRODUCED = "reproduced"
