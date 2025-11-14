@@ -36,7 +36,8 @@ def get_buggy_function_info(function_file: Path, instance_id: str) -> list[Funct
 
 
 def get_reproducer(reproducer_file: Path, instance_id: str) -> str:
-    all_test_info = json.loads(reproducer_file.read_text())
+    assert reproducer_file.name.endswith(".jsonl")
+    all_test_info = list(map(json.loads, reproducer_file.read_text().splitlines()))
     target_test_info = [t_info for t_info in all_test_info if t_info["instance_id"] == instance_id]
     return target_test_info[0]["test"]
 
@@ -49,14 +50,14 @@ def get_single_instance_io(
     debug: bool = False
 ) -> None:
     save_bug_dir = save_dir / instance_id
-    save_bug_dir.mkdir(exist_ok = True)
+    save_bug_dir.mkdir(exist_ok = True, parents = True)
     reproducer = get_reproducer(reproducer_file, instance_id)
     buggy_funcs = get_buggy_function_info(function_file, instance_id)
 
     container, bug_info = setup(instance_id)
     pdb_manager = PDBManager(container, bug_info, reproducer)
     for buggy_func in buggy_funcs:
-        save_file = save_dir / (buggy_func.full_name + ".json")
+        save_file = save_bug_dir / (buggy_func.full_name + ".json")
         try:
             buggy_io = pdb_manager.get_func_io(buggy_func, max_iter = max_iter)
             fixed_io = pdb_manager.get_func_io(buggy_func, use_fixed=True, max_iter = max_iter)
@@ -72,8 +73,10 @@ def get_single_instance_io(
         pdb_manager.exit()
 
 def main(args):
-    with open(args.test_file) as f:
-        all_test_info = json.load(f)
+    all_test_info = []
+    with open(args.reproducer_file) as f:
+        for line in f:
+            all_test_info.append(json.loads(line))
     
     instance_list = [e["instance_id"] for e in all_test_info]
     if args.target_pattern != "":
@@ -84,9 +87,9 @@ def main(args):
     for instance_id in instance_list:
         get_single_instance_io(
             instance_id,
-            args.reproducer_file,
-            args.buggy_function_file,
-            args.save_dir,
+            Path(args.reproducer_file),
+            Path(args.buggy_function_file),
+            Path(args.save_dir),
             args.max_iter,
             args.debug
         )    
