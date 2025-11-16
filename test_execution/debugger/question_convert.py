@@ -70,12 +70,41 @@ def rank_fixed_io(fixed_ios: list[IOInfo], buggy_ios: list[IOInfo]) -> tuple[lis
     ]
     return (ranked_io_strs, max(scores))
 
+def _analyze_results(all_jsons: list[Path], bug2question_info: dict[str, dict]) -> dict:
+    from collections import Counter
+    io_attempted_instance_ids = set()
+    for json_file in all_jsons:
+        instance_id = json_file.parent.name
+        io_attempted_instance_ids.add(instance_id)
+    
+    io_gathered_instance_ids = set(bug2question_info.keys())
+    io_failed_instance_ids = io_attempted_instance_ids - io_gathered_instance_ids
+    
+    attempted_by_project = Counter(
+        [instance_id.split("-")[0] for instance_id in io_attempted_instance_ids]
+    )
+    failed_by_project = Counter(
+        [instance_id.split("-")[0] for instance_id in io_failed_instance_ids]
+    )
+    result_dict = dict()
+    result_dict["total"] = len(io_attempted_instance_ids)
+    result_dict["failure"] = len(io_failed_instance_ids)
+    for repo_name in attempted_by_project:
+        result_dict[repo_name] = {
+            "total": attempted_by_project[repo_name],
+            "failure": failed_by_project[repo_name],
+            "ratio": failed_by_project[repo_name] / attempted_by_project[repo_name] ,
+        }
+    return result_dict
+
+
 def main(args):
     all_jsons = get_io_files(Path(args.io_info_dir))
     save_json = Path(args.save_path)
     bug2question_info = dict()
     max_q = args.question_num
     for json_file in all_jsons:
+        instance_id = json_file.parent.name
         buggy_ios, fixed_ios = read_io_file(json_file)
         if len(fixed_ios) == 0:
             continue
@@ -85,7 +114,6 @@ def main(args):
         except ValueError:
             continue
         
-        instance_id = json_file.parent.name
         method_has_better_score = (
             (instance_id not in bug2question_info) or
             (max_score > bug2question_info[instance_id]['max_score'])
@@ -99,16 +127,20 @@ def main(args):
                 'max_score': max_score
             }
     
-    print('Successes:', len(bug2question_info))
     save_values = list(bug2question_info.values())
     save_values = list(sorted(save_values, key=lambda d: d['instance_id']))
     save_json.write_text(json.dumps(save_values, indent=2))
+
+    if args.display_result_analysis:
+        analyzed_results = _analyze_results(all_jsons, bug2question_info)
+        print(json.dumps(analyzed_results, indent=2))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--io_info_dir", type=str)
     parser.add_argument("--save_path", type=str)
     parser.add_argument("--question_num", type=int, default=3)
+    parser.add_argument("--display_result_analysis", action="store_true")
     args = parser.parse_args()
 
     main(args)

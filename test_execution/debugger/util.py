@@ -23,3 +23,7 @@ class IOInfo():
             "input_values": self.input_values,
             "output_value": self.output_value,
         }
+    
+    @classmethod
+    def from_dict(cls, io_info: dict):
+        return IOInfo(io_info["input_values"], io_info["output_value"])
