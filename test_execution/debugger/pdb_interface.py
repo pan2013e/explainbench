@@ -18,7 +18,11 @@ import json
 def read_output(p):
     output = ""
     while not output.endswith("(Pdb) "):
-        char = p.stdout.read(1).decode("utf-8")
+        stdout_byte = p.stdout.read(1)
+        try:
+            char = stdout_byte.decode("utf-8")
+        except UnicodeDecodeError:
+            char = "?"
         if not char:
             return True, output
         else:
