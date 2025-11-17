@@ -59,15 +59,20 @@ def get_single_instance_io(
     for buggy_func in buggy_funcs:
         save_file = save_bug_dir / (buggy_func.full_name + ".json")
         try:
-            buggy_io = pdb_manager.get_func_io(buggy_func, max_iter = max_iter)
-            fixed_io = pdb_manager.get_func_io(buggy_func, use_fixed=True, max_iter = max_iter)
+            buggy_io, bug_error_str = pdb_manager.get_func_io(buggy_func, max_iter = max_iter)
+            fixed_io, _ = pdb_manager.get_func_io(buggy_func, use_fixed=True, max_iter = max_iter)
         except Exception as e:
             print(f"Oh no, exception for {instance_id} - {type(e)}: {e}")
             continue
-        save_file.write_text(json.dumps({
-            "buggy_io": [info.to_dict() for info in buggy_io],
-            "fixed_io": [info.to_dict() for info in fixed_io],
-        }, indent=2))
+
+        if not bug_error_str:
+            save_file.write_text(json.dumps({
+                "buggy_io": [info.to_dict() for info in buggy_io],
+                "fixed_io": [info.to_dict() for info in fixed_io],
+            }, indent=2))
+        else:
+            error_file = save_file.parent / f"error.{buggy_func.full_name}.txt"
+            error_file.write_text(bug_error_str)
     
     if not debug:
         pdb_manager.exit()
