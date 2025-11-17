@@ -8,31 +8,33 @@ from test_execution.util import REPRODUCER_LOC, read_from_container, write_to_co
 from test_execution.debugger.python_parsing import get_matching_func_node, get_func_qualified_name
 from test_execution.debugger.util import FunctionInfo, IOInfo
 
+# The debugger operation script needs to be backward-compatible with earlier Python versions,
+# making it slightly more complex than it would be in modern Python.
 DEBUGGER_OPERATION_SCRIPT = r"""
 import subprocess as sp
 from subprocess import Popen
 import json
 
-def read_output(p: Popen[str]) -> tuple[bool, str]:
+def read_output(p):
     output = ""
     while not output.endswith("(Pdb) "):
-        char = p.stdout.read(1)
+        char = p.stdout.read(1).decode("utf-8")
         if not char:
             return True, output
         else:
             output += char
     return False, output.removesuffix("(Pdb) ").strip()
 
-def get_pdb_response(p: Popen[str], prog_input: str) -> tuple[bool, str]:
+def get_pdb_response(p, prog_input):
     if not prog_input.endswith("\n"):
         prog_input += "\n"
-    p.stdin.write(prog_input)
+    p.stdin.write(prog_input.encode("utf-8"))
     p.stdin.flush()
 
     return read_output(p)
 
-def return_stack(p: Popen[str]) -> None:
-    def _get_stack_depth(stack: str) -> int:
+def return_stack(p):
+    def _get_stack_depth(stack):
         return stack.count("\n->")
     _, current_stack = get_pdb_response(p, "w")
     new_stack_depth = 999
@@ -45,7 +47,7 @@ def return_stack(p: Popen[str]) -> None:
         has_return_value = ")->" in new_stack
 
 PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, '=', locals()[param.name])"
-p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
+p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
 read_output(p) # flush initial setup string
 for idx in range({max_iter}):
     get_pdb_response(p, "import inspect")
@@ -90,7 +92,10 @@ class PDBManager():
         )
         ast_root = ast.parse(file_content)
         target_func_node = get_matching_func_node(ast_root, target_func)
-        target_func_node.body.insert(0, ast.Expr(ast.Call(ast.Name("breakpoint"), [], [])))
+        # Below: need to import pdb then set_trace; breakpoint() is not backward-compatible
+        target_func_node.body.insert(0, ast.Import([ast.alias("pdb")]))
+        target_func_node.body.insert(1, ast.Expr(ast.Call(ast.Attribute(ast.Name("pdb"), "set_trace"), [], [])))
+
         injected_file_content = ast.unparse(ast_root)
         write_to_container(
             self.container, 
