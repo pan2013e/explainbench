@@ -34,20 +34,22 @@ def get_injected_script(instance_id: str, mode: str):
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACER=1\n'
             f'export INSTANCE_ID={instance_id}\n'
-            f'export TRACER_OUTPUT_DIR=/{mode}_traces'
+            f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+            'export PYTHONHASHSEED=0'
         )
     else:
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
-            'python -m pip install -e /root/py-tracer'
+            'python -m pip install -e /root/py-tracer\n'
+            'export PYTHONHASHSEED=0'
         )
 
 def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
-    if any(project in instance_id for project in ['django', 'sympy']):
-        # For other projects, run all tests, but only fail-to-pass tests are traced
-        # This should be handled within the tracer plugin
+    if 'django' in instance_id:
         return None
+    elif 'sympy' in instance_id:
+        return orig_line.replace(" -C --verbose ", " ")
     elif 'sphinx' in instance_id:
         fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
         prefix = orig_line.split(' -- ')[0].strip()
