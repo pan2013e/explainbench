@@ -40,11 +40,14 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
     with tarfile.open(fileobj=BytesIO(file_content)) as tar:
         tar.extractall(path=dst_path)
 
-def get_fail_to_pass_tests(instance_id: str) -> list[str]:
+def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     if 'django__django' in instance_id:
         return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
-    return json.loads(instance['FAIL_TO_PASS'])
+    tests = json.loads(instance['FAIL_TO_PASS'])
+    if 'sympy__sympy' in instance_id:
+        return ' or '.join(tests)
+    return tests
 
 def get_instance_ids(value: list[str]) -> list[str]:
     if value == ["all"]:
