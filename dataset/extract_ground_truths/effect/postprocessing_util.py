@@ -6,7 +6,7 @@ BASE_IGNORE_FIELDS: Set[str] = {"vars_used", "vars_defined"}
 # If there is a new repo and field that should be ignored, we can easily ignore the ordering by adding
 # "<reponame>": {"<target_field_name>"}
 IGNORE_ORDER_REGISTRY: Dict[str, Set[str]] = {
-    "astropy": {"attr_names", "frame_names"},
+    "astropy": {"attr_names", "frame_names", "unit", "_all_units"},
     "django": {"_property_names"}
 }
 
