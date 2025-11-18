@@ -140,6 +140,16 @@ def filter_caller_name(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
         return True
     return _filter_by_predicate(diff_dict, keep)
 
+def filter_by_keys(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def keep(kind: str, path: str, payload: Any) -> bool:
+        IGNORE = {"_xdg_config_home_orig", "_xdg_cache_home_orig", "unit", "_all_units", "line", "p_functions", "p_function", "pinfo", "pfuncs", "f", "_registry"}
+        all_keys = extract_all_keys(path)
+        for key in all_keys:
+            if key in IGNORE:
+                return False
+        return True
+    return _filter_by_predicate(diff_dict, keep)
+
 def filter_based_on_vars_at_current_line(diff_dict: Dict[str, Any], event) -> Dict[str, Any]:
     """
     Keep entries whose var is referenced on the current line:
@@ -180,7 +190,7 @@ def filter_docstring_changes(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Filter the docstring changes using heuristics number of words
     """
-    MAX_WORDS = 10
+    MAX_WORDS = 3
     for change_key, change_val in list(diff_dict.items()):
         if change_key == "values_changed" and isinstance(change_val, dict):
             to_delete = []
@@ -242,6 +252,7 @@ def apply_trace_filters(diffs_by_kind: Dict[str, Any], event, instance_id: str) 
     cur = filter_parameter_sources(cur)
     cur = filter_return_values(cur)
     cur = filter_caller_name(cur)
+    cur = filter_by_keys(cur)
     
     # Step 2
     cur = filter_added_dict_based_on_seen_variables(cur, event)
