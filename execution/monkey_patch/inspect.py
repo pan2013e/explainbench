@@ -46,28 +46,26 @@ def get_injected_script(instance_id: str, mode: str):
             'export ENABLE_TRACER=1\n'
             f'export INSTANCE_ID={instance_id}\n'
             f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
-            'export PYTHONHASHSEED=0'
+            'export PYTHONHASHSEED=42'
         )
     else:
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
             'python -m pip install -e /root/py-tracer\n'
-            'export PYTHONHASHSEED=0'
+            'export PYTHONHASHSEED=42'
         )
 
 def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
+    fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
     if 'django' in instance_id:
         return None
     elif 'sympy' in instance_id:
-        return orig_line.replace(" -C --verbose ", " ")
+        return orig_line.replace(" -C ", f' -k "{fail_to_pass_tests}" --seed 7357232 ')
     elif 'sphinx' in instance_id:
-        fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
         prefix = orig_line.split(' -- ')[0].strip()
         return f'{prefix} -- {" ".join(fail_to_pass_tests)} {get_pytest_addopts(mode)}'
     else:
-        # For pytest projects, only run the fail-to-pass tests
-        fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
         return f'pytest -rA {" ".join(fail_to_pass_tests)} {get_pytest_addopts(mode)}'
 
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
