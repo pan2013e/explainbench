@@ -64,6 +64,7 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             if not is_return:            
                 print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
                 print('In function: ', patched_block.function_name)
+                print("Caller: ", patched_block.call_event.statement)
                 print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
                 print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
             filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
@@ -103,5 +104,5 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
 
 if __name__ == "__main__":
     import pprint as pp
-    test = main("astropy__astropy-7166", is_return=True, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.gold.1021/gold")
+    test = main("astropy__astropy-12907", is_return=False, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.debug.gold.1021/gold")
     pp.pprint(test, sort_dicts=False)
