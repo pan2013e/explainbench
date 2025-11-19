@@ -93,7 +93,7 @@ def _analyze_results(all_jsons: list[Path], bug2question_info: dict[str, dict]) 
         result_dict[repo_name] = {
             "total": attempted_by_project[repo_name],
             "failure": failed_by_project[repo_name],
-            "ratio": failed_by_project[repo_name] / attempted_by_project[repo_name] ,
+            "ratio": failed_by_project[repo_name] / attempted_by_project[repo_name],
         }
     return result_dict
 
