@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from deepdiff import DeepDiff
 from tracer.protocol import Event, FunctionEvent, ReturnEvent
@@ -129,50 +129,6 @@ class Traces:
             if block.is_function_excluded():
                 continue
             yield block
-
-    def find_block_for_event(self, target_id: int) -> Optional[FunctionBlock]:
-        """
-        Given an Event or event_id, return the FunctionBlock that contains it.
-        Returns None if the event cannot be found.
-        """
-        for block in self.blocks:
-            for ev in block.events:
-                if ev.event_id == target_id:
-                    return block
-        return None
-    
-    def get_callsite_for_block(self, callee_block: FunctionBlock) -> Optional[Event]:
-        """
-        Given a FunctionBlock (callee), return the Event in its caller where it was invoked.
-        This uses the callsites recorded in _init.
-        Returns None if no callsite was recorded (e.g., callee is called directly from the test block).
-        """
-        for callsite_event, block in self.callsites:
-            if block is callee_block:
-                return callsite_event
-        return None
-
-def get_caller_callsite(traces: Traces, target_id: int) -> Optional[Event]:
-    """
-    Given an event (or event_id) inside some function F, find the *caller* of F,
-    then return the callsite in that caller where F was invoked.
-    Returns: The callsite Event (usually a LineEvent) in the caller-of-F 
-    or None if there is no such caller (e.g. top-level test call).
-    """
-    block_for_event = traces.find_block_for_event(target_id)
-    if block_for_event is None:
-        return None
-
-    caller_block = block_for_event.caller
-    if caller_block is None:
-        return None
-
-    # If the caller itself is the special top-level <test> block, we have no recorded callsite
-    if caller_block is traces.blocks[0]:
-        return None
-
-    callsite_event = traces.get_callsite_for_block(caller_block)
-    return callsite_event
 
 def block_key(block: FunctionBlock):
     if not block.caller or not getattr(block, "call_event", None):
