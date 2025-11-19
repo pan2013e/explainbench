@@ -64,7 +64,8 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             if not is_return:            
                 print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
                 print('In function: ', patched_block.function_name)
-                print("Caller: ", patched_block.call_event.statement)
+                if patched_block.call_event:
+                    print("Caller: ", patched_block.call_event.statement)
                 print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
                 print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
             filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
