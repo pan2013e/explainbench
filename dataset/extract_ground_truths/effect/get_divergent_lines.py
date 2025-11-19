@@ -5,6 +5,7 @@ from dataset.extract_ground_truths.effect.trace_util import (
     event_match,
     function_match,
     get_trace_dir,
+    get_traceback
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import(
     apply_trace_filters, 
@@ -91,7 +92,12 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                         "buggy_variables": buggy_variable_views,
                         "patched_variables": patched_variable_views,
                     }
-                print("Diff: ", filtered_diff)            
+                print("Diff: ", filtered_diff)    
+                tracebacks = get_traceback(patched_block)
+                print(f"{'ID':<5} | {'FUNCTION':<40} | {'STATEMENT'}")
+                print("-" * 80)
+                for event in tracebacks:
+                    print(f"{event.event_id:<5} | {event.function_name:<40} | {event.statement.strip()}")
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
                     print('Buggy Variables: ', buggy_event.return_value)
                     print('====')
