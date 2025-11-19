@@ -207,3 +207,50 @@ def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
         # exclude_paths=["root['seen_variables']['transform']"],
         **kwargs,
     )
+
+############# DEBUGGING FUNCTION ####################
+def visualize_trace_structure(traces):
+    print(f"{'='*80}")
+    print(f"{'BLOCK IDX':<10} | {'DEPTH':<6} | {'RANGE (IDs)':<15} | {'FUNCTION & RELATIONSHIPS'}")
+    print(f"{'='*80}")
+
+    # 1. Create Lookup Maps for fast access
+    # Map: Block Object -> The Event that created it
+    block_created_by = {blk: evt for evt, blk in traces.callsites}
+    
+    # Map: Event ID -> The Block it creates
+    event_creates_block = {evt.event_id: blk for evt, blk in traces.callsites}
+
+    for idx, block in enumerate(traces.blocks):
+        if not block.events:
+            continue
+
+        start_id = block.events[0].event_id
+        end_id = block.events[-1].event_id
+        depth = block.call_depth
+        indent = "|   " * depth
+        
+        # Determine Block Type
+        status_str = ""
+        if idx == 0:
+            status_str = "(ROOT)"
+        elif block in block_created_by:
+            trigger_evt = block_created_by[block]
+            status_str = f"<- [ENTRY] Called by Event {trigger_evt.event_id}"
+        else:
+            status_str = f"<- [CONTINUATION] Resuming {block.function_name}"
+
+        # Print Block Header
+        print(f"{idx:<10} | {depth:<6} | {start_id:<5} - {end_id:<7} | {indent}{block.function_name} {status_str}")
+
+        # Scan events in this block to see if they call OUT to other blocks
+        for event in block.events:
+            if event.event_id in event_creates_block:
+                callee = event_creates_block[event.event_id]
+                # Find the index of the callee in the blocks list for reference
+                try:
+                    callee_idx = traces.blocks.index(callee)
+                    print(f"{'':<35} | {indent}|   -> Event {event.event_id} calls block [{callee_idx}] {callee.function_name}")
+                except ValueError:
+                    pass
+    print(f"{'='*80}")
