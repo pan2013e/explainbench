@@ -44,10 +44,7 @@ def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     if 'django__django' in instance_id:
         return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
-    tests = json.loads(instance['FAIL_TO_PASS'])
-    if 'sympy__sympy' in instance_id:
-        return ' or '.join(tests)
-    return tests
+    return json.loads(instance['FAIL_TO_PASS'])
 
 def get_instance_ids(value: list[str]) -> list[str]:
     if value == ["all"]:
