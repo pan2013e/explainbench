@@ -19,7 +19,15 @@ def get_trace_dir(agent='gold'):
     return os.path.join(DIR, f'../../../logs/run_evaluation/trace.{agent}.{os.getuid()}/{agent}')
 
 class FunctionBlock:
-    def __init__(self, file_path: str, function_name: str, params: Dict[str, Any], trace_type: Literal['buggy', 'patched'], caller: Optional['FunctionBlock'], call_depth: int = 0):
+    def __init__(self, 
+                 file_path: str, 
+                 function_name: str, 
+                 params: Dict[str, Any], 
+                 trace_type: Literal['buggy', 'patched'], 
+                 caller: Optional['FunctionBlock'], 
+                 call_depth: int = 0,
+                 call_event: Optional['Event'] = None):
+        
         self.events = [] # type: List[Event]
         self.file_path = os.path.relpath(file_path, '/testbed')
         self.function_name = function_name
@@ -27,6 +35,7 @@ class FunctionBlock:
         self.trace_type = trace_type
         self.caller = caller
         self.call_depth = call_depth
+        self.call_event = call_event
     
     def add_event(self, event: Event):
         self.events.append(event)
@@ -57,28 +66,52 @@ class Traces:
 
     def _init(self, events: List[Event], diff_lines: Dict[str, List[int]]):
         current_block = self.blocks[0]
+        
         for idx, event in enumerate(events):
             if isinstance(event, FunctionEvent):
                 call_depth = current_block.call_depth + 1 if current_block is not self.blocks[0] and idx > 0 else 0
-                block = FunctionBlock(event.filepath, event.function_name, event.parameters, self.trace_type, current_block, call_depth)
+                
+                call_event = self.events[idx - 1] if idx > 0 else None  
+                block = FunctionBlock(
+                    event.filepath, 
+                    event.function_name, 
+                    event.parameters, 
+                    self.trace_type, 
+                    current_block, 
+                    call_depth,
+                    call_event=call_event
+                )
+                
                 self.blocks.append(block)
-                # Record call sites (except the test function call)
                 if current_block is not self.blocks[0]:
-                    self.callsites.append((self.events[idx - 1], block))
+                    self.callsites.append((call_event, block))
+                
                 current_block = block
                 current_block.add_event(event)
+                
             elif isinstance(event, ReturnEvent):
                 current_block.add_event(event)
                 caller = current_block.caller
                 assert caller, "Return without caller"
-                block = FunctionBlock(event.filepath, caller.function_name, caller.params, caller.trace_type, caller.caller, call_depth=max(caller.call_depth - 1, 0))
+                
+                block = FunctionBlock(
+                    event.filepath, 
+                    caller.function_name, 
+                    caller.params, 
+                    caller.trace_type, 
+                    caller.caller, 
+                    call_depth=max(caller.call_depth - 1, 0),
+                    call_event=caller.call_event
+                )
+                
                 self.blocks.append(block)
                 current_block = block
             else:
                 current_block.add_event(event)
-        self._exclude_lines(diff_lines)
-        self._merge_blocks()
     
+        self._exclude_lines(diff_lines)
+        self._merge_blocks()    
+
     def _exclude_event(self, event: Event):
         '''
         Mark the event as excluded. If the event calls a function, exclude all events in the callee as well. Since this is recursive, all callees along the call chain are excluded.
