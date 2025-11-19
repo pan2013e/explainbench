@@ -50,7 +50,7 @@ def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
     if 'django' in instance_id:
         return None
     elif 'sympy' in instance_id:
-        return orig_line.replace(" -C ", f' -k "{fail_to_pass_tests}" --seed 7357232 ')
+        return orig_line.replace(" -C ", f' -k {" ".join(fail_to_pass_tests)} --seed 7357232 ')
     elif 'sphinx' in instance_id:
         prefix = orig_line.split(' -- ')[0].strip()
         return f'{prefix} -- {" ".join(fail_to_pass_tests)} --output=/{mode}_traces'
