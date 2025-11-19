@@ -254,3 +254,15 @@ def visualize_trace_structure(traces):
                 except ValueError:
                     pass
     print(f"{'='*80}")
+
+def get_traceback(current_block):
+    """
+    Returns a list of Event objects representing the call stack.
+    The list is ordered from the immediate caller up to the root.
+    """
+    traceback_stack = []
+    while current_block.call_event:
+        call_event = current_block.call_event
+        traceback_stack.append(call_event)
+        current_block = current_block.caller        
+    return traceback_stack
