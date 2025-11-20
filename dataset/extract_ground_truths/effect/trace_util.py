@@ -36,6 +36,7 @@ class FunctionBlock:
         self.caller = caller
         self.call_depth = call_depth
         self.call_event = call_event
+        self.return_event = None
     
     def add_event(self, event: Event):
         self.events.append(event)
@@ -90,6 +91,7 @@ class Traces:
                 current_block.add_event(event)
                 
             elif isinstance(event, ReturnEvent):
+                current_block.return_event = event
                 current_block.add_event(event)
                 caller = current_block.caller
                 assert caller, "Return without caller"
