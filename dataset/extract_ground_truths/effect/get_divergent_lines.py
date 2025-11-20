@@ -80,14 +80,22 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                     buggy_variable_views = get_complete_variable_views_from_diff(buggy_event,filtered_diff)
                     patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
                     
-                    caller_exp = None
+                    patched_caller_exp = None
+                    buggy_caller_exp = None
                     if hasattr(patched_block, "call_event") and patched_block.call_event:
-                        caller_exp =  patched_block.call_event.statement
+                        patched_caller_exp =  patched_block.call_event.statement
+                        
+                    if hasattr(buggy_block, "call_event") and buggy_block.call_event:
+                        buggy_caller_exp = buggy_block.call_event.statement
                     
-                    callee_return_val = None
+                    patched_callee_return_val = None
                     if hasattr(patched_block, "return_event") and hasattr(patched_block.return_event, "return_value"):
-                        callee_return_val = patched_block.return_event.return_value
+                        patched_callee_return_val = patched_block.return_event.return_value
 
+                    buggy_callee_return_val = None
+                    if hasattr(buggy_block, "return_event") and hasattr(buggy_block.return_event, "return_value"):
+                        buggy_callee_return_val = buggy_block.return_event.return_value
+                        
                     return {
                         "test_id": test_id,
                         "file_path": patched_event.filepath,
@@ -102,8 +110,11 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                         "patched_function_param": patched_block.params,
                         "buggy_variables": buggy_variable_views,
                         "patched_variables": patched_variable_views,
-                        "caller_expression": caller_exp,
-                        "callee_return_value": callee_return_val
+                        "patched_caller_expression": patched_caller_exp,
+                        "patched_callee_return_value": patched_callee_return_val,
+                        "buggy_caller_expression": buggy_caller_exp,
+                        "buggy_callee_return_value": buggy_callee_return_val
+
                     }
                 print("Diff: ", filtered_diff)    
                 tracebacks = get_traceback(patched_block)
