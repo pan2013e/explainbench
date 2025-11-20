@@ -82,7 +82,12 @@ class Traces:
                     call_depth,
                     call_event=call_event
                 )
-                
+
+                if call_event:
+                    call_event.executed_fn_block = block 
+
+                event.current_fn_block = block
+                              
                 self.blocks.append(block)
                 if current_block is not self.blocks[0]:
                     self.callsites.append((call_event, block))
@@ -92,7 +97,16 @@ class Traces:
                 
             elif isinstance(event, ReturnEvent):
                 current_block.return_event = event
+                
+                # The 'call_event' that created this function points to the ENTRY block.
+                # We must save the return value there too
+                if current_block.call_event and hasattr(current_block.call_event, 'executed_block'):
+                    entry_block = current_block.call_event.executed_fn_block
+                    entry_block.return_event = event
+
+                event.current_fn_block = current_block
                 current_block.add_event(event)
+                
                 caller = current_block.caller
                 assert caller, "Return without caller"
                 
@@ -109,6 +123,7 @@ class Traces:
                 self.blocks.append(block)
                 current_block = block
             else:
+                event.current_fn_block = current_block
                 current_block.add_event(event)
     
         self._exclude_lines(diff_lines)
