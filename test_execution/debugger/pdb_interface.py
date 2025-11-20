@@ -62,7 +62,7 @@ for idx in range({max_iter}):
                 line = p.stderr.readline()
                 if not line:
                     break
-                print(line.decode()) # for debugging
+                print(line.decode().rstrip()) # for debugging
             exit(0)
         else:
             raise
