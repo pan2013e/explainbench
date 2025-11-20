@@ -65,8 +65,10 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
             if not is_return:            
                 print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
                 print('In function: ', patched_block.function_name)
-                if patched_block.call_event:
-                    print("Caller: ", patched_block.call_event.statement)
+                if hasattr(patched_block, "return_event") and hasattr(patched_block.return_event, "return_value"):
+                    print("Current fn return value: ", patched_block.return_event.return_value)
+                if hasattr(patched_block, "call_event") and patched_block.call_event:
+                    print("Caller of the current fn: ", patched_block.call_event.statement)
                 print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
                 print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
             filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
@@ -94,10 +96,13 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                     }
                 print("Diff: ", filtered_diff)    
                 tracebacks = get_traceback(patched_block)
-                print(f"{'ID':<5} | {'FUNCTION':<40} | {'STATEMENT'}")
+                tracebacks.reverse()
+                print('====')
+                print(f"{'ID':<5} | {'FUNCTION':<90} | {'STATEMENT'}")
                 print("-" * 80)
                 for event in tracebacks:
                     print(f"{event.event_id:<5} | {event.function_name:<40} | {event.statement.strip()}")
+                print('====')
                 if 'return_value' in diff.affected_root_keys and hasattr(patched_event, "return_value"):
                     print('Buggy Variables: ', buggy_event.return_value)
                     print('====')
