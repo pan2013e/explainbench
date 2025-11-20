@@ -79,6 +79,15 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                     # assert patched_block.params == buggy_block.params
                     buggy_variable_views = get_complete_variable_views_from_diff(buggy_event,filtered_diff)
                     patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
+                    
+                    caller_exp = None
+                    if hasattr(patched_block, "call_event") and patched_block.call_event:
+                        caller_exp =  patched_block.call_event.statement
+                    
+                    callee_return_val = None
+                    if hasattr(patched_block, "return_event") and hasattr(patched_block.return_event, "return_value"):
+                        callee_return_val = patched_block.return_event.return_value
+
                     return {
                         "test_id": test_id,
                         "file_path": patched_event.filepath,
@@ -93,6 +102,8 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
                         "patched_function_param": patched_block.params,
                         "buggy_variables": buggy_variable_views,
                         "patched_variables": patched_variable_views,
+                        "caller_expression": caller_exp,
+                        "callee_return_value": callee_return_val
                     }
                 print("Diff: ", filtered_diff)    
                 tracebacks = get_traceback(patched_block)
@@ -116,5 +127,5 @@ def main(instance_id, agent='gold', test_id=0, is_return=False, base_dir=None):
 
 if __name__ == "__main__":
     import pprint as pp
-    test = main("astropy__astropy-12907", is_return=False, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.debug.gold.1021/gold")
+    test = main("astropy__astropy-12907", is_return=True, base_dir="/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.debug.gold.1021/gold")
     pp.pprint(test, sort_dicts=False)
