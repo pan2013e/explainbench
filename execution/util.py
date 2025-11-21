@@ -4,7 +4,7 @@ import atexit
 import tarfile
 import datasets
 
-from io import BytesIO
+from io import RawIOBase, BufferedReader
 from pathlib import PurePosixPath, Path
 from datasets import load_dataset
 from docker.models.containers import Container
@@ -15,6 +15,31 @@ datasets.disable_progress_bars()
 SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
 AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
+
+class _IterableReader(RawIOBase):
+    def __init__(self, iterable):
+        self._iter = iter(iterable)
+        self._leftover = b""
+    
+    def readable(self):
+        return True
+    
+    def readinto(self, b):
+        view = memoryview(b)
+        written = 0
+        while written < len(b):
+            if not self._leftover:
+                try:
+                    self._leftover = next(self._iter)
+                except StopIteration:
+                    break
+            n = min(len(self._leftover), len(b) - written)
+            view[written:written + n] = self._leftover[:n]
+            self._leftover = self._leftover[n:]
+            written += n
+            if written:
+                break
+        return written
 
 def get_tmp_tracer_path():
     return f'/tmp/py-tracer.{os.getpid()}.tar'
@@ -33,11 +58,10 @@ def prepare_tracer():
     atexit.register(lambda: os.unlink(tmp_dir) if os.path.exists(tmp_dir) else None)
 
 def copy_directory_from_docker(container: Container, src_path: PurePosixPath, dst_path: Path):
-    tar_stream, _ = container.get_archive(str(src_path))
-    file_content = b""
-    for chunk in tar_stream:
-        file_content += chunk
-    with tarfile.open(fileobj=BytesIO(file_content)) as tar:
+    dst_path.mkdir(parents=True, exist_ok=True)
+    tar_stream, _ = container.get_archive(str(src_path), encode_stream=True)
+    reader = BufferedReader(_IterableReader(tar_stream))
+    with tarfile.open(fileobj=reader, mode="r|gz") as tar:
         tar.extractall(path=dst_path)
 
 def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:

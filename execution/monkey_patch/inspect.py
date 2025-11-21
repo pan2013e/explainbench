@@ -30,8 +30,7 @@ def get_pytest_addopts(mode):
 
 def install_tracer(container, logger):
     with open(get_tmp_tracer_path(), 'rb') as f:
-        data = f.read()
-    container.put_archive('/root', data)
+        container.put_archive('/root', f)
     logger.info("Tracer code copied to container")
 
 def get_injected_script(instance_id: str, mode: str):
