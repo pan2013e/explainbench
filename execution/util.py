@@ -58,11 +58,15 @@ def prepare_tracer():
     atexit.register(lambda: os.unlink(tmp_dir) if os.path.exists(tmp_dir) else None)
 
 def copy_directory_from_docker(container: Container, src_path: PurePosixPath, dst_path: Path):
-    dst_path.mkdir(parents=True, exist_ok=True)
-    tar_stream, _ = container.get_archive(str(src_path), encode_stream=True)
-    reader = BufferedReader(_IterableReader(tar_stream))
+    target_path = dst_path / src_path.name
+    target_path.mkdir(parents=True, exist_ok=True)
+    exec_result = container.exec_run(
+        ["tar", "-C", str(src_path), "-czf", "-", "."],
+        stream=True,
+    )
+    reader = BufferedReader(_IterableReader(exec_result.output))
     with tarfile.open(fileobj=reader, mode="r|gz") as tar:
-        tar.extractall(path=dst_path)
+        tar.extractall(path=target_path)
 
 def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     if 'django__django' in instance_id:
