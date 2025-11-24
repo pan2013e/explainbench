@@ -22,7 +22,7 @@ def main(**kwargs):
         clean=False,
         open_file_limit=4096,
         run_id=f"trace.debug.{kwargs["agent"]}.{os.getuid()}",
-        timeout=18000,
+        timeout=21600,
         namespace="swebench",
         rewrite_reports=False,
         modal=False,
