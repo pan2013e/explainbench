@@ -9,7 +9,7 @@ from execution.util import prepare_tracer, get_instance_ids, get_predictions_pat
 
 def main(**kwargs):
     monkey_patch_dataset()
-    monkey_patch_execution()
+    monkey_patch_execution(agent=kwargs["agent"])
     prepare_tracer()
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
