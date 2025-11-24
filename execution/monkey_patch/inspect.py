@@ -28,6 +28,22 @@ def get_pytest_addopts(mode):
         count = GLOBAL_ARGS["post_count"]
     return f'--output=/{mode}_traces --mode=inspector --bp-file={GLOBAL_ARGS["bp_file"]} --bp-line={bp_line} --expr="{GLOBAL_ARGS["expr"]}" --count={count} --inspector-mode={GLOBAL_ARGS["inspector_mode"]}'
 
+def get_pth_addenv(mode):
+    if mode == "buggy":
+        bp_line = GLOBAL_ARGS["pre_bp_line"]
+        count = GLOBAL_ARGS["pre_count"]
+    else:
+        bp_line = GLOBAL_ARGS["post_bp_line"]
+        count = GLOBAL_ARGS["post_count"]
+    return (
+        f'export INSPECTOR_BP_FILE={GLOBAL_ARGS["bp_file"]}\n'
+        f'export INSPECTOR_BP_LINE={bp_line}\n'
+        f'export INSPECTOR_EXPR="{GLOBAL_ARGS["expr"]}"\n'
+        f'export INSPECTOR_COUNT={count}\n'
+        f'export INSPECTOR_MODE={GLOBAL_ARGS["inspector_mode"]}\n'
+        f'export INSPECTOR_OUTPUT_DIR=/{mode}_traces'
+    )
+
 def install_tracer(container, logger):
     with open(get_tmp_tracer_path(), 'rb') as f:
         container.put_archive('/root', f)
@@ -44,7 +60,7 @@ def get_injected_script(instance_id: str, mode: str):
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_INSPECTOR=1\n'
             f'export INSTANCE_ID={instance_id}\n'
-            f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+            f'{get_pth_addenv(mode)}\n'
             'export PYTHONHASHSEED=42'
         )
     else:
