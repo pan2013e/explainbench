@@ -20,5 +20,4 @@ class File(BaseModel):
 
 ###### Effect Schemas ######
 class Effect(BaseModel):
-    value_before: str
-    value_after: str
+    expr: str

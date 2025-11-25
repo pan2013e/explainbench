@@ -28,6 +28,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     )
     QUESTION: ClassVar[str]
     SCHEMA: ClassVar[type[Schema]]
+    CTX_AGENT_SPECIFIC: ClassVar[bool] = False
     
     _registry = {} # type: dict[str, type[Task]]
     
@@ -54,10 +55,6 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     @classmethod
     def repr(cls):
         return cls.__qualname__.lower().replace('.', '_')
-    
-    @classmethod
-    def is_context_agent_specific(cls) -> bool:
-        return False
     
     @classmethod
     def get_task(cls, name: str):
@@ -115,27 +112,29 @@ class RootCause:
             return [set_f1_score(p, gt, simple_name_eq) for p in pred]
 
 class Effect(Task[schema.Effect]):
+    # Ask about expression which value changes
+    EXPR_QUESTION = (
+        "Given the function and inputs, before the given line is executed, predict a Python expression whose value changes before and after the patch. Try to make the expression specific."
+    )
+    # Ask about control flow changes
+    CF_QUESTION = (
+        ""
+    )
     QUESTION = (
-        'Given the function and inputs, before the given line is executed, what are the values of the given expression before and after the patch? For the values, answer with strings that can be directly parsed by Python\'s eval() function. '
+        '{question} '
+        'If you cannot infer from the explanation, please answer with an empty string. '
     )
     SCHEMA = schema.Effect
+    CTX_AGENT_SPECIFIC = True
+    
+    @classmethod
+    def _build_prompt(cls, explanation, **kwargs):
+        selected_question = cls.EXPR_QUESTION
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(question=selected_question), context=cls._build_context(**kwargs))
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        def eval_single(pred: schema.Effect, gt):
-            score = 0
-            try:
-                if eval(pred.value_before) == gt['buggy_value']:
-                    score += 0.5
-            except Exception:
-                pass
-            try:
-                if eval(pred.value_after) == gt['patched_value']:
-                    score += 0.5
-            except Exception:
-                pass
-            return score
-        return [eval_single(p, gt) for p in pred]
+        ...
 
 if __name__ == "__main__":
     # Helpers
@@ -159,12 +158,12 @@ if __name__ == "__main__":
         pre = metadata['buggy_function_param']
         post = metadata['patched_function_param']
         if pre == post:
-            print(deserialize(pre), file=output)
+            print(pre, file=output)
         else:
             print("\n# Before Patch:\n", file=output)
-            print(deserialize(pre), file=output)
+            print(pre, file=output)
             print("\n# After Patch:\n", file=output)
-            print(deserialize(post), file=output)
+            print(post, file=output)
             print("\n", file=output)
         contents = output.getvalue()
         output.close()
@@ -174,36 +173,36 @@ if __name__ == "__main__":
         import os
         from dataset.extract_ground_truths.effect.source_util import get_function_code
         DIR = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(DIR, "../dataset/extract_ground_truths/effect/tmp/step3.json"), 'r') as f:
+        with open(os.path.join(DIR, "../dataset/extract_ground_truths/effect/tmp/step1.json"), 'r') as f:
             data = json.load(f)[agent][instance_id]
         
         ctx = {
-            'function_code': get_function_code(
-                                instance_id,
-                                data['file_path'],
-                                get_simple_function_name(data),
-                                line_hint=(data['buggy_lineno'], None),
-                                remove_doc=True,
-                            )[0],
+            'function_code_before_patch': 
+                get_function_code(
+                    instance_id,
+                    data['file_path'],
+                    get_simple_function_name(data),
+                    line_hint=(data['buggy_lineno'], None),
+                    remove_doc=True,
+                )[0],
             'function_input': get_function_input(data),
             'line': data['statement'],
-            'expression': data['expr'][0],
         }
-        gt = {
-            'buggy_value': data['buggy_value'],
-            'patched_value': data['patched_value'],
-        }
+        gt = {}
         return ctx, gt
     
     # Example
     model = Model('gemini/gemini-2.5-flash', n=5)
-    explanation = get_expl('20250731_harness_ai', 'astropy__astropy-12907')
-    context, gt = get_ctx_and_gt('20250731_harness_ai', 'astropy__astropy-12907')
+    agent = '20250805_openhands-Qwen3-Coder-480B-A35B-Instruct'
+    instance_id = 'astropy__astropy-13579'
+    explanation = get_expl(agent, instance_id)
+    if explanation == 'EMPTY':
+        print('null')
+        exit(0)
+    context, gt = get_ctx_and_gt(agent, instance_id)
     # predict actually calls _build_prompt internally
     # here we call again just to display the full prompt
     prompt = Effect._build_prompt(explanation, **context)
     print(prompt)
     res = Effect.predict(model, explanation, **context)
     print(res)
-    score = Effect.eval(res, gt)
-    print(score)

@@ -70,13 +70,15 @@ def load_ground_truth() -> list[dict]:
     return data
 
 def load_context(task, agent_id=None) -> list[dict]:
-    if not task.is_context_agent_specific():
+    if not task.CTX_AGENT_SPECIFIC:
         path = os.path.join(DATASET_DIR, f'context/{task.repr()}.json')
+        if not os.path.exists(path):
+            return None
     else:
         assert agent_id is not None, "agent_id must be provided for agent-specific context"
         path = os.path.join(DATASET_DIR, f'context/{task.repr()}__{agent_id}.json')
-    if not os.path.exists(path):
-        return None
+        if not os.path.exists(path):
+            raise ValueError(f"Context file not found for agent-specific context: {path}")
     with open(path) as f:
         data = json.load(f)
     assert isinstance(data, list) and all(isinstance(item, dict) for item in data)
@@ -93,7 +95,7 @@ def result_statistics(data: dict[str, list]):
         'min': np.min(n_runs),
     }
 
-def timeout(seconds=15):
+def timeout(seconds=30):
     def decorator(func: Callable[[list, dict], list[float]]):
         @wraps(func)
         def wrapper(*args, **kwargs):
