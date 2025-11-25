@@ -26,7 +26,7 @@ def generate(task: type[Task], model: Model, agent_id: str):
     pbar = tqdm(zip(explanations.items(), context), total=len(explanations))
     for (instance_id, expl), ctx in pbar:
         pbar.set_postfix(**model.tqdm_usage())
-        expl = expl[0] if expl else ''
+        expl = expl[0] if expl else 'EMPTY'
         pred = task.predict(model, expl, **ctx)
         pred_results[instance_id] = [p.model_dump() for p in pred]
     save_path = get_path(task, model, agent_id, 'generation')
