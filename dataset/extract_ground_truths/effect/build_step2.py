@@ -1,16 +1,18 @@
 # Build ground truth for effect
-# Step 2. Provide step 1 info to an LLM to infer an expression
+# Step 2. Provide step 1 info to an LLM to infer an expression,
+# then inspect the expr value in buggy and patched versions
 import os
 import json
+import backoff
 
 from tqdm.auto import tqdm
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from execution.util import get_instance_ids
-from dataset.extract_ground_truths.effect import infer_expression
 from dataset.extract_ground_truths.effect.build_step1 import DIR, AGENTS
 from dataset.extract_ground_truths.effect.source_util import get_function_code
+from dataset.extract_ground_truths.effect.infer_expression import main as infer_main
 
 def read_step1_results():
     with open(os.path.join(DIR, "tmp/step1.json"), "r") as f:
@@ -40,6 +42,27 @@ def get_simple_function_name(metadata):
         name = name.split(".")[-1]
     return name
 
+@backoff.on_exception(backoff.constant, Exception, max_tries=5)
+def infer_with_validation(pre_code, post_code, metadata):
+    expr = infer_main(
+        build_fn_code(pre_code, post_code),
+        metadata["statement"],
+        metadata["filtered_diff"],
+        metadata["buggy_variables"],
+        metadata["patched_variables"],
+    )
+    buggy_value, patched_value = expr.eval(
+        metadata["instance_id"],
+        metadata["agent"],
+        metadata["file_path"],
+        metadata["buggy_lineno"],
+        metadata["patched_lineno"],
+        metadata["test_id"],
+        metadata["buggy_line_count"],
+        metadata["patched_line_count"],
+    )
+    return expr, buggy_value, patched_value
+
 def process_agent(data, agent, instance_ids):
     results = {}
     for instance_id in instance_ids:
@@ -54,15 +77,11 @@ def process_agent(data, agent, instance_ids):
             patch=get_agent_patch(agent, instance_id),
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
-        expr_candidates = infer_expression.main(
-            build_fn_code(pre_code, post_code),
-            metadata["statement"],
-            metadata["filtered_diff"],
-            metadata["buggy_variables"],
-            metadata["patched_variables"],
-        )
+        expr, buggy_value, patched_value = infer_with_validation(pre_code, post_code, metadata)
         results[instance_id] = {
-            "expr": [expr.expr for expr in expr_candidates],
+            "expr": expr.expr,
+            "buggy_value": buggy_value,
+            "patched_value": patched_value,
             **metadata
         }
     return results
