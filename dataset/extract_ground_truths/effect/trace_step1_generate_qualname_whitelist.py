@@ -3,13 +3,13 @@ import ast
 import json
 import subprocess
 
-from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
-from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
-from execution.monkey_patch.dataset import monkey_patch_dataset
 from swebench.harness.utils import load_swebench_dataset
+from execution.monkey_patch.dataset import monkey_patch_dataset
+from execution.util import get_instance_ids
+from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
 
 
 class _DefCollector(ast.NodeVisitor):
@@ -219,28 +219,23 @@ def main() -> None:
     parser.add_argument(
         "--agents",
         nargs="+",
-        default=["gold"],
+        default=[
+            "gold",
+            "20250612_trae",
+            "20250623_warp",
+            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            "20250728_zai_glm4-5",
+            "20250731_harness_ai",
+            "20250804_epam-ai-run-claude-4-sonnet",
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
+        ],
         help="List of agent names to process (used as top-level keys in the JSON).",
     )
 
     parser.add_argument(
         "--instance-ids",
         nargs="+",
-        default=[
-            "astropy__astropy-7166",
-            "astropy__astropy-7336",
-            "astropy__astropy-7671",
-            "astropy__astropy-8707",
-            "astropy__astropy-8872",
-            "astropy__astropy-12907",
-            "astropy__astropy-13033",
-            "astropy__astropy-13236",
-            "astropy__astropy-13398",
-            "astropy__astropy-13453",
-            "astropy__astropy-13579",
-            "astropy__astropy-13977",
-            "sympy__sympy-13615",
-        ],
+        default=["astropy", "sympy"],
         help="List of instance_ids to load from the dataset.",
     )
 
@@ -257,23 +252,20 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path(
-            "/home/yusuf/explainbench/dataset/extract_ground_truths/"
-            "effect/allowed_qualnames.json"
-        ),
+        default=Path(__file__).parent / "allowed_qualnames.json",
         help="Path to the output JSON file.",
     )
 
     args = parser.parse_args()
 
     AGENT_NAMES = args.agents
-    INSTANCE_IDS = args.instance_ids
+    INSTANCE_IDS = get_instance_ids(args.instance_ids)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
 
     # Load dataset
     monkey_patch_dataset()
-    ds = load_swebench_dataset(instance_ids=INSTANCE_IDS)
+    ds = load_swebench_dataset(name="SWE-bench/SWE-bench_Verified", instance_ids=INSTANCE_IDS)
 
     # Final structure: agent -> instance_id -> [qualnames]
     results: Dict[str, Dict[str, List[str]]] = {}
