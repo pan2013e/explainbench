@@ -1,3 +1,5 @@
+import os
+import json
 from pathlib import Path, PurePosixPath
 
 from dowhen import when
@@ -17,6 +19,32 @@ from execution.util import (
     get_tmp_tracer_path,
 )
 
+DIR = os.path.dirname(os.path.abspath(__file__))
+GLOBAL_ARGS = dict()
+
+def get_allowed_functions(agent, instance_id):
+    dataset_file = os.path.join(DIR, "../../dataset/extract_ground_truths/effect/allowed_functions.json")
+    with open(dataset_file, 'r') as f:
+        data = json.load(f)
+    allowed_functions_agent = data.get(agent, {})
+    if not allowed_functions_agent:
+        print(f"Warning: No allowed functions found for {agent}")
+        return 'none'
+    allowed_functions = allowed_functions_agent.get(instance_id, [])
+    if not allowed_functions:
+        print(f"Warning: No allowed functions found for ({agent}, {instance_id})")
+        return 'none'
+    return ','.join(allowed_functions)
+
+def get_pytest_addopts(instance_id, mode):
+    return f'--output=/{mode}_traces --allowed-functions="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)} --use-tracker"'
+
+def get_pth_addenv(instance_id, mode):
+    return (
+        f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+        f'export ALLOWED_FUNCTIONS="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)}"'
+    )
+
 def install_tracer(container, logger):
     with open(get_tmp_tracer_path(), 'rb') as f:
         container.put_archive('/root', f)
@@ -33,7 +61,7 @@ def get_injected_script(instance_id: str, mode: str):
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACKER=1\n'
             f'export INSTANCE_ID={instance_id}\n'
-            f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
+            f'{get_pth_addenv(instance_id, mode)}\n'
             'export PYTHONHASHSEED=42'
         )
     else:
@@ -52,9 +80,9 @@ def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
         return orig_line.replace(" -C ", f' -k {" ".join(fail_to_pass_tests)} --seed 7357232 ')
     elif 'sphinx' in instance_id:
         prefix = orig_line.split(' -- ')[0].strip()
-        return f'{prefix} -- {" ".join(fail_to_pass_tests)} --output=/{mode}_traces --use-tracker'
+        return f'{prefix} -- {" ".join(fail_to_pass_tests)} {get_pytest_addopts(instance_id, mode)}'
     else:
-        return f'pytest -rA {" ".join(fail_to_pass_tests)} --output=/{mode}_traces --use-tracker'
+        return f'pytest -rA {" ".join(fail_to_pass_tests)} {get_pytest_addopts(instance_id, mode)}'
 
 def update_eval_script(instance_id: str, eval_script: str, mode: str):
     lines = eval_script.splitlines()
@@ -107,7 +135,8 @@ def run_patched_write_script(instance_id, eval_file, test_spec):
 def run_patched_copy_out(container, log_dir):
     copy_directory_from_docker(container, PurePosixPath(f"/patched_traces"), log_dir)
 
-def monkey_patch_execution():
+def monkey_patch_execution(**kwargs):
+    GLOBAL_ARGS.update(kwargs)
     # Skip docker communication after evaluation
     when(main, 569).do("client = None")
     # Install tracer and the pytest plugin
