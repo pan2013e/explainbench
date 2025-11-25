@@ -1,5 +1,1237 @@
 {
-  "gold": {
+  "20250612_trae": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col"
+    ],
+    "astropy__astropy-13398": [],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write",
+      "astropy.io.ascii.rst:SimpleRSTData.write"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits",
+      "astropy.io.votable.connect:is_votable"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser",
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units",
+      "astropy.units.format.cds:CDS._make_parser.p_division_parts"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card",
+      "astropy.io.fits.card:Card._parse_string_value",
+      "astropy.io.fits.card:Card._parse_value",
+      "astropy.io.fits.card:Card._split"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnrecognizedUnit.__eq__"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.header:Header.fromstring"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.quantity:Quantity.__new__"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.concrete.summations:eval_sum",
+      "sympy.matrices.expressions.matexpr:Identity._entry"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.mul_inv"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.common:MatrixShaping.hstack",
+      "sympy.matrices.common:MatrixShaping.vstack"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.expr:Expr.__ge__",
+      "sympy.core.expr:Expr.__gt__",
+      "sympy.core.expr:Expr.__le__",
+      "sympy.core.expr:Expr.__lt__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ge__",
+      "sympy.core.numbers:Float.__gt__",
+      "sympy.core.numbers:Float.__le__",
+      "sympy.core.numbers:Float.__lt__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Infinity.__ge__",
+      "sympy.core.numbers:Infinity.__gt__",
+      "sympy.core.numbers:Infinity.__le__",
+      "sympy.core.numbers:Infinity.__lt__",
+      "sympy.core.numbers:Integer.__ge__",
+      "sympy.core.numbers:Integer.__gt__",
+      "sympy.core.numbers:Integer.__le__",
+      "sympy.core.numbers:Integer.__lt__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NegativeInfinity.__ge__",
+      "sympy.core.numbers:NegativeInfinity.__gt__",
+      "sympy.core.numbers:NegativeInfinity.__le__",
+      "sympy.core.numbers:NegativeInfinity.__lt__",
+      "sympy.core.numbers:Number.__ge__",
+      "sympy.core.numbers:Number.__gt__",
+      "sympy.core.numbers:Number.__le__",
+      "sympy.core.numbers:Number.__lt__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ge__",
+      "sympy.core.numbers:NumberSymbol.__gt__",
+      "sympy.core.numbers:NumberSymbol.__le__",
+      "sympy.core.numbers:NumberSymbol.__lt__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ge__",
+      "sympy.core.numbers:Rational.__gt__",
+      "sympy.core.numbers:Rational.__le__",
+      "sympy.core.numbers:Rational.__lt__",
+      "sympy.core.numbers:Rational.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product",
+      "sympy.concrete.products:Product.doit"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:Complement.reduce"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.polys.polytools:Poly",
+      "sympy.polys.polytools:Poly.__rmul__"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.core.exprtools:factor_terms.do",
+      "sympy.matrices.matrices:MatrixDeterminant.det"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution.pdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.core.power:Pow",
+      "sympy.core.power:Pow._eval_expand_tensorproduct",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.latex:LatexPrinter._print_MatAdd._mat_coeff_isneg",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.str:StrPrinter._print_MatAdd._mat_coeff_isneg"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Relational"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter",
+      "sympy.printing.pycode:MpmathPrinter._print_Rational"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Max",
+      "sympy.printing.mathematica:MCodePrinter._print_Min"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:Max",
+      "sympy.functions.elementary.miscellaneous:Min",
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed",
+      "sympy.printing.pycode:PythonCodePrinter._print_IndexedBase"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:_split_gcd",
+      "sympy.simplify.radsimp:split_surds"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.geometry.entity:GeometryEntity.__rmul__",
+      "sympy.geometry.point:Point.__add__"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:nthroot_mod"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.core.relational:Relational._eval_as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_sorted_factors",
+      "sympy.polys.polytools:_sorted_factors.key"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet._eval_subs"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger",
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.sets.handlers.issubset:is_subset_sets",
+      "sympy.sets.sets:EmptySet.equals"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_Mul",
+      "sympy.printing.pretty.pretty_symbology:pretty_symbol"
+    ],
+    "sympy__sympy-21379": [
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_nonnegative",
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_positive",
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_real",
+      "sympy.functions.elementary.hyperbolic:sinh._eval_is_real",
+      "sympy.functions.elementary.hyperbolic:tanh",
+      "sympy.functions.elementary.hyperbolic:tanh._eval_is_real"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.parsing.latex._parse_latex_antlr:convert_frac"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.physics.secondquant:CreateBoson._latex"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.printing.pycode:AbstractPythonCodePrinter._print_Mod",
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Mul"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String",
+      "sympy.codegen.ast:String.args"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Tuple",
+      "sympy.printing.pycode:PythonCodePrinter._print_tuple",
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains._eval_as_set",
+      "sympy.sets.contains:Contains.as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+  "20250623_warp": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col",
+      "astropy.table.tests.test_init_table:test_structured_array_future_warning",
+      "astropy.table.tests.test_mixin:test_ndarray_mixin",
+      "astropy.table.tests.test_table:test_structured_masked_column"
+    ],
+    "astropy__astropy-13398": [],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__",
+      "astropy.units.tests.test_quantity:TestQuantityOperations.test_non_number_type",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity1",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity2",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity2.unit",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity3",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity3.__array_ufunc__",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestBinaryUfuncs",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestBinaryUfuncs.test_basic",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestBinaryUfuncs.test_full",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestUnaryUfuncs",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestUnaryUfuncs.test_basic",
+      "astropy.units.tests.test_quantity_ufuncs:TestUfuncReturnsNotImplemented.TestUnaryUfuncs.test_full"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.io.ascii.tests.test_cds:test_mrt_units_left_associative_division",
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units",
+      "astropy.units.format.cds:CDS._make_parser.p_product_of_units"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._split",
+      "astropy.io.fits.card:Card._verify"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper",
+      "astropy.units.tests.py3_test_quantity_annotations:py3only",
+      "astropy.units.tests.py3_test_quantity_annotations:py3only.wrapper",
+      "astropy.units.tests.py3_test_quantity_annotations:test_arg_equivalencies3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_args3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_args_noconvert3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_args_nonquantity3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_decorator_override",
+      "astropy.units.tests.py3_test_quantity_annotations:test_kwarg_default3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_kwarg_equivalencies3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_kwarg_not_quantity3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_kwarg_wrong_unit3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_kwargs3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_not_quantity3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_return_annotation",
+      "astropy.units.tests.py3_test_quantity_annotations:test_unused_kwargs3",
+      "astropy.units.tests.py3_test_quantity_annotations:test_wrong_unit3"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnrecognizedUnit.__eq__"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:_compare_versions",
+      "astropy.utils.introspection:minversion"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance",
+      "sympy.geometry.point:Point.taxicab_distance"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf",
+      "sympy.core.tests.test_evalf:test_implemented_function_evalf_composition"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.matrices.expressions.matexpr:Identity._entry"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.rmul_with_af",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson",
+      "sympy.combinatorics.permutations:_af_new"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.tests.test_commonmatrix:test_vstack"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.expr:Expr.__ge__",
+      "sympy.core.expr:Expr.__gt__",
+      "sympy.core.expr:Expr.__le__",
+      "sympy.core.expr:Expr.__lt__",
+      "sympy.core.numbers:Integer.__ge__",
+      "sympy.core.numbers:Integer.__gt__",
+      "sympy.core.numbers:Integer.__le__",
+      "sympy.core.numbers:Integer.__lt__",
+      "sympy.core.tests.test_basic:test_equality",
+      "sympy.core.tests.test_basic:test_equality.Bar",
+      "sympy.core.tests.test_basic:test_equality.Bar.__eq__",
+      "sympy.core.tests.test_basic:test_equality.Bar.__ne__",
+      "sympy.core.tests.test_basic:test_equality.Foo",
+      "sympy.core.tests.test_numbers:test_NumberSymbol_comparison",
+      "sympy.core.tests.test_numbers:test_comparisons_with_unknown_type",
+      "sympy.core.tests.test_numbers:test_comparisons_with_unknown_type.Bar",
+      "sympy.core.tests.test_numbers:test_comparisons_with_unknown_type.Bar.__eq__",
+      "sympy.core.tests.test_numbers:test_comparisons_with_unknown_type.Bar.__ne__",
+      "sympy.core.tests.test_numbers:test_comparisons_with_unknown_type.Foo"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:Interval._complement",
+      "sympy.sets.sets:Set._complement"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.core.tests.test_match:test_mul",
+      "sympy.polys.polytools:Poly",
+      "sympy.polys.tests.test_polytools:test_issue_13079"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.core.exprtools:factor_terms.do",
+      "sympy.matrices.matrices:MatrixDeterminant.det"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution",
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:ArcsinDistribution.set",
+      "sympy.stats.crv_types:DagumDistribution",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution.set",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.core.power:Pow",
+      "sympy.core.power:Pow._eval_expand_tensorproduct",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.pretty.tests.test_pretty:test_MatrixSymbol_printing",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.tests.test_ccode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_fcode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_jscode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_julia:test_MatrixElement_printing",
+      "sympy.printing.tests.test_latex:test_MatrixElement_printing",
+      "sympy.printing.tests.test_latex:test_MatrixSymbol_printing",
+      "sympy.printing.tests.test_octave:test_MatrixElement_printing",
+      "sympy.printing.tests.test_rcode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_str:test_MatrixElement_printing",
+      "sympy.printing.tests.test_str:test_MatrixSymbol_printing"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.python:python",
+      "sympy.printing.str:StrPrinter",
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Relational",
+      "sympy.printing.str:StrPrinter._print_Uniform",
+      "sympy.printing.tests.test_python:test_python_relational",
+      "sympy.printing.tests.test_str:test_Rational"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__",
+      "sympy.physics.vector.vector:Vector.__sub__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter._print_Rational",
+      "sympy.printing.tests.test_pycode:test_MpmathPrinter",
+      "sympy.solvers.tests.test_numeric:test_nsolve_rational",
+      "sympy.utilities.tests.test_lambdify:test_mpmath_rational_wrapping"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.ndim_array:NDimArray._parse_index",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:SparseNDimArray.__iter__.iterator"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Max",
+      "sympy.printing.mathematica:MCodePrinter._print_Min"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [
+      "sympy.core.tests.test_assumptions:test_infinity",
+      "sympy.core.tests.test_assumptions:test_neg_infinity",
+      "sympy.core.tests.test_assumptions:test_other_symbol",
+      "sympy.functions.elementary.tests.test_miscellaneous:test_minmax_assumptions"
+    ],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine",
+      "sympy.utilities.tests.test_autowrap:test_cython_wrapper_unused_array_argument"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f",
+      "sympy.simplify.tests.test_fu:test__TR56",
+      "sympy.simplify.tests.test_simplify:test_issue_17137"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:_split_gcd"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul",
+      "sympy.matrices.expressions.tests.test_blockmatrix:test_issue_17624",
+      "sympy.matrices.expressions.tests.test_matadd:test_matrix_add_with_scalar",
+      "sympy.matrices.expressions.tests.test_matadd:test_zero_matrix_add"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__add__",
+      "sympy.geometry.point:Point.__rmul__",
+      "sympy.geometry.point:Point.as_coeff_Mul"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:nthroot_mod",
+      "sympy.ntheory.tests.test_residue:test_residue",
+      "sympy.solvers.tests.test_solveset:test_solve_modular"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.core.relational:Relational._eval_as_set",
+      "sympy.logic.tests.test_boolalg:test_bool_as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_combine_factors_by_multiplicity",
+      "sympy.polys.polytools:_generic_factor_list"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet._eval_subs"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger",
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__",
+      "sympy.physics.quantum.tests.test_dagger:test_dagger_mul",
+      "sympy.physics.quantum.tests.test_operator:test_identity"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.sets.handlers.issubset:is_subset_sets"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable",
+      "sympy.core.tests.test_symbol:test_symbol_slots"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [
+      "sympy.printing.pretty.tests.test_pretty:test_greek_symbol_subscripts",
+      "sympy.printing.tests.test_conventions:test_super_sub"
+    ],
+    "sympy__sympy-21379": [
+      "sympy.polys.polytools:gcd",
+      "sympy.polys.tests.test_polytools:test_gcd"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.parsing.latex._parse_latex_antlr:parse_latex"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.printing.latex:LatexPrinter._helper_print_standard_power"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.codegen.tests.test_rewriting:test_create_expand_pow_optimization",
+      "sympy.printing.codeprinter:CodePrinter",
+      "sympy.printing.codeprinter:CodePrinter._needs_parentheses_for_negative",
+      "sympy.printing.codeprinter:CodePrinter._parenthesize_if_needed_for_mul",
+      "sympy.printing.codeprinter:CodePrinter._print_Mul",
+      "sympy.printing.tests.test_pycode:test_PythonCodePrinter",
+      "sympy.utilities.tests.test_lambdify:test_empty_modules"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.matrices.tests.test_normalforms:test_hermite_normal",
+      "sympy.matrices.tests.test_normalforms:test_issue_23410",
+      "sympy.polys.matrices.normalforms:_hermite_normal_form",
+      "sympy.polys.matrices.tests.test_normalforms:test_hermite_normal"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains",
+      "sympy.sets.contains:Contains._eval_as_set",
+      "sympy.sets.contains:Contains.as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.tests.test_unitsystem:test_collect_factor_and_dimension_equivalent_dims",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+  "20250720_Lingxi-v1.5_claude-4-sonnet-20250514": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col"
+    ],
+    "astropy__astropy-13398": [],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits",
+      "astropy.io.votable.connect:is_votable"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._split"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnrecognizedUnit.__eq__"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.header:Header.fromstring"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.quantity:Quantity.__new__"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance",
+      "sympy.geometry.point:Point.dot",
+      "sympy.geometry.point:Point.midpoint",
+      "sympy.geometry.point:Point.taxicab_distance",
+      "sympy.geometry.point:_normalize_dimension_with_warning"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.matrices.expressions.matexpr:Identity._entry"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.rmul_with_af",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.sparse:MutableSparseMatrix.row_join"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:Set._complement"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.polys.polytools:Poly"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.core.exprtools:factor_terms.do",
+      "sympy.matrices.matrices:MatrixDeterminant._eval_det_bareiss._find_pivot"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.latex:LatexPrinter._print_MatAdd._matmul_is_negative",
+      "sympy.printing.latex:LatexPrinter._print_MatMul",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd._matmul_is_negative",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd.pretty_negative",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.str:StrPrinter._print_MatAdd._matmul_is_negative",
+      "sympy.printing.str:StrPrinter._print_MatMul"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.str:StrPrinter._print_ExprCondPair",
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Normal",
+      "sympy.printing.str:StrPrinter._print_Relational",
+      "sympy.printing.str:StrPrinter._print_Uniform"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.dyadic:Dyadic.__add__",
+      "sympy.physics.vector.vector:Vector.__add__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter._print_Rational"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Max",
+      "sympy.printing.mathematica:MCodePrinter._print_Min"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Idx",
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:_split_gcd"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.core.numbers:Number.__mul__",
+      "sympy.geometry.entity:GeometryEntity.__rmul__"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:nthroot_mod"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.logic.boolalg:Boolean.as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_should_expand_for_sqf",
+      "sympy.polys.polytools:_symbolic_factor_list"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor",
+      "sympy.polys.factortools:dmp_ext_factor.anp_to_rational",
+      "sympy.polys.factortools:dmp_ext_factor.convert_anp_poly_to_ground",
+      "sympy.polys.factortools:dmp_ext_factor.is_anp_rational"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_frozenset",
+      "sympy.printing.repr:ReprPrinter._print_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet._eval_subs"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:ordered_partitions",
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.sets.handlers.issubset:is_subset_sets",
+      "sympy.sets.sets:Complement",
+      "sympy.sets.sets:Complement.equals",
+      "sympy.sets.sets:EmptySet.equals"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [
+      "sympy.printing.pretty.pretty_symbology:pretty_try_use_unicode"
+    ],
+    "sympy__sympy-21379": [
+      "sympy.polys.polytools:_parallel_poly_from_expr"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.printing.str:StrPrinter",
+      "sympy.printing.str:StrPrinter._is_complex_denominator",
+      "sympy.printing.str:StrPrinter._print_Mul"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.printing.latex:LatexPrinter._helper_print_standard_power",
+      "sympy.printing.latex:LatexPrinter._print_Pow"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.printing.pycode:AbstractPythonCodePrinter._print_Mod"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains.as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+ "gold": {
     "astropy__astropy-12907": [
       "astropy.modeling.separable:_cstack"
     ],
@@ -34,11 +1266,49 @@
     "astropy__astropy-13977": [
       "astropy.units.quantity:Quantity.__array_ufunc__"
     ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST",
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.read",
+      "astropy.io.ascii.rst:RST.write",
+      "astropy.io.ascii.rst:SimpleRSTData"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_get_tables_from_qdp_file",
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser",
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card",
+      "astropy.io.fits.card:Card._split"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
     "astropy__astropy-7166": [
       "astropy.utils.misc:InheritDocstrings.__init__"
     ],
     "astropy__astropy-7336": [
       "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnitBase.__eq__",
+      "astropy.units.core:UnrecognizedUnit.__eq__"
     ],
     "astropy__astropy-7671": [
       "astropy.utils.introspection:minversion"
@@ -50,6 +1320,3120 @@
     "astropy__astropy-8872": [
       "astropy.units.quantity:Quantity",
       "astropy.units.quantity:Quantity.__new__"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.matrices.expressions.matexpr:Identity._entry",
+      "sympy.matrices.expressions.matexpr:MatrixElement._eval_derivative"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__iter__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__rmul__",
+      "sympy.combinatorics.permutations:Permutation.__rxor__",
+      "sympy.combinatorics.permutations:Permutation.__sub__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutes_with",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.get_precedence_matrix",
+      "sympy.combinatorics.permutations:Permutation.josephus",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.rank",
+      "sympy.combinatorics.permutations:Permutation.rank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.rmul_with_af",
+      "sympy.combinatorics.permutations:Permutation.signature",
+      "sympy.combinatorics.permutations:Permutation.transpositions",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.sparse:MutableSparseMatrix.col_join",
+      "sympy.matrices.sparse:MutableSparseMatrix.row_join"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.basic:Basic._has_matcher",
+      "sympy.core.exprtools:Factors.__ne__",
+      "sympy.core.exprtools:Term.__ne__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ge__",
+      "sympy.core.numbers:Float.__gt__",
+      "sympy.core.numbers:Float.__le__",
+      "sympy.core.numbers:Float.__lt__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ge__",
+      "sympy.core.numbers:Rational.__gt__",
+      "sympy.core.numbers:Rational.__le__",
+      "sympy.core.numbers:Rational.__lt__",
+      "sympy.core.numbers:Rational.__ne__",
+      "sympy.geometry.entity:GeometryEntity.__ne__",
+      "sympy.physics.optics.medium:Medium.__gt__",
+      "sympy.physics.optics.medium:Medium.__ne__",
+      "sympy.physics.vector.dyadic:Dyadic.__ne__",
+      "sympy.physics.vector.frame:CoordinateSym.__ne__",
+      "sympy.physics.vector.vector:Vector.__ne__",
+      "sympy.polys.agca.modules:ModuleElement.__ne__",
+      "sympy.polys.domains.domain:Domain.__ne__",
+      "sympy.polys.domains.expressiondomain:ExpressionDomain.Expression.__ne__",
+      "sympy.polys.domains.pythonrational:PythonRational.__ne__",
+      "sympy.polys.domains.quotientring:QuotientRingElement.__ne__",
+      "sympy.polys.fields:FracElement.__ne__",
+      "sympy.polys.fields:FracField.__ne__",
+      "sympy.polys.monomials:Monomial.__ne__",
+      "sympy.polys.polyclasses:ANP.__ge__",
+      "sympy.polys.polyclasses:ANP.__gt__",
+      "sympy.polys.polyclasses:ANP.__le__",
+      "sympy.polys.polyclasses:ANP.__lt__",
+      "sympy.polys.polyclasses:DMF.__ge__",
+      "sympy.polys.polyclasses:DMF.__gt__",
+      "sympy.polys.polyclasses:DMF.__le__",
+      "sympy.polys.polyclasses:DMF.__lt__",
+      "sympy.polys.polyclasses:DMP.__ge__",
+      "sympy.polys.polyclasses:DMP.__gt__",
+      "sympy.polys.polyclasses:DMP.__le__",
+      "sympy.polys.polyclasses:DMP.__lt__",
+      "sympy.polys.polyclasses:DMP.__ne__",
+      "sympy.polys.polyclasses:DMP.eq",
+      "sympy.polys.polytools:GroebnerBasis.__ne__",
+      "sympy.polys.polytools:Poly.__ne__",
+      "sympy.polys.polytools:Poly.eq",
+      "sympy.polys.rings:PolyElement.__ne__",
+      "sympy.polys.rings:PolyRing.__ne__",
+      "sympy.polys.rootoftools:ComplexRootOf._eval_Eq",
+      "sympy.tensor.array.ndim_array:NDimArray.__ne__",
+      "sympy.utilities.enumerative:PartComponent.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:Set._complement",
+      "sympy.sets.sets:Set._complement.ternary_sift"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.polys.polytools:Poly"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.zeta_functions:polylog",
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.matrices.matrices:MatrixDeterminant._eval_det_bareiss",
+      "sympy.matrices.matrices:MatrixDeterminant._eval_det_bareiss._find_pivot",
+      "sympy.matrices.matrices:MatrixDeterminant._eval_det_bareiss.bareiss",
+      "sympy.matrices.matrices:_is_zero_after_expand_mul",
+      "sympy.utilities.randtest:random_complex_number"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:Arcsin",
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:ChiSquaredDistribution._cdf",
+      "sympy.stats.crv_types:Dagum",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:Erlang",
+      "sympy.stats.crv_types:ExponentialDistribution._cdf",
+      "sympy.stats.crv_types:Frechet",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverse",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:Kumaraswamy",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:Laplace",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogNormalDistribution._cdf",
+      "sympy.stats.crv_types:Logistic",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:Nakagami",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentT",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSum",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp_Mul",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp_Pow"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.latex:LatexPrinter._print_MatMul",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.str:StrPrinter._print_MatMul"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.str:StrPrinter._print_AppliedPredicate",
+      "sympy.printing.str:StrPrinter._print_ExprCondPair",
+      "sympy.printing.str:StrPrinter._print_FracField",
+      "sympy.printing.str:StrPrinter._print_Lambda",
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_MatrixElement",
+      "sympy.printing.str:StrPrinter._print_Normal",
+      "sympy.printing.str:StrPrinter._print_Permutation",
+      "sympy.printing.str:StrPrinter._print_PermutationGroup",
+      "sympy.printing.str:StrPrinter._print_PolyRing",
+      "sympy.printing.str:StrPrinter._print_Relational",
+      "sympy.printing.str:StrPrinter._print_Uniform"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter",
+      "sympy.printing.pycode:MpmathPrinter._print_Rational"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval",
+      "sympy.core.mod:Mod.eval.doit"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [
+      "sympy.assumptions.ask:get_known_facts",
+      "sympy.assumptions.ask_generated:get_known_facts_cnf",
+      "sympy.assumptions.ask_generated:get_known_facts_dict",
+      "sympy.core.power:Pow._eval_is_rational",
+      "sympy.printing.tree:print_tree",
+      "sympy.tensor.indexed:Idx.__new__"
+    ],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine",
+      "sympy.utilities.codegen:CodeGen.routine.dimensions"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:rad_rationalize",
+      "sympy.simplify.radsimp:split_surds",
+      "sympy.simplify.sqrtdenest:_sqrt_match"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.matexpr:get_postprocessor._postprocessor"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__rmul__"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:_nthroot_mod_composite",
+      "sympy.ntheory.residue_ntheory:nthroot_mod"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.core.relational:Relational._eval_as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_symbolic_factor_list"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet",
+      "sympy.sets.conditionset:ConditionSet._eval_subs"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.domains.expressiondomain:ExpressionDomain.Expression.__bool__"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.core.relational:Equality._eval_simplify",
+      "sympy.core.relational:Relational._eval_simplify",
+      "sympy.sets.handlers.comparison:_eval_is_eq",
+      "sympy.sets.handlers.issubset:is_subset_sets"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [
+      "sympy.printing.conventions:split_super_sub"
+    ],
+    "sympy__sympy-21379": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets",
+      "sympy.sets.handlers.intersection:intersection_sets._solution_union"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.printing.str:StrPrinter._print_Mul"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.physics.secondquant:AntiSymmetricTensor._latex",
+      "sympy.physics.secondquant:CreateBoson._latex",
+      "sympy.physics.secondquant:CreateFermion._latex"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.printing.codeprinter:CodePrinter._print_Mul"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String",
+      "sympy.codegen.ast:String.func",
+      "sympy.codegen.ast:String.kwargs"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__"
+    ],
+    "sympy__sympy-22914": [],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains.as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism",
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+  "20250728_zai_glm4-5": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack",
+      "debug_separability:debug_separability",
+      "test_comprehensive_separability:test_comprehensive_separability"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns",
+      "astropy.timeseries.tests.test_binned:test_empty_initialization_invalid",
+      "astropy.timeseries.tests.test_sampled:test_empty_initialization_invalid",
+      "astropy.timeseries.tests.test_sampled:test_required_columns",
+      "test_fix_comprehensive:main",
+      "test_fix_comprehensive:test_column_order_issue",
+      "test_fix_comprehensive:test_multiple_missing_columns",
+      "test_fix_comprehensive:test_no_missing_columns",
+      "test_fix_comprehensive:test_original_issue",
+      "test_fix_comprehensive:test_single_required_column"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col",
+      "astropy.table.tests.test_mixin:test_ndarray_mixin",
+      "reproduce_issue:test_current_behavior",
+      "reproduce_issue:test_manual_column_wrapping",
+      "reproduce_issue:test_with_warnings_capture",
+      "test_comprehensive:run_all_tests",
+      "test_comprehensive:test_add_column_method",
+      "test_comprehensive:test_column_wrapping",
+      "test_comprehensive:test_existing_mixin_columns",
+      "test_comprehensive:test_non_structured_arrays",
+      "test_comprehensive:test_structured_array_scenarios",
+      "test_comprehensive:test_warning_message_content"
+    ],
+    "astropy__astropy-13398": [
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:observed_to_itrs",
+      "debug_itrs_transform:debug_transformation_matrices",
+      "debug_itrs_transform:test_matrix_properties",
+      "debug_itrs_transform:test_simple_vector",
+      "final_verification_test:test_comparison_with_old_method",
+      "final_verification_test:test_performance_benefit",
+      "final_verification_test:test_satellite_observation_scenario",
+      "test_itrs_observed_issue:test_current_itrs_to_altaz_complexity",
+      "test_itrs_observed_issue:test_current_itrs_to_hadec",
+      "test_itrs_observed_issue:test_new_direct_transformation",
+      "test_itrs_observed_issue:test_simple_satellite_case",
+      "test_itrs_observed_issue:test_straight_overhead_current",
+      "test_matrix_fix:create_correct_matrix",
+      "test_matrix_fix:test_at_different_location",
+      "test_matrix_fix:test_correct_matrix",
+      "test_round_trip:test_altaz_round_trip",
+      "test_round_trip:test_itrs_to_altaz_directly",
+      "test_round_trip:test_true_topocentric_overhead"
+    ],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write",
+      "reproduce_issue:test_html_formats_issue",
+      "test_html_formats_comprehensive:test_html_formats_comprehensive"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values",
+      "test_fix_verification:test_sliced_wcs_multiple_slice_indices",
+      "test_fix_verification:test_sliced_wcs_no_regression_simple_cases",
+      "test_fix_verification:test_sliced_wcs_pc_matrix_coupling"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__",
+      "comprehensive_test:DuckArray",
+      "comprehensive_test:DuckArray.__array_ufunc__",
+      "comprehensive_test:DuckArray.__repr__",
+      "comprehensive_test:DuckArray.unit",
+      "comprehensive_test:test_arithmetic_operations",
+      "comprehensive_test:test_backward_compatibility",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_numpy_ufuncs",
+      "debug_typerror:DuckArray",
+      "debug_typerror:DuckArray.__array_ufunc__",
+      "debug_typerror:DuckArray.unit",
+      "debug_typerror:test_typerror_case",
+      "debug_unitless:DuckArray",
+      "debug_unitless:DuckArray.__array_ufunc__",
+      "debug_unitless:DuckArray.__repr__",
+      "debug_unitless:DuckArray.unit",
+      "debug_unitless:test_unitless_issue",
+      "reproduce_issue:DuckArray",
+      "reproduce_issue:DuckArray.__array_ufunc__",
+      "reproduce_issue:DuckArray.unit",
+      "reproduce_issue:test_failing_case",
+      "reproduce_issue:test_with_numpy_ufunc_directly",
+      "reproduce_issue:test_working_cases",
+      "test_fix_verification:DuckArray",
+      "test_fix_verification:DuckArray.__array_ufunc__",
+      "test_fix_verification:DuckArray.unit",
+      "test_fix_verification:test_github_issue_examples",
+      "test_fix_verification:test_notimplemented_return",
+      "test_fix_verification:test_notimplemented_return.IncompatibleDuckArray",
+      "test_fix_verification:test_notimplemented_return.IncompatibleDuckArray.__array_ufunc__",
+      "test_fix_verification:test_notimplemented_return.IncompatibleDuckArray.__init__",
+      "test_fix_verification:test_notimplemented_return.IncompatibleDuckArray.unit",
+      "test_fix_verification:test_reflected_operations"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__",
+      "comprehensive_test:main",
+      "comprehensive_test:test_multiple_properties",
+      "comprehensive_test:test_multiple_properties.multi_prop_coord",
+      "comprehensive_test:test_multiple_properties.multi_prop_coord.prop1",
+      "comprehensive_test:test_multiple_properties.multi_prop_coord.prop2",
+      "comprehensive_test:test_multiple_properties.multi_prop_coord.working_prop",
+      "comprehensive_test:test_normal_attribute_access",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_original_issue.custom_coord",
+      "comprehensive_test:test_original_issue.custom_coord.prop",
+      "comprehensive_test:test_property_with_valid_access",
+      "comprehensive_test:test_property_with_valid_access.custom_coord_valid",
+      "comprehensive_test:test_property_with_valid_access.custom_coord_valid.valid_prop",
+      "comprehensive_test:test_skycoord_functionality",
+      "debug_issue:custom_coord",
+      "debug_issue:custom_coord.prop",
+      "final_verification:demonstrate_improvement",
+      "final_verification:demonstrate_improvement.custom_coord",
+      "final_verification:demonstrate_improvement.custom_coord.prop",
+      "reproduce_issue:custom_coord",
+      "reproduce_issue:custom_coord.prop"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write",
+      "comprehensive_test:test_rst_header_rows",
+      "debug_output:debug_rst_output",
+      "final_verification:test_exact_issue_example",
+      "reproduce_issue:test_issue"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits",
+      "astropy.io.misc.hdf5:is_hdf5",
+      "astropy.io.votable.connect:is_votable",
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_reproduce_indexerror"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS",
+      "astropy.units.format.cds:CDS._fix_division_order",
+      "astropy.units.format.cds:CDS._parse_divisions_manually",
+      "astropy.units.format.cds:CDS.parse",
+      "debug_scale:debug_scale_parsing",
+      "debug_specific_case:debug_m_s_kg_m",
+      "reproduce_issue:test_cds_unit_parsing_issue",
+      "test_cds_parser:test_cds_parser_direct",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float",
+      "final_verification:test_exact_issue_scenario",
+      "reproduce_issue:test_float_formatting_issue",
+      "reproduce_issue:test_format_float_directly",
+      "test_fix_comprehensive:test_backwards_compatibility",
+      "test_fix_comprehensive:test_card_creation_with_various_floats",
+      "test_fix_comprehensive:test_format_float_various_cases",
+      "test_fix_comprehensive:test_hierarch_card_issue"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff",
+      "comprehensive_test:run_all_tests",
+      "comprehensive_test:test_empty_vlas",
+      "comprehensive_test:test_mixed_columns",
+      "comprehensive_test:test_p_format_vlas",
+      "comprehensive_test:test_vla_different_files",
+      "comprehensive_test:test_vla_identical_files",
+      "comprehensive_test:test_vla_with_tolerance",
+      "reproduce_issue:test_regular_array_diff",
+      "reproduce_issue:test_vla_diff_bug"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._parse_value",
+      "astropy.io.fits.card:Card._split",
+      "comprehensive_test:test_continue_cards",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_escaped_quotes",
+      "comprehensive_test:test_original_issue_cases",
+      "debug_case_67:debug_case_67",
+      "debug_script:debug_card_parsing",
+      "simple_test:test_simple_cases",
+      "test_reproduction:test_edge_cases",
+      "test_reproduction:test_issue_1",
+      "test_reproduction:test_issue_2"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask",
+      "reproduce_issue:test_mask_propagation_issue",
+      "test_comprehensive:test_comprehensive_mask_propagation",
+      "test_comprehensive:test_other_arithmetic_operations"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper",
+      "final_verification:PoC",
+      "final_verification:PoC.__init__",
+      "reproduce_issue:PoC",
+      "reproduce_issue:PoC.__init__",
+      "test_comprehensive:run_all_tests",
+      "test_comprehensive:test_case_1_constructor_with_none_return",
+      "test_comprehensive:test_case_1_constructor_with_none_return.TestClass",
+      "test_comprehensive:test_case_1_constructor_with_none_return.TestClass.__init__",
+      "test_comprehensive:test_case_2_function_with_none_return",
+      "test_comprehensive:test_case_2_function_with_none_return.test_func",
+      "test_comprehensive:test_case_3_function_with_quantity_return",
+      "test_comprehensive:test_case_3_function_with_quantity_return.test_func",
+      "test_comprehensive:test_case_4_function_without_return_annotation",
+      "test_comprehensive:test_case_4_function_without_return_annotation.test_func",
+      "test_comprehensive:test_case_5_function_with_explicit_none_return",
+      "test_comprehensive:test_case_5_function_with_explicit_none_return.test_func",
+      "test_comprehensive:test_case_6_function_with_implicit_none_return",
+      "test_comprehensive:test_case_6_function_with_implicit_none_return.test_func"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnrecognizedUnit.__eq__",
+      "debug_test:debug_string_comparison",
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_other_comparisons",
+      "reproduce_issue:test_unrecognized_unit_none_comparison"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.header:Header.fromstring",
+      "test_fromstring_issue:test_card_fromstring_with_bytes",
+      "test_fromstring_issue:test_edge_cases",
+      "test_fromstring_issue:test_header_fromstring_with_bytes"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.quantity:Quantity.__new__",
+      "astropy.units.tests.test_quantity:TestQuantityCreation.test_preserve_dtype",
+      "reproduce_issue:test_float16_dtype_preservation",
+      "reproduce_issue:test_float16_specific",
+      "test_edge_cases:test_array_operations",
+      "test_edge_cases:test_boolean_types_get_upgraded",
+      "test_edge_cases:test_float_preservation",
+      "test_edge_cases:test_integer_types_still_get_upgraded",
+      "test_edge_cases:test_object_dtype",
+      "test_edge_cases:test_structured_dtypes"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance"
+    ],
+    "sympy__sympy-12419": [
+      "final_verification:final_verification",
+      "sympy.matrices.expressions.matexpr:Identity._entry",
+      "test_edge_cases:test_edge_cases",
+      "test_edge_cases:test_original_issue",
+      "test_identity_sum:test_direct_identity",
+      "test_identity_sum:test_identity_sum_issue"
+    ],
+    "sympy__sympy-12481": [
+      "check_issue_example:check_issue_example",
+      "debug_cycle_order:debug_cycle_application",
+      "debug_singleton_cycle:debug_singleton_cycle",
+      "final_verification:test_backward_compatibility",
+      "final_verification:test_original_issue",
+      "final_verification:test_requirements",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.tests.test_permutations:test_args",
+      "test_comprehensive:test_array_form_still_works",
+      "test_comprehensive:test_basic_cases",
+      "test_comprehensive:test_comparison_with_cycle",
+      "test_comprehensive:test_complex_cases",
+      "test_comprehensive:test_disjoint_cycles",
+      "test_comprehensive:test_edge_cases",
+      "test_reproduction:test_current_behavior",
+      "test_reproduction:test_expected_behavior",
+      "test_reproduction:test_other_cases"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.from_sequence",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson",
+      "test_comprehensive_subclass:MyPermutation",
+      "test_comprehensive_subclass:MyPermutation.__str__",
+      "test_comprehensive_subclass:MyPermutation.get_class_name",
+      "test_comprehensive_subclass:test_comprehensive_subclass",
+      "test_subclass_issue:MyPermutation",
+      "test_subclass_issue:MyPermutation.get_class_name",
+      "test_subclass_issue:test_subclass_issue"
+    ],
+    "sympy__sympy-13031": [],
+    "sympy__sympy-13372": [
+      "reproduce_issue:test_issue",
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_issue",
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "debug_complement:debug_complement_issue",
+      "debug_complement_reduce:debug_complement_reduce",
+      "debug_detailed:debug_detailed",
+      "debug_failing_tests:debug_failing_tests",
+      "debug_issue_9637:debug_issue_9637",
+      "debug_specific_failing_test:debug_specific_failing_test",
+      "sympy.sets.sets:FiniteSet._complement",
+      "sympy.sets.sets:Interval._complement",
+      "test_complement_issue:test_complement_issue",
+      "test_edge_cases:test_edge_cases",
+      "test_reduce_behavior:test_reduce_behavior"
+    ],
+    "sympy__sympy-13647": [
+      "final_verification:main",
+      "final_verification:test_existing_tests",
+      "final_verification:test_original_issue",
+      "final_verification:test_various_cases",
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry",
+      "test_col_insert_bug:test_edge_cases",
+      "test_col_insert_bug:test_original_issue",
+      "test_col_insert_bug:test_simple_case"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.core.mul:Mul.flatten",
+      "test_poly_multiplication:test_poly_multiplication"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex",
+      "sympy.printing.tests.test_latex:test_latex_mul_symbol",
+      "test_comprehensive_mul_symbol:test_backward_compatibility",
+      "test_comprehensive_mul_symbol:test_custom_symbols",
+      "test_comprehensive_mul_symbol:test_integral_example",
+      "test_comprehensive_mul_symbol:test_numbers_with_custom_symbols",
+      "test_mul_symbol_issue:test_current_behavior",
+      "test_mul_symbol_issue:test_desired_behavior",
+      "test_mul_symbol_issue:test_edge_cases",
+      "test_mul_symbol_issue:test_integral_behavior"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.tests.test_zeta_functions:test_polylog_expansion",
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_bareiss_explicit",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_existing_functionality",
+      "comprehensive_test:test_original_issue",
+      "reproduce_issue:test_determinant_issue",
+      "reproduce_issue:test_matrix_properties",
+      "sympy.matrices.matrices:MatrixDeterminant._eval_det_bareiss"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf",
+      "test_cdf_issues:main",
+      "test_cdf_issues:test_case",
+      "test_fixes:main",
+      "test_fixes:test_case",
+      "test_fixes:test_case.timeout_handler",
+      "verify_fixes:main",
+      "verify_fixes:verify_cdf_pdf"
+    ],
+    "sympy__sympy-13974": [
+      "debug_existing_tests:debug_existing_tests",
+      "debug_expand2:debug_expand_detailed",
+      "debug_expand:debug_expand",
+      "debug_negative2:debug_negative_commutative",
+      "debug_negative:debug_negative",
+      "debug_scalar:debug_scalar",
+      "reproduce_issue:test_tensor_product_powers",
+      "sympy.physics.quantum.tensorproduct:TensorProduct._eval_expand_tensorproduct",
+      "sympy.physics.quantum.tensorproduct:_eval_expand_tensorproduct_pow",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp",
+      "test_comprehensive:test_comprehensive"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd.pretty_negative",
+      "sympy.printing.str:StrPrinter._print_MatAdd"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Relational",
+      "sympy.printing.tests.test_python:test_python_relational",
+      "test_issue_reproduction:test_edge_cases",
+      "test_issue_reproduction:test_python_code_generation",
+      "test_issue_reproduction:test_sympy_integers_setting"
+    ],
+    "sympy__sympy-14976": [
+      "debug_failing_test:debug_failing_test",
+      "debug_lambdify:debug_printer",
+      "final_verification:final_verification",
+      "reproduce_issue:test_issue",
+      "sympy.printing.pycode:MpmathPrinter",
+      "sympy.printing.pycode:MpmathPrinter._print_Rational",
+      "sympy.utilities.lambdify:lambdify",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-15017": [
+      "comprehensive_test:test_all_array_types",
+      "comprehensive_test:test_edge_cases",
+      "reproduce_issue:test_higher_rank_arrays",
+      "reproduce_issue:test_rank0_array_len",
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__",
+      "sympy.tensor.array.tests.test_immutable_ndim_array:test_ndim_array_initiation"
+    ],
+    "sympy__sympy-15345": [
+      "reproduce_issue:test_max_issue",
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_LatticeOp",
+      "sympy.printing.mathematica:MCodePrinter._print_MinMaxBase",
+      "sympy.printing.tests.test_mathematica:test_Max",
+      "sympy.printing.tests.test_mathematica:test_Min"
+    ],
+    "sympy__sympy-15599": [
+      "comprehensive_test:test_mod_comprehensive",
+      "comprehensive_test:test_mod_comprehensive.run_test",
+      "debug_test:debug_failing_test",
+      "focused_debug:debug_focused",
+      "reproduce_issue:test_mod_issue",
+      "simple_test:test_simple_cases",
+      "sympy.core.mod:Mod.eval",
+      "sympy.core.tests.test_arit:test_Mod"
+    ],
+    "sympy__sympy-15809": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_identity_properties",
+      "comprehensive_test:test_mathematical_properties",
+      "comprehensive_test:test_type_consistency",
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__",
+      "test_minmax_empty:main",
+      "test_minmax_empty:test_current_behavior",
+      "test_minmax_empty:test_edge_cases",
+      "test_minmax_empty:test_expected_behavior"
+    ],
+    "sympy__sympy-15875": [
+      "final_verification_test:main",
+      "final_verification_test:test_complex_expressions",
+      "final_verification_test:test_edge_cases",
+      "final_verification_test:test_matrix_rank_issue",
+      "final_verification_test:test_original_issue",
+      "sympy.core.add:Add._eval_is_zero",
+      "test_is_zero_issue:test_additional_cases",
+      "test_is_zero_issue:test_is_zero_issue"
+    ],
+    "sympy__sympy-16450": [
+      "final_verification:main",
+      "sympy.simplify.simplify:posify",
+      "test_posify_edge_cases:main",
+      "test_posify_edge_cases:test_already_positive",
+      "test_posify_edge_cases:test_conflicting_assumptions",
+      "test_posify_edge_cases:test_multiple_assumptions",
+      "test_posify_edge_cases:test_no_assumptions",
+      "test_posify_issue:main",
+      "test_posify_issue:test_finite_assumption_preservation",
+      "test_posify_issue:test_other_assumptions_preservation",
+      "test_posify_issue:test_posify_basic_functionality"
+    ],
+    "sympy__sympy-16597": [
+      "sympy.assumptions.ask:get_known_facts",
+      "sympy.assumptions.ask_generated:get_known_facts_cnf",
+      "sympy.assumptions.ask_generated:get_known_facts_dict",
+      "sympy.assumptions.handlers.calculus:AskFiniteHandler",
+      "sympy.assumptions.handlers.calculus:AskFiniteHandler.Add",
+      "sympy.assumptions.handlers.calculus:AskFiniteHandler.Basic",
+      "sympy.assumptions.handlers.calculus:AskFiniteHandler.Symbol",
+      "test_comprehensive_fix:test_comprehensive",
+      "test_is_properties:test_is_properties",
+      "test_issue_reproduction:test_issue",
+      "test_known_facts:test_known_facts",
+      "test_symbol_assumptions:test_symbol_assumptions"
+    ],
+    "sympy__sympy-16792": [
+      "debug_autowrap:debug_autowrap",
+      "debug_working_case:debug_working_case",
+      "reproduce_issue:test_issue",
+      "reproduce_issue:test_working_case",
+      "sympy.utilities.codegen:CodeGen.routine",
+      "test_edge_cases:run_edge_case_tests",
+      "test_edge_cases:test_case",
+      "test_matrixsymbol_not_used:test_autowrap_matrixsymbol_not_used_in_expression",
+      "test_matrixsymbol_not_used:test_autowrap_mixed_arguments_matrixsymbol_not_used",
+      "test_matrixsymbol_not_used:test_autowrap_multiple_matrixsymbols_some_not_used",
+      "verify_fix:verify_fix"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f",
+      "test_issue_reproduction:test_edge_cases",
+      "test_issue_reproduction:test_issue",
+      "test_issue_reproduction:test_real_exponents",
+      "test_issue_reproduction:test_related_cases"
+    ],
+    "sympy__sympy-17318": [
+      "final_test:test_edge_cases",
+      "final_test:test_expected_behavior",
+      "final_test:test_original_issue",
+      "final_test:test_still_denests",
+      "sympy.simplify.radsimp:_split_gcd",
+      "test_comprehensive_fix:test_denestable_expressions",
+      "test_comprehensive_fix:test_split_gcd_functionality",
+      "test_comprehensive_fix:test_split_surds_functionality",
+      "test_comprehensive_fix:test_sqrtdenest_issue_cases",
+      "test_fix_verification:test_split_gcd_empty",
+      "test_fix_verification:test_split_surds_no_surds",
+      "test_fix_verification:test_sqrtdenest_issue_expression",
+      "test_fix_verification:test_various_expressions"
+    ],
+    "sympy__sympy-17630": [
+      "final_verification:test_exact_issue",
+      "reproduce_issue:test_issue",
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul",
+      "test_comprehensive:test_all_zero_blocks",
+      "test_comprehensive:test_block_collapse_properties",
+      "test_comprehensive:test_different_sizes",
+      "test_comprehensive:test_mixed_blocks",
+      "test_comprehensive:test_original_issue",
+      "test_comprehensive:test_rectangular_blocks",
+      "test_comprehensive:test_single_block"
+    ],
+    "sympy__sympy-17655": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_point_multiplication_commutativity",
+      "debug_integer_issue:debug_integer_issue",
+      "debug_mul_object:debug_mul",
+      "debug_sympy_types:debug_types",
+      "final_verification:test_original_issue",
+      "final_verification:test_variations",
+      "reproduce_issue:test_issue",
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__add__",
+      "sympy.geometry.point:Point.__rmul__"
+    ],
+    "sympy__sympy-18189": [
+      "final_verification:final_verification",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_diophantine_permute_issue",
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "comprehensive_test:test_comprehensive_zero_cases",
+      "comprehensive_test:test_non_zero_cases",
+      "debug_gcd_algorithm:debug_nthroot_mod_gcd_algorithm",
+      "debug_gcd_algorithm:test_specific_cases",
+      "find_bug_case:find_bug_case",
+      "reproduce_issue:test_nthroot_mod_zero_case",
+      "sympy.ntheory.residue_ntheory:nthroot_mod",
+      "trace_bug_case:trace_bug_case"
+    ],
+    "sympy__sympy-18211": [
+      "debug_periodic:debug_periodic",
+      "sympy.core.relational:Relational._eval_as_set",
+      "sympy.logic.boolalg:Boolean.as_set",
+      "sympy.logic.tests.test_boolalg:test_bool_as_set",
+      "test_comprehensive:test_comprehensive",
+      "test_issue:test_issue",
+      "test_sin_behavior:test_sin_behavior"
+    ],
+    "sympy__sympy-18763": [
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_other_cases",
+      "reproduce_issue:test_subs_parenthesizing",
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_basic_cases",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_irreducible_cases",
+      "comprehensive_test:test_mixed_cases",
+      "comprehensive_test:test_with_sqrt_extension",
+      "debug_extension_difference:debug_extension_difference",
+      "debug_factor_detailed:debug_factor_detailed",
+      "debug_factor_issue:debug_factor_issue",
+      "debug_gcd_issue:debug_gcd_issue",
+      "debug_simplify_gcd:debug_simplify_gcd",
+      "final_verification:test_exact_bug_report",
+      "final_verification:test_issue_title",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_factor_extension_issue",
+      "sympy.polys.factortools:dmp_ext_factor",
+      "test_disable_simplify_gcd:test_disable_simplify_gcd",
+      "test_factor_issue:test_factor_issue"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_set",
+      "sympy.printing.tests.test_repr:test_dict",
+      "sympy.printing.tests.test_repr:test_set",
+      "test_fix_comprehensive:test_basic_functionality",
+      "test_fix_comprehensive:test_empty_containers",
+      "test_fix_comprehensive:test_mixed_types",
+      "test_fix_comprehensive:test_nested_structures",
+      "test_fix_comprehensive:test_single_element"
+    ],
+    "sympy__sympy-19495": [
+      "debug_condition:debug_condition",
+      "debug_failing_test:debug_failing_test",
+      "debug_with_assumptions:debug_with_assumptions",
+      "reproduce_issue:test_issue",
+      "sympy.sets.conditionset:ConditionSet._eval_subs",
+      "test_exact:test_exact",
+      "test_issue_fix:test_conditionset_finiteset_subs_works",
+      "test_issue_fix:test_conditionset_imageset_subs",
+      "test_issue_fix:test_current_fixed_behavior",
+      "test_issue_fix:test_imageset_subs_works",
+      "test_issue_fix:test_workarounds",
+      "test_regression_for_issue:test_conditionset_finiteset_subs_still_works",
+      "test_regression_for_issue:test_conditionset_imageset_subs_regression",
+      "test_regression_for_issue:test_imageset_subs_still_works"
+    ],
+    "sympy__sympy-19637": [
+      "final_verification:main",
+      "reproduce_issue:test_kernS_issue",
+      "reproduce_issue:test_kernS_working_cases",
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "final_verification:test_exact_issue",
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_issue",
+      "sympy.physics.quantum.dagger:Dagger",
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.dagger:Dagger.__rmul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__"
+    ],
+    "sympy__sympy-20154": [
+      "final_verification:test_docstring_examples",
+      "final_verification:test_issue_examples",
+      "final_verification:test_no_more_subtle_bugs",
+      "final_verification:test_performance",
+      "reproduce_issue:test_partitions_issue",
+      "reproduce_issue:test_partitions_with_size",
+      "sympy.utilities.iterables:partitions",
+      "test_fix_comprehensive:test_basic_functionality",
+      "test_fix_comprehensive:test_consistency_with_copy",
+      "test_fix_comprehensive:test_edge_cases",
+      "test_fix_comprehensive:test_no_reuse",
+      "test_fix_comprehensive:test_performance_impact",
+      "test_fix_comprehensive:test_size_parameter"
+    ],
+    "sympy__sympy-20428": [
+      "final_verification:test_original_issue_complete",
+      "reproduce_issue:test_clear_denoms_issue",
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms",
+      "test_fix_comprehensive:test_clear_denoms_edge_cases"
+    ],
+    "sympy__sympy-20438": [
+      "debug_equals:debug_equals_issue",
+      "debug_nested:debug_nested_productset",
+      "final_verification:final_verification",
+      "reproduce_issue:test_is_subset_issue",
+      "sympy.core.basic:Basic",
+      "sympy.core.basic:Basic.equals",
+      "sympy.sets.sets:ProductSet._eval_is_subset",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__",
+      "test_comprehensive_fix:test_comprehensive",
+      "test_final_verification:test_original_issue",
+      "test_issue_reproduction:test_issue"
+    ],
+    "sympy__sympy-20916": [
+      "debug_detailed:debug_pretty_symbol_step_by_step",
+      "debug_detailed:debug_pretty_symbol_step_by_step.pretty_list",
+      "debug_detailed:debug_pretty_symbol_step_by_step.translate",
+      "debug_subscript:debug_subscript_processing",
+      "debug_subscript:debug_subscript_processing.debug_pretty_list",
+      "reproduce_issue:test_greek_subscripts",
+      "reproduce_issue:test_matrix_scenario",
+      "reproduce_issue:upretty",
+      "test_comprehensive_fix:test_comprehensive_fix",
+      "test_comprehensive_fix:upretty",
+      "test_edge_cases:test_edge_cases",
+      "test_exact_issue:test_exact_issue",
+      "test_exact_issue:upretty",
+      "test_greek_as_subscript:test_greek_as_subscript",
+      "test_greek_as_subscript:upretty",
+      "test_gsub:test_gsub_characters",
+      "test_lambda_issue:debug_lambda",
+      "test_w_omega_scenario:test_w_omega_scenario",
+      "test_w_omega_scenario:upretty"
+    ],
+    "sympy__sympy-21379": [
+      "comprehensive_test:test_comprehensive",
+      "debug_cosh:debug_parallel_poly_from_expr",
+      "debug_cosh:test_cosh_issue",
+      "debug_stack_trace:debug_parallel_poly_from_expr",
+      "debug_stack_trace:test_issue",
+      "final_verification:test_exact_issue_example",
+      "reproduce_issue:test_issue",
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_nonnegative",
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_positive",
+      "sympy.functions.elementary.hyperbolic:cosh._eval_is_real",
+      "sympy.functions.elementary.hyperbolic:sinh._eval_is_real",
+      "sympy.functions.elementary.hyperbolic:tanh._eval_is_real"
+    ],
+    "sympy__sympy-21596": [
+      "final_verification:verify_issue_requirements",
+      "reproduce_issue:test_issue",
+      "sympy.sets.handlers.intersection:intersection_sets",
+      "sympy.sets.tests.test_fancysets:test_imageset_intersect_real",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-21612": [
+      "final_test:main",
+      "final_test:test_edge_cases",
+      "final_test:test_original_issue",
+      "final_test:test_regression_cases",
+      "reproduce_issue:test_nested_fraction_parsing",
+      "reproduce_issue:test_simple_fractions",
+      "sympy.parsing.latex._parse_latex_antlr:convert_frac"
+    ],
+    "sympy__sympy-21847": [
+      "comprehensive_test:test_degree_list_mode",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_empty_cases",
+      "comprehensive_test:test_non_commutative",
+      "comprehensive_test:test_original_examples",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_current_behavior",
+      "reproduce_issue:test_issue",
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_complex_expressions",
+      "comprehensive_test:test_different_symbols",
+      "comprehensive_test:test_issue_fix",
+      "comprehensive_test:test_various_powers",
+      "sympy.physics.secondquant:AnnihilateBoson._latex",
+      "sympy.physics.secondquant:CreateBoson._latex",
+      "sympy.physics.tests.test_secondquant:test_create"
+    ],
+    "sympy__sympy-22080": [
+      "final_verification_test:main",
+      "final_verification_test:test_issue_reproduction",
+      "final_verification_test:test_mathematical_correctness",
+      "final_verification_test:test_original_issue",
+      "sympy.printing.pycode:AbstractPythonCodePrinter",
+      "sympy.printing.pycode:AbstractPythonCodePrinter._print_Mul",
+      "test_mod_lambdify_bug:test_mod_lambdify_bug",
+      "test_mod_lambdify_bug:test_other_mod_cases"
+    ],
+    "sympy__sympy-22456": [
+      "reproduce_issue:test_string_argument_invariance",
+      "reproduce_issue:test_string_edge_cases",
+      "reproduce_issue:test_string_subclasses",
+      "sympy.codegen.ast:String",
+      "sympy.codegen.ast:String._construct_text",
+      "sympy.codegen.ast:String.args",
+      "sympy.codegen.ast:String.args._StringWrapper",
+      "sympy.codegen.ast:String.args._StringWrapper.__init__",
+      "sympy.codegen.ast:String.args._StringWrapper.__str__"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__",
+      "test_comprehensive:test_comprehensive",
+      "test_comprehensive:test_imaginary_coordinates",
+      "test_comprehensive:test_with_context",
+      "test_detailed_debug:debug_point_creation",
+      "test_im_behavior:test_im_behavior",
+      "test_reproduce_issue:test_issue"
+    ],
+    "sympy__sympy-22914": [
+      "reproduce_issue:test_current_behavior",
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_expected_behavior",
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string",
+      "test_tuple_issue:test_direct_execution",
+      "test_tuple_issue:test_edge_cases",
+      "test_tuple_issue:test_single_element_tuple"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form",
+      "test_hnf_bug:test_direct_hnf",
+      "test_hnf_bug:test_hnf_bug",
+      "test_hnf_bug:test_step_by_step"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols",
+      "test_reproduction:main",
+      "test_reproduction:test_additional_cases",
+      "test_reproduction:test_issue_reproduction"
+    ],
+    "sympy__sympy-23824": [
+      "debug_edge_case:debug_single_leading_matrix",
+      "debug_three_matrices:debug_three_leading_matrices",
+      "sympy.physics.hep.gamma_matrices:kahane_simplify",
+      "test_kahane_bug:test_additional_cases",
+      "test_kahane_bug:test_kahane_leading_gamma_matrix_bug",
+      "test_original_issue:test_kahane_leading_gamma_matrix_bug"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains.as_set",
+      "test_comprehensive_fix_verification:test_comprehensive_contains_as_set_fix",
+      "test_exact_issue_verification:test_exact_issue",
+      "test_issue_reproduction:test_contains_as_set_issue"
+    ],
+    "sympy__sympy-24066": [
+      "reproduce_issue:test_dimensionless_exponents",
+      "reproduce_issue:test_existing_working_cases",
+      "reproduce_issue:test_original_issue",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "final_verification:test_exact_issue_scenario",
+      "final_verification:verify_calculation_correctness",
+      "reproduce_issue:test_dimension_equivalence",
+      "reproduce_issue:test_other_equivalent_dimensions",
+      "reproduce_issue:test_reproduce_issue",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension",
+      "test_fix_comprehensive:test_complex_expressions",
+      "test_fix_comprehensive:test_nonequivalent_dimensions_should_fail",
+      "test_fix_comprehensive:test_original_issue",
+      "test_fix_comprehensive:test_various_equivalent_dimensions"
+    ],
+    "sympy__sympy-24443": [
+      "debug_test:debug_failing_test",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_issue",
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image",
+      "sympy.combinatorics.tests.test_homomorphisms:test_check_homomorphism"
+    ],
+    "sympy__sympy-24539": [
+      "comprehensive_test:test_edge_cases",
+      "final_verification:main",
+      "reproduce_issue:test_as_expr_issue",
+      "reproduce_issue:test_error_case",
+      "sympy.polys.rings:PolyElement.as_expr",
+      "test_modified:test_original_vs_modified",
+      "test_original_issue:test_original_issue"
+    ],
+    "sympy__sympy-24562": [
+      "reproduce_rational_bug:test_edge_cases",
+      "reproduce_rational_bug:test_rational_string_bug",
+      "sympy.core.numbers:Rational.__new__",
+      "test_rational_fix_comprehensive:test_consistency_with_numeric_inputs",
+      "test_rational_fix_comprehensive:test_mathematical_correctness",
+      "test_rational_fix_comprehensive:test_rational_string_fix"
+    ],
+    "sympy__sympy-24661": [
+      "debug_ast:debug_ast",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare",
+      "test_edge_cases:test_chained_comparisons",
+      "test_edge_cases:test_edge_cases",
+      "test_edge_cases:test_mixed_expressions",
+      "test_parse_expr_relational:test_direct_relational_creation",
+      "test_parse_expr_relational:test_relational_parse_expr"
+    ]
+  },
+  "20250731_harness_ai": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col"
+    ],
+    "astropy__astropy-13398": [],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._split"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.matrices.expressions.matexpr:Identity._entry"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.tests.test_permutations:test_args"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.group_constructs:_af_new",
+      "sympy.combinatorics.named_groups:_af_new",
+      "sympy.combinatorics.perm_groups:_af_new",
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new_cls",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.josephus",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.rmul_with_af",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson",
+      "sympy.combinatorics.permutations:_af_new",
+      "sympy.combinatorics.util:_af_new",
+      "sympy.tensor.tensor:TIDS.canon_args",
+      "sympy.tensor.tensor:TIDS.canon_args._af_new",
+      "sympy.tensor.tensor:_IndexStructure.indices_canon_args",
+      "sympy.tensor.tensor:_IndexStructure.indices_canon_args._af_new"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.sparse:MutableSparseMatrix.col_join",
+      "sympy.matrices.sparse:MutableSparseMatrix.row_join"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:FiniteSet._complement",
+      "sympy.sets.sets:Interval._complement"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.core.mul:Mul.flatten"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.matrices.matrices:MatrixDeterminant.det"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.core.power:Pow",
+      "sympy.core.power:Pow._eval_expand_tensorproduct",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd.pretty_negative",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.tests.test_ccode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_fcode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_jscode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_julia:test_MatrixElement_printing",
+      "sympy.printing.tests.test_latex:test_MatrixElement_printing",
+      "sympy.printing.tests.test_octave:test_MatrixElement_printing",
+      "sympy.printing.tests.test_rcode:test_MatrixElement_printing",
+      "sympy.printing.tests.test_str:test_MatrixElement_printing"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Relational"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter._print_Rational"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__",
+      "sympy.tensor.array.tests.test_immutable_ndim_array:test_ndim_array_initiation"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Max",
+      "sympy.printing.mathematica:MCodePrinter._print_Min"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix",
+      "sympy.algebras.tests.test_quaternion:test_quaternion_conversions"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol",
+      "sympy.printing.tests.test_mathml:test_presentation_symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [
+      "sympy.assumptions.ask:get_known_facts",
+      "sympy.assumptions.ask_generated:get_known_facts_cnf",
+      "sympy.assumptions.ask_generated:get_known_facts_dict",
+      "sympy.core.symbol:Symbol._eval_is_finite"
+    ],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed",
+      "sympy.printing.pycode:PythonCodePrinter._print_IndexedBase"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine",
+      "sympy.utilities.codegen:JuliaCodeGen.routine",
+      "sympy.utilities.codegen:OctaveCodeGen.routine",
+      "sympy.utilities.codegen:RustCodeGen.routine"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:_split_gcd"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__rmul__"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:nthroot_mod"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.core.relational:Relational._eval_as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_combine_sqf_factors",
+      "sympy.polys.polytools:_generic_factor_list"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet._eval_subs",
+      "sympy.sets.tests.test_conditionset:test_subs_CondSet"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.sets.sets:EmptySet.equals",
+      "sympy.sets.sets:ProductSet._eval_is_subset"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [],
+    "sympy__sympy-21379": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets",
+      "sympy.sets.tests.test_fancysets:test_imageset_intersect_real"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.parsing.latex._antlr.latexparser:LaTeXParser",
+      "sympy.parsing.latex._parse_latex_antlr:convert_frac",
+      "sympy.parsing.latex._parse_latex_antlr:parse_latex"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.physics.secondquant:CreateBoson._latex",
+      "sympy.physics.secondquant:CreateFermion._latex",
+      "sympy.physics.tests.test_secondquant:test_NO",
+      "sympy.physics.tests.test_secondquant:test_commutation",
+      "sympy.physics.tests.test_secondquant:test_create",
+      "sympy.physics.tests.test_secondquant:test_create_f"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.printing.pycode:AbstractPythonCodePrinter._print_Mod",
+      "sympy.printing.tests.test_pycode:test_PythonCodePrinter",
+      "sympy.printing.tests.test_pycode:test_frac"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String",
+      "sympy.codegen.ast:String.__new__",
+      "sympy.codegen.ast:String._construct_text",
+      "sympy.codegen.ast:String.args"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains.as_set",
+      "sympy.sets.tests.test_contains:test_as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+  "20250804_epam-ai-run-claude-4-sonnet": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col"
+    ],
+    "astropy__astropy-13398": [],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits",
+      "astropy.io.votable.connect:is_votable"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser",
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units",
+      "astropy.units.format.cds:CDS._make_parser.p_division_product"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._split"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7606": [
+      "astropy.units.core:UnrecognizedUnit.__eq__"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion",
+      "astropy.utils.introspection:minversion.extract_numeric_version"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.header:Header.fromstring"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.core:UnitBase._get_converter",
+      "astropy.units.core:UnitBase._get_converter.converter",
+      "astropy.units.quantity:Quantity.__new__"
+    ],
+    "sympy__sympy-11618": [
+      "sympy.geometry.point:Point.distance",
+      "sympy.geometry.point:Point.midpoint",
+      "sympy.geometry.point:Point.taxicab_distance"
+    ],
+    "sympy__sympy-12096": [
+      "sympy.core.function:Function._eval_evalf"
+    ],
+    "sympy__sympy-12419": [
+      "sympy.matrices.expressions.matexpr:Identity._entry"
+    ],
+    "sympy__sympy-12481": [
+      "sympy.combinatorics.permutations:Permutation.__new__"
+    ],
+    "sympy__sympy-12489": [
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.rmul_with_af",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson",
+      "sympy.combinatorics.permutations:_af_new"
+    ],
+    "sympy__sympy-13031": [
+      "sympy.matrices.sparse:MutableSparseMatrix.col_join",
+      "sympy.matrices.sparse:MutableSparseMatrix.row_join"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "sympy.core.evalf:evalf"
+    ],
+    "sympy__sympy-13480": [
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "sympy.concrete.products:Product._eval_product"
+    ],
+    "sympy__sympy-13615": [
+      "sympy.sets.sets:Interval._complement"
+    ],
+    "sympy__sympy-13647": [
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry"
+    ],
+    "sympy__sympy-13757": [
+      "sympy.polys.polytools:Poly",
+      "sympy.polys.polytools:Poly.__mul__",
+      "sympy.polys.polytools:Poly.__rmul__"
+    ],
+    "sympy__sympy-13798": [
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex"
+    ],
+    "sympy__sympy-13852": [
+      "sympy.functions.special.tests.test_zeta_functions:test_polylog_expansion",
+      "sympy.functions.special.zeta_functions:lerchphi._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval"
+    ],
+    "sympy__sympy-13877": [
+      "sympy.core.exprtools:factor_terms.do",
+      "sympy.matrices.matrices:MatrixDeterminant.det"
+    ],
+    "sympy__sympy-13878": [
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf"
+    ],
+    "sympy__sympy-13974": [
+      "sympy.core.power:Pow",
+      "sympy.core.power:Pow._eval_expand_tensorproduct",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp"
+    ],
+    "sympy__sympy-14248": [
+      "sympy.printing.latex:LatexPrinter._print_MatAdd",
+      "sympy.printing.latex:LatexPrinter._print_MatAdd._matrix_coeff_isneg",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd._matrix_coeff_isneg",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatAdd.pretty_negative",
+      "sympy.printing.str:StrPrinter._print_MatAdd",
+      "sympy.printing.str:StrPrinter._print_MatAdd._matrix_coeff_isneg",
+      "sympy.printing.tests.test_latex:test_matAdd"
+    ],
+    "sympy__sympy-14531": [
+      "sympy.printing.python:python",
+      "sympy.printing.str:StrPrinter._print_AppliedPredicate",
+      "sympy.printing.str:StrPrinter._print_ExprCondPair",
+      "sympy.printing.str:StrPrinter._print_Lambda",
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_MatrixElement",
+      "sympy.printing.str:StrPrinter._print_Normal",
+      "sympy.printing.str:StrPrinter._print_Relational"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__"
+    ],
+    "sympy__sympy-14976": [
+      "sympy.printing.pycode:MpmathPrinter._print_Rational"
+    ],
+    "sympy__sympy-15017": [
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Max",
+      "sympy.printing.mathematica:MCodePrinter._print_Min"
+    ],
+    "sympy__sympy-15349": [
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix",
+      "sympy.algebras.tests.test_quaternion:test_quaternion_conversions"
+    ],
+    "sympy__sympy-15599": [
+      "sympy.core.mod:Mod.eval"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__",
+      "sympy.functions.elementary.tests.test_miscellaneous:test_Max",
+      "sympy.functions.elementary.tests.test_miscellaneous:test_Min"
+    ],
+    "sympy__sympy-15875": [
+      "sympy.core.add:Add._eval_is_zero"
+    ],
+    "sympy__sympy-15976": [
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol",
+      "sympy.printing.tests.test_mathml:test_presentation_symbol"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed"
+    ],
+    "sympy__sympy-16792": [
+      "sympy.utilities.codegen:CodeGen.routine"
+    ],
+    "sympy__sympy-16886": [],
+    "sympy__sympy-17139": [
+      "sympy.simplify.fu:_TR56._f"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.radsimp:_split_gcd"
+    ],
+    "sympy__sympy-17630": [
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul"
+    ],
+    "sympy__sympy-17655": [
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__add__",
+      "sympy.geometry.point:Point.__rmul__"
+    ],
+    "sympy__sympy-18189": [
+      "sympy.solvers.diophantine:diophantine"
+    ],
+    "sympy__sympy-18199": [
+      "sympy.ntheory.residue_ntheory:nthroot_mod"
+    ],
+    "sympy__sympy-18211": [
+      "sympy.core.relational:Relational._eval_as_set"
+    ],
+    "sympy__sympy-18698": [
+      "sympy.polys.polytools:_combine_factors_by_multiplicity",
+      "sympy.polys.polytools:_generic_factor_list"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "sympy.polys.factortools:dmp_ext_factor"
+    ],
+    "sympy__sympy-19346": [
+      "sympy.printing.repr:ReprPrinter",
+      "sympy.printing.repr:ReprPrinter._print_dict",
+      "sympy.printing.repr:ReprPrinter._print_frozenset",
+      "sympy.printing.repr:ReprPrinter._print_set",
+      "sympy.printing.tests.test_repr:test_dict",
+      "sympy.printing.tests.test_repr:test_frozenset",
+      "sympy.printing.tests.test_repr:test_set"
+    ],
+    "sympy__sympy-19495": [
+      "sympy.sets.conditionset:ConditionSet._eval_subs",
+      "sympy.sets.tests.test_conditionset:test_subs_CondSet"
+    ],
+    "sympy__sympy-19637": [
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "sympy.physics.quantum.dagger:Dagger.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator",
+      "sympy.physics.quantum.operator:IdentityOperator.__mul__",
+      "sympy.physics.quantum.operator:IdentityOperator.__rmul__"
+    ],
+    "sympy__sympy-19954": [
+      "sympy.combinatorics.perm_groups:PermutationGroup.minimal_blocks"
+    ],
+    "sympy__sympy-20154": [
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "sympy.polys.polyclasses:DMP.clear_denoms"
+    ],
+    "sympy__sympy-20438": [
+      "sympy.sets.handlers.issubset:is_subset_sets",
+      "sympy.sets.sets:Set",
+      "sympy.sets.sets:Set.equals"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [],
+    "sympy__sympy-21379": [
+      "sympy.polys.polytools:_parallel_poly_from_expr"
+    ],
+    "sympy__sympy-21596": [
+      "sympy.sets.handlers.intersection:intersection_sets",
+      "sympy.sets.tests.test_fancysets:test_imageset_intersect_real"
+    ],
+    "sympy__sympy-21612": [
+      "sympy.parsing.latex._parse_latex_antlr:convert_frac"
+    ],
+    "sympy__sympy-21847": [
+      "sympy.polys.monomials:itermonomials"
+    ],
+    "sympy__sympy-21930": [
+      "sympy.printing.latex:LatexPrinter._helper_print_standard_power"
+    ],
+    "sympy__sympy-22080": [
+      "sympy.printing.codeprinter:CodePrinter._print_Mul"
+    ],
+    "sympy__sympy-22456": [
+      "sympy.codegen.ast:String",
+      "sympy.codegen.ast:String._construct_text",
+      "sympy.codegen.ast:_SymPyString",
+      "sympy.codegen.ast:_SymPyString.is_Atom",
+      "sympy.codegen.ast:_SymPyString.is_Relational",
+      "sympy.codegen.ast:_SymPyString.matches",
+      "sympy.codegen.ast:_SymPyString.xreplace"
+    ],
+    "sympy__sympy-22714": [
+      "sympy.geometry.point:Point.__new__"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "sympy.utilities.lambdify:_recursive_to_string"
+    ],
+    "sympy__sympy-23413": [
+      "sympy.polys.matrices.normalforms:_hermite_normal_form"
+    ],
+    "sympy__sympy-23534": [
+      "sympy.core.symbol:symbols"
+    ],
+    "sympy__sympy-23824": [
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "sympy.sets.contains:Contains._eval_as_set",
+      "sympy.sets.contains:Contains.as_set"
+    ],
+    "sympy__sympy-24066": [
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24213": [
+      "sympy.physics.units.tests.test_unitsystem:test_collect_factor_and_dimension_equivalent_dims",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension"
+    ],
+    "sympy__sympy-24443": [
+      "sympy.combinatorics.homomorphisms:_check_homomorphism",
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image"
+    ],
+    "sympy__sympy-24539": [
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "sympy.core.numbers:Rational.__new__"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare"
+    ]
+  },
+  "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack",
+      "test_comprehensive:test_backward_compatibility",
+      "test_comprehensive:test_nested_compound_models",
+      "test_nested_separability:test_nested_compound_model_separability",
+      "test_reproduction:test_issue"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns",
+      "comprehensive_final_test:test_scenario_1_original_issue",
+      "comprehensive_final_test:test_scenario_2_wrong_order_same_count",
+      "comprehensive_final_test:test_scenario_3_adding_wrong_first_column",
+      "comprehensive_final_test:test_scenario_4_normal_operation",
+      "comprehensive_final_test:test_scenario_5_multiple_missing_columns",
+      "debug_logic:debug_check_logic",
+      "final_test:test_before_and_after_comparison",
+      "final_test:test_exact_issue_reproduction",
+      "reproduce_issue:test_misleading_exception",
+      "reproduce_issue:test_normal_case",
+      "test_comprehensive:test_empty_table",
+      "test_comprehensive:test_missing_multiple_columns",
+      "test_comprehensive:test_missing_single_column",
+      "test_comprehensive:test_normal_operation",
+      "test_comprehensive:test_wrong_order",
+      "test_existing_functionality:test_add_wrong_first_column",
+      "test_existing_functionality:test_normal_operations",
+      "test_existing_functionality:test_remove_all_columns"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col",
+      "final_test:test_comprehensive",
+      "reproduce_issue:test_current_behavior",
+      "reproduce_issue:test_initialization_behavior",
+      "test_warning:test_explicit_column_no_warning",
+      "test_warning:test_warning_shown"
+    ],
+    "astropy__astropy-13398": [
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:observed_to_itrs",
+      "test_detailed_issue:test_straight_overhead_comparison",
+      "test_detailed_issue:test_time_invariance_issue",
+      "test_fix_verification:test_roundtrip_transforms",
+      "test_fix_verification:test_straight_overhead_case",
+      "test_fix_verification:test_time_invariance_fix",
+      "test_issue_fix_demo:demonstrate_new_functionality",
+      "test_issue_fix_demo:demonstrate_original_problem",
+      "test_issue_fix_demo:demonstrate_user_benefit",
+      "test_issue_reproduction:test_current_behavior",
+      "test_issue_reproduction:test_problem_with_time_differences",
+      "test_issue_reproduction:test_proposed_solution",
+      "test_issue_reproduction:test_proposed_solution.itrs_to_observed",
+      "test_issue_reproduction:test_proposed_solution.itrs_to_observed_mat",
+      "test_issue_reproduction:test_proposed_solution.observed_to_itrs",
+      "test_my_transforms:test_itrs_observed_transforms",
+      "test_my_transforms:test_time_invariance"
+    ],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values",
+      "test_issue_reproduction:test_sliced_wcs_world_to_pixel_coupled_pc",
+      "test_issue_reproduction:test_sliced_wcs_world_to_pixel_with_offset",
+      "test_issue_simple:test_fix_verification"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__",
+      "comprehensive_test:DuckArray",
+      "comprehensive_test:DuckArray.__array_ufunc__",
+      "comprehensive_test:DuckArray.unit",
+      "comprehensive_test:test_basic_functionality",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_various_ufuncs",
+      "edge_case_test:ConverterErrorObject",
+      "edge_case_test:ConverterErrorObject.__array_ufunc__",
+      "edge_case_test:ConverterErrorObject.__radd__",
+      "edge_case_test:ProblematicObject",
+      "edge_case_test:ProblematicObject.__array_ufunc__",
+      "edge_case_test:ProblematicObject.__radd__",
+      "edge_case_test:test_converter_errors",
+      "edge_case_test:test_problematic_objects",
+      "reproduce_issue:DuckArray",
+      "reproduce_issue:DuckArray.__array_ufunc__",
+      "reproduce_issue:DuckArray.__radd__",
+      "reproduce_issue:DuckArray.unit",
+      "reproduce_issue:test_operations",
+      "test_clear_radd:UnconvertibleObject",
+      "test_clear_radd:UnconvertibleObject.__array_ufunc__",
+      "test_clear_radd:UnconvertibleObject.__radd__",
+      "test_clear_radd:test_clear_radd",
+      "test_forced_radd:SimpleDuck",
+      "test_forced_radd:SimpleDuck.__array_ufunc__",
+      "test_forced_radd:SimpleDuck.__radd__",
+      "test_forced_radd:SimpleDuck.__str__",
+      "test_forced_radd:test_simple_duck",
+      "test_proper_radd:DuckArray",
+      "test_proper_radd:DuckArray.__array_ufunc__",
+      "test_proper_radd:DuckArray.__radd__",
+      "test_proper_radd:DuckArray.unit",
+      "test_proper_radd:NonNumericObject",
+      "test_proper_radd:test_edge_cases",
+      "test_radd:DuckArray",
+      "test_radd:DuckArray.__add__",
+      "test_radd:DuckArray.__array_ufunc__",
+      "test_radd:DuckArray.__radd__",
+      "test_radd:DuckArray.unit",
+      "test_radd:test_radd"
+    ],
+    "astropy__astropy-14096": [
+      "astropy.coordinates.sky_coordinate:SkyCoord.__getattr__",
+      "debug_classification:DebugCoord",
+      "debug_classification:DebugCoord.debug_getattr",
+      "debug_classification:main",
+      "debug_detailed:DebugCoord",
+      "debug_detailed:DebugCoord.prop",
+      "debug_detailed:main",
+      "debug_test2:custom_coord",
+      "debug_test2:custom_coord.prop",
+      "debug_test2:main",
+      "debug_test3:NormalClass",
+      "debug_test3:NormalClass.prop",
+      "debug_test3:SkyCoordLike",
+      "debug_test3:SkyCoordLike.__getattr__",
+      "debug_test3:SkyCoordLike.__init__",
+      "debug_test3:SkyCoordSubclass",
+      "debug_test3:SkyCoordSubclass.prop",
+      "debug_test3:test_normal",
+      "debug_test3:test_skycoord_like",
+      "debug_test4:TestClass",
+      "debug_test4:TestClass.__getattr__",
+      "debug_test4:TestClass.__init__",
+      "debug_test4:TestClass.prop",
+      "debug_test4:main",
+      "debug_test5:TestClass",
+      "debug_test5:TestClass.__getattr__",
+      "debug_test5:TestClass.__init__",
+      "debug_test5:TestClass.prop",
+      "debug_test5:main",
+      "debug_test6:NormalClass",
+      "debug_test6:NormalClass.existing_prop",
+      "debug_test6:NormalClass.failing_prop",
+      "debug_test6:NormalClass.method",
+      "debug_test6:TestWithGetattr",
+      "debug_test6:TestWithGetattr.__getattr__",
+      "debug_test6:TestWithGetattr.existing_prop",
+      "debug_test6:TestWithGetattr.failing_prop",
+      "debug_test6:TestWithGetattr.method",
+      "debug_test6:test_normal",
+      "debug_test6:test_with_getattr",
+      "debug_test7:DebugCoord",
+      "debug_test7:DebugCoord.__getattr__",
+      "debug_test7:DebugCoord.__init__",
+      "debug_test7:DebugCoord.failing_prop",
+      "debug_test7:DebugCoord.working_prop",
+      "debug_test7:main",
+      "debug_test8:NoGetattrObject",
+      "debug_test8:NoGetattrObject.prop",
+      "debug_test8:NormalObject",
+      "debug_test8:NormalObject.__getattr__",
+      "debug_test8:NormalObject.prop",
+      "debug_test8:test_no_getattr",
+      "debug_test8:test_normal",
+      "debug_test9:DebugCoord",
+      "debug_test9:DebugCoord.prop",
+      "debug_test9:main",
+      "debug_test:custom_coord",
+      "debug_test:custom_coord.prop",
+      "debug_test:main",
+      "final_test:MyCoord",
+      "final_test:MyCoord.failing_method",
+      "final_test:MyCoord.failing_prop",
+      "final_test:MyCoord.user_method",
+      "final_test:MyCoord.user_prop",
+      "final_test:test_cases",
+      "normal_python_test:NormalClass",
+      "normal_python_test:NormalClass.__getattr__",
+      "normal_python_test:NormalClass.prop",
+      "normal_python_test:main",
+      "reproduce_issue:custom_coord",
+      "reproduce_issue:custom_coord.prop",
+      "reproduce_issue:main",
+      "test_comprehensive:TestCoord",
+      "test_comprehensive:TestCoord.another_method",
+      "test_comprehensive:TestCoord.failing_property",
+      "test_comprehensive:TestCoord.nested_failing_property",
+      "test_comprehensive:TestCoord.working_property",
+      "test_comprehensive:main",
+      "test_comprehensive:test_failing_property",
+      "test_comprehensive:test_missing_skycoord_attribute",
+      "test_comprehensive:test_skycoord_functionality",
+      "test_comprehensive:test_working_property",
+      "test_full_traceback:custom_coord",
+      "test_full_traceback:custom_coord.prop",
+      "test_full_traceback:main",
+      "test_missing_real_skycoord_attr:main",
+      "test_original_behavior:main",
+      "test_real_skycoord_attr:main"
+    ],
+    "astropy__astropy-14182": [
+      "astropy.io.ascii.rst:RST.__init__",
+      "astropy.io.ascii.rst:RST.write",
+      "reproduce_issue:test_basic_rst",
+      "reproduce_issue:test_expected_output",
+      "reproduce_issue:test_fixed_width_with_header_rows",
+      "reproduce_issue:test_rst_with_header_rows",
+      "test_comprehensive:test_backward_compatibility",
+      "test_comprehensive:test_basic_rst",
+      "test_comprehensive:test_edge_case_empty_table",
+      "test_comprehensive:test_rst_explicit_single_header",
+      "test_comprehensive:test_rst_multiple_headers",
+      "test_comprehensive:test_rst_two_headers",
+      "test_rst_header_rows:test_rst_header_rows",
+      "test_rst_header_rows:test_rst_header_rows_backward_compatibility"
+    ],
+    "astropy__astropy-14309": [
+      "astropy.io.fits.connect:is_fits",
+      "astropy.io.misc.hdf5:is_hdf5",
+      "astropy.io.votable.connect:is_votable"
+    ],
+    "astropy__astropy-14365": [
+      "astropy.io.ascii.qdp:_line_type"
+    ],
+    "astropy__astropy-14369": [
+      "astropy.units.format.cds:CDS._make_parser",
+      "astropy.units.format.cds:CDS._make_parser.p_combined_units",
+      "astropy.units.format.cds:CDS._make_parser.p_division_of_units",
+      "astropy.units.format.cds:CDS._make_parser.p_product_of_units",
+      "astropy.utils.parsing:_add_tab_header",
+      "debug_parsing:test_manual_construction",
+      "debug_parsing:test_simple_divisions",
+      "final_verification:main",
+      "test_comprehensive_fix:test_comprehensive_division",
+      "test_comprehensive_fix:test_original_issue",
+      "test_comprehensive_fix:test_simple_cases_still_work",
+      "test_issue_reproduction:test_cds_unit_parsing"
+    ],
+    "astropy__astropy-14508": [
+      "astropy.io.fits.card:_format_float"
+    ],
+    "astropy__astropy-14539": [
+      "astropy.io.fits.diff:TableDataDiff._diff"
+    ],
+    "astropy__astropy-14598": [
+      "astropy.io.fits.card:Card._split",
+      "final_test:test_normal_functionality",
+      "final_test:test_original_issue",
+      "final_test:test_quote_escaping",
+      "reproduce_issue:test_basic_issue",
+      "reproduce_issue:test_position_issue",
+      "reproduce_issue:test_simple_cases"
+    ],
+    "astropy__astropy-14995": [
+      "astropy.nddata.mixins.ndarithmetic:NDArithmeticMixin._arithmetic_mask",
+      "final_test:test_expected_behavior",
+      "final_test:test_issue_examples",
+      "reproduce_issue:test_mask_propagation",
+      "test_comprehensive:test_comprehensive_mask_propagation"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.card:_pad",
+      "astropy.io.fits.header:Header.fromstring",
+      "test_comprehensive:test_card_fromstring",
+      "test_comprehensive:test_edge_cases",
+      "test_comprehensive:test_header_fromstring"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.quantity:Quantity.__new__",
+      "comprehensive_test:test_all_float_types",
+      "comprehensive_test:test_array_inputs",
+      "comprehensive_test:test_boolean_type",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_explicit_dtype",
+      "comprehensive_test:test_integer_types",
+      "final_verification:test_consistency",
+      "final_verification:test_original_issue",
+      "test_float16_issue:test_expected_behavior",
+      "test_float16_issue:test_float16_issue"
+    ],
+    "sympy__sympy-11618": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_mixed_dimension_cases",
+      "comprehensive_test:test_same_dimension_cases",
+      "comprehensive_test:test_symbolic_cases",
+      "final_verification:test_additional_mixed_cases",
+      "final_verification:test_backward_compatibility",
+      "final_verification:test_original_issue",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_distance_issue",
+      "sympy.geometry.point:Point.distance"
+    ],
+    "sympy__sympy-12419": [
+      "comprehensive_test:test_comprehensive",
+      "sympy.matrices.expressions.matexpr:Identity._entry",
+      "test_issue_reproduction:test_direct_identity_matrix",
+      "test_issue_reproduction:test_identity_matrix_sum_issue"
+    ],
+    "sympy__sympy-12481": [
+      "final_test:test_backward_compatibility",
+      "final_test:test_error_cases",
+      "final_test:test_issue_requirements",
+      "final_test:test_left_to_right_order",
+      "final_test:test_mathematical_properties",
+      "reproduce_issue:test_expected_results",
+      "reproduce_issue:test_issue",
+      "reproduce_issue:test_more_cases",
+      "reproduce_issue:test_workaround",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "test_edge_cases:test_edge_cases",
+      "test_edge_cases:test_mathematical_correctness"
+    ],
+    "sympy__sympy-12489": [
+      "debug_test:MyPermutation",
+      "debug_test:MyPermutation.__new__",
+      "debug_test:test_debug",
+      "reproduce_issue:MyPermutation",
+      "reproduce_issue:MyPermutation.__new__",
+      "reproduce_issue:MyPermutation.my_method",
+      "reproduce_issue:test_subclassing",
+      "sympy.combinatorics.permutations:Permutation",
+      "sympy.combinatorics.permutations:Permutation.__invert__",
+      "sympy.combinatorics.permutations:Permutation.__mul__",
+      "sympy.combinatorics.permutations:Permutation.__new__",
+      "sympy.combinatorics.permutations:Permutation.__pow__",
+      "sympy.combinatorics.permutations:Permutation.__xor__",
+      "sympy.combinatorics.permutations:Permutation._af_new",
+      "sympy.combinatorics.permutations:Permutation.commutator",
+      "sympy.combinatorics.permutations:Permutation.from_inversion_vector",
+      "sympy.combinatorics.permutations:Permutation.mul_inv",
+      "sympy.combinatorics.permutations:Permutation.next_lex",
+      "sympy.combinatorics.permutations:Permutation.next_trotterjohnson",
+      "sympy.combinatorics.permutations:Permutation.random",
+      "sympy.combinatorics.permutations:Permutation.unrank_lex",
+      "sympy.combinatorics.permutations:Permutation.unrank_nonlex",
+      "sympy.combinatorics.permutations:Permutation.unrank_trotterjohnson",
+      "test_backward_compatibility:test_backward_compatibility",
+      "test_comprehensive:MyPerm1",
+      "test_comprehensive:MyPerm1.__new__",
+      "test_comprehensive:MyPerm2",
+      "test_comprehensive:MyPerm2.__new__",
+      "test_comprehensive:test_comprehensive",
+      "test_fix:MyPermutation",
+      "test_fix:MyPermutation.__new__",
+      "test_fix:MyPermutation.my_method",
+      "test_fix:test_subclassing_fix"
+    ],
+    "sympy__sympy-13031": [
+      "test_comprehensive_stacking:main",
+      "test_comprehensive_stacking:test_comprehensive_hstack",
+      "test_comprehensive_stacking:test_comprehensive_vstack",
+      "test_comprehensive_stacking:test_edge_cases",
+      "test_issue_reproduction:main",
+      "test_issue_reproduction:test_edge_cases",
+      "test_issue_reproduction:test_hstack_issue",
+      "test_issue_reproduction:test_vstack_issue"
+    ],
+    "sympy__sympy-13091": [
+      "sympy.core.basic:Basic.__eq__",
+      "sympy.core.basic:Basic.__ne__",
+      "sympy.core.numbers:Float.__eq__",
+      "sympy.core.numbers:Float.__ne__",
+      "sympy.core.numbers:Integer.__ne__",
+      "sympy.core.numbers:NumberSymbol.__eq__",
+      "sympy.core.numbers:NumberSymbol.__ne__",
+      "sympy.core.numbers:Rational.__eq__",
+      "sympy.core.numbers:Rational.__ne__",
+      "test_comparison_issue:CustomClass",
+      "test_comparison_issue:CustomClass.__eq__",
+      "test_comparison_issue:CustomClass.__init__",
+      "test_comparison_issue:CustomClass.__repr__",
+      "test_comparison_issue:main",
+      "test_comparison_issue:test_basic_comparison_issue",
+      "test_comparison_issue:test_notimplemented_behavior",
+      "test_comparison_issue:test_notimplemented_behavior.NotImplementedClass",
+      "test_comparison_issue:test_notimplemented_behavior.NotImplementedClass.__eq__",
+      "test_comparison_issue:test_number_comparison_issues",
+      "test_comparison_issue:test_numbersymbol_comparison_issue",
+      "test_edge_cases:main",
+      "test_edge_cases:test_comparisons_with_unrelated_types",
+      "test_edge_cases:test_ne_method_still_works",
+      "test_edge_cases:test_normal_comparisons_still_work",
+      "test_edge_cases:test_other_comparison_operators",
+      "test_final_verification:TestClass",
+      "test_final_verification:TestClass.__eq__",
+      "test_final_verification:TestClass.__init__",
+      "test_final_verification:TestClass.__ne__",
+      "test_final_verification:TestClass.__repr__",
+      "test_final_verification:main",
+      "test_final_verification:test_all_classes_symmetric",
+      "test_final_verification:test_ne_operator",
+      "test_final_verification:test_normal_functionality",
+      "test_final_verification:test_notimplemented_fallback",
+      "test_final_verification:test_notimplemented_fallback.NeitherHandles",
+      "test_final_verification:test_notimplemented_fallback.NeitherHandles.__eq__",
+      "test_final_verification:test_notimplemented_fallback.NeitherHandles.__ne__"
+    ],
+    "sympy__sympy-13372": [
+      "final_test:test_edge_cases",
+      "final_test:test_original_issue",
+      "sympy.core.evalf:evalf",
+      "test_comprehensive:test_comprehensive",
+      "test_reproduction:test_issue"
+    ],
+    "sympy__sympy-13480": [
+      "comprehensive_test:test_comprehensive_coth_fix",
+      "reproduce_issue:test_coth_subs_issue",
+      "sympy.functions.elementary.hyperbolic:coth.eval"
+    ],
+    "sympy__sympy-13551": [
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_original_issue",
+      "reproduce_issue:test_product_issue",
+      "sympy.concrete.products:Product._eval_product",
+      "test_fix_verification:test_original_issue"
+    ],
+    "sympy__sympy-13615": [
+      "final_verification:main",
+      "reproduce_issue:test_complement_issue",
+      "sympy.sets.sets:Interval._complement",
+      "test_edge_cases:test_edge_cases",
+      "test_fix:test_additional_cases",
+      "test_issue_specific:test_expected_mathematical_behavior",
+      "test_issue_specific:test_reported_issue"
+    ],
+    "sympy__sympy-13647": [
+      "comprehensive_test:run_all_tests",
+      "comprehensive_test:test_insert_at_beginning",
+      "comprehensive_test:test_insert_at_end",
+      "comprehensive_test:test_insert_into_empty_matrix",
+      "comprehensive_test:test_insert_multiple_columns",
+      "comprehensive_test:test_negative_position",
+      "comprehensive_test:test_original_issue",
+      "debug_col_insert:debug_col_insert",
+      "reproduce_issue:test_col_insert_issue",
+      "sympy.matrices.common:MatrixShaping._eval_col_insert.entry",
+      "test_sparse:test_sparse_col_insert",
+      "verify_fix:test_edge_cases",
+      "verify_fix:verify_col_insert_fix"
+    ],
+    "sympy__sympy-13757": [
+      "final_comprehensive_test:test_comprehensive",
+      "sympy.polys.polytools:Poly",
+      "test_edge_cases:test_edge_cases",
+      "test_issue_reproduction:test_poly_multiplication"
+    ],
+    "sympy__sympy-13798": [
+      "comprehensive_test:test_backwards_compatibility",
+      "comprehensive_test:test_custom_symbols",
+      "comprehensive_test:test_integral_consistency",
+      "comprehensive_test:test_number_multiplication",
+      "final_verification:test_arbitrary_custom_symbols",
+      "final_verification:test_backwards_compatibility",
+      "final_verification:test_edge_cases",
+      "final_verification:test_original_issue_requirements",
+      "sympy.printing.latex:LatexPrinter.__init__",
+      "sympy.printing.latex:latex",
+      "test_mul_symbol_issue:test_current_behavior",
+      "test_mul_symbol_issue:test_desired_behavior",
+      "test_mul_symbol_issue:test_integral_consistency"
+    ],
+    "sympy__sympy-13852": [
+      "final_verification:test_issue_requirements",
+      "reproduce_issue:test_polylog_issue",
+      "sympy.functions.special.tests.test_zeta_functions:test_polylog_expansion",
+      "sympy.functions.special.zeta_functions:polylog",
+      "sympy.functions.special.zeta_functions:polylog._eval_expand_func",
+      "sympy.functions.special.zeta_functions:polylog.eval",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-13877": [
+      "final_verification:main",
+      "reproduce_issue:test_matrix_determinant_issue",
+      "sympy.core.exprtools:factor_terms.do",
+      "test_edge_cases:test_edge_cases",
+      "test_edge_cases:test_original_issue",
+      "test_fix_comprehensive:test_comparisons",
+      "test_fix_comprehensive:test_factor_terms_directly",
+      "test_fix_comprehensive:test_matrix_determinants"
+    ],
+    "sympy__sympy-13878": [
+      "final_test:test_all_distributions",
+      "sympy.stats.crv_types:ArcsinDistribution._cdf",
+      "sympy.stats.crv_types:DagumDistribution._cdf",
+      "sympy.stats.crv_types:FrechetDistribution._cdf",
+      "sympy.stats.crv_types:GammaDistribution",
+      "sympy.stats.crv_types:GammaDistribution._cdf",
+      "sympy.stats.crv_types:GammaInverseDistribution._cdf",
+      "sympy.stats.crv_types:KumaraswamyDistribution._cdf",
+      "sympy.stats.crv_types:LaplaceDistribution._cdf",
+      "sympy.stats.crv_types:LogisticDistribution._cdf",
+      "sympy.stats.crv_types:NakagamiDistribution._cdf",
+      "sympy.stats.crv_types:StudentTDistribution._cdf",
+      "sympy.stats.crv_types:UniformSumDistribution._cdf",
+      "test_cdf_issue:test_arcsin",
+      "test_cdf_issue:test_dagum",
+      "test_cdf_issue:test_erlang",
+      "test_cdf_issue:test_frechet",
+      "test_cdf_issue:test_gamma",
+      "test_cdf_issue:test_gamma_inverse",
+      "test_cdf_issue:test_kumaraswamy",
+      "test_cdf_issue:test_laplace",
+      "test_cdf_issue:test_logistic",
+      "test_cdf_issue:test_nakagami",
+      "test_cdf_issue:test_student_t",
+      "test_cdf_issue:test_uniform_sum",
+      "test_individual:run_test_with_timeout"
+    ],
+    "sympy__sympy-13974": [
+      "final_test:test_exact_issue",
+      "reproduce_issue:test_issue_reproduction",
+      "sympy.physics.quantum.tensorproduct:tensor_product_simp",
+      "test_comprehensive:test_comprehensive"
+    ],
+    "sympy__sympy-14248": [
+      "final_verification:test_issue_resolution",
+      "reproduce_issue:test_matrix_symbol_difference_printing",
+      "sympy.printing.latex:LatexPrinter._print_MatMul",
+      "sympy.printing.pretty.pretty:PrettyPrinter._print_MatMul",
+      "sympy.printing.str:StrPrinter._print_MatMul",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-14531": [
+      "comprehensive_test:test_nested_expressions",
+      "comprehensive_test:test_other_settings_still_work",
+      "comprehensive_test:test_python_function",
+      "comprehensive_test:test_sympy_integers_comprehensive",
+      "final_verification:test_backward_compatibility",
+      "final_verification:test_edge_cases",
+      "final_verification:test_exact_issue_examples",
+      "reproduce_issue:test_python_function",
+      "reproduce_issue:test_sympy_integers_setting",
+      "sympy.printing.str:StrPrinter._print_AppliedPredicate",
+      "sympy.printing.str:StrPrinter._print_ExprCondPair",
+      "sympy.printing.str:StrPrinter._print_Limit",
+      "sympy.printing.str:StrPrinter._print_Normal",
+      "sympy.printing.str:StrPrinter._print_Relational",
+      "sympy.printing.str:StrPrinter._print_Uniform"
+    ],
+    "sympy__sympy-14711": [
+      "sympy.physics.vector.vector:Vector.__add__",
+      "test_comprehensive:test_comprehensive",
+      "test_reproduce_issue:test_vector_add_zero_issue"
+    ],
+    "sympy__sympy-14976": [
+      "final_test:test_original_issue",
+      "sympy.printing.pycode:MpmathPrinter._print_Rational",
+      "test_edge_cases:test_integer_rationals",
+      "test_edge_cases:test_lambdify_with_various_rationals",
+      "test_edge_cases:test_mixed_expressions",
+      "test_edge_cases:test_various_rationals",
+      "test_issue_reproduction:test_lambdify_mpmath_rational_issue",
+      "test_issue_reproduction:test_mpmath_printer_directly",
+      "test_issue_reproduction:test_precision_issue"
+    ],
+    "sympy__sympy-15017": [
+      "final_verification:test_issue_requirements",
+      "reproduce_issue:test_rank_zero_array_len",
+      "sympy.tensor.array.dense_ndim_array:ImmutableDenseNDimArray._new",
+      "sympy.tensor.array.dense_ndim_array:MutableDenseNDimArray._new",
+      "sympy.tensor.array.sparse_ndim_array:ImmutableSparseNDimArray.__new__",
+      "sympy.tensor.array.sparse_ndim_array:MutableSparseNDimArray.__new__",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-15345": [
+      "sympy.printing.mathematica:MCodePrinter",
+      "sympy.printing.mathematica:MCodePrinter._print_Expr",
+      "sympy.printing.tests.test_mathematica:test_Max_Min",
+      "test_edge_cases:test_edge_cases",
+      "test_reproduction:test_mathematica_code_max"
+    ],
+    "sympy__sympy-15349": [
+      "debug_4x4:debug_4x4",
+      "debug_test:debug_test",
+      "final_verification:test_original_issue",
+      "reproduce_issue:test_issue",
+      "run_tests:run_all_tests",
+      "sympy.algebras.quaternion:Quaternion.to_rotation_matrix",
+      "sympy.algebras.tests.test_quaternion:test_quaternion_conversions",
+      "test_docstring_example:test_docstring_examples",
+      "test_edge_cases:test_general_quaternion",
+      "test_edge_cases:test_specific_angles",
+      "test_edge_cases:test_y_axis_rotation",
+      "test_edge_cases:test_z_axis_rotation",
+      "test_existing:test_existing",
+      "verify_formula:test_numerical",
+      "verify_rotation_matrix:verify_rotation_matrix"
+    ],
+    "sympy__sympy-15599": [
+      "final_test:test_main_issue",
+      "final_test:test_mathematical_correctness",
+      "final_test:test_various_cases",
+      "reproduce_issue:test_mod_issue",
+      "sympy.core.mod:Mod.eval",
+      "test_edge_cases:test_edge_cases",
+      "test_existing_case:test_existing_mod_case"
+    ],
+    "sympy__sympy-15809": [
+      "sympy.functions.elementary.miscellaneous:MinMaxBase.__new__"
+    ],
+    "sympy__sympy-15875": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_fixed_case",
+      "comprehensive_test:test_imaginary_nonzero",
+      "comprehensive_test:test_mixed_cases",
+      "comprehensive_test:test_original_functionality",
+      "comprehensive_test:test_real_cases",
+      "final_verification:test_issue_requirements",
+      "reproduce_issue:analyze_add_components",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_original_issue",
+      "sympy.core.add:Add._eval_is_zero",
+      "test_issue_fix:test_issue_is_zero_complex_add"
+    ],
+    "sympy__sympy-15976": [
+      "reproduce_issue:test_mathml_symbol_issue",
+      "sympy.printing.mathml:MathMLContentPrinter._print_Symbol",
+      "sympy.printing.mathml:MathMLPresentationPrinter._print_Symbol",
+      "test_comprehensive:test_comprehensive",
+      "test_simple:test_simple"
+    ],
+    "sympy__sympy-16450": [
+      "sympy.simplify.simplify:posify"
+    ],
+    "sympy__sympy-16597": [
+      "test_comprehensive_even_finite:test_basic_even_finite",
+      "test_comprehensive_even_finite:test_even_false",
+      "test_comprehensive_even_finite:test_even_with_other_assumptions",
+      "test_comprehensive_even_finite:test_integer_zero_even_relationship",
+      "test_comprehensive_even_finite:test_no_assumptions",
+      "test_comprehensive_even_finite:test_zero_still_works",
+      "test_even_finite_issue:test_even_implies_finite",
+      "test_even_finite_issue:test_integer_is_finite",
+      "test_even_finite_issue:test_zero_is_finite"
+    ],
+    "sympy__sympy-16766": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Indexed",
+      "sympy.printing.pycode:PythonCodePrinter._print_IndexedBase",
+      "sympy.printing.tests.test_pycode:test_PythonCodePrinter"
+    ],
+    "sympy__sympy-16792": [
+      "comprehensive_test:test_different_shapes",
+      "comprehensive_test:test_matrix_symbol_in_expr",
+      "comprehensive_test:test_matrix_symbol_not_in_expr",
+      "comprehensive_test:test_mixed_arguments",
+      "comprehensive_test:test_scalar_and_array_args",
+      "sympy.utilities.codegen:CodeGen.routine",
+      "test_indexed:test_indexed_base",
+      "test_make_routine:test_make_routine_mixed_args",
+      "test_make_routine:test_make_routine_with_unused_matrix",
+      "test_make_routine:test_make_routine_with_used_matrix"
+    ],
+    "sympy__sympy-16886": [
+      "comprehensive_morse_test:test_all_digits",
+      "comprehensive_morse_test:test_edge_cases",
+      "comprehensive_morse_test:test_mixed_content",
+      "test_digit_1_fix:test_digit_1_fix",
+      "test_morse_issue:test_morse_digit_mappings"
+    ],
+    "sympy__sympy-17139": [
+      "reproduce_issue:test_complex_exponents",
+      "reproduce_issue:test_original_issue",
+      "reproduce_issue:test_related_cases",
+      "sympy.simplify.fu:_TR56._f",
+      "test_complex_exponent_fix:test_complex_exponents_in_TR5",
+      "test_complex_exponent_fix:test_complex_exponents_in_TR6",
+      "test_complex_exponent_fix:test_simplify_with_complex_exponents",
+      "test_edge_cases:test_TR6_directly",
+      "test_edge_cases:test_edge_cases",
+      "test_edge_cases:test_symbolic_exponents"
+    ],
+    "sympy__sympy-17318": [
+      "sympy.simplify.sqrtdenest:_sqrt_match",
+      "sympy.simplify.tests.test_sqrtdenest:test_issue_12420"
+    ],
+    "sympy__sympy-17630": [
+      "final_verification:test_exact_issue",
+      "reproduce_issue:test_issue",
+      "sympy.matrices.expressions.blockmatrix:BlockMatrix._blockmul",
+      "test_fix_comprehensive:test_different_dimensions",
+      "test_fix_comprehensive:test_edge_cases",
+      "test_fix_comprehensive:test_mixed_zero_and_nonzero",
+      "test_fix_comprehensive:test_original_issue",
+      "test_fix_comprehensive:test_triple_multiplication"
+    ],
+    "sympy__sympy-17655": [
+      "comprehensive_test:test_comprehensive",
+      "debug_doit:debug_doit",
+      "debug_float_mul:debug_float_mul",
+      "debug_multiplication:debug_multiplication",
+      "reproduce_issue:test_issue",
+      "sympy.geometry.point:Point",
+      "sympy.geometry.point:Point.__add__",
+      "sympy.geometry.point:Point.__rmul__",
+      "test_edge_cases:test_edge_cases",
+      "test_main_issue:test_main_issue",
+      "test_rmul:test_rmul"
+    ],
+    "sympy__sympy-18189": [
+      "reproduce_issue:test_diophantine_permute_issue",
+      "reproduce_issue:test_without_permute",
+      "sympy.solvers.diophantine:diophantine",
+      "test_edge_cases:test_multiple_variables",
+      "test_edge_cases:test_no_symbols_specified",
+      "test_edge_cases:test_original_issue",
+      "test_edge_cases:test_permute_false_unchanged",
+      "test_fix_comprehensive:test_edge_cases",
+      "test_fix_comprehensive:test_more_complex_case",
+      "test_fix_comprehensive:test_permute_false_behavior",
+      "test_fix_comprehensive:test_permute_with_different_symbol_orders"
+    ],
+    "sympy__sympy-18199": [
+      "comprehensive_test:test_comprehensive",
+      "edge_case_test:test_edge_cases",
+      "sympy.ntheory.residue_ntheory:nthroot_mod",
+      "test_issue_reproduction:test_nthroot_mod_zero_case"
+    ],
+    "sympy__sympy-18211": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_complex_equation",
+      "comprehensive_test:test_different_symbols",
+      "comprehensive_test:test_inequality",
+      "comprehensive_test:test_logical_combination",
+      "comprehensive_test:test_or_combination",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_simple_equation",
+      "comprehensive_test:verify_structure",
+      "reproduce_issue:test_expected_result",
+      "reproduce_issue:test_issue",
+      "reproduce_issue:test_simple_case",
+      "sympy.core.relational:Relational._eval_as_set"
+    ],
+    "sympy__sympy-18763": [
+      "sympy.printing.latex:LatexPrinter._print_Subs"
+    ],
+    "sympy__sympy-19040": [
+      "debug_issue2:debug_direct_factorization",
+      "debug_issue2:debug_domain_issue",
+      "debug_issue:debug_factorization_steps",
+      "debug_issue:debug_poly_construction",
+      "debug_norm:debug_norm_factorization",
+      "debug_simple:debug_direct_call",
+      "debug_trial_division:debug_trial_division",
+      "reproduce_issue:test_factor_issue",
+      "sympy.polys.factortools:dmp_ext_factor",
+      "sympy.polys.factortools:dup_ext_factor",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-19495": [
+      "check_correct_behavior:check_behavior",
+      "check_mathematical_result:check_mathematical_result",
+      "comprehensive_test:test_comprehensive",
+      "debug_cond_true:debug_cond_true",
+      "debug_failing_test:debug_failing_test",
+      "debug_issue:debug_issue",
+      "debug_test:debug_test",
+      "reproduce_issue:test_issue",
+      "sympy.sets.conditionset:ConditionSet._eval_subs"
+    ],
+    "sympy__sympy-19637": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_original_functionality",
+      "reproduce_issue:test_kernS_issue",
+      "reproduce_issue:test_kernS_working_cases",
+      "sympy.core.sympify:kernS"
+    ],
+    "sympy__sympy-19783": [
+      "comprehensive_test:test_comprehensive",
+      "reproduce_issue:test_issue",
+      "sympy.physics.quantum.dagger:Dagger.__mul__"
+    ],
+    "sympy__sympy-20154": [
+      "comprehensive_test:test_basic_functionality",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_k_parameter",
+      "comprehensive_test:test_m_parameter",
+      "comprehensive_test:test_object_independence",
+      "comprehensive_test:test_size_parameter",
+      "final_verification:test_issue_requirements",
+      "reproduce_issue:test_dictionary_reuse",
+      "reproduce_issue:test_expected_behavior",
+      "sympy.utilities.iterables:partitions"
+    ],
+    "sympy__sympy-20428": [
+      "debug_detailed:test_clear_denoms_detailed",
+      "debug_domain:debug_domains",
+      "debug_mul_ground:test_dmp_mul_ground",
+      "debug_specific:debug_specific_case",
+      "debug_zero_check:debug_zero_check",
+      "reproduce_issue:test_clear_denoms_issue",
+      "sympy.polys.densetools:dmp_clear_denoms",
+      "sympy.polys.densetools:dup_clear_denoms",
+      "test_comprehensive:test_normal_clear_denoms",
+      "test_comprehensive:test_univariate_multivariate_consistency",
+      "test_comprehensive:test_zero_cases",
+      "test_edge_cases:test_edge_cases",
+      "test_specific:test_clear_denoms_failure"
+    ],
+    "sympy__sympy-20438": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_error_conditions",
+      "comprehensive_test:test_finite_set_only",
+      "comprehensive_test:test_original_issue",
+      "final_verification:test_original_issue_exact",
+      "reproduce_issue:test_eq_simplify_issue",
+      "reproduce_issue:test_is_subset_issue",
+      "sympy.core.relational:Relational._eval_simplify",
+      "sympy.sets.sets:Set.is_subset"
+    ],
+    "sympy__sympy-20590": [
+      "sympy.core._print_helpers:Printable"
+    ],
+    "sympy__sympy-20801": [
+      "comprehensive_test:test_consistency_with_rational",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_float_comparisons",
+      "comprehensive_test:test_main_issue",
+      "comprehensive_test:test_python_boolean_compatibility",
+      "final_verification:test_mixed_comparisons",
+      "final_verification:test_non_zero_floats",
+      "final_verification:test_original_issue_examples",
+      "final_verification:test_various_boolean_representations",
+      "final_verification:test_various_float_representations",
+      "reproduce_issue:test_additional_cases",
+      "reproduce_issue:test_issue",
+      "sympy.core.numbers:Float.__eq__"
+    ],
+    "sympy__sympy-20916": [
+      "reproduce_issue:test_greek_subscripts",
+      "reproduce_issue:test_various_greek_subscripts",
+      "sympy.printing.pretty.pretty_symbology:pretty_symbol",
+      "test_fix_edge_cases:test_edge_cases",
+      "test_fix_edge_cases:test_numeric_subscripts_in_fallback",
+      "test_issue_comprehensive:debug_pretty_symbol",
+      "test_issue_comprehensive:debug_pretty_symbol.pretty_list",
+      "test_issue_comprehensive:test_matrix_display",
+      "test_issue_comprehensive:test_potential_issues",
+      "test_issue_simulation:test_issue_scenario",
+      "test_issue_simulation:verify_fix_logic"
+    ],
+    "sympy__sympy-21379": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_piecewise_directly",
+      "comprehensive_test:test_polynomial_functionality",
+      "debug_issue:test_with_traceback",
+      "final_verification:test_original_issue_resolved",
+      "final_verification:test_piecewise_polynomial_error_still_raises",
+      "final_verification:test_polynomial_operations_still_work",
+      "final_verification:test_subs_functionality_preserved",
+      "reproduce_issue:test_issue",
+      "sympy.polys.polytools:_parallel_poly_from_expr",
+      "test_issue_fix:test_subs_piecewise_hyperbolic_multiple_calls",
+      "test_issue_fix:test_subs_piecewise_hyperbolic_no_error"
+    ],
+    "sympy__sympy-21596": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_other_intersections",
+      "debug_issue:debug_intersection",
+      "edge_case_tests:test_edge_cases",
+      "reproduce_issue:main",
+      "sympy.sets.handlers.intersection:intersection_sets",
+      "sympy.sets.tests.test_fancysets:test_imageset_intersect_real"
+    ],
+    "sympy__sympy-21612": [
+      "final_test:main",
+      "sympy.parsing.latex._antlr.latexparser:LaTeXParser",
+      "sympy.parsing.latex._parse_latex_antlr:convert_frac",
+      "test_basic_fractions:test_basic_fractions",
+      "test_edge_cases:test_edge_cases",
+      "test_fraction_issue:test_nested_fraction_parsing"
+    ],
+    "sympy__sympy-21847": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_backward_compatibility",
+      "comprehensive_test:test_exact_degree",
+      "comprehensive_test:test_total_degree_correctness",
+      "final_verification:main",
+      "reproduce_issue:test_itermonomials_issue",
+      "sympy.polys.monomials:itermonomials",
+      "test_max_above_min:test_max_above_min"
+    ],
+    "sympy__sympy-21930": [
+      "reproduce_issue:main",
+      "sympy.physics.secondquant:CreateBoson._latex",
+      "sympy.physics.secondquant:CreateFermion._latex",
+      "sympy.physics.tests.test_secondquant:test_commutation",
+      "sympy.physics.tests.test_secondquant:test_create",
+      "sympy.physics.tests.test_secondquant:test_create_f",
+      "test_fix_comprehensive:main",
+      "test_fix_comprehensive:test_basic_operators",
+      "test_fix_comprehensive:test_commutators",
+      "test_fix_comprehensive:test_mixed_expressions",
+      "test_fix_comprehensive:test_powered_operators",
+      "test_fix_comprehensive:test_symbolic_indices",
+      "test_original_issue:main"
+    ],
+    "sympy__sympy-22080": [
+      "comprehensive_test:test_mod_lambdify_fix",
+      "comprehensive_test:test_original_issue_case",
+      "sympy.printing.pycode:AbstractPythonCodePrinter._print_Mod"
+    ],
+    "sympy__sympy-22714": [
+      "comprehensive_test:run_comprehensive_test",
+      "sympy.geometry.point:Point.__new__",
+      "test_edge_cases:test_edge_cases",
+      "test_imaginary_detection:test_imaginary_detection",
+      "test_point_functionality:test_point_functionality",
+      "test_reproduction:test_point2d_with_evaluate_false"
+    ],
+    "sympy__sympy-22914": [
+      "sympy.printing.pycode:PythonCodePrinter",
+      "sympy.printing.pycode:PythonCodePrinter._print_Max",
+      "sympy.printing.pycode:PythonCodePrinter._print_Min"
+    ],
+    "sympy__sympy-23262": [
+      "final_test:main",
+      "reproduce_issue:test_direct_tuple",
+      "reproduce_issue:test_multi_element_tuple",
+      "reproduce_issue:test_single_element_tuple",
+      "sympy.utilities.lambdify:_recursive_to_string",
+      "test_edge_cases:test_empty_tuple",
+      "test_edge_cases:test_mixed_structures",
+      "test_edge_cases:test_nested_tuples",
+      "test_edge_cases:test_single_element_in_list",
+      "test_edge_cases:test_with_symbols"
+    ],
+    "sympy__sympy-23413": [
+      "check_rank_fix:check_working_example_ranks",
+      "check_rank_fix:test_rank_preservation_fix",
+      "comprehensive_test:test_comprehensive",
+      "debug_failing_test:debug_tests",
+      "debug_hnf:debug_hnf_step_by_step",
+      "debug_hnf:test_rank_preservation",
+      "debug_matrix_type:debug_matrix_reconstruction",
+      "debug_my_fix:debug_fix_logic",
+      "debug_single_column:debug_single_column",
+      "debug_specific_case:debug_failing_case",
+      "debug_zero_column:debug_zero_column",
+      "final_verification:final_verification",
+      "manual_hnf:check_mathematical_hnf",
+      "manual_hnf:manual_hnf_computation",
+      "reproduce_issue:manual_flip",
+      "reproduce_issue:test_direct_hnf",
+      "reproduce_issue:test_hnf_issue",
+      "sympy.polys.matrices.normalforms:_hermite_normal_form",
+      "test_original_behavior:_gcdex",
+      "test_original_behavior:add_columns",
+      "test_original_behavior:original_hermite_normal_form",
+      "test_original_behavior:test_original_single_column",
+      "test_specific_issue:test_row_removal_fix",
+      "test_working_cases:test_failing_case_detailed",
+      "test_working_cases:test_working_hnf",
+      "trace_hnf:_gcdex",
+      "trace_hnf:add_columns",
+      "trace_hnf:main",
+      "trace_hnf:trace_hermite_normal_form",
+      "trace_single_column:_gcdex",
+      "trace_single_column:add_columns",
+      "trace_single_column:trace_single_column"
+    ],
+    "sympy__sympy-23534": [
+      "comprehensive_test:test_comprehensive",
+      "reproduce_issue:test_issue",
+      "sympy.core.symbol:symbols",
+      "test_dummy_cls:test_dummy_cls",
+      "test_exact_issue:test_exact_issue"
+    ],
+    "sympy__sympy-23824": [
+      "comprehensive_test:test_comprehensive",
+      "final_verification:test_kahane_leading_gamma_matrix_bug",
+      "reproduce_issue:test_kahane_leading_gamma_matrix_bug",
+      "sympy.physics.hep.gamma_matrices:kahane_simplify"
+    ],
+    "sympy__sympy-23950": [
+      "comprehensive_test:test_comprehensive",
+      "reproduce_issue:test_contains_as_set",
+      "sympy.sets.contains:Contains.as_set",
+      "test_edge_cases:test_edge_cases"
+    ],
+    "sympy__sympy-24066": [
+      "final_verification:test_all_elementary_functions",
+      "final_verification:test_error_cases",
+      "final_verification:test_existing_functionality",
+      "final_verification:test_main_issue",
+      "final_verification:test_mixed_expressions",
+      "final_verification:test_symbolic_expressions",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension",
+      "test_edge_cases:test_hyperbolic_functions",
+      "test_edge_cases:test_inverse_trigonometric_functions",
+      "test_edge_cases:test_mixed_expressions",
+      "test_edge_cases:test_non_dimensionless_arguments",
+      "test_edge_cases:test_sqrt_function",
+      "test_edge_cases:test_symbolic_expressions",
+      "test_reproduction:test_existing_working_case",
+      "test_reproduction:test_issue_reproduction",
+      "test_reproduction:test_mathematical_functions"
+    ],
+    "sympy__sympy-24213": [
+      "comprehensive_test:test_incompatible_dimensions",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_same_dimensions",
+      "comprehensive_test:test_three_terms",
+      "comprehensive_test:test_zero_dimension",
+      "sympy.physics.units.unitsystem:UnitSystem._collect_factor_and_dimension",
+      "test_edge_cases:test_multiple_equivalent_dimensions",
+      "test_edge_cases:test_nested_operations",
+      "test_edge_cases:test_symbolic_addition",
+      "test_specific_functionality:test_collect_factor_and_dimension_basic",
+      "test_specific_functionality:test_collect_factor_and_dimension_edge_cases"
+    ],
+    "sympy__sympy-24443": [
+      "comprehensive_test:main",
+      "comprehensive_test:test_cyclic_groups",
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_existing_functionality",
+      "comprehensive_test:test_mixed_groups",
+      "comprehensive_test:test_original_issue",
+      "comprehensive_test:test_other_dihedral_groups",
+      "comprehensive_test:test_symmetric_groups",
+      "debug_issue2:check_array_form",
+      "debug_issue2:understand_r_i",
+      "debug_issue:check_images_dict",
+      "debug_issue:deep_debug",
+      "debug_issue:understand_presentation",
+      "reproduce_issue:analyze_relators",
+      "reproduce_issue:debug_check_homomorphism",
+      "reproduce_issue:test_original_issue",
+      "sympy.combinatorics.homomorphisms:_check_homomorphism._image",
+      "test_inverted_generators:test_inverted_generator_handling"
+    ],
+    "sympy__sympy-24539": [
+      "comprehensive_test:test_edge_cases",
+      "comprehensive_test:test_error_conditions",
+      "comprehensive_test:test_new_functionality",
+      "comprehensive_test:test_original_functionality",
+      "final_verification:test_exact_issue_example",
+      "final_verification:test_issue_requirements",
+      "reproduce_issue:test_backward_compatibility",
+      "reproduce_issue:test_edge_cases",
+      "reproduce_issue:test_issue_reproduction",
+      "sympy.polys.rings:PolyElement.as_expr"
+    ],
+    "sympy__sympy-24562": [
+      "reproduce_issue:test_rational_issue",
+      "sympy.core.numbers:Rational.__new__",
+      "test_edge_cases:test_edge_cases",
+      "test_rational_string_fix:test_rational_string_arguments"
+    ],
+    "sympy__sympy-24661": [
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer",
+      "sympy.parsing.sympy_parser:EvaluateFalseTransformer.visit_Compare",
+      "test_comprehensive_verification:main",
+      "test_comprehensive_verification:test_all_relational_operators",
+      "test_comprehensive_verification:test_evaluate_true_still_works",
+      "test_comprehensive_verification:test_mixed_expressions",
+      "test_comprehensive_verification:test_multiple_comparisons",
+      "test_comprehensive_verification:test_original_issue",
+      "test_edge_cases:test_edge_cases",
+      "test_issue_reproduction:test_parse_expr_evaluate_false_relationals",
+      "test_issue_reproduction:test_parse_expr_evaluate_true_relationals"
     ]
   }
 }
