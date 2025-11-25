@@ -1,0 +1,55 @@
+{
+  "gold": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns",
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns.as_scalar_or_list_str"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table._convert_data_to_col"
+    ],
+    "astropy__astropy-13398": [
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:cirs_to_itrs",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:itrs_to_cirs",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:itrs_to_tete",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:tete_to_itrs",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:tete_to_itrs_mat",
+      "astropy.coordinates.builtin_frames.itrs:ITRS",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:add_refraction",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:altaz_to_hadec_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_altaz_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_hadec_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:observed_to_itrs",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:remove_refraction"
+    ],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.html:HTML.write"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__"
+    ],
+    "astropy__astropy-7336": [
+      "astropy.units.decorators:QuantityInput.__call__.wrapper"
+    ],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion"
+    ],
+    "astropy__astropy-8707": [
+      "astropy.io.fits.card:Card.fromstring",
+      "astropy.io.fits.header:Header.fromstring"
+    ],
+    "astropy__astropy-8872": [
+      "astropy.units.quantity:Quantity",
+      "astropy.units.quantity:Quantity.__new__"
+    ]
+  }
+}

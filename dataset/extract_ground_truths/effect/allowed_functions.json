@@ -1,0 +1,83 @@
+{
+  "gold": {
+    "astropy__astropy-12907": [
+      "astropy.modeling.separable:_cstack",
+      "astropy.modeling.separable:_separable",
+      "astropy.modeling.separable:is_separable",
+      "astropy.modeling.separable:separability_matrix",
+      "astropy.modeling.tests.test_separable:test_separable",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13033": [
+      "astropy.table.table:Table.add_columns",
+      "astropy.table.table:Table.copy",
+      "astropy.table.table:Table.remove_column",
+      "astropy.timeseries.core:BaseTimeSeries._check_required_columns",
+      "astropy.timeseries.core:_delay_required_column_checks",
+      "astropy.timeseries.core:wrapper",
+      "astropy.timeseries.sampled:TimeSeries.__init__",
+      "astropy.timeseries.sampled:add_columns",
+      "astropy.timeseries.tests.test_sampled:test_required_columns",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13236": [
+      "astropy.table.table:Table.__init__",
+      "astropy.table.table:Table.__setitem__",
+      "astropy.table.table:Table._convert_data_to_col",
+      "astropy.table.table:Table._init_from_list",
+      "astropy.table.table:Table.add_column",
+      "astropy.table.tests.test_mixin:test_ndarray_mixin",
+      "astropy.table.tests.test_table:test_structured_masked_column",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13398": [
+      "astropy.coordinates.baseframe:BaseCoordinateFrame.transform_to",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:cirs_to_itrs",
+      "astropy.coordinates.builtin_frames.intermediate_rotation_transforms:itrs_to_cirs",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:add_refraction",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:altaz_to_hadec_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_altaz_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_hadec_mat",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:itrs_to_observed",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:observed_to_itrs",
+      "astropy.coordinates.builtin_frames.itrs_observed_transforms:remove_refraction",
+      "astropy.coordinates.tests.test_intermediate_transformations:test_cirs_itrs_topo",
+      "astropy.coordinates.tests.test_intermediate_transformations:test_itrs_straight_overhead",
+      "astropy.coordinates.tests.test_intermediate_transformations:test_itrs_topo_to_hadec_with_refraction",
+      "astropy.coordinates.transformations:CompositeTransform.__call__",
+      "astropy.coordinates.transformations:FunctionTransformWithFiniteDifference.__call__",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13453": [
+      "astropy.io.ascii.connect:io_write",
+      "astropy.io.ascii.html:HTML.write",
+      "astropy.io.ascii.tests.test_html:test_write_table_formatted_columns",
+      "astropy.io.ascii.ui:write",
+      "astropy.io.registry.core:UnifiedOutputRegistry.write",
+      "astropy.table.connect:TableWrite.__call__",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13579": [
+      "astropy.wcs.wcsapi.wrappers.sliced_wcs:SlicedLowLevelWCS.world_to_pixel_values",
+      "astropy.wcs.wcsapi.wrappers.tests.test_sliced_wcs:test_coupled_world_slicing",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-13977": [
+      "astropy.units.quantity:Quantity.__array_ufunc__",
+      "astropy.units.tests.test_quantity_ufuncs:DuckQuantity3.__array_ufunc__",
+      "astropy.units.tests.test_quantity_ufuncs:test_full",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-7166": [
+      "astropy.utils.misc:InheritDocstrings.__init__",
+      "astropy.utils.tests.test_misc:test_inherit_docstrings",
+      "pytest:<module>"
+    ],
+    "astropy__astropy-7336": [],
+    "astropy__astropy-7671": [
+      "astropy.utils.introspection:minversion",
+      "astropy.utils.tests.test_introspection:test_minversion",
+      "pytest:<module>"
+    ]
+  }
+}
