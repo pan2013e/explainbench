@@ -216,6 +216,8 @@ def filter_docstring_changes(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def extract_attribute_name(full_path: str) -> str:
     tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+    if not tokens:
+        return ""
     return tokens[-1]
 
 def filter_hash_attribute(diff_dict: Dict[str, Any]) -> Dict[str, Any]:
