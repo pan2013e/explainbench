@@ -1,158 +1,12 @@
 import argparse
-import ast
 import json
-import subprocess
 
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Dict, Iterable, List, Set
 
-from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
-from execution.monkey_patch.dataset import monkey_patch_dataset 
-from swebench.harness.utils import load_swebench_dataset
+from execution.monkey_patch.dataset import monkey_patch_dataset
 
-class _DefCollector(ast.NodeVisitor):
-    """
-    Collects class/function definitions with their [start, end] line ranges
-    and qualnames (relative to the module).
-    """
-
-    def __init__(self) -> None:
-        self.stack: List[str] = []  # name components for qualname
-        # entries: (start_lineno, end_lineno, qualname)
-        self.defs: List[Tuple[int, int, str]] = []
-
-    def _record_def(self, node: ast.AST, name: str) -> None:
-        qualname = ".".join(self.stack + [name]) if self.stack else name
-        start = getattr(node, "lineno", None)
-        end = getattr(node, "end_lineno", None)
-        if start is None:
-            return
-        if end is None:
-            # Fallback if end_lineno is not present (older Python)
-            end = start
-        self.defs.append((start, end, qualname))
-
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-
-def _path_to_module_name(file_path: str) -> str:
-    """
-    Convert a repo-relative file path like 'astropy/modeling/separable.py'
-    into a module name like 'astropy.modeling.separable'.
-
-    This is a heuristic to match the module name used by your tracer.
-    """
-    rel = Path(file_path)
-    parts = list(rel.parts)
-    if parts and parts[-1].endswith(".py"):
-        parts[-1] = parts[-1][:-3]  # strip .py
-
-    # Remove empty parts, join with '.'
-    parts = [p for p in parts if p]
-    return ".".join(parts) if parts else "<unknown_module>"
-
-
-def _find_qualname_for_line(
-    defs: List[Tuple[int, int, str]], line_no: int
-) -> str:
-    """
-    Given a list of (start, end, qualname) and a line number,
-    return the innermost definition that contains the line, if any.
-
-    If no definition contains the line, returns an empty string.
-    """
-    candidates = [
-        (start, end, q)
-        for (start, end, q) in defs
-        if start <= line_no <= end
-    ]
-    if not candidates:
-        return ""
-    # Innermost = the one with the largest start line
-    candidates.sort(key=lambda t: t[0], reverse=True)
-    return candidates[0][2]
-
-
-def extract_modified_qualnames(
-    patch_content: str,
-    repo_root: str | Path,
-    mode: str = "new",
-) -> List[str]:
-    """
-    Given a unified diff patch content and a repo root, extract the full
-    qualified names ('module:qualname') of classes/functions whose bodies
-    include at least one modified line.
-
-    mode:
-      - "new": use added lines and file paths from the NEW version
-               (i.e. line_info["added"] / new_path).
-               repo_root should point to the NEW checkout.
-      - "old": use removed lines and file paths from the OLD version
-               (i.e. line_info["removed"] / old_path).
-               repo_root should point to the OLD checkout.
-    Returns:
-      Sorted list of strings: "<module>:<qualname>".
-    """
-    mode = mode.lower()
-    if mode not in {"new", "old"}:
-        raise ValueError(f"Unsupported mode: {mode!r}. Use 'new' or 'old'.")
-
-    repo_root_path = Path(repo_root)  # <- allow Path or str
-    line_info = extract_modified_lines(patch_content)
-
-    modified_qualnames: Set[str] = set()
-
-    def _process(path_to_lines: Dict[str, List[int]]) -> None:
-        for rel_path, lines in path_to_lines.items():
-            file_on_disk = repo_root_path / rel_path
-            source = file_on_disk.read_text(encoding="utf-8")
-            tree = ast.parse(source, filename=str(file_on_disk))
-
-            collector = _DefCollector()
-            collector.visit(tree)
-
-            # Compute module name RELATIVE to repo_root
-            try:
-                rel_to_repo = file_on_disk.relative_to(repo_root_path)
-            except ValueError:
-                # Fallback in weird cases; you probably won't hit this
-                rel_to_repo = file_on_disk
-
-            module_name = _path_to_module_name(str(rel_to_repo))
-
-            for line_no in lines:
-                local_qualname = _find_qualname_for_line(collector.defs, line_no)
-                if local_qualname:
-                    full_qualname = f"{module_name}:{local_qualname}"
-                    modified_qualnames.add(full_qualname)
-                else:
-                    # For now, ignore module-level changes
-                    pass
-
-    if mode in {"new"}:
-        _process(line_info["added"])
-
-    if mode in {"old"}:
-        _process(line_info["removed"])
-
-    return sorted(modified_qualnames)
 
 def load_jsonl(path: str) -> Iterable[dict]:
     """Yield JSON objects, one per line, from a JSONL file."""
@@ -184,9 +38,13 @@ def collect_functions_by_target(
 
         stack = entry.get("stack") or []
         for frame in stack:
+            # frame is expected to be [module, qualname, ...]
+            if len(frame) < 2:
+                continue
             _, qualname = frame[0], frame[1]
             results[target].add(qualname)
     return results
+
 
 def collect_files(root_path: Path, keyword_filter: str = "") -> List[Path]:
     jsonl_files = root_path.rglob("*.jsonl")
@@ -194,73 +52,14 @@ def collect_files(root_path: Path, keyword_filter: str = "") -> List[Path]:
         return [x for x in jsonl_files if keyword_filter in str(x)]
     return list(jsonl_files)
 
-def ensure_repo_at_commit(
-    repos_root: Path,
-    repo_slug: str,
-    commit: str,
-    remote_base: str = "https://github.com",
-) -> Path:
-    """
-    Ensure that the repository identified by `repo_slug` (e.g. 'astropy/astropy')
-    is cloned under `repos_root` and checked out at `commit`.
 
-    Layout on disk:
-        repos_root / owner / repo_name
-
-    Returns:
-        Path to the repo directory on disk.
-    """
-    owner, name = repo_slug.split("/", 1)
-    repo_dir = repos_root / owner / name
-
-    repo_dir.parent.mkdir(parents=True, exist_ok=True)
-
-    if not repo_dir.exists():
-        # Clone if repo_dir does not exist
-        clone_url = f"{remote_base}/{repo_slug}.git"
-        print(f"[git] Cloning {clone_url} into {repo_dir} ...")
-        subprocess.run(
-            ["git", "clone", clone_url, str(repo_dir)],
-            check=True,
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Use precomputed target qualnames (from a JSON file) to "
+            "filter buggy/patched trace JSONLs and collect function qualnames."
         )
-    else:
-        # Make sure the working tree is clean before switching commits
-        print(f"[git] Cleaning existing repo at {repo_dir} ...")
-        subprocess.run(
-            ["git", "-C", str(repo_dir), "reset", "--hard", "HEAD"],
-            check=True,
-        )
-        subprocess.run(
-            ["git", "-C", str(repo_dir), "clean", "-fdx"],
-            check=True,
-        )
-        print(f"[git] Fetching updates ...")
-        subprocess.run(
-            ["git", "-C", str(repo_dir), "fetch", "--all", "--tags", "--prune"],
-            check=True,
-        )
-
-    print(f"[git] Checking out {commit} in {repo_dir} ...")
-    subprocess.run(
-        ["git", "-C", str(repo_dir), "checkout", commit],
-        check=True,
     )
-
-    return repo_dir
-
-
-def apply_patch_to_repo(repo_dir: Path, patch_content: str) -> None:
-    """
-    Apply a unified diff patch to the working tree of `repo_dir` using `git apply`.
-    """
-    subprocess.run(
-        ["git", "-C", str(repo_dir), "apply", "--whitespace=nowarn", "-"],
-        input=patch_content.encode("utf-8"),
-        check=True,
-    )
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "--root-path",
@@ -279,38 +78,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--instance-ids",
         nargs="+",
-        default=[
-            "astropy__astropy-7166",
-            "astropy__astropy-7336",
-            "astropy__astropy-7671",
-            "astropy__astropy-8707",
-            "astropy__astropy-8872",
-            # "astropy__astropy-12907",
-            "astropy__astropy-13033",
-            "astropy__astropy-13236",
-            "astropy__astropy-13398",
-            "astropy__astropy-13453",
-            "astropy__astropy-13579",
-            "astropy__astropy-13977",
-            "sympy__sympy-13615",
-        ],
-        help="List of instance_ids to load from the dataset.",
+        default=None,
+        help=(
+            "Optional list of instance_ids to process. "
+            "If omitted, all instance_ids found for each agent in --targets-json are used."
+        ),
     )
 
     parser.add_argument(
-        "--repos-root",
+        "--targets-json",
         type=Path,
-        default=Path(
-            "/home/yusuf/explainbench/dataset/extract_ground_truths/localization/swe_bench_repos"
+        default="/home/yusuf/explainbench/dataset/extract_ground_truths/effect/allowed_qualnames.json",
+        help=(
+            "Path to JSON produced by the previous step, with structure:\n"
+            "  { agent_name: { instance_id: [list of target qualnames] } }"
         ),
-        help="Root directory under which all Git repos will be cloned.",
     )
 
     parser.add_argument(
         "--output-path",
         type=Path,
         default=Path(
-            "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/test.json"
+            "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/allowed_functions.json"
         ),
         help="Path to the output JSON file.",
     )
@@ -319,83 +108,79 @@ if __name__ == "__main__":
 
     ROOT_PATH = args.root_path
     AGENT_NAMES = args.agents
-    INSTANCE_IDS = args.instance_ids
-    REPOS_ROOT = args.repos_root
+    INSTANCE_IDS_ARG = args.instance_ids
+    TARGETS_JSON = args.targets_json
     OUTPUT_PATH = args.output_path
-    
-    monkey_patch_dataset()
-    ds = load_swebench_dataset(instance_ids=INSTANCE_IDS)
+
+    # Load precomputed targets: agent -> instance_id -> [target_qualnames]
+    with TARGETS_JSON.open("r", encoding="utf-8") as f:
+        targets_data: Dict[str, Dict[str, List[str]]] = json.load(f)
 
     # Final structure: agent -> instance_id -> [functions]
     results: Dict[str, Dict[str, List[str]]] = {}
 
     for agent in AGENT_NAMES:
+        print(f"Processing agent: {agent}")
         agent_mapping: Dict[str, List[str]] = {}
-        for instance in ds:
-            instance_id = instance.get("instance_id", "")
-            assert instance_id, "instance_id is missing"
+
+        agent_targets: Dict[str, List[str]] = targets_data.get(agent, {})
+        if not agent_targets:
+            print(f"  [warn] No targets found for agent '{agent}' in {TARGETS_JSON}")
+            results[agent] = {}
+            continue
+        if INSTANCE_IDS_ARG:
+            instance_ids = INSTANCE_IDS_ARG
+        else:
+            instance_ids = sorted(agent_targets.keys())
+
+        for instance_id in instance_ids:
+            target_qualnames = agent_targets.get(instance_id)
+            if not target_qualnames:
+                print(f"  [warn] No target qualnames for {agent}/{instance_id}, skipping.")
+                continue
 
             current_root = Path(
                 ROOT_PATH.format(agent_name=agent, instance_id=instance_id)
             )
-            assert current_root != ""
 
             buggy_files = collect_files(current_root, "buggy_traces")
             patched_files = collect_files(current_root, "patched_traces")
-            
-            if not buggy_files or not patched_files:
+
+            if not buggy_files and not patched_files:
+                print(f"  [warn] No buggy/patched trace files for {agent}/{instance_id}, skipping.")
                 continue
-
-            # Ensure repo is at the base commit
-            repo_slug = instance["repo"]          # e.g. "astropy/astropy"
-            base_commit = instance["base_commit"]
-            repo_dir = ensure_repo_at_commit(
-                repos_root=REPOS_ROOT,
-                repo_slug=repo_slug,
-                commit=base_commit,
-            )
-
-            # Extract qualnames for OLD version
-            patch_content = instance.get("patch", "")
-            assert patch_content != ""
-
-            # Qualnames from old and new versions
-            old_qualnames = extract_modified_qualnames(
-                patch_content=patch_content,
-                repo_root=repo_dir,
-                mode="old",
-            )
-            apply_patch_to_repo(repo_dir, patch_content)
-            new_qualnames = extract_modified_qualnames(
-                patch_content=patch_content,
-                repo_root=repo_dir,
-                mode="new",
-            )
 
             all_functions: Set[str] = set()
 
-            # Use OLD qualnames for buggy_traces
+            # Use the same target_qualnames for both buggy and patched traces
             for jsonl_path in buggy_files:
                 per_target = collect_functions_by_target(
                     jsonl_path=str(jsonl_path),
-                    target_qualnames=old_qualnames,
+                    target_qualnames=target_qualnames,
                 )
                 for funcs in per_target.values():
                     all_functions.update(funcs)
 
-            # Use NEW qualnames for patched_traces
             for jsonl_path in patched_files:
                 per_target = collect_functions_by_target(
                     jsonl_path=str(jsonl_path),
-                    target_qualnames=new_qualnames,
+                    target_qualnames=target_qualnames,
                 )
                 for funcs in per_target.values():
                     all_functions.update(funcs)
 
             agent_mapping[instance_id] = sorted(all_functions)
+            print(f"  {instance_id}: {len(all_functions)} functions")
+
         results[agent] = agent_mapping
 
     # Write out the final JSON
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, sort_keys=True)
+
+    print(f"Wrote functions JSON to {OUTPUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()
