@@ -16,7 +16,7 @@ def load_traces(file_path):
     return traces
 
 def get_trace_dir(agent='gold'):
-    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.{agent}.{os.getuid()}/{agent}')
+    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
 
 class FunctionBlock:
     def __init__(self, 
@@ -214,16 +214,19 @@ def event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
     return pairs
 
 def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
-    return DeepDiff(
-        buggy.dump(),
-        patched.dump(),
-        significant_digits=3,
-        ignore_order=False,                           
-        ignore_order_func=get_ignore_order_func(repo_name),
-        ignore_private_variables=False,
-        # exclude_paths=["root['seen_variables']['transform']"],
-        **kwargs,
-    )
+    try:
+        return DeepDiff(
+            buggy.dump(),
+            patched.dump(),
+            significant_digits=3,
+            ignore_order=False,                           
+            ignore_order_func=get_ignore_order_func(repo_name),
+            ignore_private_variables=False,
+            **kwargs,
+        )
+    except Exception as e:
+        print(f"Error diffing events: {e}\nBuggy - at line {buggy.line_number} in {buggy.filepath}: {buggy.statement}\nPatched - at line {patched.line_number} in {patched.filepath}: {patched.statement}")
+        return dict()
 
 ############# DEBUGGING FUNCTION ####################
 def visualize_trace_structure(traces):
