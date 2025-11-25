@@ -5,7 +5,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
 from execution.monkey_patch.dataset import monkey_patch_dataset
-from execution.util import get_instance_ids
+from execution.util import get_instance_ids, get_predictions_path
 
 def main(**kwargs):
     monkey_patch_dataset()
@@ -13,13 +13,13 @@ def main(**kwargs):
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
         instance_ids=get_instance_ids(kwargs["instance_ids"]),
-        predictions_path="gold",
+        predictions_path=get_predictions_path(kwargs["agent"]),
         max_workers=kwargs["max_workers"],
         force_rebuild=False,
         cache_level="env",
         clean=False,
         open_file_limit=4096,
-        run_id=f"wo_trace.gold.{os.getuid()}",
+        run_id=f"wo_trace.{kwargs['agent']}.{os.getuid()}",
         timeout=12600,
         namespace="swebench",
         rewrite_reports=False,
@@ -40,6 +40,12 @@ if __name__ == "__main__":
         nargs="+",
         type=str,
         help="Instance IDs to run (space separated) - 'all' for all instances; repo name(s) for all instances in the repo(s); or specific instance IDs",
+    )
+    parser.add_argument(
+        "--agent",
+        type=str,
+        help="Agent submission ID - if 'gold', uses gold predictions",
+        required=True,
     )
     parser.add_argument(
         "--max_workers",
