@@ -213,17 +213,17 @@ def apply_patch_to_repo(repo_dir: Path, patch_content: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract modified qualnames (old+new) per agent/instance "
-                    "and save to JSON."
+                    "and save to a single JSON file, updating incrementally."
     )
 
     parser.add_argument(
         "--agents",
         nargs="+",
         default=[
-            "gold",
-            "20250612_trae",
-            "20250623_warp",
-            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            # "gold",
+            # "20250612_trae",
+            # "20250623_warp",
+            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
             "20250728_zai_glm4-5",
             "20250731_harness_ai",
             "20250804_epam-ai-run-claude-4-sonnet",
@@ -253,7 +253,7 @@ def main() -> None:
         "--output-path",
         type=Path,
         default=Path(__file__).parent / "allowed_qualnames.json",
-        help="Path to the output JSON file.",
+        help="Path to the single output JSON file.",
     )
 
     args = parser.parse_args()
@@ -262,76 +262,99 @@ def main() -> None:
     INSTANCE_IDS = get_instance_ids(args.instance_ids)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
-    
+
+    # Load existing JSON if present so we can resume/append.
+    if OUTPUT_PATH.exists():
+        with OUTPUT_PATH.open("r", encoding="utf-8") as f:
+            results: Dict[str, Dict[str, List[str]]] = json.load(f)
+        print(f"[info] Loaded existing results from {OUTPUT_PATH}")
+    else:
+        results = {}
+
+    # Ensure the parent directory exists for the output file.
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
     monkey_patch_dataset()
-    ds = load_swebench_dataset(name="SWE-bench/SWE-bench_Verified", instance_ids=INSTANCE_IDS)
-    
-    # Load agent patches
+    ds = load_swebench_dataset(
+        name="SWE-bench/SWE-bench_Verified",
+        instance_ids=INSTANCE_IDS,
+    )
+
     AGENT_JSON_PATH = Path("/home/yusuf/explainbench/dataset/explanations/agent_patches")
 
-    # Final structure: agent -> instance_id -> [qualnames]
-    results: Dict[str, Dict[str, List[str]]] = {}
-
     for agent in AGENT_NAMES:
-        agent_mapping: Dict[str, List[str]] = {}
         print(f"Processing agent: {agent}")
-        
+
+        # Ensure we have a dict for this agent in the global results.
+        agent_mapping: Dict[str, List[str]] = results.setdefault(agent, {})
+
+        # Load patch reference for this agent once.
         if agent != "gold":
             with open(AGENT_JSON_PATH / f"{agent}.json", "r", encoding="utf-8") as f:
                 patch_reference = json.load(f)
-                patch_key = "model_patch"
+            patch_key = "model_patch"
         else:
             patch_reference = ds
             patch_key = "patch"
-    
+
         for idx, instance in enumerate(ds):
             instance_id = instance.get("instance_id", "")
             assert instance_id, "instance_id is missing"
 
-            repo_slug = instance["repo"]          # e.g. "astropy/astropy"
+            # If this (agent, instance_id) is already in results, do not overwrite it.
+            if instance_id in agent_mapping:
+                print(f"  {instance_id}: already present for agent {agent}, skipping.")
+                continue
+
+            repo_slug = instance["repo"]      # e.g. "astropy/astropy"
             base_commit = instance["base_commit"]
+
             if isinstance(patch_reference, list):
                 patch_content = patch_reference[idx][patch_key]
             else:
                 patch_content = patch_reference[instance_id][patch_key]
+
             if not patch_content:
                 print(f"[warn] No patch for {instance_id}, skipping.")
                 continue
+            
+            try:
+                # Ensure repo is at the base commit.
+                repo_dir = ensure_repo_at_commit(
+                    repos_root=REPOS_ROOT,
+                    repo_slug=repo_slug,
+                    commit=base_commit,
+                )
 
-            # Ensure repo is at the base commit
-            repo_dir = ensure_repo_at_commit(
-                repos_root=REPOS_ROOT,
-                repo_slug=repo_slug,
-                commit=base_commit,
-            )
+                # Qualnames for old version.
+                old_qualnames = extract_modified_qualnames(
+                    patch_content=patch_content,
+                    repo_root=repo_dir,
+                    mode="old",
+                )
 
-            # Qualnames for old version
-            old_qualnames = extract_modified_qualnames(
-                patch_content=patch_content,
-                repo_root=repo_dir,
-                mode="old",
-            )
+                # Apply patch and get qualnames for new version.
+                apply_patch_to_repo(repo_dir, patch_content)
+                new_qualnames = extract_modified_qualnames(
+                    patch_content=patch_content,
+                    repo_root=repo_dir,
+                    mode="new",
+                )
 
-            # Apply patch and get qualnames for new version
-            apply_patch_to_repo(repo_dir, patch_content)
-            new_qualnames = extract_modified_qualnames(
-                patch_content=patch_content,
-                repo_root=repo_dir,
-                mode="new",
-            )
+                merged = sorted(set(old_qualnames) | set(new_qualnames))
+                agent_mapping[instance_id] = list(merged)
 
-            merged = sorted(set(old_qualnames) | set(new_qualnames))
-            agent_mapping[instance_id] = merged
-            print(f"  {instance_id}: {len(merged)} qualnames")
+                # Persist full JSON after each new instance update.
+                with OUTPUT_PATH.open("w", encoding="utf-8") as f:
+                    json.dump(results, f, indent=2, sort_keys=True)
 
-        results[agent] = agent_mapping
+                print(f"  {instance_id}: {len(merged)} qualnames (saved)")
+            except Exception as e:
+                print(f"[error] Failed to process {instance_id} for agent {agent}: {e}")
+                continue
 
-    # Write out the final JSON
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with OUTPUT_PATH.open("w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, sort_keys=True)
+    print(f"Finished. JSON at {OUTPUT_PATH}")
 
-    print(f"Wrote qualnames JSON to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":
