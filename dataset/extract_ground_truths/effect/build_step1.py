@@ -27,14 +27,14 @@ def process_agent(agent, instance_ids):
             results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent, is_return=True))
         except FileNotFoundError:
             results[instance_id] = None
-        except AssertionError as e:
-            print(f"AssertionError for {instance_id} with agent {agent}: {e}")
+        except Exception as e:
+            print(f"Error for {instance_id} with agent {agent}: {e}")
             results[instance_id] = None
     return results
 
 if __name__ == "__main__":
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-12907"])
+    instance_ids = get_instance_ids(["astropy", "sympy"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, agent, instance_ids): agent
