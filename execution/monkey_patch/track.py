@@ -42,7 +42,7 @@ def get_pytest_addopts(instance_id, mode):
 def get_pth_addenv(instance_id, mode):
     return (
         f'export TRACER_OUTPUT_DIR=/{mode}_traces\n'
-        f'export ALLOWED_FUNCTIONS="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)}"'
+        f'export TRACER_ALLOWED_FUNCTIONS="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)}"'
     )
 
 def install_tracer(container, logger):
