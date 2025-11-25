@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set
 
 from execution.monkey_patch.dataset import monkey_patch_dataset
+from execution.util import get_instance_ids
 
 
 def load_jsonl(path: str) -> Iterable[dict]:
@@ -64,21 +65,29 @@ def main() -> None:
     parser.add_argument(
         "--root-path",
         type=str,
-        default="/home/yusuf/explainbench/logs/run_evaluation/track.{agent_name}.1020/{agent_name}/{instance_id}",
+        default="/home/zhiyuan/explainbench/logs/run_evaluation/track.{agent_name}.1021/{agent_name}/{instance_id}",
         help="Template path to logs; must contain {agent_name} and {instance_id}.",
     )
 
     parser.add_argument(
         "--agents",
         nargs="+",
-        default=["gold"],
+        default=[
+            "20250612_trae",
+            "20250623_warp",
+            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            "20250728_zai_glm4-5",
+            "20250731_harness_ai",
+            "20250804_epam-ai-run-claude-4-sonnet",
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        ],
         help="List of agent names to process.",
     )
 
     parser.add_argument(
         "--instance-ids",
         nargs="+",
-        default=None,
+        default=["astropy", "sympy"],
         help=(
             "Optional list of instance_ids to process. "
             "If omitted, all instance_ids found for each agent in --targets-json are used."
@@ -88,7 +97,7 @@ def main() -> None:
     parser.add_argument(
         "--targets-json",
         type=Path,
-        default="/home/yusuf/explainbench/dataset/extract_ground_truths/effect/allowed_qualnames.json",
+        default=Path(__file__).parent / "allowed_qualnames.json",
         help=(
             "Path to JSON produced by the previous step, with structure:\n"
             "  { agent_name: { instance_id: [list of target qualnames] } }"
@@ -98,9 +107,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path(
-            "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/allowed_functions.json"
-        ),
+        default=Path(__file__).parent / "allowed_functions.json",
         help="Path to the output JSON file.",
     )
 
@@ -108,7 +115,7 @@ def main() -> None:
 
     ROOT_PATH = args.root_path
     AGENT_NAMES = args.agents
-    INSTANCE_IDS_ARG = args.instance_ids
+    INSTANCE_IDS_ARG = get_instance_ids(args.instance_ids)
     TARGETS_JSON = args.targets_json
     OUTPUT_PATH = args.output_path
 
