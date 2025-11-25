@@ -146,28 +146,29 @@ def main() -> None:
             buggy_files = collect_files(current_root, "buggy_traces")
             patched_files = collect_files(current_root, "patched_traces")
 
+            if not buggy_files or not patched_files:
+                print(f"  [warn] No buggy/patched trace files for {agent}/{instance_id}, skipping.")
+                agent_mapping[instance_id] = []
+                continue
+
             all_functions: Set[str] = set()
 
             # Use the same target_qualnames for both buggy and patched traces
-            if buggy_files:
-                print(f"  [warn] No buggy trace files for {agent}/{instance_id}, skipping.")
-                for jsonl_path in buggy_files:
-                    per_target = collect_functions_by_target(
-                        jsonl_path=str(jsonl_path),
-                        target_qualnames=target_qualnames,
-                    )
-                    for funcs in per_target.values():
-                        all_functions.update(funcs)
+            for jsonl_path in buggy_files:
+                per_target = collect_functions_by_target(
+                    jsonl_path=str(jsonl_path),
+                    target_qualnames=target_qualnames,
+                )
+                for funcs in per_target.values():
+                    all_functions.update(funcs)
 
-            if patched_files:
-                print(f"  [warn] No buggy trace files for {agent}/{instance_id}, skipping.")
-                for jsonl_path in patched_files:
-                    per_target = collect_functions_by_target(
-                        jsonl_path=str(jsonl_path),
-                        target_qualnames=target_qualnames,
-                    )
-                    for funcs in per_target.values():
-                        all_functions.update(funcs)
+            for jsonl_path in patched_files:
+                per_target = collect_functions_by_target(
+                    jsonl_path=str(jsonl_path),
+                    target_qualnames=target_qualnames,
+                )
+                for funcs in per_target.values():
+                    all_functions.update(funcs)
 
             agent_mapping[instance_id] = sorted(all_functions)
             print(f"  {instance_id}: {len(all_functions)} functions")
