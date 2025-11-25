@@ -262,10 +262,12 @@ def main() -> None:
     INSTANCE_IDS = get_instance_ids(args.instance_ids)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
-
-    # Load dataset
+    
     monkey_patch_dataset()
     ds = load_swebench_dataset(name="SWE-bench/SWE-bench_Verified", instance_ids=INSTANCE_IDS)
+    
+    # Load agent patches
+    AGENT_JSON_PATH = Path("/home/yusuf/explainbench/dataset/explanations/agent_patches")
 
     # Final structure: agent -> instance_id -> [qualnames]
     results: Dict[str, Dict[str, List[str]]] = {}
@@ -273,13 +275,25 @@ def main() -> None:
     for agent in AGENT_NAMES:
         agent_mapping: Dict[str, List[str]] = {}
         print(f"Processing agent: {agent}")
-        for instance in ds:
+        
+        if agent != "gold":
+            with open(AGENT_JSON_PATH / f"{agent}.json", "r", encoding="utf-8") as f:
+                patch_reference = json.load(f)
+                patch_key = "model_patch"
+        else:
+            patch_reference = ds
+            patch_key = "patch"
+    
+        for idx, instance in enumerate(ds):
             instance_id = instance.get("instance_id", "")
             assert instance_id, "instance_id is missing"
 
             repo_slug = instance["repo"]          # e.g. "astropy/astropy"
             base_commit = instance["base_commit"]
-            patch_content = instance.get("patch", "")
+            if isinstance(patch_reference, list):
+                patch_content = patch_reference[idx][patch_key]
+            else:
+                patch_content = patch_reference[instance_id][patch_key]
             if not patch_content:
                 print(f"[warn] No patch for {instance_id}, skipping.")
                 continue
