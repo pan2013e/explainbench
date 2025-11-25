@@ -148,6 +148,7 @@ def main() -> None:
 
             if not buggy_files and not patched_files:
                 print(f"  [warn] No buggy/patched trace files for {agent}/{instance_id}, skipping.")
+                agent_mapping[instance_id] = []
                 continue
 
             all_functions: Set[str] = set()
