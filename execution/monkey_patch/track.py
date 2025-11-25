@@ -37,7 +37,7 @@ def get_allowed_functions(agent, instance_id):
     return ','.join(allowed_functions)
 
 def get_pytest_addopts(instance_id, mode):
-    return f'--output=/{mode}_traces --allowed-functions="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)} --use-tracker"'
+    return f'--output=/{mode}_traces --allowed-functions="{get_allowed_functions(GLOBAL_ARGS["agent"], instance_id)}"  --use-tracker'
 
 def get_pth_addenv(instance_id, mode):
     return (
