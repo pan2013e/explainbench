@@ -1,70 +1,110 @@
-import sys
+import os
 import json
-from tracer.protocol import Event
 
-def load_jsonl(file_path):
-    events = []
+from deepdiff import DeepDiff
+from tracer.protocol import (
+    Event,
+    FunctionEvent,
+    ReturnEvent,
+    ExceptionEvent,
+)
+from execution.util import get_fail_to_pass_tests
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+
+def load_traces(file_path):
     with open(file_path, 'r') as f:
-        for line in f:
-            event = Event.from_dict(json.loads(line))
-            events.append(event)
-    return events
+        return [Event.from_dict(json.loads(line)) for line in f]
+
+def get_trace_dir(agent='gold'):
+    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
+
+def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
+    # test_id refers to the index of FAIL_TO_PASS tests
+    if base_dir is None:
+        base_dir = get_trace_dir(agent)
+    test_name = get_fail_to_pass_tests(instance_id)[test_id]
+    buggy_path = os.path.join(base_dir, instance_id, f"buggy_traces/{test_name}.jsonl")
+    patched_path = os.path.join(base_dir, instance_id, f"patched_traces/{test_name}.jsonl")
+    buggy_traces = Traces(buggy_path)
+    patched_traces = Traces(patched_path)
+    return buggy_traces, patched_traces
+
+def rv_equals(rv1, rv2):
+    diff = DeepDiff(rv1, rv2, significant_digits=5, ignore_private_variables=False)
+    return diff == {}
 
 class FunctionBlock:
     def __init__(self, id, name, parent, params=None):
         self.id = id
         self.name = name
-        self.parent = parent
+        self.parent = parent     # type: FunctionBlock | None
         self.params = params
-        self.events = []
-        self.links = {}
-        self.return_value = None
-        self.exception = None
-        self.pointer = 0
+        self.return_value = None # type: any | None
+        self.exception = None    # type: tuple[str, str] | None
+        self._events = []        # type: list[Event]
+        self._links = {}         # type: dict[int, FunctionBlock]
+        self._index = 0
         
-    def add_event(self, event):
-        self.events.append(event)
+    def add_event(self, event: Event):
+        self._events.append(event)
     
-    def next_event(self):
-        if self.pointer >= len(self.events):
+    def prev_event(self, event: Event):
+        idx = self._events.index(event)
+        if idx > 0:
+            return self._events[idx - 1]
+        return None
+    
+    def step_into(self, event: FunctionEvent):
+        assert isinstance(event, FunctionEvent), "Not a FunctionEvent"
+        return self._links[event.event_id]
+    
+    def returns_equals(self, other):
+        assert isinstance(other, FunctionBlock), "Not a FunctionBlock"
+        match self.return_value, self.exception, other.return_value, other.exception:
+            case rv1, None, rv2, None:
+                return rv_equals(rv1, rv2)
+            case None, e1, None, e2:
+                return e1 == e2
+            case (_, None, None, _) | (None, _, _, None):
+                return False
+            case _:
+                raise ValueError("Exception and return value cannot coexist")
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self._index >= len(self._events):
             raise StopIteration
-        event = self.events[self.pointer]
-        self.pointer += 1
+        event = self._events[self._index]
+        self._index += 1
         return event
 
 class Traces:
-    def __init__(self, trace_path):
+    def __init__(self, trace_path: str):
         self._entry = FunctionBlock(-1, "<module>", None)
-        events = load_jsonl(trace_path)
-        self._events_iterator = iter(events)
+        self._events = load_traces(trace_path)
         self._build_traces()
-    
-    def _next_event(self):
-        return next(self._events_iterator)
-    
-    def _build_traces_event(self, stack):
-        try:
-            e = self._next_event()
-        except StopIteration:
-            return None
-        stack[-1].add_event(e)
-        if e.event_type == "Function":
-            new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters)
-            stack[-1].links[e.event_id] = new_block
-            stack.append(new_block)
-        elif e.event_type == "Return":
-            stack[-1].return_value = e.return_value
-            stack.pop()
-        elif e.event_type == "Exception":
-            stack[-1].exception = (e.exception_type, e.exception_value)
-        self._build_traces_event(stack)
-    
+
     def _build_traces(self):
-        sys.setrecursionlimit(10000)
         stack = [self._entry]
-        self._build_traces_event(stack)
-        sys.setrecursionlimit(1000)
+        for e in self._events:
+            stack[-1].add_event(e)
+            match e:
+                case FunctionEvent():
+                    new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters)
+                    stack[-1]._links[e.event_id] = new_block
+                    stack.append(new_block)
+                case ReturnEvent():
+                    stack[-1].return_value = e.return_value
+                    stack.pop()
+                case ExceptionEvent():
+                    stack[-1].exception = (e.exception_type, e.exception_value)
+                case _: pass
 
     @property
     def entry(self):
-        return list(self._entry.links.values())[0]
+        fbs = list(self._entry._links.values())
+        assert len(fbs) > 0, "<module> does not call any test functions"
+        return fbs[0]
