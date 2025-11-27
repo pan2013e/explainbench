@@ -17,7 +17,7 @@ def load_traces(file_path):
         return [Event.from_dict(json.loads(line)) for line in f]
 
 def get_trace_dir(agent='gold'):
-    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
+    return "/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.debug.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1021/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
 
 def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
     # test_id refers to the index of FAIL_TO_PASS tests
@@ -62,6 +62,8 @@ class FunctionBlock:
     def returns_equals(self, other):
         assert isinstance(other, FunctionBlock), "Not a FunctionBlock"
         match self.return_value, self.exception, other.return_value, other.exception:
+            # case rv1, e1, rv2, e2:
+            #     return e1 == e2 and rv_equals(rv1, rv2)
             case rv1, None, rv2, None:
                 return rv_equals(rv1, rv2)
             case None, e1, None, e2:
@@ -89,7 +91,7 @@ class Traces:
 
     def _build_traces(self):
         stack = [self._entry]
-        for e in self._events:
+        for idx, e in enumerate(self._events):
             stack[-1].add_event(e)
             match e:
                 case FunctionEvent():
@@ -100,7 +102,10 @@ class Traces:
                     stack[-1].return_value = e.return_value
                     stack.pop()
                 case ExceptionEvent():
-                    stack[-1].exception = (e.exception_type, e.exception_value)
+                    # stack[-1].exception = (e.exception_type, e.exception_value)
+                    ne = self._events[idx + 1] if idx + 1 < len(self._events) else None
+                    if isinstance(ne, ReturnEvent):
+                        stack[-1].exception = (e.exception_type, e.exception_value)
                 case _: pass
 
     @property
