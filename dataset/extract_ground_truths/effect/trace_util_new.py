@@ -9,6 +9,7 @@ from tracer.protocol import (
     ExceptionEvent,
 )
 from execution.util import get_fail_to_pass_tests
+from dataset.extract_ground_truths.effect.process_agent_patch import get_diff_info_per_instance
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,17 +18,18 @@ def load_traces(file_path):
         return [Event.from_dict(json.loads(line)) for line in f]
 
 def get_trace_dir(agent='gold'):
-    return "/home/yusuf/explainbench/logs_zhiyuan/logs/run_evaluation/trace.debug.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1021/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
+    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
 
 def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
     # test_id refers to the index of FAIL_TO_PASS tests
     if base_dir is None:
         base_dir = get_trace_dir(agent)
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
+    diff_lines = get_diff_info_per_instance(base_dir, instance_id)
     buggy_path = os.path.join(base_dir, instance_id, f"buggy_traces/{test_name}.jsonl")
     patched_path = os.path.join(base_dir, instance_id, f"patched_traces/{test_name}.jsonl")
-    buggy_traces = Traces(buggy_path)
-    patched_traces = Traces(patched_path)
+    buggy_traces = Traces(buggy_path, diff_lines.get('removed', {}))
+    patched_traces = Traces(patched_path, diff_lines.get('added', {}))
     return buggy_traces, patched_traces
 
 def rv_equals(rv1, rv2):
@@ -49,12 +51,6 @@ class FunctionBlock:
     def add_event(self, event: Event):
         self._events.append(event)
     
-    def prev_event(self, event: Event):
-        idx = self._events.index(event)
-        if idx > 0:
-            return self._events[idx - 1]
-        return None
-    
     def step_into(self, event: FunctionEvent):
         assert isinstance(event, FunctionEvent), "Not a FunctionEvent"
         return self._links[event.event_id]
@@ -62,8 +58,6 @@ class FunctionBlock:
     def returns_equals(self, other):
         assert isinstance(other, FunctionBlock), "Not a FunctionBlock"
         match self.return_value, self.exception, other.return_value, other.exception:
-            # case rv1, e1, rv2, e2:
-            #     return e1 == e2 and rv_equals(rv1, rv2)
             case rv1, None, rv2, None:
                 return rv_equals(rv1, rv2)
             case None, e1, None, e2:
@@ -73,26 +67,36 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
+    def _next_event(self):
         if self._index >= len(self._events):
             raise StopIteration
         event = self._events[self._index]
         self._index += 1
         return event
 
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        event = self._next_event()
+        while event.excluded:
+            event = self._next_event()
+        return event
+
 class Traces:
-    def __init__(self, trace_path: str):
+    def __init__(self, trace_path: str, diff_lines=None):
         self._entry = FunctionBlock(-1, "<module>", None)
         self._events = load_traces(trace_path)
+        self._diff_lines = diff_lines or {} # type: dict[str, list[int]]
         self._build_traces()
 
     def _build_traces(self):
         stack = [self._entry]
         for idx, e in enumerate(self._events):
             stack[-1].add_event(e)
+            relpath = os.path.relpath(e.filepath, '/testbed')
+            if e.line_number in self._diff_lines.get(relpath, []):
+                e.excluded = True
             match e:
                 case FunctionEvent():
                     new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters)
@@ -102,7 +106,6 @@ class Traces:
                     stack[-1].return_value = e.return_value
                     stack.pop()
                 case ExceptionEvent():
-                    # stack[-1].exception = (e.exception_type, e.exception_value)
                     ne = self._events[idx + 1] if idx + 1 < len(self._events) else None
                     if isinstance(ne, ReturnEvent):
                         stack[-1].exception = (e.exception_type, e.exception_value)

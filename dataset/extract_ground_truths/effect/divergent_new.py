@@ -28,12 +28,12 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
             if event_type == 'Function':
                 buggy_callee = buggy_function.step_into(buggy_event)
                 patched_callee = patched_function.step_into(patched_event)
-                if not buggy_callee.returns_equals(patched_callee):
-                    callee_name = buggy_callee.name
-                    # test patch-modified functions here
-                    if not callee_name.endswith("_cstack"):
-                        buggy_function = buggy_callee
-                        patched_function = patched_callee
+                if (
+                    buggy_callee.return_value is None and patched_callee.return_value is None
+                    or not buggy_callee.returns_equals(patched_callee)
+                ):
+                    buggy_function = buggy_callee
+                    patched_function = patched_callee
             else:
                 # check diff
                 repo_name = instance_id.split("__")[0]
