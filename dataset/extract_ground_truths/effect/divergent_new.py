@@ -18,6 +18,12 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
             buggy_event = next(buggy_function)
             patched_event = next(patched_function)
         except StopIteration:
+            buggy_caller = buggy_function.parent
+            patched_caller = patched_function.parent
+            if buggy_caller and patched_caller:
+                buggy_function = buggy_caller
+                patched_function = patched_caller
+                continue
             break
         print(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
         print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
@@ -94,5 +100,5 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
 if __name__ == "__main__":
     from pprint import pprint
-    result = main("astropy__astropy-12907", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("astropy__astropy-7336", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     pprint(result)
