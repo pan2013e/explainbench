@@ -79,7 +79,7 @@ class FunctionBlock:
     
     def __next__(self):
         event = self._next_event()
-        while event.excluded:
+        while event.excluded and not isinstance(event, FunctionEvent):
             event = self._next_event()
         return event
 
