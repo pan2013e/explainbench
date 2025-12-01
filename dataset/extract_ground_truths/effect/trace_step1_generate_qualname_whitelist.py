@@ -3,6 +3,7 @@ import ast
 import json
 import subprocess
 
+from bisect import bisect_right 
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
@@ -12,43 +13,66 @@ from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
 
 
-class _DefCollector(ast.NodeVisitor):
-    """
-    Collects class/function definitions with their [start, end] line ranges
-    and qualnames (relative to the module).
-    """
-
+class QualnameVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
-        self.stack: List[str] = []  # name components for qualname
-        # entries: (start_lineno, end_lineno, qualname)
+        super().__init__()
+        self.stack: List[str] = []
+        self.qualnames: Dict[Tuple[str, int], str] = {}
         self.defs: List[Tuple[int, int, str]] = []
 
-    def _record_def(self, node: ast.AST, name: str) -> None:
-        qualname = ".".join(self.stack + [name]) if self.stack else name
-        start = getattr(node, "lineno", None)
-        end = getattr(node, "end_lineno", None)
-        if start is None:
-            return
-        if end is None:
-            # Fallback if end_lineno is not present (older Python)
-            end = start
+    def _record_def_range(self, node: ast.AST, qualname: str) -> None:
+        if getattr(node, "decorator_list", ()):
+            start = node.decorator_list[0].lineno
+        else:
+            start = node.lineno
+        end = getattr(node, "end_lineno", start)
         self.defs.append((start, end, qualname))
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
-        self.generic_visit(node)
+    def add_qualname(self, node: ast.AST, name: str | None = None) -> None:
+        name = name or node.name
+        self.stack.append(name)
+        if getattr(node, 'decorator_list', ()):
+            lineno = node.decorator_list[0].lineno
+        else:
+            lineno = node.lineno
+        self.qualnames.setdefault((name, lineno), ".".join(self.stack))
+        qualname = ".".join(self.stack)
+        self._record_def_range(node, qualname)
+
+    def visit_FunctionDef(self, node, name=None):
+        assert isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)), node
+        self.add_qualname(node, name)
+        self.stack.append("<locals>")
+        if isinstance(node, ast.Lambda):
+            children = [node.body]
+        else:
+            children = node.body
+
+        for child in children:
+            self.visit(child)
+
+        self.stack.pop() 
         self.stack.pop()
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
+        for field, child in ast.iter_fields(node):
+            if field == "body":
+                continue
+            if isinstance(child, ast.AST):
+                self.visit(child)
+            elif isinstance(child, list):
+                for grandchild in child:
+                    if isinstance(grandchild, ast.AST):
+                        self.visit(grandchild)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self._record_def(node, node.name)
-        self.stack.append(node.name)
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    def visit_Lambda(self, node):
+        assert isinstance(node, ast.Lambda)
+        self.visit_FunctionDef(node, "<lambda>")
+
+    def visit_ClassDef(self, node):
+        assert isinstance(node, ast.ClassDef)
+        self.add_qualname(node, node.name)
         self.generic_visit(node)
         self.stack.pop()
 
@@ -115,8 +139,8 @@ def extract_modified_qualnames(
             source = file_on_disk.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(file_on_disk))
 
-            collector = _DefCollector()
-            collector.visit(tree)
+            visitor = QualnameVisitor()
+            visitor.visit(tree)
 
             # Compute module name RELATIVE to repo_root
             try:
@@ -127,7 +151,7 @@ def extract_modified_qualnames(
             module_name = _path_to_module_name(str(rel_to_repo))
 
             for line_no in lines:
-                local_qualname = _find_qualname_for_line(collector.defs, line_no)
+                local_qualname = _find_qualname_for_line(visitor.defs, line_no)
                 if local_qualname:
                     full_qualname = f"{module_name}:{local_qualname}"
                     modified_qualnames.add(full_qualname)
@@ -220,14 +244,14 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            # "gold",
+            "gold",
             # "20250612_trae",
             # "20250623_warp",
             # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            "20250728_zai_glm4-5",
-            "20250731_harness_ai",
-            "20250804_epam-ai-run-claude-4-sonnet",
-            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
+            # "20250728_zai_glm4-5",
+            # "20250731_harness_ai",
+            # "20250804_epam-ai-run-claude-4-sonnet",
+            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
         ],
         help="List of agent names to process (used as top-level keys in the JSON).",
     )
@@ -235,7 +259,7 @@ def main() -> None:
     parser.add_argument(
         "--instance-ids",
         nargs="+",
-        default=["astropy", "sympy"],
+        default=["django"],
         help="List of instance_ids to load from the dataset.",
     )
 
