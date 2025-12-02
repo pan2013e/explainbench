@@ -1,217 +1,37 @@
-import json
 import os
-
-from typing import Any, Dict, List, Literal, Optional, Tuple
+import json
 
 from deepdiff import DeepDiff
-from tracer.protocol import Event, FunctionEvent, ReturnEvent
-from dataset.extract_ground_truths.effect.diff_util import sequence_match
+from tracer.protocol import (
+    Event,
+    FunctionEvent,
+    ReturnEvent,
+    ExceptionEvent,
+)
+from execution.util import get_fail_to_pass_tests
+from dataset.extract_ground_truths.effect.process_agent_patch import get_diff_info_per_instance
 from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_order_func
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_traces(file_path):
     with open(file_path, 'r') as f:
-        traces = [Event.from_dict(json.loads(line)) for line in f]
-    return traces
+        return [Event.from_dict(json.loads(line)) for line in f]
 
 def get_trace_dir(agent='gold'):
     return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
 
-class FunctionBlock:
-    def __init__(self, 
-                 file_path: str, 
-                 function_name: str, 
-                 params: Dict[str, Any], 
-                 trace_type: Literal['buggy', 'patched'], 
-                 caller: Optional['FunctionBlock'], 
-                 call_depth: int = 0,
-                 call_event: Optional['Event'] = None):
-        
-        self.events = [] # type: List[Event]
-        self.file_path = os.path.relpath(file_path, '/testbed')
-        self.function_name = function_name
-        self.params = params
-        self.trace_type = trace_type
-        self.caller = caller
-        self.call_depth = call_depth
-        self.call_event = call_event
-        self.return_event = None
-    
-    def add_event(self, event: Event):
-        self.events.append(event)
-    
-    def get_patch_modified_lines(self, diff_lines: Dict[str, List[int]]):
-        key = 'added' if self.trace_type == 'patched' else 'removed'
-        if self.file_path not in diff_lines[key]:
-            return []
-        existing_linenos = list(set(event.line_number for event in self.events))
-        return [lineno for lineno in diff_lines[key][self.file_path] if lineno in existing_linenos]
-    
-    def is_function_excluded(self):
-        return all(event.excluded for event in self.events)
-    
-    def __iter__(self):
-        for event in self.events:
-            if event.excluded:
-                continue
-            yield event
-
-class Traces:
-    def __init__(self, trace_file: str, diff_lines: Dict[str, List[int]], trace_type: Literal['buggy', 'patched']):
-        self.trace_type = trace_type
-        self.events = load_traces(trace_file)
-        self.blocks = [FunctionBlock('<module>', '<test>', {}, self.trace_type, None)]
-        self.callsites = [] # type: List[Tuple[Event, FunctionBlock]]
-        self._init(self.events, diff_lines)
-
-    def _init(self, events: List[Event], diff_lines: Dict[str, List[int]]):
-        current_block = self.blocks[0]
-        
-        for idx, event in enumerate(events):
-            if isinstance(event, FunctionEvent):
-                call_depth = current_block.call_depth + 1 if current_block is not self.blocks[0] and idx > 0 else 0
-                
-                call_event = self.events[idx - 1] if idx > 0 else None  
-                block = FunctionBlock(
-                    event.filepath, 
-                    event.function_name, 
-                    event.parameters, 
-                    self.trace_type, 
-                    current_block, 
-                    call_depth,
-                    call_event=call_event
-                )
-
-                if call_event:
-                    call_event.executed_fn_block = block 
-
-                event.current_fn_block = block
-                              
-                self.blocks.append(block)
-                if current_block is not self.blocks[0]:
-                    self.callsites.append((call_event, block))
-                
-                current_block = block
-                current_block.add_event(event)
-                
-            elif isinstance(event, ReturnEvent):
-                current_block.return_event = event
-                
-                # The 'call_event' that created this function points to the ENTRY block.
-                # We must save the return value there too
-                if current_block.call_event and hasattr(current_block.call_event, 'executed_block'):
-                    entry_block = current_block.call_event.executed_fn_block
-                    entry_block.return_event = event
-
-                event.current_fn_block = current_block
-                current_block.add_event(event)
-                
-                caller = current_block.caller
-                assert caller, "Return without caller"
-                
-                block = FunctionBlock(
-                    event.filepath, 
-                    caller.function_name, 
-                    caller.params, 
-                    caller.trace_type, 
-                    caller.caller, 
-                    call_depth=max(caller.call_depth - 1, 0),
-                    call_event=caller.call_event
-                )
-                
-                self.blocks.append(block)
-                current_block = block
-            else:
-                event.current_fn_block = current_block
-                current_block.add_event(event)
-    
-        self._exclude_lines(diff_lines)
-        self._merge_blocks()    
-
-    def _exclude_event(self, event: Event):
-        '''
-        Mark the event as excluded. If the event calls a function, exclude all events in the callee as well. Since this is recursive, all callees along the call chain are excluded.
-        '''
-        event.excluded = True
-        for e, fb in self.callsites:
-            if e == event:
-                # Use original list instead of __iter__ to avoid modification during iteration
-                for fb_event in fb.events:
-                    self._exclude_event(fb_event)
-                break
-    
-    def _exclude_lines(self, diff_lines: Dict[str, List[int]]):
-        '''
-        Get overlapping line numbers from `diff_lines` for each block, and exclude corresponding events.
-        '''
-        for block in self.blocks[1:]:
-            modified_lines = block.get_patch_modified_lines(diff_lines)
-            if not modified_lines:
-                continue
-            related_events = [event for event in block.events if event.line_number in modified_lines]
-            for event in related_events:
-                self._exclude_event(event)
-    
-    def _merge_blocks(self):
-        '''
-        After excluding events, some function blocks may be entirely excluded. So we need to merge "consecutive" unexcluded blocks of the same function into one.
-        '''
-        if len(self.blocks) <= 2:
-            return
-        block_to_remove = []
-        cur_func_name = self.blocks[1].function_name
-        cur_block = self.blocks[1]
-        for block in self.blocks[2:]:
-            if block.is_function_excluded():
-                continue
-            if block.function_name == cur_func_name:
-                cur_block.events.extend(block.events)
-                block_to_remove.append(block)
-            else:
-                cur_func_name = block.function_name
-                cur_block = block
-        for block in block_to_remove:
-            self.blocks.remove(block)
-    
-    def __iter__(self):
-        for block in self.blocks:
-            if block.is_function_excluded():
-                continue
-            yield block
-
-def block_key(block: FunctionBlock):
-    if not block.caller or not getattr(block, "call_event", None):
-        return ("<root>", block.file_path, block.function_name, block.call_depth)
-
-    caller = block.caller
-    return (
-        block.file_path,                # callee file
-        block.function_name,            # callee name
-        caller.file_path,               # caller file
-        caller.function_name,           # caller name
-        block.call_depth,               # stack depth
-    )
-
-def function_match(buggy_traces: Traces, patched_traces: Traces):
-    buggy_blocks = [block for block in buggy_traces]
-    patched_blocks = [block for block in patched_traces]
-    idx_pairs = sequence_match(
-        buggy_blocks, patched_blocks,
-        key=block_key
-    )
-    pairs = [(buggy_blocks[i], patched_blocks[j]) for i, j in idx_pairs]
-    return pairs  
-
-def event_match(buggy_block: FunctionBlock, patched_block: FunctionBlock):
-    buggy_events = [event for event in buggy_block]
-    patched_events = [event for event in patched_block]
-    idx_pairs = sequence_match(
-        buggy_events, patched_events,
-        key=lambda event: event.statement
-    )
-    pairs = [(buggy_events[i], patched_events[j]) for i, j in idx_pairs]
-    return pairs
+def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
+    # test_id refers to the index of FAIL_TO_PASS tests
+    if base_dir is None:
+        base_dir = get_trace_dir(agent)
+    test_name = get_fail_to_pass_tests(instance_id)[test_id]
+    diff_lines = get_diff_info_per_instance(base_dir, instance_id)
+    buggy_path = os.path.join(base_dir, instance_id, f"buggy_traces/{test_name}.jsonl")
+    patched_path = os.path.join(base_dir, instance_id, f"patched_traces/{test_name}.jsonl")
+    buggy_traces = Traces(buggy_path, diff_lines.get('removed', {}))
+    patched_traces = Traces(patched_path, diff_lines.get('added', {}))
+    return buggy_traces, patched_traces
 
 def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
     try:
@@ -229,61 +49,87 @@ def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
         print(f"Error diffing events: {e}\nBuggy - at line {buggy.line_number} in {buggy.filepath}: {buggy.statement}\nPatched - at line {patched.line_number} in {patched.filepath}: {patched.statement}")
         return dict()
 
-############# DEBUGGING FUNCTION ####################
-def visualize_trace_structure(traces):
-    print(f"{'='*80}")
-    print(f"{'BLOCK IDX':<10} | {'DEPTH':<6} | {'RANGE (IDs)':<15} | {'FUNCTION & RELATIONSHIPS'}")
-    print(f"{'='*80}")
+def rv_equals(rv1, rv2):
+    diff = DeepDiff(rv1, rv2, significant_digits=5, ignore_private_variables=False)
+    return diff == {}
 
-    # 1. Create Lookup Maps for fast access
-    # Map: Block Object -> The Event that created it
-    block_created_by = {blk: evt for evt, blk in traces.callsites}
-    
-    # Map: Event ID -> The Block it creates
-    event_creates_block = {evt.event_id: blk for evt, blk in traces.callsites}
-
-    for idx, block in enumerate(traces.blocks):
-        if not block.events:
-            continue
-
-        start_id = block.events[0].event_id
-        end_id = block.events[-1].event_id
-        depth = block.call_depth
-        indent = "|   " * depth
+class FunctionBlock:
+    def __init__(self, id, name, parent, params=None):
+        self.id = id
+        self.name = name
+        self.parent = parent     # type: FunctionBlock | None
+        self.params = params
+        self.return_value = None # type: any | None
+        self.exception = None    # type: tuple[str, str] | None
+        self._events = []        # type: list[Event]
+        self._links = {}         # type: dict[int, FunctionBlock]
+        self._index = 0
         
-        # Determine Block Type
-        status_str = ""
-        if idx == 0:
-            status_str = "(ROOT)"
-        elif block in block_created_by:
-            trigger_evt = block_created_by[block]
-            status_str = f"<- [ENTRY] Called by Event {trigger_evt.event_id}"
-        else:
-            status_str = f"<- [CONTINUATION] Resuming {block.function_name}"
+    def add_event(self, event: Event):
+        self._events.append(event)
+    
+    def step_into(self, event: FunctionEvent):
+        assert isinstance(event, FunctionEvent), "Not a FunctionEvent"
+        return self._links[event.event_id]
+    
+    def returns_equals(self, other):
+        assert isinstance(other, FunctionBlock), "Not a FunctionBlock"
+        match self.return_value, self.exception, other.return_value, other.exception:
+            case rv1, None, rv2, None:
+                return rv_equals(rv1, rv2)
+            case None, e1, None, e2:
+                return e1 == e2
+            case (_, None, None, _) | (None, _, _, None):
+                return False
+            case _:
+                raise ValueError("Exception and return value cannot coexist")
+    
+    def _next_event(self):
+        if self._index >= len(self._events):
+            raise StopIteration
+        event = self._events[self._index]
+        self._index += 1
+        return event
 
-        # Print Block Header
-        print(f"{idx:<10} | {depth:<6} | {start_id:<5} - {end_id:<7} | {indent}{block.function_name} {status_str}")
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        event = self._next_event()
+        while event.excluded and not isinstance(event, FunctionEvent):
+            event = self._next_event()
+        return event
 
-        # Scan events in this block to see if they call OUT to other blocks
-        for event in block.events:
-            if event.event_id in event_creates_block:
-                callee = event_creates_block[event.event_id]
-                # Find the index of the callee in the blocks list for reference
-                try:
-                    callee_idx = traces.blocks.index(callee)
-                    print(f"{'':<35} | {indent}|   -> Event {event.event_id} calls block [{callee_idx}] {callee.function_name}")
-                except ValueError:
-                    pass
-    print(f"{'='*80}")
+class Traces:
+    def __init__(self, trace_path: str, diff_lines=None):
+        self._entry = FunctionBlock(-1, "<module>", None)
+        self._events = load_traces(trace_path)
+        self._diff_lines = diff_lines or {} # type: dict[str, list[int]]
+        self._build_traces()
 
-def get_traceback(current_block):
-    """
-    Returns a list of Event objects representing the call stack.
-    The list is ordered from the immediate caller up to the root.
-    """
-    traceback_stack = []
-    while current_block.call_event:
-        call_event = current_block.call_event
-        traceback_stack.append(call_event)
-        current_block = current_block.caller        
-    return traceback_stack
+    def _build_traces(self):
+        stack = [self._entry]
+        for idx, e in enumerate(self._events):
+            stack[-1].add_event(e)
+            relpath = os.path.relpath(e.filepath, '/testbed')
+            if e.line_number in self._diff_lines.get(relpath, []):
+                e.excluded = True
+            match e:
+                case FunctionEvent():
+                    new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters)
+                    stack[-1]._links[e.event_id] = new_block
+                    stack.append(new_block)
+                case ReturnEvent():
+                    stack[-1].return_value = e.return_value
+                    stack.pop()
+                case ExceptionEvent():
+                    ne = self._events[idx + 1] if idx + 1 < len(self._events) else None
+                    if isinstance(ne, ReturnEvent):
+                        stack[-1].exception = (e.exception_type, e.exception_value)
+                case _: pass
+
+    @property
+    def entry(self):
+        fbs = list(self._entry._links.values())
+        assert len(fbs) > 0, "<module> does not call any test functions"
+        return fbs[0]
