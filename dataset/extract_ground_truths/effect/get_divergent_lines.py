@@ -25,11 +25,16 @@ def get_event_count(event: Event, traces: Traces):
 def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
     if diff:
+        logger.debug(f"> State diff found at buggy ID {buggy_event.event_id} vs patched ID {patched_event.event_id}")
         buggy_variable_views = get_complete_variable_views_from_diff(buggy_event, diff)
-        patched_variable_views = get_complete_variable_views_from_diff(patched_event, diff)    
+        patched_variable_views = get_complete_variable_views_from_diff(patched_event, diff)
+        for k, v in kwargs.items():
+            if callable(v):
+                kwargs[k] = v()
         return {
             "file_path": patched_event.filepath,
-            "statement": patched_event.statement,
+            "buggy_statement": buggy_event.statement,
+            "patched_statement": patched_event.statement,
             "buggy_lineno": buggy_event.line_number,
             "patched_lineno": patched_event.line_number,
             "diff": diff,
@@ -56,6 +61,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 continue
             break
         logger.debug(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
+        logger.debug(f"Function: {buggy_function.name} vs {patched_function.name}")
         logger.debug(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
         logger.debug(f'+ {patched_event.event_type:<10} {patched_event.statement}')
         logger.debug("========")
@@ -77,8 +83,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     repo_name,
                     test_id=test_id,
                     function_name=buggy_function.name,
-                    buggy_line_count=get_event_count(buggy_event, buggy_traces),
-                    patched_line_count=get_event_count(patched_event, patched_traces),
+                    buggy_line_count=lambda: get_event_count(buggy_event, buggy_traces),
+                    patched_line_count=lambda: get_event_count(patched_event, patched_traces),
                     buggy_function_param=buggy_function.params,
                     patched_function_param=patched_function.params,
                 )
@@ -107,8 +113,19 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 or {buggy_event.event_type, patched_event.event_type} == {"Exception", "Function"}
             ):
                 logger.debug(">> Exception vs Line/Function")
-                # for line/function event, go to the return event in this function
-                break
+                lhs_event = buggy_function.return_event
+                rhs_event = patched_function.return_event
+                return state_diff(
+                    lhs_event,
+                    rhs_event,
+                    repo_name,
+                    test_id=test_id,
+                    function_name=buggy_function.name,
+                    buggy_line_count=get_event_count(lhs_event, buggy_traces),
+                    patched_line_count=get_event_count(rhs_event, patched_traces),
+                    buggy_function_param=buggy_function.params,
+                    patched_function_param=patched_function.params,
+                )
             logger.debug(">> Jumping back to caller")
             buggy_caller = buggy_function.parent
             patched_caller = patched_function.parent
@@ -121,5 +138,5 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
-    result = main("astropy__astropy-12907", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("astropy__astropy-14995", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
