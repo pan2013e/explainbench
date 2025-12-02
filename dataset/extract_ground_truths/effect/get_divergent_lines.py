@@ -86,12 +86,20 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
                     }
         else:
-            print("Control flow diverged")
-            print(f"Buggy id: {buggy_event.event_id}, Patched id: {patched_event.event_id}")
-            print(f"Buggy function: {buggy_function.name}, Patched function: {patched_function.name}")
-            print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
-            print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
-            # should return something
+            print("> Control flow diverged")
+            if (
+                {buggy_event.event_type, patched_event.event_type} == {"Exception", "Return"}
+                and buggy_event.statement == patched_event.statement
+            ):
+                print(">> Exception vs Return")
+                break
+            print(">> Jumping back to caller")
+            buggy_caller = buggy_function.parent
+            patched_caller = patched_function.parent
+            if buggy_caller and patched_caller:
+                buggy_function = buggy_caller
+                patched_function = patched_caller
+                continue
             break
     return None
 
