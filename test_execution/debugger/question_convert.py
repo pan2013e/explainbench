@@ -7,6 +7,8 @@ import argparse
 
 from test_execution.debugger.util import IOInfo
 
+GT_FL_FILE = "./dataset/extract_ground_truths/localization/ground_truth_w_fullname.jsonl"
+
 ## Processing IO files and their contents
 
 def get_io_files(root_dir: Path) -> list[Path]:
@@ -70,7 +72,12 @@ def rank_fixed_io(fixed_ios: list[IOInfo], buggy_ios: list[IOInfo]) -> tuple[lis
     ]
     return (ranked_io_strs, max(scores))
 
-def _analyze_results(all_jsons: list[Path], bug2question_info: dict[str, dict]) -> dict:
+def _analyze_results(
+    all_jsons: list[Path], 
+    bug2question_info: dict[str, dict],
+    all_bugs: set[str],
+    all_with_methods: set[str]
+) -> dict:
     from collections import Counter
     io_attempted_instance_ids = set()
     for json_file in all_jsons:
@@ -87,9 +94,17 @@ def _analyze_results(all_jsons: list[Path], bug2question_info: dict[str, dict]) 
         [instance_id.split("-")[0] for instance_id in io_failed_instance_ids]
     )
     result_dict = dict()
-    result_dict["total"] = len(io_attempted_instance_ids)
+    result_dict["pbt_exists"] = len(all_bugs)
+    result_dict["pbt_exists_and_buggy_method"] = len(all_bugs & all_with_methods)
+    result_dict["io_gathered"] = len(io_attempted_instance_ids)
     result_dict["failure"] = len(io_failed_instance_ids)
     for repo_name in attempted_by_project:
+        print(repo_name)
+        print(list(sorted([
+            instance_id
+            for instance_id in io_failed_instance_ids
+            if repo_name in instance_id
+        ])))
         result_dict[repo_name] = {
             "total": attempted_by_project[repo_name],
             "failure": failed_by_project[repo_name],
@@ -98,7 +113,19 @@ def _analyze_results(all_jsons: list[Path], bug2question_info: dict[str, dict]) 
     return result_dict
 
 
+def get_all_bugs_with_methods() -> set[str]:
+    fl_results = Path(GT_FL_FILE).read_text()
+    has_method_bugs = set()
+    for line in fl_results.splitlines():
+        line_obj = json.loads(line)
+        if any(["function:" in name for name in line_obj["buggy_function_names"]]):
+            has_method_bugs.add(line_obj["instance_id"])
+    return has_method_bugs
+
+
 def main(args):
+    all_bugs_with_pbts = set(os.listdir(args.io_info_dir))
+    all_bugs_with_buggy_methods = get_all_bugs_with_methods()
     all_jsons = get_io_files(Path(args.io_info_dir))
     save_json = Path(args.save_path)
     bug2question_info = dict()
@@ -132,7 +159,10 @@ def main(args):
     save_json.write_text(json.dumps(save_values, indent=2))
 
     if args.display_result_analysis:
-        analyzed_results = _analyze_results(all_jsons, bug2question_info)
+        analyzed_results = _analyze_results(
+            all_jsons, bug2question_info,
+            all_bugs_with_pbts, all_bugs_with_buggy_methods
+        )
         print(json.dumps(analyzed_results, indent=2))
 
 if __name__ == "__main__":
