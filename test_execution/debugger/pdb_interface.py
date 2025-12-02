@@ -51,7 +51,7 @@ def return_stack(p):
         has_return_value = ")->" in new_stack
 
 PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, '=', locals()[param.name])"
-p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
+p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.STDOUT)
 read_output(p) # flush initial setup string
 for idx in range({max_iter}):
     try:
@@ -59,7 +59,7 @@ for idx in range({max_iter}):
     except BrokenPipeError:
         if idx == 0:
             while True:
-                line = p.stderr.readline()
+                line = p.stdout.readline()
                 if not line:
                     break
                 print(line.decode().rstrip()) # for debugging
