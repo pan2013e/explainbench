@@ -1,13 +1,47 @@
+import logging
+
+from tracer.protocol import Event
 from dataset.extract_ground_truths.effect.trace_util import (
     diff_events,
-    load_trace_pair
+    load_trace_pair,
+    Traces,
 )
-from dataset.extract_ground_truths.effect.postprocessing_util import(
-    apply_trace_filters, 
+from dataset.extract_ground_truths.effect.postprocessing_util import (
     get_complete_variable_views_from_diff
 )
 
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
+print = logger.debug
+
+def get_event_count(event: Event, traces: Traces):
+    count = 0
+    for e in traces._events:
+        if e.line_number == event.line_number and e.event_type == event.event_type:
+            count += 1
+        if e is event:
+            break
+    return count
+
+def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwargs):
+    diff = diff_events(buggy_event, patched_event, repo_name)
+    if diff:
+        buggy_variable_views = get_complete_variable_views_from_diff(buggy_event, diff)
+        patched_variable_views = get_complete_variable_views_from_diff(patched_event, diff)    
+        return {
+            "file_path": patched_event.filepath,
+            "statement": patched_event.statement,
+            "buggy_lineno": buggy_event.line_number,
+            "patched_lineno": patched_event.line_number,
+            "diff": diff,
+            "buggy_variables": buggy_variable_views,
+            "patched_variables": patched_variable_views,
+            **kwargs
+        }
+    return None
+
 def main(instance_id, agent='gold', test_id=0, base_dir=None):
+    repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
     while True:
@@ -38,53 +72,19 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     buggy_function = buggy_callee
                     patched_function = patched_callee
             else:
-                # check diff
-                repo_name = instance_id.split("__")[0]
-                diff = diff_events(buggy_event, patched_event, repo_name)
-                filtered_diff = diff
-                # apply_trace_filters needs to be fixed
-                # need to support event types other than "Line"
-                # filtered_diff = apply_trace_filters(diff, patched_event, instance_id)
-                if filtered_diff:
-                    buggy_variable_views = get_complete_variable_views_from_diff(buggy_event,filtered_diff)
-                    patched_variable_views = get_complete_variable_views_from_diff(patched_event, filtered_diff)
-                    
-                    # patched_caller_exp = None
-                    # buggy_caller_exp = None
-                    # if hasattr(patched_block, "call_event") and patched_block.call_event:
-                    #     patched_caller_exp =  patched_block.call_event.statement
-                        
-                    # if hasattr(buggy_block, "call_event") and buggy_block.call_event:
-                    #     buggy_caller_exp = buggy_block.call_event.statement
-                    
-                    # patched_callee_return_val = None
-                    # if hasattr(patched_block, "return_event") and hasattr(patched_block.return_event, "return_value"):
-                    #     patched_callee_return_val = patched_block.return_event.return_value
-
-                    # buggy_callee_return_val = None
-                    # if hasattr(buggy_block, "return_event") and hasattr(buggy_block.return_event, "return_value"):
-                    #     buggy_callee_return_val = buggy_block.return_event.return_value
-                        
-                    return {
-                        "test_id": test_id,
-                        "file_path": patched_event.filepath,
-                        "statement": patched_event.statement,
-                        "buggy_lineno": buggy_event.line_number,
-                        # "buggy_line_count": get_event_count(buggy_event, buggy_traces),
-                        "patched_lineno": patched_event.line_number,
-                        # "patched_line_count": get_event_count(patched_event, patched_traces),
-                        "filtered_diff": filtered_diff,
-                        "function_name": patched_function.name,
-                        "buggy_function_param": buggy_function.params,
-                        "patched_function_param": patched_function.params,
-                        "buggy_variables": buggy_variable_views,
-                        "patched_variables": patched_variable_views,
-                        # "patched_caller_expression": patched_caller_exp,
-                        # "patched_callee_return_value": patched_callee_return_val,
-                        # "buggy_caller_expression": buggy_caller_exp,
-                        # "buggy_callee_return_value": buggy_callee_return_val
-
-                    }
+                diff = state_diff(
+                    buggy_event,
+                    patched_event,
+                    repo_name,
+                    test_id=test_id,
+                    function_name=buggy_function.name,
+                    buggy_line_count=get_event_count(buggy_event, buggy_traces),
+                    patched_line_count=get_event_count(patched_event, patched_traces),
+                    buggy_function_param=buggy_function.params,
+                    patched_function_param=patched_function.params,
+                )
+                if diff:
+                    return diff
         else:
             print("> Control flow diverged")
             if (
@@ -92,12 +92,23 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 and buggy_event.statement == patched_event.statement
             ):
                 print(">> Exception vs Return")
-                break
+                return state_diff(
+                    buggy_event,
+                    patched_event,
+                    repo_name,
+                    test_id=test_id,
+                    function_name=buggy_function.name,
+                    buggy_line_count=get_event_count(buggy_event, buggy_traces),
+                    patched_line_count=get_event_count(patched_event, patched_traces),
+                    buggy_function_param=buggy_function.params,
+                    patched_function_param=patched_function.params,
+                )
             if (
                 {buggy_event.event_type, patched_event.event_type} == {"Exception", "Line"}
                 or {buggy_event.event_type, patched_event.event_type} == {"Exception", "Function"}
             ):
                 print(">> Exception vs Line/Function")
+                # for line/function event, go to the return event in this function
                 break
             print(">> Jumping back to caller")
             buggy_caller = buggy_function.parent
@@ -110,6 +121,6 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
     return None
 
 if __name__ == "__main__":
-    from pprint import pprint
-    result = main("astropy__astropy-14182", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    logger.setLevel(logging.DEBUG)
+    result = main("astropy__astropy-12907", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
