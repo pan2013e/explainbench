@@ -218,6 +218,7 @@ def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
         return DeepDiff(
             buggy.dump(),
             patched.dump(),
+            cache_size=5000,
             significant_digits=3,
             ignore_order=False,                           
             ignore_order_func=get_ignore_order_func(repo_name),
