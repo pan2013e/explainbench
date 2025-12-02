@@ -1,5 +1,5 @@
 import os
-import json
+import orjson as json
 
 from deepdiff import DeepDiff
 from tracer.protocol import (
@@ -15,7 +15,7 @@ from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_traces(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'rb', buffering=1024*1024) as f:
         return [Event.from_dict(json.loads(line)) for line in f]
 
 def get_trace_dir(agent='gold'):

@@ -18,6 +18,7 @@ dependencies = [
     "gitpython == 3.1.45",
     "deepdiff == 8.6.1",
     "datasets == 4.2.0",
+    "orjson == 3.11.3",
 ]
 
 [build-system]
