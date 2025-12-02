@@ -92,10 +92,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     return diff
         else:
             logger.debug("> Control flow diverged")
-            if (
-                {buggy_event.event_type, patched_event.event_type} == {"Exception", "Return"}
-                and buggy_event.statement == patched_event.statement
-            ):
+            if {buggy_event.event_type, patched_event.event_type} == {"Exception", "Return"}:
                 logger.debug(">> Exception vs Return")
                 return state_diff(
                     buggy_event,
@@ -138,5 +135,5 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
-    result = main("astropy__astropy-14995", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("astropy__astropy-14309", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
