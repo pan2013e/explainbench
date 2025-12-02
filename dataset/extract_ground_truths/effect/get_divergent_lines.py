@@ -12,7 +12,6 @@ from dataset.extract_ground_truths.effect.postprocessing_util import (
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
-print = logger.debug
 
 def get_event_count(event: Event, traces: Traces):
     count = 0
@@ -56,10 +55,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 patched_function = patched_caller
                 continue
             break
-        print(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
-        print(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
-        print(f'+ {patched_event.event_type:<10} {patched_event.statement}')
-        print("========")
+        logger.debug(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
+        logger.debug(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
+        logger.debug(f'+ {patched_event.event_type:<10} {patched_event.statement}')
+        logger.debug("========")
         if buggy_function.name == patched_function.name and buggy_event.matches(patched_event):
             event_type = buggy_event.event_type
             if event_type == 'Function':
@@ -86,12 +85,12 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 if diff:
                     return diff
         else:
-            print("> Control flow diverged")
+            logger.debug("> Control flow diverged")
             if (
                 {buggy_event.event_type, patched_event.event_type} == {"Exception", "Return"}
                 and buggy_event.statement == patched_event.statement
             ):
-                print(">> Exception vs Return")
+                logger.debug(">> Exception vs Return")
                 return state_diff(
                     buggy_event,
                     patched_event,
@@ -107,10 +106,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 {buggy_event.event_type, patched_event.event_type} == {"Exception", "Line"}
                 or {buggy_event.event_type, patched_event.event_type} == {"Exception", "Function"}
             ):
-                print(">> Exception vs Line/Function")
+                logger.debug(">> Exception vs Line/Function")
                 # for line/function event, go to the return event in this function
                 break
-            print(">> Jumping back to caller")
+            logger.debug(">> Jumping back to caller")
             buggy_caller = buggy_function.parent
             patched_caller = patched_function.parent
             if buggy_caller and patched_caller:
