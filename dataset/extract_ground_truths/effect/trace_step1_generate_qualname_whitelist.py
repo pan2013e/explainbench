@@ -3,7 +3,6 @@ import ast
 import json
 import subprocess
 
-from bisect import bisect_right 
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
@@ -11,6 +10,7 @@ from swebench.harness.utils import load_swebench_dataset
 from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
+from tqdm.auto import tqdm 
 
 
 class QualnameVisitor(ast.NodeVisitor):
@@ -244,14 +244,14 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            "gold",
-            # "20250612_trae",
+            # "gold",
+            "20250612_trae",
             # "20250623_warp",
             # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
             # "20250728_zai_glm4-5",
             # "20250731_harness_ai",
             # "20250804_epam-ai-run-claude-4-sonnet",
-            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
         ],
         help="List of agent names to process (used as top-level keys in the JSON).",
     )
@@ -259,7 +259,7 @@ def main() -> None:
     parser.add_argument(
         "--instance-ids",
         nargs="+",
-        default=["django"],
+        default=["all"],
         help="List of instance_ids to load from the dataset.",
     )
 
@@ -276,7 +276,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path(__file__).parent / "allowed_qualnames.json",
+        default=Path("/home/yusuf/explainbench/shared_logs") / "allowed_qualnames.json",
         help="Path to the single output JSON file.",
     )
 
@@ -321,7 +321,7 @@ def main() -> None:
             patch_reference = ds
             patch_key = "patch"
 
-        for idx, instance in enumerate(ds):
+        for idx, instance in enumerate(tqdm(ds, desc=f"Agent {agent}", unit="inst")):
             instance_id = instance.get("instance_id", "")
             assert instance_id, "instance_id is missing"
 
