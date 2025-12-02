@@ -65,7 +65,7 @@ def main() -> None:
     parser.add_argument(
         "--root-path",
         type=str,
-        default="/home/zhiyuan/explainbench/logs/run_evaluation/track.{agent_name}.1021/{agent_name}/{instance_id}",
+        default="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/track.{agent_name}.1020/{agent_name}/{instance_id}",
         help="Template path to logs; must contain {agent_name} and {instance_id}.",
     )
 
@@ -74,11 +74,11 @@ def main() -> None:
         nargs="+",
         default=[
             "20250612_trae",
-            "20250623_warp",
-            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            "20250728_zai_glm4-5",
-            "20250731_harness_ai",
-            "20250804_epam-ai-run-claude-4-sonnet",
+            # "20250623_warp",
+            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            # "20250728_zai_glm4-5",
+            # "20250731_harness_ai",
+            # "20250804_epam-ai-run-claude-4-sonnet",
             "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         ],
         help="List of agent names to process.",
@@ -97,7 +97,7 @@ def main() -> None:
     parser.add_argument(
         "--targets-json",
         type=Path,
-        default=Path(__file__).parent / "allowed_qualnames.json",
+        default=Path("/home/yusuf/explainbench/shared_logs") / "allowed_qualnames.json",
         help=(
             "Path to JSON produced by the previous step, with structure:\n"
             "  { agent_name: { instance_id: [list of target qualnames] } }"
@@ -107,7 +107,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path(__file__).parent / "allowed_functions.json",
+        default=Path("/home/yusuf/explainbench/shared_logs") / "allowed_functions.json",
         help="Path to the output JSON file.",
     )
 
