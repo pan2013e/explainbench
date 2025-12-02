@@ -84,6 +84,18 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
+    @property
+    def return_event(self):
+        match self.return_value, self.exception:
+            case _, None:
+                assert len(self._events) >= 1 and isinstance(self._events[-1], ReturnEvent)
+                return self._events[-1]
+            case None, _:
+                assert len(self._events) >= 2 and isinstance(self._events[-2], ExceptionEvent)
+                return self._events[-2]
+            case _:
+                raise ValueError("Exception and return value cannot coexist")
+    
     def _next_event(self):
         if self._index >= len(self._events):
             raise StopIteration
@@ -94,7 +106,7 @@ class FunctionBlock:
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def __next__(self) -> Event:
         event = self._next_event()
         while event.excluded and not isinstance(event, FunctionEvent):
             event = self._next_event()
