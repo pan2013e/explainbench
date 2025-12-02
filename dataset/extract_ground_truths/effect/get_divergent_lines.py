@@ -95,8 +95,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 break
             if (
                 {buggy_event.event_type, patched_event.event_type} == {"Exception", "Line"}
+                or {buggy_event.event_type, patched_event.event_type} == {"Exception", "Function"}
             ):
-                print(">> Exception vs Line")
+                print(">> Exception vs Line/Function")
                 break
             print(">> Jumping back to caller")
             buggy_caller = buggy_function.parent
@@ -110,5 +111,5 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
 if __name__ == "__main__":
     from pprint import pprint
-    result = main("astropy__astropy-13236", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("astropy__astropy-14182", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
