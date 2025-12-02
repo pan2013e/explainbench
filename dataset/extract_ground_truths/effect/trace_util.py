@@ -4,6 +4,7 @@ import orjson as json
 from deepdiff import DeepDiff
 from tracer.protocol import (
     Event,
+    LineEvent,
     FunctionEvent,
     ReturnEvent,
     ExceptionEvent,
@@ -108,7 +109,7 @@ class FunctionBlock:
     
     def __next__(self) -> Event:
         event = self._next_event()
-        while event.excluded and not isinstance(event, FunctionEvent):
+        while event.excluded and isinstance(event, LineEvent):
             event = self._next_event()
         return event
 
