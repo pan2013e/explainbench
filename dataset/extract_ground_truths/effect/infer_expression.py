@@ -13,6 +13,16 @@ from execution.util import get_fail_to_pass_tests
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+def convert_to_valid_arg(expr: str):
+    expr = expr.strip()
+    if (
+        expr.startswith("`") and expr.endswith("`")
+        or expr.startswith('"') and expr.endswith('"')
+        or expr.startswith("'") and expr.endswith("'")
+    ):
+        expr = expr[1:-1].strip()
+    return expr
+
 class Expression(BaseModel):
     expr: str
     
@@ -52,7 +62,7 @@ class Expression(BaseModel):
                 "--bp-file", file_path,
                 "--pre-bp-line", str(buggy_lineno),
                 "--post-bp-line", str(patched_lineno),
-                "--expr", json.dumps(self.expr),
+                "--expr", convert_to_valid_arg(self.expr),
                 "--expr-id", str(expr_id),
                 "--pre-count", str(buggy_line_count),
                 "--post-count", str(patched_line_count),
@@ -91,7 +101,7 @@ TEMPLATE = (
     "Notes:\n"
     "1. The value of complex Python objects will be presented in JSON-serialized format produced by the jsonpickle library, including type information and some available attributes.\n"
     "2. The expressions you design should reflect such differences in values.\n"
-    "3. If the given line is a return statement, use `__return__` as a special variable representing the return value.\n"
+    "3. When `__return__` is available in the local variable list, it is a special variable representing the return value.\n"
     "4. Sometimes the code execution of one version may fail to reach the given line due to an exception raised earlier. In this case, the crashed line will also be provided. If two lines differ, you only need to reason about the normally executed line.\n"
     "5. The values of the expressions should be easy for an LLM to describe, while still non-trivial to reason about. Avoid directly using complex objects or long floating-point numbers as expressions. In this case, consider using a more subtle expression that derives the desired information from these complex objects.\n"
     "6. Make sure the values of the expressions are primitive types (i.e., None, int, float, str, bool) or native collections (e.g., list, dict) of primitive types.\n\n"
