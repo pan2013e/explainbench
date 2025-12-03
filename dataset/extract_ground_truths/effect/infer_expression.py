@@ -36,6 +36,7 @@ class Expression(BaseModel):
              test_id: int,
              buggy_line_count: int,
              patched_line_count: int,
+             before_or_after: str,
              expr_id=0,
             ):
         log_dir = os.path.join(DIR, f"../../../logs/run_evaluation/inspect.{agent}.{os.getuid()}.{expr_id}/{agent}/{instance_id}")
@@ -55,6 +56,7 @@ class Expression(BaseModel):
                 "--expr-id", str(expr_id),
                 "--pre-count", str(buggy_line_count),
                 "--post-count", str(patched_line_count),
+                "--inspector-mode", before_or_after,
             ])
         
         test_name = get_fail_to_pass_tests(instance_id)[test_id]

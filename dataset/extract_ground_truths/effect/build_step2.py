@@ -79,6 +79,7 @@ def infer_with_validation(pre_code, post_code, metadata):
         metadata["test_id"],
         metadata["buggy_line_count"],
         metadata["patched_line_count"],
+        metadata["before_or_after"],
     )
     return expr, buggy_value, patched_value
 
