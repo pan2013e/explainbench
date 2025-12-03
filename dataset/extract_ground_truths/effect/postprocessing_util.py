@@ -282,13 +282,29 @@ def get_complete_variable_view(event, query: str) -> Dict[str, Any]:
     return {var_name: seen_vars[var_name] for var_name in seen_vars if var_name == query}
 
 def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
-    diff_iterator = iter_diff_items(diff)
-    output = {}
-    for change_kind, full_path, payload in diff_iterator:
-        query = extract_var_name(full_path)
-        variable_view = get_complete_variable_view(event, query)
-        output.update(variable_view)
-    return output
+    event_type = event.event_type
+    if event_type == "Line":
+        diff_iterator = iter_diff_items(diff)
+        output = {}
+        for change_kind, full_path, payload in diff_iterator:
+            query = extract_var_name(full_path)
+            variable_view = get_complete_variable_view(event, query)
+            output.update(variable_view)
+        return output
+
+    elif event_type == "Exception" or event_type == "Return":
+        return_value = event.return_value if hasattr(event, "return_value") else None
+        exception_type = event.exception_type if hasattr(event, "exception_type") else None
+        exception_value = event.exception_value if hasattr(event, "exception_value") else None
+        return_dict = {"__exception__": {
+                            "type": exception_type,
+                            "value": exception_value
+                        },
+                       "__return__": {
+                           "value": return_value
+                        }
+        }
+        return return_dict
 
 # EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
 #     "astropy__astropy-14182": {
