@@ -33,11 +33,13 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
                 kwargs[k] = v()
         return {
             "file_path": patched_event.filepath,
+            "buggy_event_type": buggy_event.event_type,
+            "patched_event_type": patched_event.event_type,
             "buggy_statement": buggy_event.statement,
             "patched_statement": patched_event.statement,
             "buggy_lineno": buggy_event.line_number,
             "patched_lineno": patched_event.line_number,
-            "diff": diff,
+            "diff": diff.to_dict() if hasattr(diff, "to_dict") else diff,
             "buggy_variables": buggy_variable_views,
             "patched_variables": patched_variable_views,
             **kwargs
@@ -87,6 +89,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     patched_line_count=lambda: get_event_count(patched_event, patched_traces),
                     buggy_function_param=buggy_function.params,
                     patched_function_param=patched_function.params,
+                    instance_id=instance_id,
+                    agent=agent,
                 )
                 if diff:
                     return diff
@@ -104,6 +108,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     patched_line_count=get_event_count(patched_event, patched_traces),
                     buggy_function_param=buggy_function.params,
                     patched_function_param=patched_function.params,
+                    instance_id=instance_id,
+                    agent=agent,
                 )
             if (
                 {buggy_event.event_type, patched_event.event_type} == {"Exception", "Line"}
@@ -122,6 +128,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     patched_line_count=get_event_count(rhs_event, patched_traces),
                     buggy_function_param=buggy_function.params,
                     patched_function_param=patched_function.params,
+                    instance_id=instance_id,
+                    agent=agent,
                 )
             logger.debug(">> Jumping back to caller")
             buggy_caller = buggy_function.parent
@@ -135,5 +143,5 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
 
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
-    result = main("astropy__astropy-14309", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("astropy__astropy-7166", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
