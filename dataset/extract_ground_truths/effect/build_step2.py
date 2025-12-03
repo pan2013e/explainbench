@@ -29,6 +29,17 @@ def build_fn_code(pre_code, post_code):
     else:
         return f"# Before Patch:\n{pre_code}\n\n# After Patch:\n{post_code}"
 
+def build_statement(pre_stmt, post_stmt, pre_type, post_type):
+    def exc_tag(event_type):
+        if event_type == "Exception":
+            return " (crash location)"
+        else:
+            return ""
+    if pre_stmt == post_stmt:
+        return pre_stmt
+    else:
+        return f"# Before Patch:\n{pre_stmt}{exc_tag(pre_type)}\n\n# After Patch:\n{post_stmt}{exc_tag(post_type)}"
+
 def get_agent_patch(agent, instance_id):
     data = read_agent_patch_data(agent)
     patch = data[instance_id]['model_patch'] or None
@@ -46,8 +57,13 @@ def get_simple_function_name(metadata):
 def infer_with_validation(pre_code, post_code, metadata):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
-        metadata["statement"],
-        metadata["filtered_diff"],
+        build_statement(
+            metadata["buggy_statement"],
+            metadata["patched_statement"],
+            metadata["buggy_event_type"],
+            metadata["patched_event_type"],
+        ),
+        metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
     )
