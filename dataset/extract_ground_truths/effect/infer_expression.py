@@ -17,9 +17,11 @@ class Expression(BaseModel):
     expr: str
     
     @field_validator('expr')
+    @classmethod
     def validate_expr(cls, v: str):
         tree = ast.parse(v, mode='eval')
         assert isinstance(tree, ast.Expression)
+        assert not isinstance(tree.body, ast.Constant)
         return v
     
     def as_ast(self):
@@ -65,9 +67,15 @@ class Expression(BaseModel):
             raise RuntimeError("Inspection failed, results not found.")
         
         with open(buggy_path, "r") as f:
-            buggy_value = json.load(f)['value']
+            buggy_inspect = json.load(f)
+            buggy_value = buggy_inspect['value']
+            buggy_inspect_exc = buggy_inspect['exception']
         with open(patched_path, "r") as f:
-            patched_value = json.load(f)['value']
+            patched_inspect = json.load(f)
+            patched_value = patched_inspect['value']
+            patched_inspect_exc = patched_inspect['exception']
+        assert buggy_inspect_exc is None, "Other exception occurred in buggy inspection"
+        assert patched_inspect_exc is None, "Other exception occurred in patched inspection"
         assert buggy_value != patched_value, "The expression does not distinguish buggy and patched versions."
         
         return buggy_value, patched_value
@@ -82,8 +90,9 @@ TEMPLATE = (
     "1. The value of complex Python objects will be presented in JSON-serialized format, including type information and available attributes.\n"
     "2. The expressions you design should reflect such differences in values.\n"
     "3. If the given line is a return statement, use `__return__` as a special variable representing the return value.\n"
-    "4. The values of the expressions should be easy for an LLM to describe, while still non-trivial to reason about. Avoid directly using complex objects or long floating-point numbers as expressions. In this case, consider using a more subtle expression that derives the desired information from these complex objects.\n"
-    "5. Make sure the values of the expressions are primitive types (i.e., None, int, float, str, bool) or native collections (e.g., list, dict) of primitive types.\n\n"
+    "4. In addition to normal behaviors, an exception may also be raised at the given line. In this case, you can use `__exception__` as a special variable. `__exception__` is a tuple, where the first element is the exception class, and the second element is the exception object.\n"
+    "5. The values of the expressions should be easy for an LLM to describe, while still non-trivial to reason about. Avoid directly using complex objects or long floating-point numbers as expressions. In this case, consider using a more subtle expression that derives the desired information from these complex objects.\n"
+    "6. Make sure the values of the expressions are primitive types (i.e., None, int, float, str, bool) or native collections (e.g., list, dict) of primitive types.\n\n"
     "Function:\n{code}\n\n"
     "Line:\n{line}\n\n"
     "State Differences:\n{diff}\n\n"
