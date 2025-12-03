@@ -20,7 +20,8 @@ def load_traces(file_path):
         return [Event.from_dict(json.loads(line)) for line in f]
 
 def get_trace_dir(agent='gold'):
-    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
+    # return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
+    return "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.{agent}.1020/{agent}"
 
 def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
     # test_id refers to the index of FAIL_TO_PASS tests
