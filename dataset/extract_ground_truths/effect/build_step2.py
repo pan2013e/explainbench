@@ -11,7 +11,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.build_step1 import DIR, AGENTS
-from dataset.extract_ground_truths.effect.source_util import get_function_code
+from dataset.extract_ground_truths.effect.source_util import (
+    get_function_code,
+    remove_docstrings,
+)
 from dataset.extract_ground_truths.effect.infer_expression import main as infer_main
 
 def read_step1_results():
@@ -98,6 +101,7 @@ def process_agent(data, agent, instance_ids):
             "expr": expr.expr,
             "buggy_value": buggy_value,
             "patched_value": patched_value,
+            "function_code_before_patch": remove_docstrings(pre_code),
             **metadata
         }
     return results

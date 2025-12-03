@@ -22,6 +22,21 @@ def get_event_count(event: Event, traces: Traces):
             break
     return count
 
+def location_to_present(buggy_event: Event):
+    if buggy_event.event_type == 'Exception' or buggy_event.event_type == 'Return':
+        return "The return statement in the provided function"
+    else:
+        return buggy_event.statement
+
+def before_or_after(buggy_event: Event, patched_event: Event):
+    if (
+        'Exception' in {buggy_event.event_type, patched_event.event_type}
+        or 'Return' in {buggy_event.event_type, patched_event.event_type}
+    ):
+        return 'after'
+    else:
+        return 'before'
+
 def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
     if diff:
@@ -39,6 +54,8 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
             "patched_event_type": patched_event.event_type,
             "buggy_statement": buggy_event.statement,
             "patched_statement": patched_event.statement,
+            "location": location_to_present(buggy_event, patched_event),
+            "before_or_after": before_or_after(buggy_event, patched_event),
             "buggy_lineno": buggy_event.line_number,
             "patched_lineno": patched_event.line_number,
             "diff": diff.to_dict() if hasattr(diff, "to_dict") else diff,

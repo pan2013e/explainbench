@@ -113,10 +113,10 @@ class RootCause:
 
 class Effect(Task[schema.Effect]):
     QUESTION = (
-        'Given the function and inputs, {before_or_after} the given line is executed, what are the values of the given expression before and after the patch?\n\n'
+        'Given the function and inputs, {before_or_after} the given location, what are the values of the given expression before and after the patch?\n\n'
         'Notes:\n'
         '1. For the values, answer with strings that can be directly parsed by Python\'s eval() function.\n'
-        '2. It is possible that an exception is raised before or at the given line, so the value may not exist. In this case, please answer with the type and message of the exception.\n'
+        '2. It is possible that an exception is raised before or at the given location, so the value may not exist. In this case, please answer with the type and message of the exception.\n'
         '3. If you cannot infer from the explanation, please answer with an empty string.'
     )
     SCHEMA = schema.Effect
@@ -145,17 +145,8 @@ if __name__ == "__main__":
         expl = load_explanation(agent)[instance_id]
         return expl[0] if expl else 'EMPTY'
     
-    def get_simple_function_name(metadata):
-        name = metadata['function_name']
-        if ":" in name:
-            name = name.split(":")[-1]
-        if "." in name:
-            name = name.split(".")[-1]
-        return name
-    
     def get_function_input(metadata):
         import io
-        from tracer.serializer import deserialize
         output = io.StringIO()
         pre = metadata['buggy_function_param']
         post = metadata['patched_function_param']
@@ -173,24 +164,20 @@ if __name__ == "__main__":
 
     def get_ctx_and_gt(agent, instance_id):
         import os
-        from dataset.extract_ground_truths.effect.source_util import get_function_code
         DIR = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(DIR, "../dataset/extract_ground_truths/effect/tmp/step1.json"), 'r') as f:
+        with open(os.path.join(DIR, "../dataset/extract_ground_truths/effect/tmp/step2.json"), 'r') as f:
             data = json.load(f)[agent][instance_id]
         
         ctx = {
-            'function_code_before_patch': 
-                get_function_code(
-                    instance_id,
-                    data['file_path'],
-                    get_simple_function_name(data),
-                    line_hint=(data['buggy_lineno'], None),
-                    remove_doc=True,
-                )[0],
+            'function_code_before_patch': data['function_code_before_patch'],
             'function_input': get_function_input(data),
-            'line': data['statement'],
+            'location': data['location'],
+            'before_or_after': data['before_or_after'],
         }
-        gt = {}
+        gt = {
+            'buggy_value': data['buggy_value'],
+            'patched_value': data['patched_value'],
+        }
         return ctx, gt
     
     # Example
@@ -198,9 +185,6 @@ if __name__ == "__main__":
     agent = '20250805_openhands-Qwen3-Coder-480B-A35B-Instruct'
     instance_id = 'astropy__astropy-13579'
     explanation = get_expl(agent, instance_id)
-    if explanation == 'EMPTY':
-        print('null')
-        exit(0)
     context, gt = get_ctx_and_gt(agent, instance_id)
     # predict actually calls _build_prompt internally
     # here we call again just to display the full prompt
