@@ -112,29 +112,31 @@ class RootCause:
             return [set_f1_score(p, gt, simple_name_eq) for p in pred]
 
 class Effect(Task[schema.Effect]):
-    # Ask about expression which value changes
-    EXPR_QUESTION = (
-        "Given the function and inputs, before the given line is executed, predict a Python expression whose value changes before and after the patch. Try to make the expression specific."
-    )
-    # Ask about control flow changes
-    CF_QUESTION = (
-        ""
-    )
     QUESTION = (
-        '{question} '
-        'If you cannot infer from the explanation, please answer with an empty string. '
+        'Given the function and inputs, {before_or_after} the given line is executed, what are the values of the given expression before and after the patch?\n\n'
+        'Notes:\n'
+        '1. For the values, answer with strings that can be directly parsed by Python\'s eval() function.\n'
+        '2. It is possible that an exception is raised before or at the given line, so the value may not exist. In this case, please answer with the type and message of the exception.\n'
+        '3. If you cannot infer from the explanation, please answer with an empty string.'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
     
     @classmethod
     def _build_prompt(cls, explanation, **kwargs):
-        selected_question = cls.EXPR_QUESTION
-        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(question=selected_question), context=cls._build_context(**kwargs))
+        before_or_after = kwargs.pop('before_or_after', 'before')
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after), context=cls._build_context(**kwargs))
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        ...
+        def eval_single(pred: schema.Effect, gt):
+            score = 0
+            if pred.before == gt['buggy_value']:
+                score += 0.5
+            if pred.after == gt['patched_value']:
+                score += 0.5
+            return score
+        return [eval_single(p, gt) for p in pred]
 
 if __name__ == "__main__":
     # Helpers
