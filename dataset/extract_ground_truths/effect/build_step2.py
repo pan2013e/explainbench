@@ -32,9 +32,9 @@ def build_fn_code(pre_code, post_code):
 def build_statement(pre_stmt, post_stmt, pre_type, post_type):
     def exc_tag(event_type):
         if event_type == "Exception":
-            return " (crash location)"
+            return " (crashed here)"
         else:
-            return ""
+            return " (normally executed)"
     if pre_stmt == post_stmt:
         return pre_stmt
     else:
