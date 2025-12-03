@@ -54,7 +54,7 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
             "patched_event_type": patched_event.event_type,
             "buggy_statement": buggy_event.statement,
             "patched_statement": patched_event.statement,
-            "location": location_to_present(buggy_event, patched_event),
+            "location": location_to_present(buggy_event),
             "before_or_after": before_or_after(buggy_event, patched_event),
             "buggy_lineno": buggy_event.line_number,
             "patched_lineno": patched_event.line_number,
