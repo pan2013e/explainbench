@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def get_event_count(event: Event, traces: Traces):
     count = 0
     for e in traces._events:
-        if e.line_number == event.line_number and e.event_type == event.event_type:
+        if e.line_number == event.line_number:
             count += 1
         if e is event:
             break
