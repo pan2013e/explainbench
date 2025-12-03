@@ -113,11 +113,12 @@ class RootCause:
 
 class Effect(Task[schema.Effect]):
     QUESTION = (
-        'Given the function and inputs, {before_or_after} the given location, what are the values of the given expression before and after the patch?\n\n'
+        'Given the function and inputs, {before_or_after} the given location, what are the values of "{expr}" before and after the patch?\n\n'
         'Notes:\n'
         '1. For the values, answer with strings that can be directly parsed by Python\'s eval() function.\n'
-        '2. It is possible that an exception is raised before or at the given location, so the value may not exist. In this case, please answer with the type and message of the exception.\n'
-        '3. If you cannot infer from the explanation, please answer with an empty string.'
+        '2. If `__return__` appears in the given expression, it refers to the return value of the function.\n'
+        '3. It is possible that an exception is raised before or at the given location, so the value of the expression may not exist. In this case, please answer with the type and message of the exception.\n'
+        '4. If you cannot infer from the explanation, please answer with an empty string.'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
@@ -125,7 +126,8 @@ class Effect(Task[schema.Effect]):
     @classmethod
     def _build_prompt(cls, explanation, **kwargs):
         before_or_after = kwargs.pop('before_or_after', 'before')
-        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after), context=cls._build_context(**kwargs))
+        expr = kwargs.pop('expr')
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, expr=expr), context=cls._build_context(**kwargs))
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
@@ -172,6 +174,7 @@ if __name__ == "__main__":
             'function_code_before_patch': data['function_code_before_patch'],
             'function_input': get_function_input(data),
             'location': data['location'],
+            'expr': data['expr'],
             'before_or_after': data['before_or_after'],
         }
         gt = {
@@ -183,7 +186,7 @@ if __name__ == "__main__":
     # Example
     model = Model('gemini/gemini-2.5-flash', n=5)
     agent = '20250805_openhands-Qwen3-Coder-480B-A35B-Instruct'
-    instance_id = 'astropy__astropy-13579'
+    instance_id = 'astropy__astropy-12907'
     explanation = get_expl(agent, instance_id)
     context, gt = get_ctx_and_gt(agent, instance_id)
     # predict actually calls _build_prompt internally
