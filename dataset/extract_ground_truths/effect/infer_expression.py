@@ -52,7 +52,7 @@ class Expression(BaseModel):
                 "--bp-file", file_path,
                 "--pre-bp-line", str(buggy_lineno),
                 "--post-bp-line", str(patched_lineno),
-                "--expr", self.expr,
+                "--expr", json.dumps(self.expr),
                 "--expr-id", str(expr_id),
                 "--pre-count", str(buggy_line_count),
                 "--post-count", str(patched_line_count),
