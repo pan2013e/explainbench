@@ -33,6 +33,8 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
                 kwargs[k] = v()
         return {
             "file_path": patched_event.filepath,
+            "buggy_event_id": buggy_event.event_id,
+            "patched_event_id": patched_event.event_id,
             "buggy_event_type": buggy_event.event_type,
             "patched_event_type": patched_event.event_type,
             "buggy_statement": buggy_event.statement,
