@@ -3,6 +3,7 @@
 # then inspect the expr value in buggy and patched versions
 import os
 import json
+import random
 import backoff
 
 from tqdm.auto import tqdm
@@ -57,7 +58,7 @@ def get_simple_function_name(metadata):
     return name
 
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_with_validation(pre_code, post_code, metadata):
+def infer_with_validation(pre_code, post_code, metadata, should_change=True, expr_id=0):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -70,7 +71,7 @@ def infer_with_validation(pre_code, post_code, metadata):
         metadata["buggy_variables"],
         metadata["patched_variables"],
     )
-    buggy_value, patched_value = expr.eval(
+    expr.validate_effect(
         metadata["instance_id"],
         metadata["agent"],
         metadata["file_path"],
@@ -80,8 +81,10 @@ def infer_with_validation(pre_code, post_code, metadata):
         metadata["buggy_line_count"],
         metadata["patched_line_count"],
         metadata["before_or_after"],
+        should_change=should_change,
+        expr_id=expr_id,
     )
-    return expr, buggy_value, patched_value
+    return expr
 
 def process_agent(data, agent, instance_ids):
     results = {}
@@ -97,11 +100,23 @@ def process_agent(data, agent, instance_ids):
             patch=get_agent_patch(agent, instance_id),
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
-        expr, buggy_value, patched_value = infer_with_validation(pre_code, post_code, metadata)
+        n_choices = 5
+        n_changes = 2
+        _should_change = [True] * n_changes + [False] * (n_choices - n_changes)
+        random.shuffle(_should_change)
+        choices = []
+        for expr_id, should_change in enumerate(_should_change):
+            choice = infer_with_validation(pre_code, post_code, metadata, should_change=should_change, expr_id=expr_id).expr
+            choices.append(choice)
+        choices.append('None of the above')
+        labels = 'abcdefghijklmnopqrstuvwxyz'
+        answer = [labels[i] for i, should_change in enumerate(_should_change) if should_change]
+        if not answer:
+            fallback_idx = len(choices) - 1
+            answer = [labels[fallback_idx]]
         results[instance_id] = {
-            "expr": expr.expr,
-            "buggy_value": buggy_value,
-            "patched_value": patched_value,
+            "choices": choices,
+            "answer": answer,
             "function_code_before_patch": remove_docstrings(pre_code),
             **metadata
         }

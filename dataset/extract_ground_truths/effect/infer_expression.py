@@ -32,12 +32,9 @@ class Expression(BaseModel):
         tree = ast.parse(v, mode='eval')
         assert isinstance(tree, ast.Expression)
         assert not isinstance(tree.body, ast.Constant)
-        return v
+        return convert_to_valid_arg(v)
     
-    def as_ast(self):
-        return ast.parse(self.expr, mode='eval')
-    
-    def eval(self,
+    def validate_effect(self,
              instance_id: str,
              agent: str,
              file_path: str,
@@ -47,6 +44,7 @@ class Expression(BaseModel):
              buggy_line_count: int,
              patched_line_count: int,
              before_or_after: str,
+             should_change=True,
              expr_id=0,
             ):
         log_dir = "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/logs/run_evaluation/inspect.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1020.0/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct/astropy__astropy-12907"
@@ -62,7 +60,7 @@ class Expression(BaseModel):
                 "--bp-file", file_path,
                 "--pre-bp-line", str(buggy_lineno),
                 "--post-bp-line", str(patched_lineno),
-                "--expr", convert_to_valid_arg(self.expr),
+                "--expr", self.expr,
                 "--expr-id", str(expr_id),
                 "--pre-count", str(buggy_line_count),
                 "--post-count", str(patched_line_count),
@@ -91,8 +89,6 @@ class Expression(BaseModel):
         assert buggy_inspect_exc is None, "Other exception occurred in buggy inspection"
         assert patched_inspect_exc is None, "Other exception occurred in patched inspection"
         assert buggy_value != patched_value, "The expression does not distinguish buggy and patched versions."
-        
-        return buggy_value, patched_value
 
 # TODO: Check the prompt quality and improve it if necessary.
 # TODO: Check if the answer candidates are too diverse
