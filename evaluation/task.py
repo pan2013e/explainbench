@@ -196,12 +196,12 @@ if __name__ == "__main__":
     prompt = Effect._build_prompt(explanation, **context)
     res = Effect.predict(model, explanation, **context)
     scores = Effect.eval(res, gt)  
-
     # Save results
     output = {
         agent: {
             instance_id: {
                 'all_pred': [p.answer for p in res],
+                'individual_scores': scores,
                 'average': sum(scores) / len(scores) if scores else 0.0,
             }
         }
