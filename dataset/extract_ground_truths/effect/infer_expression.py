@@ -78,7 +78,14 @@ class Expression(BaseModel):
              should_change=True,
              expr_id=0,
             ):
-        log_dir = "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/logs/run_evaluation/inspect.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1020.0/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct/astropy__astropy-12907"
+        run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+        log_dir = os.path.join(
+            DIR,
+            "logs/run_evaluation",
+            run_id,
+            agent,
+            instance_id,
+        )
         if os.path.exists(log_dir):
             shutil.rmtree(log_dir)
         
