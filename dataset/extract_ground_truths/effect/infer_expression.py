@@ -196,7 +196,7 @@ After:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
-def main(code, line, diff, before, after):
+def main(code, line, diff, before, after, should_change=True):
     prompt = TEMPLATE.format(code=code, line=line, diff=diff, before=before, after=after)
     expr = MODEL.infer_once(prompt, Expression)
     return expr

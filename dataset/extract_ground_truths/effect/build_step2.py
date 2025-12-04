@@ -70,6 +70,7 @@ def infer_with_validation(pre_code, post_code, metadata, should_change=True, exp
         metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
+        should_change=should_change,
     )
     expr.validate_effect(
         metadata["instance_id"],
