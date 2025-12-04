@@ -23,6 +23,37 @@ def convert_to_valid_arg(expr: str):
         expr = expr[1:-1].strip()
     return expr
 
+def check_change(buggy_value, buggy_exc, patched_value, patched_exc):
+    # Special check for "None.attr vs obj.attr" case
+    if buggy_exc is None and patched_exc is not None:
+        exc_stage, exc_type, exc_msg = patched_exc['stage'], patched_exc['type'], patched_exc['message']
+        if (
+            exc_stage == 'evaluation'
+            and exc_type == 'AttributeError'
+            and 'NoneType' in exc_msg
+        ):
+            return
+        raise AssertionError("Exception occurred in patched inspection")
+    elif buggy_exc is not None and patched_exc is None:
+        exc_stage, exc_type, exc_msg = buggy_exc['stage'], buggy_exc['type'], buggy_exc['message']
+        if (
+            exc_stage == 'evaluation'
+            and exc_type == 'AttributeError'
+            and 'NoneType' in exc_msg
+        ):
+            return
+        raise AssertionError("Exception occurred in buggy inspection")
+    elif buggy_exc is not None and patched_exc is not None:
+        raise AssertionError("Exception occurred in both buggy and patched inspection")
+    else:
+        # both exc is None
+        assert buggy_value != patched_value, "Expression does not distinguish buggy and patched versions."
+
+def check_no_change(buggy_value, buggy_exc, patched_value, patched_exc):
+    assert buggy_exc is None, "Exception occurred in buggy inspection"
+    assert patched_exc is None, "Exception occurred in patched inspection"
+    assert buggy_value == patched_value, "Expression unexpectedly distinguishes buggy and patched versions."
+
 class Expression(BaseModel):
     expr: str
     
@@ -86,9 +117,11 @@ class Expression(BaseModel):
             patched_inspect_exc = patched_inspect['exception']
         pprint(buggy_inspect)
         pprint(patched_inspect)
-        assert buggy_inspect_exc is None, "Other exception occurred in buggy inspection"
-        assert patched_inspect_exc is None, "Other exception occurred in patched inspection"
-        assert buggy_value != patched_value, "The expression does not distinguish buggy and patched versions."
+        
+        if should_change:
+            check_change(buggy_value, buggy_inspect_exc, patched_value, patched_inspect_exc)
+        else:
+            check_no_change(buggy_value, buggy_inspect_exc, patched_value, patched_inspect_exc)
 
 # TODO: Check the prompt quality and improve it if necessary.
 # TODO: Check if the answer candidates are too diverse
