@@ -304,6 +304,11 @@ def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
                            "value": return_value
                         }
         }
+
+        if exception_type is not None and return_value is None:
+            del return_dict["__return__"]
+        elif exception_type is None:
+            del return_dict["__exception__"]
         return return_dict
 
 # EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
