@@ -133,7 +133,8 @@ with open("prompts/template_unchanged.txt", "r") as f:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
-def main(code, line, diff, before, after, should_change=True):
+def main(code, line, diff, before, after, 
+         should_change=True, existing_changed=[], existing_unchanged=[]):
     template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
     prompt = template.format(code=code, line=line, diff=diff, before=before, after=after)
     print(prompt)
