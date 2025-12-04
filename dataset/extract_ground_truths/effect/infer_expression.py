@@ -140,7 +140,7 @@ def main(code, line, diff, before, after,
 
     template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
     existing_exprs = existing_changed if should_change else existing_unchanged
-    existing_block = "\n".join(existing_exprs) if existing_exprs else "(none)"
+    existing_block = "\n".join(existing_exprs) if existing_exprs else ""
 
     prompt = template.format(
         code=code,
