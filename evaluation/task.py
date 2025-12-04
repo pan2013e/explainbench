@@ -144,6 +144,8 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
+    STEP2_PATH = "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/tmp/step2.json"
+
     # Helpers
     def get_expl(agent, instance_id):
         from evaluation.util import load_explanation
@@ -167,12 +169,7 @@ if __name__ == "__main__":
         output.close()
         return contents
 
-    def get_ctx_and_gt(agent, instance_id):
-        import os
-        DIR = os.path.dirname(os.path.abspath(__file__))
-        with open("/home/yusuf/explainbench/dataset/extract_ground_truths/effect/tmp/step2.json", 'r') as f:
-            data = json.load(f)[agent][instance_id]
-        
+    def get_ctx_and_gt(data):
         ctx = {
             'function_code_before_patch': data['function_code_before_patch'],
             'function_inputs': get_function_input(data),
@@ -186,27 +183,24 @@ if __name__ == "__main__":
         return ctx, gt
 
 
-    # Example
     model = Model('gemini/gemini-2.5-flash', n=5)
-    agent = '20250805_openhands-Qwen3-Coder-480B-A35B-Instruct'
-    instance_id = 'astropy__astropy-12907'
-    explanation = get_expl(agent, instance_id)
-    context, gt = get_ctx_and_gt(agent, instance_id)
-    # predict actually calls _build_prompt internally
-    # here we call again just to display the full prompt
-    prompt = Effect._build_prompt(explanation, **context)
-    res = Effect.predict(model, explanation, **context)
-    scores = Effect.eval(res, gt)  
-    # Save results
-    output = {
-        agent: {
-            instance_id: {
-                'all_pred': [p.answer for p in res],
-                'individual_scores': scores,
-                'average': sum(scores) / len(scores) if scores else 0.0,
-            }
-        }
-    }
+    with open(STEP2_PATH, 'r') as f:
+        step2_data = json.load(f)
+
+    output = {}
+    for agent, instances in step2_data.items():
+        output[agent] = {}
+        for instance_id in instances.keys():
+            if step2_data[agent][instance_id]:
+                explanation = get_expl(agent, instance_id)
+                context, gt = get_ctx_and_gt(step2_data[agent][instance_id])
+                res = Effect.predict(model, explanation, **context)
+                scores = Effect.eval(res, gt)
+                output[agent][instance_id] = {
+                    'all_pred': [p.answer for p in res],
+                    'individual_scores': scores,
+                    'average': sum(scores) / len(scores) if scores else 0.0,
+                }
     out_path = os.path.join(os.path.dirname(__file__), 'effect_eval_output.json')
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2)
