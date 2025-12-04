@@ -59,6 +59,14 @@ def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = eq):
     fn = len(gt) - tp
     return f1_score(tp, fp, fn)
 
+def mcq_score(pred: list[str], gt: list[str]):
+    assert len(gt) > 0
+    pred_set = set(pred)
+    gt_set = set(gt)
+    if pred_set - gt_set:
+        return 0.0
+    return len(pred_set & gt_set) / len(gt_set)
+
 def load_explanation(split: str) -> dict[str, list[str]]:
     with open(os.path.join(DATASET_DIR, 'explanations', 'dataset.json')) as f:
         data = json.load(f)[split]

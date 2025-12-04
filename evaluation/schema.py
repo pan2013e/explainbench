@@ -1,5 +1,5 @@
 from typing import List, Literal
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 __all__ = [
     'Region',
@@ -19,28 +19,18 @@ class File(BaseModel):
     file: List[str]
 
 ###### Effect Schemas ######
-class ExceptionValue(BaseModel):
-    type: str
-    message: str
-    
-    def __eq__(self, other):
-        if not isinstance(other, dict):
-            return False
-        try:
-            return self.type == other['type'] and self.message == other['message']
-        finally:
-            return False
-
-class ExprValue(BaseModel):
-    value: str
-    
-    def __eq__(self, other):
-        try:
-            if eval(self.value) == other:
-                return True
-        finally:
-            return False
-
+# Multiple-choice question answers
 class Effect(BaseModel):
-    before: ExprValue | ExceptionValue
-    after: ExprValue | ExceptionValue
+    answer: List[str]
+
+    @field_validator('answer')
+    @classmethod
+    def validate_answer(cls, v: List[str]):
+        if len(v) == 0:
+            raise ValueError("answer list must not be empty")
+        for item in v:
+            if len(item) != 1:
+                raise ValueError("each answer must be a single character")
+            if not item.isalpha():
+                raise ValueError("each answer must be an alphabetic character")
+        return v

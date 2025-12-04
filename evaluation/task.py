@@ -11,6 +11,7 @@ from evaluation.util import (
     is_subpath,
     simple_name_eq,
     set_f1_score,
+    mcq_score,
 )
 
 __all__ = ['Task']
@@ -113,32 +114,32 @@ class RootCause:
 
 class Effect(Task[schema.Effect]):
     QUESTION = (
-        'Given the function and inputs, {before_or_after} the given location, what are the values of "{expr}" before and after the patch?\n\n'
-        'Notes:\n'
-        '1. For the values, answer with strings that can be directly parsed by Python\'s eval() function.\n'
-        '2. If `__return__` appears in the given expression, it refers to the return value of the function.\n'
-        '3. It is possible that an exception is raised before or at the given location, so the value of the expression may not exist. In this case, please answer with the type and message of the exception.\n'
-        '4. If you cannot infer from the explanation, please answer with an empty string.'
+        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
+        'Choices:\n'
+        '{choices}\n\n'
+        'Hints:\n'
+        '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
+        '2. The specified line may not be reached or executed due to an exception. For simplicity, you may treat raising an exception as the function returning an exception object.\n'
+        '3. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
     
+    @staticmethod
+    def _format_choices(exprs: list[str], formatter='{})'):
+        assert len(exprs) <= 26, 'Too many choices to label with single letters'
+        labels = 'abcdefghijklmnopqrstuvwxyz'
+        return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
+    
     @classmethod
     def _build_prompt(cls, explanation, **kwargs):
         before_or_after = kwargs.pop('before_or_after', 'before')
-        expr = kwargs.pop('expr')
-        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, expr=expr), context=cls._build_context(**kwargs))
+        choices = kwargs.pop('choices')
+        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        def eval_single(pred: schema.Effect, gt):
-            score = 0
-            if pred.before == gt['buggy_value']:
-                score += 0.5
-            if pred.after == gt['patched_value']:
-                score += 0.5
-            return score
-        return [eval_single(p, gt) for p in pred]
+        return [mcq_score(p, gt) for p in pred]
 
 if __name__ == "__main__":
     # Helpers
@@ -172,9 +173,14 @@ if __name__ == "__main__":
         
         ctx = {
             'function_code_before_patch': data['function_code_before_patch'],
-            'function_input': get_function_input(data),
-            'location': data['location'],
-            'expr': data['expr'],
+            'function_inputs': get_function_input(data),
+            'line': data['location'],
+            'choices': [
+                'cright[2, 1]',
+                'cright[0, 1]',
+                'cleft[0, 0]',
+                'None of the above',
+            ],
             'before_or_after': data['before_or_after'],
         }
         gt = {
