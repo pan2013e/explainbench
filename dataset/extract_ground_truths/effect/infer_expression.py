@@ -2,7 +2,7 @@ import os
 import ast
 import json
 import shutil
-
+from pprint import pprint
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
 from pydantic import BaseModel, field_validator
@@ -49,7 +49,7 @@ class Expression(BaseModel):
              before_or_after: str,
              expr_id=0,
             ):
-        log_dir = os.path.join(DIR, f"../../../logs/run_evaluation/inspect.{agent}.{os.getuid()}.{expr_id}/{agent}/{instance_id}")
+        log_dir = "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/logs/run_evaluation/inspect.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1020.0/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct/astropy__astropy-12907"
         if os.path.exists(log_dir):
             shutil.rmtree(log_dir)
         
@@ -86,6 +86,8 @@ class Expression(BaseModel):
             patched_inspect = json.load(f)
             patched_value = patched_inspect['value']
             patched_inspect_exc = patched_inspect['exception']
+        pprint(buggy_inspect)
+        pprint(patched_inspect)
         assert buggy_inspect_exc is None, "Other exception occurred in buggy inspection"
         assert patched_inspect_exc is None, "Other exception occurred in patched inspection"
         assert buggy_value != patched_value, "The expression does not distinguish buggy and patched versions."
@@ -94,23 +96,126 @@ class Expression(BaseModel):
 
 # TODO: Check the prompt quality and improve it if necessary.
 # TODO: Check if the answer candidates are too diverse
+
+
+# TODO: Modify the prompt. Let the llm generate an expression that <change/or not change>
+# We do the prompting multiple times to get n choices
+# Within, we can configure the n_changes
+
+# We cannot make some options too trivial
+ 
+
 TEMPLATE = (
-    "You are designing a Python expression <expr> to probe a code change. Another LLM will later be asked a question about a patch in a Python repository: \"Before the given line is executed, what is the value of <expr> before and after the patch?\" "
-    "Your task is to design a single valid Python expression <expr> that best fits the question. "
-    "You will be given a Python function from a repository, a specific line within that function, and the state differences at that line before and after the patch.\n\n"
-    "Notes:\n"
-    "1. The value of complex Python objects will be presented in JSON-serialized format produced by the jsonpickle library, including type information and some available attributes.\n"
-    "2. The expressions you design should reflect such differences in values.\n"
-    "3. When `__return__` is available in the local variable list, it is a special variable representing the return value.\n"
-    "4. Sometimes the code execution of one version may fail to reach the given line due to an exception raised earlier. In this case, the crashed line will also be provided. If two lines differ, you only need to reason about the normally executed line.\n"
-    "5. The values of the expressions should be easy for an LLM to describe, while still non-trivial to reason about. Avoid directly using complex objects or long floating-point numbers as expressions. In this case, consider using a more subtle expression that derives the desired information from these complex objects.\n"
-    "6. Make sure the values of the expressions are primitive types (i.e., None, int, float, str, bool) or native collections (e.g., list, dict) of primitive types.\n\n"
-    "Function:\n{code}\n\n"
-    "Line:\n{line}\n\n"
-    "State Differences:\n{diff}\n\n"
-    "Complete Variable States before and after patch:\n"
-    "Before:\n{before}\n"
-    "After:\n{after}\n\n"
+    # "You are designing a Python expression <expr> to probe a code change. Another LLM will later be asked a question about a patch in a Python repository: \"Before the given line is executed, what is the value of <expr> before and after the patch?\" "
+    # "Your task is to design a single valid Python expression <expr> that best fits the question. "
+    # "You will be given a Python function from a repository, a specific line within that function, and the state differences at that line before and after the patch.\n\n"
+    # "Notes:\n"
+    # "1. The value of complex Python objects will be presented in JSON-serialized format produced by the jsonpickle library, including type information and some available attributes.\n"
+    # "2. The expressions you design should reflect such differences in values.\n"
+    # "3. When `__return__` is available in the local variable list, it is a special variable representing the return value.\n"
+    # "4. Sometimes the code execution of one version may fail to reach the given line due to an exception raised earlier. In this case, the crashed line will also be provided. If two lines differ, you only need to reason about the normally executed line.\n"
+    # "5. The values of the expressions should be easy for an LLM to describe, while still non-trivial to reason about. Avoid directly using complex objects or long floating-point numbers as expressions. In this case, consider using a more subtle expression that derives the desired information from these complex objects.\n"
+    # "6. Make sure the values of the expressions are primitive types (i.e., None, int, float, str, bool) or native collections (e.g., list, dict) of primitive types.\n\n"
+    # "Function:\n{code}\n\n"
+    # "Line:\n{line}\n\n"
+    # "State Differences:\n{diff}\n\n"
+    # "Complete Variable States before and after patch:\n"
+    # "Before:\n{before}\n"
+    # "After:\n{after}\n\n"
+
+"""
+You are designing a Python expression <expr> to probe a code change.
+
+Another LLM will later be given several candidate expressions—including your generated <expr>—and asked to choose which expressions produce different values before and after the patch. Therefore:
+- <expr> MUST evaluate to different values between the "before" and "after" states at the given line, and
+- <expr> MUST be safely evaluable (no exceptions) in both versions.
+
+You will be given:
+- A Python function from a repository
+- A specific line within that function
+- State differences at that line before and after the patch
+- Complete variable states before and after the patch
+- A list of existing expressions that are known to already produce different values between the "before" and "after" states (this list may be empty)
+
+Your task is to produce ONE MORE valid Python expression <expr> that:
+- Also produces different values between the "before" and "after" states, and
+- Is not an obvious or trivial transformation of any existing expression.
+- Is not just a direct read of a single changed variable/attribute/index, but instead uses at least one operation, function call, comparison, or logical combination.
+
+Your output must be ONLY a valid Python expression (no quotes, no explanation).
+
+Hard requirements:
+1. The expression MUST evaluate to different values in the "before" and "after" versions. Do NOT output an expression whose value remains the same.
+2. The expression MUST be valid and MUST NOT raise any exceptions (such as IndexError, KeyError, AttributeError, TypeError, etc.) when evaluated in either the "before" or the "after" state.
+3. The expression must refer only to variables, attributes, or values present in the provided function.
+4. The final value of <expr> must be a primitive type (None, int, float, str, bool) or a built-in collection (list, dict, tuple, set) whose elements are all primitives.
+5. The expression should reflect a non-trivial change, and easy for another LLM to describe.
+
+Additional hard requirements on expression structure (to increase challenge):
+1. <expr> MUST NOT be just a bare variable, attribute, or index access
+   (e.g., `foo`, `obj.x`, `lst[0]`) or a single literal.
+2. <expr> MUST contain at least one of the following:
+   - An operator (e.g., `+`, `-`, `*`, `/`, `//`, `%`, `**`)
+   - A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+   - A logical operator (`and`, `or`, `not`)
+   - A built-in aggregator or predicate (`len`, `sum`, `min`, `max`, `any`, `all`,
+     `sorted`, list/set/dict comprehension) applied in a non-trivial way.
+3. Try to derive a property or predicate from changed data rather than returning
+   the changed value directly.
+
+Relationship to existing expressions:
+1. You will be given a list of existing Python expressions that already change value between "before" and "after". This list may be empty.
+2. Your new expression MUST NOT be identical to any existing expression.
+3. Avoid trivial rewrites or obvious transformations of existing expressions, such as:
+   - Simple negations or boolean inversions (e.g., `not existing_expr`).
+   - Adding or subtracting a constant from an existing numeric expression (e.g., `existing_expr + 1`).
+   - Wrapping an existing expression in a simple constructor or cast (e.g., `str(existing_expr)`, `bool(existing_expr)`, `[existing_expr]`).
+   - Reordering or slightly reformatting the same underlying computation.
+   - Returning the same underlying changed primitive through a single aggregator (e.g., `len(existing_collection)` if an existing expression already uses that same collection directly).
+4. Prefer expressions that expose a related but distinct aspect of the state, and
+   that involve either:
+   - A different attribute, index, key, or aggregation over a changed object, OR
+   - A combination or comparison of two or more variables/attributes.
+
+Safety guidance (to avoid exceptions in both states):
+1. When using indexing, only use an index i if it is valid in BOTH states (e.g., i < len(list_before) and i < len(list_after)).
+2. When using dictionary keys, only use d["key"] if "key" exists in BOTH states; otherwise prefer safer checks such as "key" in d or d.get("key") is None.
+3. When accessing attributes (obj.attr), ensure that the attribute exists in BOTH states. If not, consider safe checks such as hasattr(obj, "attr") or comparisons that do not raise and still yield primitive results.
+4. Avoid any expression that depends on a variable or attribute that is present in only one of the two states, unless you guard access with safe operations that do not raise (for example: using `"attr" in obj.__dict__`, `"key" in d`, or `getattr(obj, "attr", default)`), and the final expression still meets all other requirements.
+
+Additional guidance:
+1. Use the provided "State Differences" and the serialized values to identify which variables, attributes, indices, keys, or collection properties actually changed across versions.
+2. Prefer expressions that reveal meaningful differences, such as:
+   - Accessing changed attributes (obj.attr)
+   - Selecting changed keys or membership (d["x"], "x" in d)
+   - Inspecting collection sizes or simple aggregates (len(items), sum(scores), sorted(names))
+   - Boolean predicates that flip truth value between versions
+3. When complex objects appear, avoid returning them directly. Extract small, descriptive properties instead (e.g., len(obj.nodes), obj.status, round(value, 2)).
+4. When `__return__` appears, it represents the return value and may be referenced.
+5. If only one version reaches the given line (the other version crashes earlier), focus on the version that reaches normally, but still ensure that:
+   - The expression can be safely evaluated in both versions, and
+   - Its value differs between the two versions.
+
+Input:
+Function:
+{code}
+
+Line:
+{line}
+
+Existing expressions that already change value (one per line, may be empty):
+[]
+
+State Differences:
+{diff}
+
+Complete Variable States before and after patch:
+Before:
+{before}
+
+After:
+{after}
+"""
 )
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
