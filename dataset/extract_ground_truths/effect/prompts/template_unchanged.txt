@@ -54,6 +54,7 @@ Line:
 {line}
 
 Existing expressions that already stay the same (one per line, may be empty):
+{existing_expr}
 
 State Differences:
 {diff}
