@@ -124,10 +124,10 @@ class Expression(BaseModel):
             check_no_change(buggy_value, buggy_inspect_exc, patched_value, patched_inspect_exc)
 
 
-with open("prompts/template_changed.txt", "r") as f:
+with open(os.path.join(DIR, "prompts/template_changed.txt"), "r") as f:
     TEMPLATE_CHANGED = f.read()
 
-with open("prompts/template_unchanged.txt", "r") as f:
+with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
     TEMPLATE_UNCHANGED = f.read()
 
 
