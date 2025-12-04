@@ -139,7 +139,7 @@ class Effect(Task[schema.Effect]):
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        return [mcq_score(p, gt) for p in pred]
+        return [mcq_score(p.answer, gt) for p in pred]
 
 if __name__ == "__main__":
     # Helpers
@@ -168,24 +168,18 @@ if __name__ == "__main__":
     def get_ctx_and_gt(agent, instance_id):
         import os
         DIR = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(DIR, "../dataset/extract_ground_truths/effect/tmp/step2.json"), 'r') as f:
+        with open("/home/yusuf/explainbench/dataset/extract_ground_truths/effect/tmp/step2.json", 'r') as f:
             data = json.load(f)[agent][instance_id]
         
         ctx = {
             'function_code_before_patch': data['function_code_before_patch'],
             'function_inputs': get_function_input(data),
             'line': data['location'],
-            'choices': [
-                'cright[2, 1]',
-                'cright[0, 1]',
-                'cleft[0, 0]',
-                'None of the above',
-            ],
+            'choices': data['choices'],
             'before_or_after': data['before_or_after'],
         }
         gt = {
-            'buggy_value': data['buggy_value'],
-            'patched_value': data['patched_value'],
+            'answer': data['answer']
         }
         return ctx, gt
     
@@ -200,4 +194,4 @@ if __name__ == "__main__":
     prompt = Effect._build_prompt(explanation, **context)
     print(prompt)
     res = Effect.predict(model, explanation, **context)
-    print(res)
+    scores = Effect.eval(res, gt)  
