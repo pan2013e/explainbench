@@ -133,12 +133,23 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
-def main(code, line, diff, before, after, 
-         should_change=True, existing_changed=[], existing_unchanged=[]):
+def main(code, line, diff, before, after,
+         should_change=True, existing_changed=None, existing_unchanged=None):
+    existing_changed = existing_changed or []
+    existing_unchanged = existing_unchanged or []
+
     template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
-    prompt = template.format(code=code, line=line, diff=diff, before=before, after=after)
-    print(prompt)
-    breakpoint()
+    existing_exprs = existing_changed if should_change else existing_unchanged
+    existing_block = "\n".join(existing_exprs) if existing_exprs else "(none)"
+
+    prompt = template.format(
+        code=code,
+        line=line,
+        diff=diff,
+        before=before,
+        after=after,
+        existing_exprs=existing_block,
+    )
     expr = MODEL.infer_once(prompt, Expression)
     return expr
 
