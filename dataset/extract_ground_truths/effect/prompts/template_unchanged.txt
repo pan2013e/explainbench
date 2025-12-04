@@ -1,0 +1,66 @@
+You are designing a Python expression `<expr>` to probe a code change.
+Another LLM will later be given several candidate expressions, including your `<expr>`, and asked to identify which expressions produce the same value before and after the patch.
+
+### Inputs
+You will be given:
+- A Python function from a repository
+- A specific line within that function
+- State differences at that line before and after the patch
+- Complete variable states before and after the patch
+- A list of existing expressions that are already known to produce the same value (this list may be empty)
+
+### Task
+Produce exactly one additional Python expression `<expr>` that:
+- Produces the same outcome in both states (same value, or same exception behavior), and
+- Is non-trivial (see structural constraints), and
+- Is not an obvious transformation of any existing expression, and
+- Does not accidentally rely on a value that changed between states.
+
+Your output must be only a valid Python expression (no quotes, no explanation).
+
+### Hard semantic constraints
+1. `<expr>` must yield the same outcome (same value or same exception/no-exception behavior) in the “before” and “after” states.
+2. `<expr>` may reference only variables available in the variable states.
+3. If `__return__` is present, you may treat it as a special local variable holding the function’s return value.
+4. If `__return__` is present, you must reference `__return__` instead of `__exception__`.
+5. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+
+### Structural constraints
+1. `<expr>` MUST NOT be just a bare variable, attribute, index access, or a single literal.
+2. `<expr>` must use at least one of:
+   - An arithmetic operator (`+`, `-`, `*`, `/`, `//`, `%`, ``)
+   - A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+   - A logical operator (`and`, `or`, `not`)
+   - A non-trivial use of an aggregator/predicate (`len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, or a comprehension`)
+3. Prefer expressions that reflect a stable property of the unchanged parts of the state rather than trivially constant expressions (e.g., comparing a variable to itself).
+
+### Relationship to existing expressions
+1. `<expr>` MUST NOT be identical to any existing expression.
+2. Avoid trivial rewrites of existing expressions, such as:
+   - Simple negations
+   - Adding/subtracting a constant
+   - Simple casting/wrapping
+   - Reordering or cosmetically reformatting
+3. Prefer expressions that:
+   - Use different stable attributes or indices, or
+   - Combine multiple unchanged values to expose a stable property.
+
+### Input:
+
+Function:
+{code}
+
+Line:
+{line}
+
+Existing expressions that already stay the same (one per line, may be empty):
+
+State Differences:
+{diff}
+
+Complete Variable States before and after patch:
+Before:
+{before}
+
+After:
+{after}

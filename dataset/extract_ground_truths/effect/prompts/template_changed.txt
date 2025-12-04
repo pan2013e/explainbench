@@ -1,0 +1,65 @@
+You are designing a Python expression `<expr>` to probe a code change.
+Another LLM will later be given several candidate expressions, including your `<expr>`, and asked to choose which ones produce different values before and after the patch.
+
+### Inputs
+You will be given:
+- A Python function from a repository
+- A specific line within that function
+- State differences at that line before and after the patch
+- Complete variable states before and after the patch
+- A list of existing expressions that are already known to produce different values (this list may be empty)
+
+### Task
+Produce exactly one additional Python expression `<expr>` that:
+- Has a different outcome between the two states (different value or valid in only one state), and
+- Is non-trivial (see structural constraints), and
+- Is not an obvious transformation of any existing expression, and
+
+Your output must be only a valid Python expression (no quotes, no explanation).
+
+### Hard semantic constraints
+1. `<expr>` must yield different outcomes between “before” and “after” (value difference or exception vs. no exception).
+2. `<expr>` may reference only variables available in the variable states. 
+3. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
+4. If `__return__` present; it must reference `__return__` instead of `__exception__`.
+5. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+
+### Structural constraints
+1. `<expr>` MUST NOT be just a bare variable, attribute, index access, or a single literal (e.g., `foo`, `obj.x`, `lst[0]`, `0`).
+2. `<expr>` may use at least one of:
+   * An arithmetic operator (`+`, `-`, `*`, `/`, `//`, `%`, `**`)
+   * A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+   * A logical operator (`and`, `or`, `not`)
+   * A non-trivial use of an aggregator/predicate (`len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, or a comprehension)
+3. Prefer deriving a **property or predicate** of changed data rather than returning the changed primitive value itself.
+
+### Relationship to existing expressions
+1. `<expr>` MUST NOT be identical to any existing expression.
+2. Avoid trivial rewrites of existing expressions, such as:
+   * Simple negations (`not existing_expr`).
+   * Adding/subtracting a constant (`existing_expr + 1`).
+   * Simple casting/wrapping (`str(existing_expr)`, `[existing_expr]`).
+   * Reordering or cosmetically reformatting the same computation.
+   * Returning the same underlying changed primitive via a simple aggregator on the same object.
+3. Prefer expressions that:
+   * Use a different attribute, index, or aggregation over a changed object, or
+   * Combine or compare two or more variables/attributes to expose a related but distinct aspect of the state.
+
+Input:
+Function:
+{code}
+
+Line:
+{line}
+
+Existing expressions that already change value (one per line, may be empty):
+
+State Differences:
+{diff}
+
+Complete Variable States before and after patch:
+Before:
+{before}
+
+After:
+{after}
