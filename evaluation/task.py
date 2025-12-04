@@ -140,7 +140,8 @@ class Effect(Task[schema.Effect]):
     
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        return [mcq_score(p.answer, gt) for p in pred]
+        answers = gt.get('answer', gt)
+        return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
     # Helpers
