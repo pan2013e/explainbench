@@ -57,8 +57,15 @@ def get_simple_function_name(metadata):
         name = name.split(".")[-1]
     return name
 
+def shuffle_list_pair(a: list, b: list):
+    combined = list(zip(a, b, strict=True))
+    random.shuffle(combined)
+    a[:], b[:] = zip(*combined)
+
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_with_validation(pre_code, post_code, metadata, should_change=True, expr_id=0):
+def infer_with_validation(pre_code, post_code, metadata, 
+                          should_change=True, expr_id=0,
+                          existing_changed=[], existing_unchanged=[]):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -71,6 +78,8 @@ def infer_with_validation(pre_code, post_code, metadata, should_change=True, exp
         metadata["buggy_variables"],
         metadata["patched_variables"],
         should_change=should_change,
+        existing_changed=existing_changed,
+        existing_unchanged=existing_unchanged,
     )
     expr.validate_effect(
         metadata["instance_id"],
@@ -104,11 +113,19 @@ def process_agent(data, agent, instance_ids):
         n_choices = 5
         n_changes = 2
         _should_change = [True] * n_changes + [False] * (n_choices - n_changes)
-        random.shuffle(_should_change)
         choices = []
-        for expr_id, should_change in enumerate(_should_change):
-            choice = infer_with_validation(pre_code, post_code, metadata, should_change=should_change, expr_id=expr_id).expr
-            choices.append(choice)
+        for expr_id, should_change in enumerate(_should_change):            
+            inferred = infer_with_validation(
+                pre_code,
+                post_code,
+                metadata,
+                should_change=should_change,
+                expr_id=expr_id,
+                existing_changed=choices[:n_changes],
+                existing_unchanged=choices[n_changes:],
+            )
+            choices.append(inferred.expr)
+        shuffle_list_pair(_should_change, choices)
         choices.append('None of the above')
         labels = 'abcdefghijklmnopqrstuvwxyz'
         answer = [labels[i] for i, should_change in enumerate(_should_change) if should_change]
