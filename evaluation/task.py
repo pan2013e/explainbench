@@ -1,3 +1,4 @@
+import os
 import json
 
 from functools import lru_cache
@@ -182,7 +183,8 @@ if __name__ == "__main__":
             'answer': data['answer']
         }
         return ctx, gt
-    
+
+
     # Example
     model = Model('gemini/gemini-2.5-flash', n=5)
     agent = '20250805_openhands-Qwen3-Coder-480B-A35B-Instruct'
@@ -192,6 +194,19 @@ if __name__ == "__main__":
     # predict actually calls _build_prompt internally
     # here we call again just to display the full prompt
     prompt = Effect._build_prompt(explanation, **context)
-    print(prompt)
     res = Effect.predict(model, explanation, **context)
     scores = Effect.eval(res, gt)  
+
+    # Save results
+    output = {
+        agent: {
+            instance_id: {
+                'all_pred': [p.answer for p in res],
+                'average': sum(scores) / len(scores) if scores else 0.0,
+            }
+        }
+    }
+    out_path = os.path.join(os.path.dirname(__file__), 'effect_eval_output.json')
+    with open(out_path, 'w') as f:
+        json.dump(output, f, indent=2)
+    print(f"Saved results to {out_path}")
