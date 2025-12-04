@@ -166,17 +166,18 @@ You will be given:
 
 ### Task
 Produce exactly one additional Python expression `<expr>` that:
-- Evaluates to **different values** in the “before” and “after” states, and
-- Is **non-trivial** (see structural constraints below), and
-- Is **not** an obvious transformation of any existing expression.
+- Has a different outcome between the two states (different value or valid in only one state), and
+- Is non-trivial (see structural constraints), and
+- Is not an obvious transformation of any existing expression, and
 
 Your output must be only a valid Python expression (no quotes, no explanation).
 
 ### Hard semantic constraints
-1. `<expr>` MUST evaluate to **different values** in the “before” and “after” versions.
-2. `<expr>` MUST be valid and MUST NOT raise any exceptions (IndexError, KeyError, AttributeError, TypeError, etc.) in either state.
-3. `<expr>` may refer only to variables, attributes, or values available in the provided function.
-4. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection (`list`, `dict`, `tuple`, `set`) whose elements are all primitives.
+1. `<expr>` must yield different outcomes between “before” and “after” (value difference or exception vs. no exception).
+2. `<expr>` may reference only variables available in the variable states. 
+3. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
+4. If `__return__` present; it must reference `__return__` instead of `__exception__`.
+5. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
 
 ### Structural constraints
 1. `<expr>` MUST NOT be just a bare variable, attribute, index access, or a single literal (e.g., `foo`, `obj.x`, `lst[0]`, `0`).
@@ -198,13 +199,6 @@ Your output must be only a valid Python expression (no quotes, no explanation).
 3. Prefer expressions that:
    * Use a different attribute, index, or aggregation over a changed object, or
    * Combine or compare two or more variables/attributes to expose a related but distinct aspect of the state.
-
-### Safety guidance
-When building `<expr>`, ensure it is safe in both states:
-* For lists/tuples: only use index `i` if it is valid in both states; otherwise, use `len(...)`, slices, or safe predicates.
-* For dicts: only use `d["key"]` if the key exists in both states, or use `"key" in d` / `d.get("key")`.
-* For attributes: only use `obj.attr` if it exists in both states; otherwise, use `hasattr(obj, "attr")` or `getattr(obj, "attr", default)`.
-* If a variable/attribute is present only in one state, any use of it must be guarded so that no exception is raised, and the final value still differs between states.
 
 Input:
 Function:
