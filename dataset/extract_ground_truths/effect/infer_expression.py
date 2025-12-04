@@ -124,77 +124,58 @@ TEMPLATE = (
     # "After:\n{after}\n\n"
 
 """
-You are designing a Python expression <expr> to probe a code change.
+You are designing a Python expression `<expr>` to probe a code change.
+Another LLM will later be given several candidate expressions, including your `<expr>`, and asked to choose which ones produce different values before and after the patch.
 
-Another LLM will later be given several candidate expressions—including your generated <expr>—and asked to choose which expressions produce different values before and after the patch. Therefore:
-- <expr> MUST evaluate to different values between the "before" and "after" states at the given line, and
-- <expr> MUST be safely evaluable (no exceptions) in both versions.
-
+### Inputs
 You will be given:
 - A Python function from a repository
 - A specific line within that function
 - State differences at that line before and after the patch
 - Complete variable states before and after the patch
-- A list of existing expressions that are known to already produce different values between the "before" and "after" states (this list may be empty)
+- A list of existing expressions that are already known to produce different values (this list may be empty)
 
-Your task is to produce ONE MORE valid Python expression <expr> that:
-- Also produces different values between the "before" and "after" states, and
-- Is not an obvious or trivial transformation of any existing expression.
-- Is not just a direct read of a single changed variable/attribute/index, but instead uses at least one operation, function call, comparison, or logical combination.
+### Task
+Produce exactly one additional Python expression `<expr>` that:
+- Evaluates to **different values** in the “before” and “after” states, and
+- Is **non-trivial** (see structural constraints below), and
+- Is **not** an obvious transformation of any existing expression.
 
-Your output must be ONLY a valid Python expression (no quotes, no explanation).
+Your output must be only a valid Python expression (no quotes, no explanation).
 
-Hard requirements:
-1. The expression MUST evaluate to different values in the "before" and "after" versions. Do NOT output an expression whose value remains the same.
-2. The expression MUST be valid and MUST NOT raise any exceptions (such as IndexError, KeyError, AttributeError, TypeError, etc.) when evaluated in either the "before" or the "after" state.
-3. The expression must refer only to variables, attributes, or values present in the provided function.
-4. The final value of <expr> must be a primitive type (None, int, float, str, bool) or a built-in collection (list, dict, tuple, set) whose elements are all primitives.
-5. The expression should reflect a non-trivial change, and easy for another LLM to describe.
+### Hard semantic constraints
+1. `<expr>` MUST evaluate to **different values** in the “before” and “after” versions.
+2. `<expr>` MUST be valid and MUST NOT raise any exceptions (IndexError, KeyError, AttributeError, TypeError, etc.) in either state.
+3. `<expr>` may refer only to variables, attributes, or values available in the provided function.
+4. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection (`list`, `dict`, `tuple`, `set`) whose elements are all primitives.
 
-Additional hard requirements on expression structure (to increase challenge):
-1. <expr> MUST NOT be just a bare variable, attribute, or index access
-   (e.g., `foo`, `obj.x`, `lst[0]`) or a single literal.
-2. <expr> MUST contain at least one of the following:
-   - An operator (e.g., `+`, `-`, `*`, `/`, `//`, `%`, `**`)
-   - A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
-   - A logical operator (`and`, `or`, `not`)
-   - A built-in aggregator or predicate (`len`, `sum`, `min`, `max`, `any`, `all`,
-     `sorted`, list/set/dict comprehension) applied in a non-trivial way.
-3. Try to derive a property or predicate from changed data rather than returning
-   the changed value directly.
+### Structural constraints
+1. `<expr>` MUST NOT be just a bare variable, attribute, index access, or a single literal (e.g., `foo`, `obj.x`, `lst[0]`, `0`).
+2. `<expr>` may use at least one of:
+   * An arithmetic operator (`+`, `-`, `*`, `/`, `//`, `%`, `**`)
+   * A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+   * A logical operator (`and`, `or`, `not`)
+   * A non-trivial use of an aggregator/predicate (`len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, or a comprehension)
+3. Prefer deriving a **property or predicate** of changed data rather than returning the changed primitive value itself.
 
-Relationship to existing expressions:
-1. You will be given a list of existing Python expressions that already change value between "before" and "after". This list may be empty.
-2. Your new expression MUST NOT be identical to any existing expression.
-3. Avoid trivial rewrites or obvious transformations of existing expressions, such as:
-   - Simple negations or boolean inversions (e.g., `not existing_expr`).
-   - Adding or subtracting a constant from an existing numeric expression (e.g., `existing_expr + 1`).
-   - Wrapping an existing expression in a simple constructor or cast (e.g., `str(existing_expr)`, `bool(existing_expr)`, `[existing_expr]`).
-   - Reordering or slightly reformatting the same underlying computation.
-   - Returning the same underlying changed primitive through a single aggregator (e.g., `len(existing_collection)` if an existing expression already uses that same collection directly).
-4. Prefer expressions that expose a related but distinct aspect of the state, and
-   that involve either:
-   - A different attribute, index, key, or aggregation over a changed object, OR
-   - A combination or comparison of two or more variables/attributes.
+### Relationship to existing expressions
+1. `<expr>` MUST NOT be identical to any existing expression.
+2. Avoid trivial rewrites of existing expressions, such as:
+   * Simple negations (`not existing_expr`).
+   * Adding/subtracting a constant (`existing_expr + 1`).
+   * Simple casting/wrapping (`str(existing_expr)`, `[existing_expr]`).
+   * Reordering or cosmetically reformatting the same computation.
+   * Returning the same underlying changed primitive via a simple aggregator on the same object.
+3. Prefer expressions that:
+   * Use a different attribute, index, or aggregation over a changed object, or
+   * Combine or compare two or more variables/attributes to expose a related but distinct aspect of the state.
 
-Safety guidance (to avoid exceptions in both states):
-1. When using indexing, only use an index i if it is valid in BOTH states (e.g., i < len(list_before) and i < len(list_after)).
-2. When using dictionary keys, only use d["key"] if "key" exists in BOTH states; otherwise prefer safer checks such as "key" in d or d.get("key") is None.
-3. When accessing attributes (obj.attr), ensure that the attribute exists in BOTH states. If not, consider safe checks such as hasattr(obj, "attr") or comparisons that do not raise and still yield primitive results.
-4. Avoid any expression that depends on a variable or attribute that is present in only one of the two states, unless you guard access with safe operations that do not raise (for example: using `"attr" in obj.__dict__`, `"key" in d`, or `getattr(obj, "attr", default)`), and the final expression still meets all other requirements.
-
-Additional guidance:
-1. Use the provided "State Differences" and the serialized values to identify which variables, attributes, indices, keys, or collection properties actually changed across versions.
-2. Prefer expressions that reveal meaningful differences, such as:
-   - Accessing changed attributes (obj.attr)
-   - Selecting changed keys or membership (d["x"], "x" in d)
-   - Inspecting collection sizes or simple aggregates (len(items), sum(scores), sorted(names))
-   - Boolean predicates that flip truth value between versions
-3. When complex objects appear, avoid returning them directly. Extract small, descriptive properties instead (e.g., len(obj.nodes), obj.status, round(value, 2)).
-4. When `__return__` appears, it represents the return value and may be referenced.
-5. If only one version reaches the given line (the other version crashes earlier), focus on the version that reaches normally, but still ensure that:
-   - The expression can be safely evaluated in both versions, and
-   - Its value differs between the two versions.
+### Safety guidance
+When building `<expr>`, ensure it is safe in both states:
+* For lists/tuples: only use index `i` if it is valid in both states; otherwise, use `len(...)`, slices, or safe predicates.
+* For dicts: only use `d["key"]` if the key exists in both states, or use `"key" in d` / `d.get("key")`.
+* For attributes: only use `obj.attr` if it exists in both states; otherwise, use `hasattr(obj, "attr")` or `getattr(obj, "attr", default)`.
+* If a variable/attribute is present only in one state, any use of it must be guarded so that no exception is raised, and the final value still differs between states.
 
 Input:
 Function:
@@ -204,7 +185,6 @@ Line:
 {line}
 
 Existing expressions that already change value (one per line, may be empty):
-[]
 
 State Differences:
 {diff}
