@@ -4,6 +4,7 @@ import atexit
 import tarfile
 import datasets
 
+from functools import lru_cache
 from io import RawIOBase, BufferedReader
 from pathlib import PurePosixPath, Path
 from datasets import load_dataset
@@ -68,6 +69,7 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
     with tarfile.open(fileobj=reader, mode="r|gz") as tar:
         tar.extractall(path=target_path)
 
+@lru_cache
 def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     if 'django__django' in instance_id:
         return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
