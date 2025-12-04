@@ -59,7 +59,7 @@ Line:
 {line}
 
 Existing expressions that already stay the same (one per line, may be empty):
-{existing_expr}
+{existing_exprs}
 
 State Differences:
 {diff}
