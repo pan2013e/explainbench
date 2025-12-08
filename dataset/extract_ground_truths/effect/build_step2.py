@@ -76,17 +76,6 @@ def infer_with_validation(pre_code, post_code, metadata):
         metadata["buggy_variables"],
         metadata["patched_variables"],
     )
-    expr.validate_effect(
-        metadata["instance_id"],
-        metadata["agent"],
-        metadata["file_path"],
-        metadata["buggy_lineno"],
-        metadata["patched_lineno"],
-        metadata["test_id"],
-        metadata["buggy_line_count"],
-        metadata["patched_line_count"],
-        metadata["before_or_after"],
-    )
     return expr
 
 def process_agent(data, agent, instance_ids):
