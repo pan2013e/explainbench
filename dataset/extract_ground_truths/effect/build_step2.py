@@ -93,12 +93,14 @@ def process_agent(data, agent, instance_ids):
             patch=get_agent_patch(agent, instance_id),
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
+        inferred_exprs = None
         for should_change in (True, False):
             inferred_exprs = infer_expressions(
                 pre_code,
                 post_code,
                 metadata,
                 should_change,
+                inferred_exprs
             )
             key = "changed_candidates" if should_change else "unchanged_candidates"
             results[instance_id] = {
