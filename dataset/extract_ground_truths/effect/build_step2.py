@@ -63,7 +63,7 @@ def shuffle_list_pair(a: list, b: list):
     a[:], b[:] = zip(*combined)
 
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_with_validation(pre_code, post_code, metadata, should_change):
+def infer_expressions(pre_code, post_code, metadata, should_change):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -94,7 +94,7 @@ def process_agent(data, agent, instance_ids):
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
         for should_change in (True, False):
-            inferred_exprs = infer_with_validation(
+            inferred_exprs = infer_expressions(
                 pre_code,
                 post_code,
                 metadata,
