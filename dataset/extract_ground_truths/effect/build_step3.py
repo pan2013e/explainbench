@@ -60,7 +60,7 @@ def process_agent(data, agent, instance_ids):
                 if valid_expr:
                     valid_exprs.append(valid_expr.expr)
             results[instance_id] = {
-                output_key: valid_exprs
+                output_key: valid_exprs,
                 **metadata
             }
     return results
