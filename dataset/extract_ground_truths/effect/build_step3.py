@@ -76,6 +76,6 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    with open(os.path.join(DIR, "tmp/step2.json"), "w") as f:
+    with open(os.path.join(DIR, "tmp/step3.json"), "w") as f:
         json.dump(results, f, indent=2)
-    print("Saved step2 results to tmp/step2.json")
+    print("Saved step2 results to tmp/step3.json")
