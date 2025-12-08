@@ -63,7 +63,7 @@ def shuffle_list_pair(a: list, b: list):
     a[:], b[:] = zip(*combined)
 
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_expressions(pre_code, post_code, metadata, should_change):
+def infer_expressions(pre_code, post_code, metadata, should_change, changed_expressions):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -75,7 +75,8 @@ def infer_expressions(pre_code, post_code, metadata, should_change):
         metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
-        should_change
+        should_change,
+        changed_expressions
     )
     return expr
 
