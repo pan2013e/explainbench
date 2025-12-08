@@ -13,18 +13,19 @@ from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect import get_divergent_lines
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-AGENTS = list(
-    map(
-        lambda x: x.strip(),
-        open(os.path.join(DIR, "../../explanations/agents.txt")).readlines()
-    )
-)
+# AGENTS = list(
+#     map(
+#         lambda x: x.strip(),
+#         open(os.path.join(DIR, "../../explanations/agents.txt")).readlines()
+#     )
+# )
+AGENTS = ["20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"]
 
 def process_agent(agent, instance_ids):
     results = {}
     for instance_id in instance_ids:
         try:
-            results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent, is_return=True))
+            results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent))
         except FileNotFoundError:
             results[instance_id] = None
         except Exception as e:
@@ -34,7 +35,19 @@ def process_agent(agent, instance_ids):
 
 if __name__ == "__main__":
     results = {}
-    instance_ids = get_instance_ids(["astropy", "sympy"])
+    ids = [
+        "astropy__astropy-12907",
+        "astropy__astropy-13453",
+        "astropy__astropy-13579",
+        "astropy__astropy-14096",
+        "astropy__astropy-14365",
+        "sympy__sympy-12096",
+        "sympy__sympy-12419",
+        "sympy__sympy-12489",
+        "sympy__sympy-13551",
+        "sympy__sympy-13615",
+    ]
+    instance_ids = get_instance_ids(ids)
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, agent, instance_ids): agent

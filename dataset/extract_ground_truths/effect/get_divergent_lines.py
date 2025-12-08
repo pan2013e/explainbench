@@ -161,7 +161,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
     return None
 
 if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
     from pprint import pprint
-    result = main("sympy__sympy-11618", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main("sympy__sympy-12419", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     pprint(result)

@@ -82,7 +82,7 @@ class Expression(BaseModel):
         run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
         log_dir = os.path.join(
             DIR,
-            "logs/run_evaluation",
+            "../../../logs/run_evaluation",
             run_id,
             agent,
             instance_id,
