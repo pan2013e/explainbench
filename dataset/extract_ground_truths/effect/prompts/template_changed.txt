@@ -7,43 +7,92 @@ You will be given:
 - A specific line within that function
 - State differences at that line before and after the patch
 - Complete variable states before and after the patch
-- A list of existing expressions that are already known to produce different values (this list may be empty)
+- A seed expression
 
 ### Task
-Produce exactly one additional Python expression `<expr>` that:
-- Has a different outcome between the two states (different value or valid in only one state), and
-- Is non-trivial (see structural constraints), and
-- Is not an obvious transformation of any existing expression, and
+Produce exactly {n_output} Python expressions `<expr>` that:
+1. have a different outcome between the buggy and patched programs based on the seed expression:
+   (a) yield different values, or
+   (b) yield different program state between the buggy and patched programs:
+      - raising an exception vs returning None or a value, or
+      - raising different exceptions
+2. are more complex than the seed expression
 
-Your output must be only a valid Python expression (no quotes, no explanation).
+### Output Format
+<expr-1>
+<expr-2>
+...
+<expr-{n_output}>
 
-### Hard semantic constraints
-1. `<expr>` must yield different outcomes between “before” and “after” (value difference or exception vs. no exception).
-2. `<expr>` may reference only variables available in the variable states. 
-3. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
-4. If `__return__` present; it must reference `__return__` instead of `__exception__`.
-5. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+### General Rules
+1. `<expr>` must reference variables available in the variable states. 
+2. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
+3. If `__return__` present and `__exception__` exist; you must reference `__return__` instead of `__exception__`.
+4. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+5. Follow `### Actions to Build the Expressions` to build more complex `<expr>` from the seed expression
 
-### Structural constraints
-1. `<expr>` MUST NOT be just a bare variable, attribute, index access, or a single literal (e.g., `foo`, `obj.x`, `lst[0]`, `0`).
-2. `<expr>` may use at least one of:
-   * An arithmetic operator (`+`, `-`, `*`, `/`, `//`, `%`, `**`)
-   * A comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
-   * A logical operator (`and`, `or`, `not`)
-   * A non-trivial use of an aggregator/predicate (`len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, or a comprehension)
-3. Prefer deriving a **property or predicate** of changed data rather than returning the changed primitive value itself.
+### Actions to Build the Expressions
+You choose 1 or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
 
-### Relationship to existing expressions
-1. `<expr>` MUST NOT be identical to any existing expression.
-2. Avoid trivial rewrites of existing expressions, such as:
-   * Simple negations (`not existing_expr`).
-   * Adding/subtracting a constant (`existing_expr + 1`).
-   * Simple casting/wrapping (`str(existing_expr)`, `[existing_expr]`).
-   * Reordering or cosmetically reformatting the same computation.
-   * Returning the same underlying changed primitive via a simple aggregator on the same object.
-3. Prefer expressions that:
-   * Use a different attribute, index, or aggregation over a changed object, or
-   * Combine or compare two or more variables/attributes to expose a related but distinct aspect of the state.
+1. Binary operations
+   - Combine the seed expression (or a subpart of it) with:
+     - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`, ``
+     - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
+     - logical operators: `and`, `or`, `not`
+     - identity/membership: `is`, `is not`, `in`, `not in`
+   - Example:
+     - `seed_expr + 1`
+     - `seed_expr == other_var`
+     - `seed_expr in some_list`
+
+2. Attribute access
+   - Access attributes or methods of the seed expression or other variables:
+     - `foo.bar`, `foo.bar()`
+   - Only use attributes/methods that exist in the provided variable states.
+   - Example:
+     - `seed_expr.lower()`
+     - `result.status_code`
+
+3. Indexing and slicing
+   - Index or slice sequences, mappings, or numpy arrays:
+     - `foo[bar]`, `foo[0]`, `foo[-1]`, `foo[1:3]`
+   - Example:
+     - `seed_expr[0]`
+     - `seed_expr['key']`
+     - `seed_expr[:3]`
+
+4. Wrapping with functions
+   - Wrap the seed expression or a related expression using:
+     1. Python built-ins:
+        `len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, `tuple`, `list`, `dict`, `set`, `bool`, `str`, `int`, `float`, `abs`, `round`, `hash`, `type`, `isinstance`, `getattr`, `hasattr`, `enumerate`, `zip`
+     2. Numpy functions (if `np` is available in the states):
+        `np.allclose`, `np.array_equal`, `np.isnan`, `np.isclose`, etc.
+   - Example:
+     - `len(seed_expr)`
+     - `sorted(seed_expr)`
+     - `np.array_equal(seed_expr, other_var)`
+
+5. Conditional expressions
+   - Use Python’s ternary operator to build predicates that can flip between before and after:
+     - `expr_if_true if condition else expr_if_false`
+   - Example:
+     - `1 if seed_expr is None else 0`
+     - `'ok' if seed_expr == other_var else 'diff'`
+
+6. Combination with other changed variables
+   - Identify variables whose values differ between before and after, and combine them with the seed expression:
+     - arithmetic, comparison, logical, or function-based combinations.
+   - Example:
+     - `seed_expr - changed_var`
+     - `changed_var in seed_expr`
+     - `len(changed_list) - len(seed_expr)`
+
+7. Collection-building expressions
+   - Build small collections of primitives or expressions:
+     - tuples, lists, sets, dicts
+   - Example:
+     - `[seed_expr, other_var]`
+     - `(seed_expr == other_var, other_var is None)`
 
 Input:
 Function:
@@ -51,9 +100,6 @@ Function:
 
 Line:
 {line}
-
-Existing expressions that already change value (one per line, may be empty):
-{existing_exprs}
 
 State Differences:
 {diff}
