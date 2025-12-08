@@ -150,7 +150,7 @@ def extract_seed_exp(input_diff):
         var_name = extract_var_name(item)
         return var_name
 
-def main(code, line, diff, before, after, should_change):
+def main(code, line, diff, before, after, should_change, changed_expressions=None):
     if should_change:
         prompt = TEMPLATE_CHANGED.format(
             code=code,
@@ -160,6 +160,16 @@ def main(code, line, diff, before, after, should_change):
             after=after,
             n_output=5,
             seed_expression=extract_seed_exp(diff)
+        )
+    else:
+        prompt = TEMPLATE_UNCHANGED.format(
+            code=code,
+            line=line,
+            diff=diff,
+            before=before,
+            after=after,
+            n_output=5,
+            changed_expressions=changed_expressions if changed_expressions else ""
         )
     expr_list = MODEL.infer_once(prompt, ExpressionList)
     return expr_list
