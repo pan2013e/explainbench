@@ -37,7 +37,8 @@ def validate_expression(expr, metadata):
             metadata["before_or_after"],
         )
         return expr
-    except:
+    except Exception as e:
+        print(e)
         return None
 
 def process_agent(data, agent, instance_ids):
@@ -51,13 +52,13 @@ def process_agent(data, agent, instance_ids):
                 continue
             expression_candidates =  ExpressionList(**metadata[key])
             valid_exprs = []
-            for expr in enumerate(expression_candidates.expressions):            
+            for _, expr in enumerate(expression_candidates.expressions):            
                 valid_expr = validate_expression(
                     expr,
                     metadata,
                 )
                 if valid_expr:
-                    valid_exprs.append(valid_expr.exp)
+                    valid_exprs.append(valid_expr.expr)
             results[instance_id] = {
                 output_key: valid_exprs
                 **metadata
