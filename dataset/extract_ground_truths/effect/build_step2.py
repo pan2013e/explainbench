@@ -92,36 +92,22 @@ def process_agent(data, agent, instance_ids):
             patch=get_agent_patch(agent, instance_id),
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
-        n_choices = 5
-        n_changes = 2
-        _should_change = [True] * n_changes + [False] * (n_choices - n_changes)
-        choices = []
-        for expr_id, should_change in enumerate(_should_change):            
-            inferred = infer_with_validation(
-                pre_code,
-                post_code,
-                metadata,
-            )
-            choices.append(inferred.expr)
-        shuffle_list_pair(_should_change, choices)
-        choices.append('None of the above')
-        labels = 'abcdefghijklmnopqrstuvwxyz'
-        answer = [labels[i] for i, should_change in enumerate(_should_change) if should_change]
-        if not answer:
-            fallback_idx = len(choices) - 1
-            answer = [labels[fallback_idx]]
+        inferred_exprs = infer_with_validation(
+            pre_code,
+            post_code,
+            metadata,
+        )
         results[instance_id] = {
-            "choices": choices,
-            "answer": answer,
+            "inferred_exprs": inferred_exprs.model_dump(),
             "function_code_before_patch": remove_docstrings(pre_code),
             **metadata
-        }
+        }        
     return results
 
 if __name__ == "__main__":
     step1 = read_step1_results()
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-12907"])
+    instance_ids = get_instance_ids(["astropy__astropy-13453"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, agent, instance_ids): agent
