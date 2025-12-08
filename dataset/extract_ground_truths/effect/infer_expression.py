@@ -10,6 +10,7 @@ from pydantic import BaseModel, field_validator
 from evaluation.inference import Model
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests
+from dataset.extract_ground_truths.effect.postprocessing_util import extract_var_name
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -142,16 +143,24 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
+# NOTE: Currently, it is possibel that input diff contains more than 1. In this case, this function outputs the first object.
+# It can be modified in the future
+def extract_seed_exp(input_diff):
+    for key, item in input_diff.items():
+        var_name = extract_var_name(item)
+        return var_name
+
 def main(code, line, diff, before, after, should_change):
-    template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
-    prompt = template.format(
-        code=code,
-        line=line,
-        diff=diff,
-        before=before,
-        after=after,
-        n_output=5
-    )
+    if should_change:
+        prompt = TEMPLATE_CHANGED.format(
+            code=code,
+            line=line,
+            diff=diff,
+            before=before,
+            after=after,
+            n_output=5,
+            seed_expression=extract_seed_exp(diff)
+        )
     expr_list = MODEL.infer_once(prompt, ExpressionList)
     return expr_list
 
@@ -168,4 +177,4 @@ if __name__ == "__main__":
     diff = "omitted, please see the full context"
     before = "{'separable_matrix': {'py/object': 'numpy.ndarray', 'dtype': 'float64', 'values': [[1.0, 1.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]]}"
     after = "{'separable_matrix': {'py/object': 'numpy.ndarray', 'dtype': 'float64', 'values': [[1.0, 1.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}"
-    print(main(code, line, diff, before, after))
+    print(main(code, line, diff, before, after, True))

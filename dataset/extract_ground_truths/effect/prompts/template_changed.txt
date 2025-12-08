@@ -106,4 +106,4 @@ After:
 {after}
 
 Seed Expression:
-cright
+{seed_expression}
