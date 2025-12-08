@@ -24,7 +24,7 @@ Produce exactly {n_output} Python expressions `<expr>` that:
 4. Follow `### Actions to Build the Expressions` to build more complex `<expr>`
 
 ### Actions to Build the Expressions
-You choose 1 or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
+You choose 1 or more of the following to build more expressions with similar complexity as the correct expressions.
 
 1. Binary operations
    - Combine the seed expression (or a subpart of it) with:
