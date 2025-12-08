@@ -140,14 +140,11 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
-def main(code, line, diff, before, after,
-         should_change=True, existing_changed=None, existing_unchanged=None):
+def main(code, line, diff, before, after):
     existing_changed = existing_changed or []
     existing_unchanged = existing_unchanged or []
 
-    template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
-    existing_exprs = existing_changed if should_change else existing_unchanged
-    existing_block = "\n".join(existing_exprs) if existing_exprs else ""
+    template = TEMPLATE_CHANGED
 
     prompt = template.format(
         code=code,
@@ -155,7 +152,7 @@ def main(code, line, diff, before, after,
         diff=diff,
         before=before,
         after=after,
-        existing_exprs=existing_block,
+        n_output=5
     )
     expr = MODEL.infer_once(prompt, Expression)
     return expr

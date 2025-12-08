@@ -63,9 +63,7 @@ def shuffle_list_pair(a: list, b: list):
     a[:], b[:] = zip(*combined)
 
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_with_validation(pre_code, post_code, metadata, 
-                          should_change=True, expr_id=0,
-                          existing_changed=[], existing_unchanged=[]):
+def infer_with_validation(pre_code, post_code, metadata):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -77,9 +75,6 @@ def infer_with_validation(pre_code, post_code, metadata,
         metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
-        should_change=should_change,
-        existing_changed=existing_changed,
-        existing_unchanged=existing_unchanged,
     )
     expr.validate_effect(
         metadata["instance_id"],
@@ -91,8 +86,6 @@ def infer_with_validation(pre_code, post_code, metadata,
         metadata["buggy_line_count"],
         metadata["patched_line_count"],
         metadata["before_or_after"],
-        should_change=should_change,
-        expr_id=expr_id,
     )
     return expr
 
@@ -119,10 +112,6 @@ def process_agent(data, agent, instance_ids):
                 pre_code,
                 post_code,
                 metadata,
-                should_change=should_change,
-                expr_id=expr_id,
-                existing_changed=choices[:n_changes],
-                existing_unchanged=choices[n_changes:],
             )
             choices.append(inferred.expr)
         shuffle_list_pair(_should_change, choices)
