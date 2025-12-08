@@ -22,46 +22,6 @@ def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
         return json.load(f)
 
-@lru_cache
-def read_agent_patch_data(agent):
-    with open(os.path.join(DIR, f"../../explanations/agent_patches/{agent}.json"), "r") as f:
-        return json.load(f)
-
-def build_fn_code(pre_code, post_code):
-    if pre_code == post_code:
-        return pre_code
-    else:
-        return f"# Before Patch:\n{pre_code}\n\n# After Patch:\n{post_code}"
-
-def build_statement(pre_stmt, post_stmt, pre_type, post_type):
-    def exc_tag(event_type):
-        if event_type == "Exception":
-            return " (crashed here)"
-        else:
-            return " (normally executed)"
-    if pre_stmt == post_stmt:
-        return pre_stmt
-    else:
-        return f"# Before Patch:\n{pre_stmt}{exc_tag(pre_type)}\n\n# After Patch:\n{post_stmt}{exc_tag(post_type)}"
-
-def get_agent_patch(agent, instance_id):
-    data = read_agent_patch_data(agent)
-    patch = data[instance_id]['model_patch'] or None
-    return patch
-
-def get_simple_function_name(metadata):
-    name = metadata['function_name']
-    if ":" in name:
-        name = name.split(":")[-1]
-    if "." in name:
-        name = name.split(".")[-1]
-    return name
-
-def shuffle_list_pair(a: list, b: list):
-    combined = list(zip(a, b, strict=True))
-    random.shuffle(combined)
-    a[:], b[:] = zip(*combined)
-
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
 def validate_expression(expr, metadata):
     try:
