@@ -16,7 +16,7 @@ from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
     remove_docstrings,
 )
-from dataset.extract_ground_truths.effect.infer_expression import main as infer_main
+from dataset.extract_ground_truths.effect.infer_expression import ExpressionList
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
@@ -49,9 +49,9 @@ def process_agent(data, agent, instance_ids):
             if metadata is None:
                 results[instance_id] = None
                 continue
-            expression_candidates =  metadata[key]
+            expression_candidates =  ExpressionList(**metadata[key])
             valid_exprs = []
-            for expr in enumerate(expression_candidates):            
+            for expr in enumerate(expression_candidates.expressions):            
                 valid_expr = validate_expression(
                     expr,
                     metadata,
@@ -67,7 +67,7 @@ def process_agent(data, agent, instance_ids):
 if __name__ == "__main__":
     step2 = read_step2_results()
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-12907"])
+    instance_ids = get_instance_ids(["astropy__astropy-13453"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids): agent
