@@ -142,8 +142,8 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
-def main(code, line, diff, before, after):
-    template = TEMPLATE_CHANGED
+def main(code, line, diff, before, after, should_change):
+    template = TEMPLATE_CHANGED if should_change else TEMPLATE_UNCHANGED
     prompt = template.format(
         code=code,
         line=line,
