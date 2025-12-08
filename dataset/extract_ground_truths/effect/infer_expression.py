@@ -130,6 +130,8 @@ class Expression(BaseModel):
         else:
             check_no_change(buggy_value, buggy_inspect_exc, patched_value, patched_inspect_exc)
 
+class ExpressionList(BaseModel):
+    expressions: list[Expression]
 
 with open(os.path.join(DIR, "prompts/template_changed.txt"), "r") as f:
     TEMPLATE_CHANGED = f.read()
@@ -150,8 +152,8 @@ def main(code, line, diff, before, after):
         after=after,
         n_output=5
     )
-    expr = MODEL.infer_once(prompt, Expression)
-    return expr
+    expr_list = MODEL.infer_once(prompt, ExpressionList)
+    return expr_list
 
 if __name__ == "__main__":
     code = '''def is_separable(transform):
