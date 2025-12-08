@@ -63,7 +63,7 @@ def shuffle_list_pair(a: list, b: list):
     a[:], b[:] = zip(*combined)
 
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def infer_with_validation(pre_code, post_code, metadata):
+def infer_with_validation(pre_code, post_code, metadata, should_change):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -75,6 +75,7 @@ def infer_with_validation(pre_code, post_code, metadata):
         metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
+        should_change
     )
     return expr
 
@@ -92,16 +93,19 @@ def process_agent(data, agent, instance_ids):
             patch=get_agent_patch(agent, instance_id),
             line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
         )
-        inferred_exprs = infer_with_validation(
-            pre_code,
-            post_code,
-            metadata,
-        )
-        results[instance_id] = {
-            "inferred_exprs": inferred_exprs.model_dump(),
-            "function_code_before_patch": remove_docstrings(pre_code),
-            **metadata
-        }        
+        for should_change in (True, False):
+            inferred_exprs = infer_with_validation(
+                pre_code,
+                post_code,
+                metadata,
+                should_change,
+            )
+            key = "changed_candidates" if should_change else "unchanged_candidates"
+            results[instance_id] = {
+                key: inferred_exprs.model_dump(),
+                **metadata
+            }
+        results["function_code_before_patch"]: remove_docstrings(pre_code),
     return results
 
 if __name__ == "__main__":
