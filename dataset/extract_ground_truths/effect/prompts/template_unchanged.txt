@@ -1,6 +1,4 @@
-You are designing a Python expression `<expr>` to be used as a multiple-choice distractor**.
-The real correct expressions are the ones that change value before and after a code patch.
-Your job is to generate one expression that resembles the correct ones if possible**, but that is actually incorrect because it does NOT change value.
+You are designing a set of Python expressions `<expr>` to be used as a multiple-choice distractor. The correct expressions are the ones that change value before and after a code patch. Your task is to generate {n_output} expressions that resemble the correct ones if possible, but actually incorrect because it does NOT change value before and after a code patch.
 
 ### Inputs
 You will be given:
@@ -8,38 +6,85 @@ You will be given:
 - A specific line within that function
 - State differences at that line before and after the patch
 - Complete variable states before and after the patch
-- A list of existing expressions that *do* change value (the correct answers)
+- The correct expressions
 
 ### Task
-Produce exactly one Python expression `<expr>` that:
-1. Does NOT change its resulting value or exception behavior between “before” and “after” states.
-2. If possible**, resembles the structure, style, or level of complexity of the existing changing expressions.
-3. If resemblance is not reasonably achievable**, still produce a strong, non-trivial distractor that meets all constraints.
-4. Is non-trivial (see structural constraints).
-5. Is not an obvious tautology or constant.
-6. Is not an obvious rewrite of any existing expression.
+Produce exactly {n_output} Python expressions `<expr>` that:
+1. have the same outcome between the buggy and patched programs:
+   (a) yield the same values, or
+   (b) yield the same program state between the buggy and patched programs:
+      - raising the same exceptions, or
+2. Have the same complexity as the correct expressions if possible
+3. If resemblance is not reasonably achievable, still produce a strong, non-trivial distractor that meets all constraints.
 
-Your output must be only a valid Python expression**, with no explanation or added formatting.
+### General Rules
+1. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
+2. If `__return__` present and `__exception__` exist; you must reference `__return__` instead of `__exception__`.
+3. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+4. Follow `### Actions to Build the Expressions` to build more complex `<expr>`
 
-### Hard Semantic Constraints
-1. `<expr>` must evaluate to exactly the same result (same value or same exception behavior) in both states.
-2. `<expr>` may reference only variables present in the variable states.
-3. The final value must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
-4. `<expr>` must not rely on any variable, attribute, or element whose value differs between states.
+### Actions to Build the Expressions
+You choose 1 or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
 
-### Structural Constraints
-1. `<expr>` MUST NOT be:
-   - a bare variable,
-   - a bare attribute or index access,
-   - a single literal.
-2. `<expr>` must use at least one of:
-   - arithmetic operator (`+`, `-`, `*`, `/`, `//`, `%`, `**`)
-   - comparison (`==`, `!=`, `<`, `<=`, `>`, `>=`)
-   - logical operator (`and`, `or`, `not`)
-   - aggregator/predicate (`len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, comprehensions`)
-3. `<expr>` should preferably mimic the complexity or pattern of the existing changing expressions—unless that is infeasible.
-4. `<expr>` must not be a trivial identity, such as `x == x`, `len(lst) - len(lst)`, or any always-constant arithmetic.
-5. `<expr>` must not be an obvious constant like `2 + 2` or `"a" == "a"`.
+1. Binary operations
+   - Combine the seed expression (or a subpart of it) with:
+     - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`, ``
+     - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
+     - logical operators: `and`, `or`, `not`
+     - identity/membership: `is`, `is not`, `in`, `not in`
+   - Example:
+     - `seed_expr + 1`
+     - `seed_expr == other_var`
+     - `seed_expr in some_list`
+
+2. Attribute access
+   - Access attributes or methods of the seed expression or other variables:
+     - `foo.bar`, `foo.bar()`
+   - Only use attributes/methods that exist in the provided variable states.
+   - Example:
+     - `seed_expr.lower()`
+     - `result.status_code`
+
+3. Indexing and slicing
+   - Index or slice sequences, mappings, or numpy arrays:
+     - `foo[bar]`, `foo[0]`, `foo[-1]`, `foo[1:3]`
+   - Example:
+     - `seed_expr[0]`
+     - `seed_expr['key']`
+     - `seed_expr[:3]`
+
+4. Wrapping with functions
+   - Wrap the seed expression or a related expression using:
+     1. Python built-ins:
+        `len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, `tuple`, `list`, `dict`, `set`, `bool`, `str`, `int`, `float`, `abs`, `round`, `hash`, `type`, `isinstance`, `getattr`, `hasattr`, `enumerate`, `zip`
+     2. Numpy functions (if `np` is available in the states):
+        `np.allclose`, `np.array_equal`, `np.isnan`, `np.isclose`, etc.
+   - Example:
+     - `len(seed_expr)`
+     - `sorted(seed_expr)`
+     - `np.array_equal(seed_expr, other_var)`
+
+5. Conditional expressions
+   - Use Python’s ternary operator to build predicates that can flip between before and after:
+     - `expr_if_true if condition else expr_if_false`
+   - Example:
+     - `1 if seed_expr is None else 0`
+     - `'ok' if seed_expr == other_var else 'diff'`
+
+6. Combination with other changed variables
+   - Identify variables whose values differ between before and after, and combine them with the seed expression:
+     - arithmetic, comparison, logical, or function-based combinations.
+   - Example:
+     - `seed_expr - changed_var`
+     - `changed_var in seed_expr`
+     - `len(changed_list) - len(seed_expr)`
+
+7. Collection-building expressions
+   - Build small collections of primitives or expressions:
+     - tuples, lists, sets, dicts
+   - Example:
+     - `[seed_expr, other_var]`
+     - `(seed_expr == other_var, other_var is None)`
 
 ### Relationship to Existing Expressions
 1. `<expr>` must NOT be identical to any existing expression.
@@ -58,9 +103,6 @@ Function:
 Line:
 {line}
 
-Existing expressions that already stay the same (one per line, may be empty):
-{existing_exprs}
-
 State Differences:
 {diff}
 
@@ -70,3 +112,6 @@ Before:
 
 After:
 {after}
+
+The correct expressions (has a different outcome between the buggy and patched programs):
+{changed_expressions}
