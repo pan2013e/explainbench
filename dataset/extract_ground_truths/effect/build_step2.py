@@ -105,7 +105,7 @@ def process_agent(data, agent, instance_ids):
                 key: inferred_exprs.model_dump(),
                 **metadata
             }
-        results["function_code_before_patch"]: remove_docstrings(pre_code),
+        results["function_code_before_patch"]: remove_docstrings(pre_code)
     return results
 
 if __name__ == "__main__":
