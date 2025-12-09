@@ -24,7 +24,6 @@ from tracer.inspector import encode_expr_list
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
         return json.load(f)
-    # return 
 
 def validate_expression(
             expression_candidates: list,
@@ -40,17 +39,8 @@ def validate_expression(
             should_change=True,
             expr_id=0,
         ):
-    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
-    log_dir = os.path.join(
-            "/home/yusuf/explainbench/logs/run_evaluation",
-            run_id,
-            agent,
-            instance_id,
-        )
-    
     stdout = StringIO()
     stderr = StringIO()
-    breakpoint()
     with redirect_stdout(stdout), redirect_stderr(stderr):
         inspect_main([
             "--instance_id", instance_id,
