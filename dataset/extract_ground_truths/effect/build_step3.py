@@ -20,6 +20,9 @@ from dataset.extract_ground_truths.effect.source_util import (
 from dataset.extract_ground_truths.effect.infer_expression import ExpressionList, Expression
 from execution.inspect import main as inspect_main
 from tracer.inspector import encode_expr_list
+from execution.util import get_fail_to_pass_tests
+from dataset.extract_ground_truths.effect.trace_util import rv_equals
+from deepdiff import DeepDiff
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
@@ -54,12 +57,94 @@ def execute_candidate_expressions(
             "--post-count", str(patched_line_count),
             "--inspector-mode", before_or_after,
         ])
+            
+def rv_equals(v1, v2):
+    diff = DeepDiff(v1, v2, significant_digits=5, ignore_private_variables=False)
+    return diff == {}
 
+def is_none_attr_inspection_failure(exc):
+    if exc is None:
+        return False
+    stage = exc.get("stage")
+    etype = exc.get("type")
+    msg = exc.get("message", "")
+    return (
+        stage == "evaluation"
+        and etype == "AttributeError"
+        and "NoneType" in msg
+    )
+
+def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
+    # values are equal, no change.
+    if rv_equals(buggy_val, patched_val):
+        return False
+
+    # Values differ.
+    # That is: one value is None, the other is not, and the side with None has
+    # an AttributeError on NoneType during evaluation.
+    if (buggy_val is None) != (patched_val is None):
+        exc = buggy_exc if buggy_val is None else patched_exc
+        if is_none_attr_inspection_failure(exc):
+            return True
+        return False
+
+    # Otherwise, treat any value difference as a change.
+    return True
+
+def index_selected(buggy_val, buggy_exc, patched_val, patched_exc, should_change: bool):
+    changed = index_changed(buggy_val, buggy_exc, patched_val, patched_exc)
+    return changed if should_change else not changed
+
+def get_valid_expressions(patched, buggy, should_change):
+    valid_expressions = []
+    for i, (pv, pe, bv, be) in enumerate(
+        zip(patched["value"], patched["exception"],
+            buggy["value"], buggy["exception"])
+    ):
+        if index_selected(pv, pe, bv, be, should_change=should_change):
+            valid_expressions.append(patched["expr"][i])
+            assert patched["expr"][i] == buggy["expr"][i], "Expression does not match"
+            breakpoint()
+    return valid_expressions
+
+def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0):
+    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+    log_dir = os.path.join(
+            DIR,
+            "../../../logs/run_evaluation",
+            run_id,
+            agent,
+            instance_id,
+        )
+    stdout = StringIO()
+    stderr = StringIO()
+    test_name = get_fail_to_pass_tests(instance_id)[test_id]
+    buggy_path = os.path.join(log_dir, f"buggy_traces/{test_name}.jsonl")
+    patched_path = os.path.join(log_dir, f"patched_traces/{test_name}.jsonl")
+    if not os.path.exists(buggy_path) or not os.path.exists(patched_path):
+        print(f"Inspection results not found for {instance_id}, test {test_name}")
+        print(f"Inspection stdout:\n{stdout.getvalue()}")
+        print(f"Inspection stderr:\n{stderr.getvalue()}")
+        # raise RuntimeError("Inspection failed, results not found.")
+        return []
+
+    with open(buggy_path, "r") as f:
+        buggy_inspect = json.load(f)
+
+    with open(patched_path, "r") as f:
+        patched_inspect = json.load(f)
+        
+    valid_expressions = get_valid_expressions(patched_inspect, buggy_inspect, should_change)
+    return valid_expressions
+    
 def process_agent(data, agent, instance_ids):
     results = {}
-    for key in ("changed_candidates", "unchanged_candidates"):
-        output_key = "valid_changed_expressions" if key == "changed_candidates" else "valid_unchanged_expressions"
-        for instance_id in instance_ids:
+    for instance_id in instance_ids:
+        for idx, key in enumerate(["changed_candidates", "unchanged_candidates"]):
+            output_key = "valid_changed_expressions" if key == "changed_candidates" else "valid_unchanged_expressions"
+            if instance_id not in results:
+                results[instance_id] = {}
+            
             metadata = data[agent][instance_id]
             if metadata is None:
                 results[instance_id] = None
@@ -75,17 +160,18 @@ def process_agent(data, agent, instance_ids):
                     metadata["test_id"],
                     metadata["buggy_line_count"],
                     metadata["patched_line_count"],
-                    metadata["before_or_after"],                
+                    metadata["before_or_after"],
+                    expr_id=idx                
                 )
-            breakpoint()
-            
-    #             if valid_expr:
-    #                 valid_exprs.append(valid_expr.expr)
-    #         results[instance_id] = {
-    #             output_key: valid_exprs,
-    #             **metadata
-    #         }
-    # return results
+            valid_expressions = validate_expressions(
+                                        agent,
+                                        instance_id,
+                                        should_change=key == "changed_candidates",
+                                        test_id=0,
+                                        expr_id=idx)
+            results[instance_id][output_key] = valid_expressions,
+        results[instance_id].update(metadata)
+    return results
 
 if __name__ == "__main__":
     step2 = read_step2_results()
