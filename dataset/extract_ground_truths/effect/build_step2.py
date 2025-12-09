@@ -116,9 +116,22 @@ def process_agent(data, agent, instance_ids):
     return results
 
 if __name__ == "__main__":
+    import time
+    start = time.time()
+
     step1 = read_step1_results()
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-13453"])
+    list_ids = [
+        "astropy__astropy-12907",
+        "astropy__astropy-13453",
+        "astropy__astropy-13579",
+        "astropy__astropy-14096",
+        "sympy__sympy-12096",
+        "sympy__sympy-12419",
+        "sympy__sympy-12489",
+        "sympy__sympy-13615",
+    ]
+    instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, agent, instance_ids): agent
@@ -130,3 +143,6 @@ if __name__ == "__main__":
     with open(os.path.join(DIR, "tmp/step2.json"), "w") as f:
         json.dump(results, f, indent=2)
     print("Saved step2 results to tmp/step2.json")
+
+    end = time.time()
+    print(f"Execution time: {end - start:.2f} seconds")
