@@ -112,7 +112,7 @@ def _ensure_list(x, length):
 def _max_len(*items):
     return max(len(x) for x in items if isinstance(x, list))
 
-def get_valid_expressions(patched, buggy, should_change):
+def compute_expr_change_map(patched, buggy):
     n = _max_len(
         patched.get("expr"),
         patched.get("value"),
@@ -130,25 +130,25 @@ def get_valid_expressions(patched, buggy, should_change):
     b_vals = _ensure_list(buggy.get("value"), n)
     b_excs = _ensure_list(buggy.get("exception"), n)
 
-    valid_expressions = []
-    for i, (pv, pe, bv, be) in enumerate(
-        zip_longest(p_vals, p_excs, b_vals, b_excs, fillvalue=None)
+    expr_change = {}
+    for i, (expr, pv, pe, bv, be) in enumerate(
+        zip_longest(p_expr, p_vals, p_excs, b_vals, b_excs, fillvalue=None)
     ):
-        if index_selected(pv, pe, bv, be, should_change=should_change):
-            valid_expressions.append(p_expr[i])
-            if p_expr[i] is not None and b_expr[i] is not None:
-                assert p_expr[i] == b_expr[i], "Expression does not match"
-    return valid_expressions
+        changed = index_changed(pv, pe, bv, be)
+        expr_change[expr] = changed
 
-def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0):
+    return expr_change
+
+
+def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
     run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
     log_dir = os.path.join(
-            DIR,
-            "../../../logs/run_evaluation",
-            run_id,
-            agent,
-            instance_id,
-        )
+        DIR,
+        "../../../logs/run_evaluation",
+        run_id,
+        agent,
+        instance_id,
+    )
     stdout = StringIO()
     stderr = StringIO()
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
@@ -158,55 +158,74 @@ def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0
         print(f"Inspection results not found for {instance_id}, test {test_name}")
         print(f"Inspection stdout:\n{stdout.getvalue()}")
         print(f"Inspection stderr:\n{stderr.getvalue()}")
-        # raise RuntimeError("Inspection failed, results not found.")
-        return []
+        return None, None
 
     with open(buggy_path, "r") as f:
         buggy_inspect = json.load(f)
-
     with open(patched_path, "r") as f:
         patched_inspect = json.load(f)
-        
-    valid_expressions = get_valid_expressions(patched_inspect, buggy_inspect, should_change)
-    return valid_expressions
-    
+    return patched_inspect, buggy_inspect
+
+def validate_expressions(agent, instance_id, test_id=0, expr_id=0):
+    patched_inspect, buggy_inspect = load_inspect_results(agent, instance_id, test_id, expr_id)
+    if patched_inspect is None:
+        return {}
+    return compute_expr_change_map(patched_inspect, buggy_inspect)
+
 def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
     for instance_id in instance_ids:
         try:
-            for idx, key in enumerate(["changed_candidates", "unchanged_candidates"]):
-                output_key = "valid_changed_expressions" if key == "changed_candidates" else "valid_unchanged_expressions"
-                if instance_id not in results:
-                    results[instance_id] = {}
-                
-                metadata = data[agent][instance_id]
-                if metadata is None:
-                    results[instance_id] = None
-                    continue
-                expression_candidates = metadata[key] 
-                if do_execute:
-                    execute_candidate_expressions(
-                            expression_candidates,
-                            metadata["instance_id"],
-                            metadata["agent"],
-                            metadata["file_path"],
-                            metadata["buggy_lineno"],
-                            metadata["patched_lineno"],
-                            metadata["test_id"],
-                            metadata["buggy_line_count"],
-                            metadata["patched_line_count"],
-                            metadata["before_or_after"],
-                            expr_id=idx                
-                        )
-                if do_validate:
-                    valid_expressions = validate_expressions(
-                                                agent,
-                                                instance_id,
-                                                should_change=key == "changed_candidates",
-                                                test_id=0,
-                                                expr_id=idx)
-                    results[instance_id][output_key] = valid_expressions,
+            metadata = data[agent][instance_id]
+            if metadata is None:
+                results[instance_id] = None
+                continue
+
+            changed_candidates = metadata["changed_candidates"]
+            unchanged_candidates = metadata["unchanged_candidates"]
+
+            all_candidates = changed_candidates + unchanged_candidates
+
+            if instance_id not in results:
+                results[instance_id] = {}
+
+            if do_execute and all_candidates:
+                execute_candidate_expressions(
+                    all_candidates,
+                    metadata["instance_id"],
+                    metadata["agent"],
+                    metadata["file_path"],
+                    metadata["buggy_lineno"],
+                    metadata["patched_lineno"],
+                    metadata["test_id"],
+                    metadata["buggy_line_count"],
+                    metadata["patched_line_count"],
+                    metadata["before_or_after"],
+                    expr_id=0,
+                )
+                                
+            if do_validate and all_candidates:
+                expr_change_map = validate_expressions(
+                    agent,
+                    instance_id,
+                    test_id=0,
+                    expr_id=0,
+                )
+
+                valid_changed = [
+                    e for e in changed_candidates
+                    if expr_change_map.get(e) is True
+                ]
+                valid_unchanged = [
+                    e for e in unchanged_candidates
+                    if expr_change_map.get(e) is False
+                ]
+
+                results[instance_id]["valid_changed_expressions"] = valid_changed
+                results[instance_id]["valid_unchanged_expressions"] = valid_unchanged
+           
             results[instance_id].update(metadata)
+
         except Exception as e:
             print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {e}")
     return results
@@ -237,11 +256,11 @@ def main():
     results = {}
     list_ids = [
         # "astropy__astropy-12907",
-        # "astropy__astropy-13453",/
-        # "astropy__astropy-13579",
+        "astropy__astropy-13453",
+        "astropy__astropy-13579",
         # "astropy__astropy-14096",
-        # "sympy__sympy-12096",
-        # "sympy__sympy-12419",
+        "sympy__sympy-12096",
+        "sympy__sympy-12419",
         "sympy__sympy-12489",
         "sympy__sympy-13615",
     ]
