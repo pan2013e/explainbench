@@ -3,14 +3,15 @@
 # This should be done outside of this script.
 # Step 1. Extract locations of divergent lines, state differences;
 # and fallback if no divergence is found.
-import os
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from tqdm.auto import tqdm
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from tracer.serializer import serialize
-from execution.util import get_instance_ids
+
 from dataset.extract_ground_truths.effect import get_divergent_lines
+from execution.util import get_instance_ids
+from tracer.serializer import serialize
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 # AGENTS = list(

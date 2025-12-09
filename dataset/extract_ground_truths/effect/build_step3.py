@@ -1,30 +1,23 @@
 # Build ground truth for effect
 # Step 2. Provide step 1 info to an LLM to infer an expression,
 # then inspect the expr value in buggy and patched versions
-import os
-import json
-import random
-import backoff
-import time
 import argparse
-from io import StringIO
-from contextlib import redirect_stdout, redirect_stderr
-from tqdm.auto import tqdm
-from functools import lru_cache
+import json
+import os
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 
-from execution.util import get_instance_ids
-from dataset.extract_ground_truths.effect.build_step1 import DIR, AGENTS
-from dataset.extract_ground_truths.effect.source_util import (
-    get_function_code,
-    remove_docstrings,
-)
-from dataset.extract_ground_truths.effect.infer_expression import ExpressionList, Expression
-from execution.inspect import main as inspect_main
-from tracer.inspector import encode_expr_list
-from execution.util import get_fail_to_pass_tests
-from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from deepdiff import DeepDiff
+from tqdm.auto import tqdm
+
+from dataset.extract_ground_truths.effect.build_step1 import AGENTS, DIR
+from dataset.extract_ground_truths.effect.trace_util import rv_equals
+from execution.inspect import main as inspect_main
+from execution.util import get_fail_to_pass_tests, get_instance_ids
+from tracer.inspector import encode_expr_list
+
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
