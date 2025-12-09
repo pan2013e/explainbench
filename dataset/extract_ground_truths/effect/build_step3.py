@@ -8,6 +8,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
+from itertools import zip_longest
 
 from deepdiff import DeepDiff
 from tqdm.auto import tqdm
@@ -90,15 +91,43 @@ def index_selected(buggy_val, buggy_exc, patched_val, patched_exc, should_change
     changed = index_changed(buggy_val, buggy_exc, patched_val, patched_exc)
     return changed if should_change else not changed
 
+def _ensure_list(x, length):
+    if isinstance(x, list):
+        return x
+    if x is None:
+        return [None] * length
+    # Broadcast scalars / dicts across all positions
+    return [x] * length
+
+def _max_len(*items):
+    return max(len(x) for x in items if isinstance(x, list))
+
 def get_valid_expressions(patched, buggy, should_change):
+    n = _max_len(
+        patched.get("expr"),
+        patched.get("value"),
+        patched.get("exception"),
+        buggy.get("expr"),
+        buggy.get("value"),
+        buggy.get("exception"),
+    )
+
+    p_expr = _ensure_list(patched.get("expr"), n)
+    p_vals = _ensure_list(patched.get("value"), n)
+    p_excs = _ensure_list(patched.get("exception"), n)
+
+    b_expr = _ensure_list(buggy.get("expr"), n)
+    b_vals = _ensure_list(buggy.get("value"), n)
+    b_excs = _ensure_list(buggy.get("exception"), n)
+
     valid_expressions = []
     for i, (pv, pe, bv, be) in enumerate(
-        zip(patched["value"], patched["exception"],
-            buggy["value"], buggy["exception"])
+        zip_longest(p_vals, p_excs, b_vals, b_excs, fillvalue=None)
     ):
         if index_selected(pv, pe, bv, be, should_change=should_change):
-            valid_expressions.append(patched["expr"][i])
-            assert patched["expr"][i] == buggy["expr"][i], "Expression does not match"
+            valid_expressions.append(p_expr[i])
+            if p_expr[i] is not None and b_expr[i] is not None:
+                assert p_expr[i] == b_expr[i], "Expression does not match"
     return valid_expressions
 
 def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0):
@@ -198,13 +227,13 @@ def main():
     results = {}
     list_ids = [
         # "astropy__astropy-12907",
-        "astropy__astropy-13453",
-        "astropy__astropy-13579",
-        "astropy__astropy-14096",
-        "sympy__sympy-12096",
-        "sympy__sympy-12419",
+        # "astropy__astropy-13453",/
+        # "astropy__astropy-13579",
+        # "astropy__astropy-14096",
+        # "sympy__sympy-12096",
+        # "sympy__sympy-12419",
         "sympy__sympy-12489",
-        "sympy__sympy-13615",
+        # "sympy__sympy-13615",
     ]
     instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
