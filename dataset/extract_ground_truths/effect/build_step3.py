@@ -134,39 +134,42 @@ def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0
 def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
     for instance_id in instance_ids:
-        for idx, key in enumerate(["changed_candidates", "unchanged_candidates"]):
-            output_key = "valid_changed_expressions" if key == "changed_candidates" else "valid_unchanged_expressions"
-            if instance_id not in results:
-                results[instance_id] = {}
-            
-            metadata = data[agent][instance_id]
-            if metadata is None:
-                results[instance_id] = None
-                continue
-            expression_candidates = metadata[key] 
-            if do_execute:
-                execute_candidate_expressions(
-                        expression_candidates,
-                        metadata["instance_id"],
-                        metadata["agent"],
-                        metadata["file_path"],
-                        metadata["buggy_lineno"],
-                        metadata["patched_lineno"],
-                        metadata["test_id"],
-                        metadata["buggy_line_count"],
-                        metadata["patched_line_count"],
-                        metadata["before_or_after"],
-                        expr_id=idx                
-                    )
-            if do_validate:
-                valid_expressions = validate_expressions(
-                                            agent,
-                                            instance_id,
-                                            should_change=key == "changed_candidates",
-                                            test_id=0,
-                                            expr_id=idx)
-                results[instance_id][output_key] = valid_expressions,
-        results[instance_id].update(metadata)
+        try:
+            for idx, key in enumerate(["changed_candidates", "unchanged_candidates"]):
+                output_key = "valid_changed_expressions" if key == "changed_candidates" else "valid_unchanged_expressions"
+                if instance_id not in results:
+                    results[instance_id] = {}
+                
+                metadata = data[agent][instance_id]
+                if metadata is None:
+                    results[instance_id] = None
+                    continue
+                expression_candidates = metadata[key] 
+                if do_execute:
+                    execute_candidate_expressions(
+                            expression_candidates,
+                            metadata["instance_id"],
+                            metadata["agent"],
+                            metadata["file_path"],
+                            metadata["buggy_lineno"],
+                            metadata["patched_lineno"],
+                            metadata["test_id"],
+                            metadata["buggy_line_count"],
+                            metadata["patched_line_count"],
+                            metadata["before_or_after"],
+                            expr_id=idx                
+                        )
+                if do_validate:
+                    valid_expressions = validate_expressions(
+                                                agent,
+                                                instance_id,
+                                                should_change=key == "changed_candidates",
+                                                test_id=0,
+                                                expr_id=idx)
+                    results[instance_id][output_key] = valid_expressions,
+            results[instance_id].update(metadata)
+        except Exception as e:
+            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {e}")
     return results
 
 def main():
