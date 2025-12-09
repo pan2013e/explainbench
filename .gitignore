@@ -9,3 +9,4 @@ logs*/
 *.json
 !results/**/*.json
 !dataset/context/*.json
+dataset/extract_ground_truths/effect/ignore/*
