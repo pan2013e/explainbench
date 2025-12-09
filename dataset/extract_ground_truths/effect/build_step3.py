@@ -16,7 +16,7 @@ from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
     remove_docstrings,
 )
-from dataset.extract_ground_truths.effect.infer_expression import ExpressionList
+from dataset.extract_ground_truths.effect.infer_expression import ExpressionList, Expression
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
@@ -50,7 +50,7 @@ def process_agent(data, agent, instance_ids):
             if metadata is None:
                 results[instance_id] = None
                 continue
-            expression_candidates =  ExpressionList(**metadata[key])
+            expression_candidates = ExpressionList(expressions=[Expression(expr=s) for s in metadata[key]]) 
             valid_exprs = []
             for _, expr in enumerate(expression_candidates.expressions):            
                 valid_expr = validate_expression(

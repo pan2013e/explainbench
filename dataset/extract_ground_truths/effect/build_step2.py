@@ -104,8 +104,9 @@ def process_agent(data, agent, instance_ids):
                 inferred_exprs
             )
             key = "changed_candidates" if should_change else "unchanged_candidates"
+            inferred_exprs = [x.expr for x in inferred_exprs.expressions]
             results[instance_id] = {
-                key: inferred_exprs.model_dump(),
+                key: inferred_exprs,
                 **metadata
             }
         results["function_code_before_patch"] = remove_docstrings(pre_code)
