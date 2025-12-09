@@ -25,7 +25,7 @@ def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
         return json.load(f)
 
-def validate_expression(
+def execute_candidate_expressions(
             expression_candidates: list,
             instance_id: str,
             agent: str,
@@ -65,7 +65,7 @@ def process_agent(data, agent, instance_ids):
                 results[instance_id] = None
                 continue
             expression_candidates = metadata[key] 
-            validate_expression(
+            execute_candidate_expressions(
                     expression_candidates,
                     metadata["instance_id"],
                     metadata["agent"],
