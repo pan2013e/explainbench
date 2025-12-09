@@ -99,7 +99,6 @@ def get_valid_expressions(patched, buggy, should_change):
         if index_selected(pv, pe, bv, be, should_change=should_change):
             valid_expressions.append(patched["expr"][i])
             assert patched["expr"][i] == buggy["expr"][i], "Expression does not match"
-            breakpoint()
     return valid_expressions
 
 def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0):
@@ -194,7 +193,17 @@ def main():
         
     step2 = read_step2_results()
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-12907"])
+    list_ids = [
+        # "astropy__astropy-12907",
+        "astropy__astropy-13453",
+        "astropy__astropy-13579",
+        "astropy__astropy-14096",
+        "sympy__sympy-12096",
+        "sympy__sympy-12419",
+        "sympy__sympy-12489",
+        "sympy__sympy-13615",
+    ]
+    instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
