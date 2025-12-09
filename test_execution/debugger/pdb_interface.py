@@ -50,26 +50,20 @@ def return_stack(p):
         new_stack_depth = _get_stack_depth(new_stack)
         has_return_value = ")->" in new_stack
 
-PORTABLE_PARAMS_CMD = "for param in inspect.signature({func_name}).parameters.values(): print(param.name, '=', locals()[param.name])"
+PORTABLE_PARAMS_CMD = "a"
 p = sp.Popen(["/opt/miniconda3/envs/testbed/bin/python", "{test_loc}"], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.STDOUT)
-read_output(p) # flush initial setup string
+terminated, init_output = read_output(p) # flush initial setup string
 for idx in range({max_iter}):
-    try:
-        get_pdb_response(p, "import inspect")
-    except BrokenPipeError:
-        if idx == 0:
-            while True:
-                line = p.stdout.readline()
-                if not line:
-                    break
-                print(line.decode().rstrip()) # for debugging
-            exit(0)
-        else:
-            raise
+    if idx == 0 and terminated:
+        print(init_output)
+        exit(0)
+    _, _ = get_pdb_response(p, "import inspect")
     _, param_values = get_pdb_response(p, PORTABLE_PARAMS_CMD)
     if "{func_name}".startswith("self."):
         _, self_value = get_pdb_response(p, "self")
         param_values += "\nself = " + self_value
+        _, self_attrs_value = get_pdb_response(p, "vars(self)")
+        param_values += "\nvars(self) = " + self_attrs_value
     print(json.dumps({{
         "value_type": "parameter_values",
         "iteration_no": idx,

@@ -2,6 +2,9 @@ import json
 import re
 from pathlib import Path
 import argparse
+from multiprocessing import Pool
+
+from tqdm import tqdm
 
 from test_execution.test_runner import setup
 from test_execution.debugger.util import FunctionInfo
@@ -60,22 +63,25 @@ def get_single_instance_io(
         save_file = save_bug_dir / (buggy_func.full_name + ".json")
         try:
             buggy_io, bug_error_str = pdb_manager.get_func_io(buggy_func, max_iter = max_iter)
-            fixed_io, _ = pdb_manager.get_func_io(buggy_func, use_fixed=True, max_iter = max_iter)
+            fixed_io, fix_error_str = pdb_manager.get_func_io(buggy_func, use_fixed=True, max_iter = max_iter)
         except Exception as e:
             print(f"Oh no, exception for {instance_id} - {type(e)}: {e}")
             continue
 
-        if not bug_error_str:
+        if (bug_error_str and fix_error_str):
+            error_file = save_file.parent / f"error.{buggy_func.full_name}.txt"
+            error_file.write_text(bug_error_str)
+        else:
             save_file.write_text(json.dumps({
                 "buggy_io": [info.to_dict() for info in buggy_io],
                 "fixed_io": [info.to_dict() for info in fixed_io],
             }, indent=2))
-        else:
-            error_file = save_file.parent / f"error.{buggy_func.full_name}.txt"
-            error_file.write_text(bug_error_str)
     
     if not debug:
         pdb_manager.exit()
+
+def get_single_instance_wrapper(args):
+    get_single_instance_io(*args)
 
 def main(args):
     all_test_info = []
@@ -89,15 +95,21 @@ def main(args):
             e for e in instance_list if args.target_pattern in e
         ]
     
+    param_list = []
     for instance_id in instance_list:
-        get_single_instance_io(
+        param_list.append((
             instance_id,
             Path(args.reproducer_file),
             Path(args.buggy_function_file),
             Path(args.save_dir),
             args.max_iter,
             args.debug
-        )    
+        ))
+    
+    with Pool(args.workers) as pool:
+        for _ in tqdm(pool.imap_unordered(get_single_instance_wrapper, param_list),
+                      total=len(param_list)):
+            pass
 
 
 if __name__ == '__main__':
@@ -107,6 +119,7 @@ if __name__ == '__main__':
     parser.add_argument("--buggy_function_file", type=str, default="./dataset/extract_ground_truths/localization/ground_truth_w_fullname.jsonl")
     parser.add_argument("--target_pattern", type=str, default="")
     parser.add_argument("--max_iter", type=int, default=10)
+    parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--debug", action='store_true')
     args = parser.parse_args()
 

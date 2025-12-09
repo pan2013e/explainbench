@@ -37,7 +37,7 @@ def score_io(buggy_ios: dict[str, str], seen_fixed_ios: dict[str, str], io_info:
     input_str, output_str = ioinfo_to_strings(io_info)
     if input_str in seen_fixed_ios:
         if output_str != seen_fixed_ios[input_str]:
-            raise ValueError(f'Different output for same input: unresolvable bug')
+            raise ValueError(f'Different output for same input :{input_str}: unresolvable bug')
         score = -1
     elif output_str in seen_fixed_ios.values():
         score = 0
@@ -99,16 +99,13 @@ def _analyze_results(
     result_dict["io_gathered"] = len(io_attempted_instance_ids)
     result_dict["failure"] = len(io_failed_instance_ids)
     for repo_name in attempted_by_project:
-        print(repo_name)
-        print(list(sorted([
-            instance_id
-            for instance_id in io_failed_instance_ids
-            if repo_name in instance_id
-        ])))
+        total = len([e for e in (all_bugs & all_with_methods) if repo_name in e])
         result_dict[repo_name] = {
-            "total": attempted_by_project[repo_name],
-            "failure": failed_by_project[repo_name],
-            "ratio": failed_by_project[repo_name] / attempted_by_project[repo_name],
+            "total": total,
+            "io_gathered": attempted_by_project[repo_name],
+            "io_ungathered": total - attempted_by_project[repo_name],
+            "io_uninformative": failed_by_project[repo_name],
+            "ratio": failed_by_project[repo_name] / total,
         }
     return result_dict
 
