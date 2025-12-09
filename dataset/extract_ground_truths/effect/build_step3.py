@@ -5,6 +5,8 @@ import os
 import json
 import random
 import backoff
+import time
+import argparse
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
 from tqdm.auto import tqdm
@@ -137,7 +139,7 @@ def validate_expressions(agent, instance_id, should_change, expr_id=0, test_id=0
     valid_expressions = get_valid_expressions(patched_inspect, buggy_inspect, should_change)
     return valid_expressions
     
-def process_agent(data, agent, instance_ids):
+def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
     for instance_id in instance_ids:
         for idx, key in enumerate(["changed_candidates", "unchanged_candidates"]):
@@ -150,41 +152,72 @@ def process_agent(data, agent, instance_ids):
                 results[instance_id] = None
                 continue
             expression_candidates = metadata[key] 
-            execute_candidate_expressions(
-                    expression_candidates,
-                    metadata["instance_id"],
-                    metadata["agent"],
-                    metadata["file_path"],
-                    metadata["buggy_lineno"],
-                    metadata["patched_lineno"],
-                    metadata["test_id"],
-                    metadata["buggy_line_count"],
-                    metadata["patched_line_count"],
-                    metadata["before_or_after"],
-                    expr_id=idx                
-                )
-            valid_expressions = validate_expressions(
-                                        agent,
-                                        instance_id,
-                                        should_change=key == "changed_candidates",
-                                        test_id=0,
-                                        expr_id=idx)
-            results[instance_id][output_key] = valid_expressions,
+            if do_execute:
+                execute_candidate_expressions(
+                        expression_candidates,
+                        metadata["instance_id"],
+                        metadata["agent"],
+                        metadata["file_path"],
+                        metadata["buggy_lineno"],
+                        metadata["patched_lineno"],
+                        metadata["test_id"],
+                        metadata["buggy_line_count"],
+                        metadata["patched_line_count"],
+                        metadata["before_or_after"],
+                        expr_id=idx                
+                    )
+            if do_validate:
+                valid_expressions = validate_expressions(
+                                            agent,
+                                            instance_id,
+                                            should_change=key == "changed_candidates",
+                                            test_id=0,
+                                            expr_id=idx)
+                results[instance_id][output_key] = valid_expressions,
         results[instance_id].update(metadata)
     return results
 
-if __name__ == "__main__":
+def main():
+
+    start_time = time.time()
+    
+    parser = argparse.ArgumentParser(
+        description="Execute candidate expressions and/or validate them for effect ground truth step 3.",
+    )
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Run execute_candidate_expressions (expression inspection).",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Run validate_expressions and write tmp/step3.json.",
+    )
+    args = parser.parse_args()
+
+    do_execute = args.execute
+    do_validate = args.validate
+        
     step2 = read_step2_results()
     results = {}
     instance_ids = get_instance_ids(["astropy__astropy-12907"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step2, agent, instance_ids): agent
+            executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
             for agent in AGENTS if agent
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    with open(os.path.join(DIR, "tmp/step3.json"), "w") as f:
-        json.dump(results, f, indent=2)
-    print("Saved step2 results to tmp/step3.json")
+    
+    if do_validate:
+        with open(os.path.join(DIR, "tmp/step3.json"), "w") as f:
+            json.dump(results, f, indent=2)
+        print("Saved step3 results to tmp/step3.json")
+    
+    end_time = time.time()
+    print(f"Total execution time: {end_time - start_time:.2f} seconds")
+    
+if __name__ == "__main__":
+    main()
