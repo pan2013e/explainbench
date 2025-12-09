@@ -5,7 +5,8 @@ import os
 import json
 import random
 import backoff
-
+from io import StringIO
+from contextlib import redirect_stdout, redirect_stderr
 from tqdm.auto import tqdm
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,29 +18,52 @@ from dataset.extract_ground_truths.effect.source_util import (
     remove_docstrings,
 )
 from dataset.extract_ground_truths.effect.infer_expression import ExpressionList, Expression
+from execution.inspect import main as inspect_main
+from tracer.inspector import encode_expr_list
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
         return json.load(f)
+    # return 
 
-@backoff.on_exception(backoff.constant, Exception, max_tries=5)
-def validate_expression(expr, metadata):
-    try:
-        expr.validate_effect(
-            metadata["instance_id"],
-            metadata["agent"],
-            metadata["file_path"],
-            metadata["buggy_lineno"],
-            metadata["patched_lineno"],
-            metadata["test_id"],
-            metadata["buggy_line_count"],
-            metadata["patched_line_count"],
-            metadata["before_or_after"],
+def validate_expression(
+            expression_candidates: list,
+            instance_id: str,
+            agent: str,
+            file_path: str,
+            buggy_lineno: int,
+            patched_lineno: int,
+            test_id: int,
+            buggy_line_count: int,
+            patched_line_count: int,
+            before_or_after: str,
+            should_change=True,
+            expr_id=0,
+        ):
+    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+    log_dir = os.path.join(
+            "/home/yusuf/explainbench/logs/run_evaluation",
+            run_id,
+            agent,
+            instance_id,
         )
-        return expr
-    except Exception as e:
-        print(e)
-        return None
+    
+    stdout = StringIO()
+    stderr = StringIO()
+    breakpoint()
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        inspect_main([
+            "--instance_id", instance_id,
+            "--agent", agent,
+            "--bp-file", file_path,
+            "--pre-bp-line", str(buggy_lineno),
+            "--post-bp-line", str(patched_lineno),
+            "--expr", encode_expr_list(expression_candidates),
+            "--expr-id", str(expr_id),
+            "--pre-count", str(buggy_line_count),
+            "--post-count", str(patched_line_count),
+            "--inspector-mode", before_or_after,
+        ])
 
 def process_agent(data, agent, instance_ids):
     results = {}
@@ -50,25 +74,33 @@ def process_agent(data, agent, instance_ids):
             if metadata is None:
                 results[instance_id] = None
                 continue
-            expression_candidates = ExpressionList(expressions=[Expression(expr=s) for s in metadata[key]]) 
-            valid_exprs = []
-            for _, expr in enumerate(expression_candidates.expressions):            
-                valid_expr = validate_expression(
-                    expr,
-                    metadata,
+            expression_candidates = metadata[key] 
+            validate_expression(
+                    expression_candidates,
+                    metadata["instance_id"],
+                    metadata["agent"],
+                    metadata["file_path"],
+                    metadata["buggy_lineno"],
+                    metadata["patched_lineno"],
+                    metadata["test_id"],
+                    metadata["buggy_line_count"],
+                    metadata["patched_line_count"],
+                    metadata["before_or_after"],                
                 )
-                if valid_expr:
-                    valid_exprs.append(valid_expr.expr)
-            results[instance_id] = {
-                output_key: valid_exprs,
-                **metadata
-            }
-    return results
+            breakpoint()
+            
+    #             if valid_expr:
+    #                 valid_exprs.append(valid_expr.expr)
+    #         results[instance_id] = {
+    #             output_key: valid_exprs,
+    #             **metadata
+    #         }
+    # return results
 
 if __name__ == "__main__":
     step2 = read_step2_results()
     results = {}
-    instance_ids = get_instance_ids(["astropy__astropy-13453"])
+    instance_ids = get_instance_ids(["astropy__astropy-12907"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids): agent
