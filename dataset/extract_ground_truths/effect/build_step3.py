@@ -70,6 +70,16 @@ def is_none_attr_inspection_failure(exc):
         and "NoneType" in msg
     )
 
+def is_name_error(exc):
+    if exc is None:
+        return False
+    stage = exc.get("stage")
+    etype = exc.get("type")
+    return (
+        stage == "evaluation"
+        and etype == "NameError"
+    )
+
 def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
     # values are equal, no change.
     if rv_equals(buggy_val, patched_val):
@@ -80,7 +90,7 @@ def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
     # an AttributeError on NoneType during evaluation.
     if (buggy_val is None) != (patched_val is None):
         exc = buggy_exc if buggy_val is None else patched_exc
-        if is_none_attr_inspection_failure(exc):
+        if is_none_attr_inspection_failure(exc) or is_name_error(exc):
             return True
         return False
 
@@ -233,7 +243,7 @@ def main():
         # "sympy__sympy-12096",
         # "sympy__sympy-12419",
         "sympy__sympy-12489",
-        # "sympy__sympy-13615",
+        "sympy__sympy-13615",
     ]
     instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
