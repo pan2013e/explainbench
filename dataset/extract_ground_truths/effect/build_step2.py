@@ -83,36 +83,40 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
 def process_agent(data, agent, instance_ids):
     results = {}
     for instance_id in instance_ids:
-        metadata = data[agent][instance_id]
-        if metadata is None:
-            results[instance_id] = None
-            continue
-        pre_code, post_code = get_function_code(
-            instance_id,
-            metadata['file_path'],
-            get_simple_function_name(metadata),
-            patch=get_agent_patch(agent, instance_id),
-            line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
-        )
-
-        instance_result = {}
-        changed_expressions = None
-        for should_change in (True, False):
-            expr_list = infer_expressions(
-                pre_code,
-                post_code,
-                metadata,
-                should_change,
-                changed_expressions,
+        try:
+            metadata = data[agent][instance_id]
+            if metadata is None:
+                results[instance_id] = {}
+                continue
+            pre_code, post_code = get_function_code(
+                instance_id,
+                metadata['file_path'],
+                get_simple_function_name(metadata),
+                patch=get_agent_patch(agent, instance_id),
+                line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
             )
-            key = "changed_candidates" if should_change else "unchanged_candidates"
-            expr_strings = [x.expr for x in expr_list.expressions]
-            instance_result[key] = expr_strings
-            if should_change:
-                changed_expressions = expr_strings
-        instance_result.update(metadata)
-        instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
-        results[instance_id] = instance_result
+
+            instance_result = {}
+            changed_expressions = None
+            for should_change in (True, False):
+                expr_list = infer_expressions(
+                    pre_code,
+                    post_code,
+                    metadata,
+                    should_change,
+                    changed_expressions,
+                )
+                key = "changed_candidates" if should_change else "unchanged_candidates"
+                expr_strings = [x.expr for x in expr_list.expressions]
+                instance_result[key] = expr_strings
+                if should_change:
+                    changed_expressions = expr_strings
+            instance_result.update(metadata)
+            instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
+            results[instance_id] = instance_result
+        except Exception as e:
+            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {e}")
+            results[instance_id] = {}
     return results
 
 if __name__ == "__main__":
