@@ -13,6 +13,10 @@ from dataset.extract_ground_truths.effect.postprocessing_util import (
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
+RANDOMIZED_FUNCTIONS = [
+    'django.contrib.auth.base_user:AbstractBaseUser.set_password',
+]
+
 def get_event_count(event: Event, traces: Traces):
     count = 0
     for e in traces._events:
@@ -99,7 +103,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 if (
                     buggy_callee.return_value is None and patched_callee.return_value is None
                     or not buggy_callee.returns_equals(patched_callee)
-                ):
+                ) and all(not buggy_callee.name.endswith(s) for s in [
+                    '<genexpr>', '<listcomp>', '<dictcomp>', '<setcomp>', '<lambda>'
+                ]) and buggy_callee.name not in RANDOMIZED_FUNCTIONS:
                     buggy_function = buggy_callee
                     patched_function = patched_callee
             else:
@@ -148,7 +154,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     continue
                 logger.debug("> END")
                 break
-    return None
+    return {}
 
 if __name__ == "__main__":
     import sys
