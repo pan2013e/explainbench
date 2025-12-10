@@ -58,8 +58,8 @@ def rv_equals(rv1, rv2):
 
 class FunctionBlock:
     def __init__(self, id, name, parent, params=None):
-        self.id = id
-        self.name = name
+        self.id = id             # type: int
+        self.name = name         # type: str
         self.parent = parent     # type: FunctionBlock | None
         self.params = params
         self.return_value = None # type: any | None
