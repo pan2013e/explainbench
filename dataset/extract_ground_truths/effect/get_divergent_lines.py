@@ -92,7 +92,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 continue
             logger.debug("> END")
             break
-        if buggy_function.is_pmf or patched_function.is_pmf:
+        if not diffing_started and (buggy_function.is_pmf or patched_function.is_pmf):
             logger.debug(f">> Start Diffing Now")
             diffing_started = True
         logger.debug(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
@@ -189,5 +189,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(f"django__django-{instance_id}", agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main(f"django__django-{instance_id}", test_id=0,  agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
