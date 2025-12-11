@@ -2,6 +2,8 @@ import re
 from typing import Iterable, Optional, Set, Dict, Callable, Any, Iterator, Tuple, MutableMapping
 from collections.abc import Sequence
 
+import deepdiff
+
 BASE_IGNORE_FIELDS: Set[str] = {"vars_used", "vars_defined"}
 # If there is a new repo and field that should be ignored, we can easily ignore the ordering by adding
 # "<reponame>": {"<target_field_name>"}
@@ -49,7 +51,7 @@ def iter_diff_items(diffs_by_kind: Dict[str, Any]) -> Iterator[Tuple[str, str, A
         if isinstance(changes_for_kind, dict):
             for full_path, payload in changes_for_kind.items():
                 yield change_kind, full_path, payload
-        elif isinstance(changes_for_kind, list):
+        elif isinstance(changes_for_kind, list) or isinstance(changes_for_kind, deepdiff.helper.SetOrdered):
             for payload in changes_for_kind:
                 yield change_kind, payload, payload
 
