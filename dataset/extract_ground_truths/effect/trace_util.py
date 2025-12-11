@@ -57,16 +57,17 @@ def rv_equals(rv1, rv2):
     return diff == {}
 
 class FunctionBlock:
-    def __init__(self, id, name, parent, params=None):
+    def __init__(self, id, name, parent, params=None, is_pmf=False):
         self.id = id             # type: int
         self.name = name         # type: str
         self.parent = parent     # type: FunctionBlock | None
         self.params = params
+        self.is_pmf = is_pmf     # type: bool
         self.return_value = None # type: any | None
         self.exception = None    # type: tuple[str, str] | None
         self._events = []        # type: list[Event]
         self._links = {}         # type: dict[int, FunctionBlock]
-        self._index = 0
+        self._index = -1
         
     def add_event(self, event: Event):
         self._events.append(event)
@@ -99,7 +100,22 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
+    def _init_index(self):
+        if not self.is_pmf:
+            return 0
+        match self.return_value, self.exception:
+            case _, None:
+                assert len(self._events) >= 1 and isinstance(self._events[-1], ReturnEvent)
+                return len(self._events) - 1
+            case None, _:
+                assert len(self._events) >= 2 and isinstance(self._events[-2], ExceptionEvent)
+                return len(self._events) - 2
+            case _:
+                raise ValueError("Exception and return value cannot coexist")
+    
     def _next_event(self):
+        if self._index == -1:
+            self._index = self._init_index()
         if self._index >= len(self._events):
             raise StopIteration
         event = self._events[self._index]
@@ -120,6 +136,7 @@ class Traces:
         self._entry = FunctionBlock(-1, "<module>", None)
         self._events = load_traces(trace_path)
         self._diff_lines = diff_lines or {} # type: dict[str, list[int]]
+        self._pmf = self._patch_modified_functions()
         self._build_traces()
 
     def _build_traces(self):
@@ -131,7 +148,8 @@ class Traces:
                 e.excluded = True
             match e:
                 case FunctionEvent():
-                    new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters)
+                    is_pmf = e.function_name in self._pmf
+                    new_block = FunctionBlock(e.event_id, e.function_name, stack[-1], params=e.parameters, is_pmf=is_pmf)
                     stack[-1]._links[e.event_id] = new_block
                     stack.append(new_block)
                 case ReturnEvent():
@@ -142,6 +160,16 @@ class Traces:
                     if isinstance(ne, ReturnEvent):
                         stack[-1].exception = (e.exception_type, e.exception_value)
                 case _: pass
+    
+    def _patch_modified_functions(self):
+        if not self._diff_lines:
+            return []
+        modified_functions = set()
+        for e in self._events:
+            path, line = os.path.relpath(e.filepath, '/testbed'), e.line_number
+            if line in self._diff_lines.get(path, []):
+                modified_functions.add(e.function_name)
+        return list(modified_functions)
 
     @property
     def entry(self):
