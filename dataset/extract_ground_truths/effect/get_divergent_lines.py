@@ -1,6 +1,6 @@
 import logging
 
-from tracer.protocol import Event
+from tracer.protocol import Event, LineEvent
 from dataset.extract_ground_truths.effect.trace_util import (
     diff_events,
     load_trace_pair,
@@ -107,6 +107,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 ) and all(not buggy_callee.name.endswith(s) for s in [
                     '<genexpr>', '<listcomp>', '<dictcomp>', '<setcomp>', '<lambda>'
                 ]) and buggy_callee.name not in RANDOMIZED_FUNCTIONS:
+                    if buggy_callee.is_pmf:
+                        logger.debug(">> Step into patch-modified function")
+                        logger.debug(">> Directly go to the return point")
                     buggy_function = buggy_callee
                     patched_function = patched_callee
             else:
@@ -124,6 +127,22 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     agent=agent,
                 )
                 if diff:
+                    if isinstance(buggy_event, LineEvent) and isinstance(patched_event, LineEvent):
+                        buggy_variables = diff['buggy_variables'].keys() | diff['patched_variables'].keys()
+                        function_param_names = (buggy_function.params.keys() if isinstance(buggy_function.params, dict) else set()) | (patched_function.params.keys() if isinstance(patched_function.params, dict) else set())
+                        if buggy_variables & function_param_names:
+                            logger.debug(">> Function parameters reveal the divergence")
+                            logger.debug(">> Buggy variable names: " + ", ".join(sorted(buggy_variables)))
+                            logger.debug(">> Parameter names: " + ", ".join(sorted(function_param_names)))
+                            logger.debug(">> Jumping back to caller")
+                            buggy_caller = buggy_function.parent
+                            patched_caller = patched_function.parent
+                            if buggy_caller and patched_caller:
+                                buggy_function = buggy_caller
+                                patched_function = patched_caller
+                                continue
+                            logger.debug("> END")
+                            break
                     return diff
         else:
             logger.debug("> Control flow diverged")
