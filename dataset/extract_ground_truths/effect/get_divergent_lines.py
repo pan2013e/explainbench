@@ -78,7 +78,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
-    diffing_started = False
+    is_pmf_exist = len(buggy_traces._pmf) > 0 or len(patched_traces._pmf) > 0
+    if is_pmf_exist:
+        logger.debug(">> Patch modified function exist!")
+    diffing_started = False if is_pmf_exist else True
     while True:
         try:
             buggy_event = next(buggy_function)
