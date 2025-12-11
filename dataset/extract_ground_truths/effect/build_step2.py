@@ -80,12 +80,12 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
     )
     return expr
 
-def process_agent(data, gold, agent, instance_ids):
+def process_agent(agent_data, gold_data, agent, instance_ids):
     results = {}
     for instance_id in instance_ids:
         results[instance_id] = {}
         try:
-            metadata = data[agent][instance_id]
+            metadata = agent_data[agent][instance_id]
             if not metadata:
                 # load the gold patch
                 pass
