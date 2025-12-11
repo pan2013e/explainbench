@@ -87,7 +87,7 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
         try:
             metadata = agent_data[agent][instance_id]
             if not metadata:
-                metadata = gold_data[agent][instance_id]
+                metadata = gold_data["gold"][instance_id]
             if not metadata:
                 print(f"[WARNING] metadata not found for agent={agent} | instance_id={instance_id}")
                 continue
@@ -125,20 +125,21 @@ if __name__ == "__main__":
     import time
     start = time.time()
 
-    STEP1_PATH = os.path.join(DIR, "tmp/step1.json")
-    GOLD_PATH = os.path.join(DIR, "../../../shared_logs/step1_gold.json")
+    STEP1_PATH = os.path.join(DIR, "tmp/step1_openhands.json")
+    GOLD_PATH = os.path.join(DIR, "tmp/step1_gold.json")
     step1 = read_json(STEP1_PATH)
     gold = read_json(GOLD_PATH)
     results = {}
     list_ids = [
-        "astropy__astropy-12907",
-        "astropy__astropy-13453",
-        "astropy__astropy-13579",
-        "astropy__astropy-14096",
-        "sympy__sympy-12096",
-        "sympy__sympy-12419",
-        "sympy__sympy-12489",
-        "sympy__sympy-13615",
+        # "astropy__astropy-12907",
+        # "astropy__astropy-13453",
+        # "astropy__astropy-13579",
+        # "astropy__astropy-14096",
+        # "sympy__sympy-12096",
+        # "sympy__sympy-12419",
+        # "sympy__sympy-12489",
+        # "sympy__sympy-13615",
+        "django__django-16429"
     ]
     instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
