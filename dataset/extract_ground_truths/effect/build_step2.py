@@ -80,7 +80,7 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
     )
     return expr
 
-def process_agent(data, agent, instance_ids):
+def process_agent(data, gold, agent, instance_ids):
     results = {}
     for instance_id in instance_ids:
         results[instance_id] = {}
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     instance_ids = get_instance_ids(list_ids)
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step1, agent, instance_ids): agent
+            executor.submit(process_agent, step1, gold, agent, instance_ids): agent
             for agent in AGENTS if agent
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
