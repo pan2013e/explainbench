@@ -18,8 +18,8 @@ from dataset.extract_ground_truths.effect.source_util import (
     remove_docstrings,
 )
 
-def read_step1_results():
-    with open(os.path.join(DIR, "tmp/step1.json"), "r") as f:
+def read_json(path):
+    with open(os.path.join(path), "r") as f:
         return json.load(f)
 
 @lru_cache
@@ -124,7 +124,10 @@ if __name__ == "__main__":
     import time
     start = time.time()
 
-    step1 = read_step1_results()
+    STEP1_PATH = os.path.join(DIR, "tmp/step1.json")
+    GOLD_PATH = os.path.join(DIR, "../../../shared_logs/step1_gold.json")
+    step1 = read_json(STEP1_PATH)
+    gold = read_json(GOLD_PATH)
     results = {}
     list_ids = [
         "astropy__astropy-12907",
