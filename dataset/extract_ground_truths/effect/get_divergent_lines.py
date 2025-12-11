@@ -111,9 +111,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 if (
                     buggy_callee.return_value is None and patched_callee.return_value is None
                     or not buggy_callee.returns_equals(patched_callee)
-                ) and all(not buggy_callee.name.endswith(s) for s in [
-                    '<genexpr>', '<listcomp>', '<dictcomp>', '<setcomp>', '<lambda>'
-                ]) and buggy_callee.name not in RANDOMIZED_FUNCTIONS:
+                ) and buggy_callee.name not in RANDOMIZED_FUNCTIONS:
                     if buggy_callee.is_pmf:
                         logger.debug(">> Step into patch-modified function")
                         logger.debug(">> Directly go to the return point")
