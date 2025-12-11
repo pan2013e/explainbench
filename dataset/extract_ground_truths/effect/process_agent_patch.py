@@ -3,6 +3,10 @@ from collections import defaultdict
 from typing import Dict, List
 from pathlib import Path
 
+TEST_FILE_PATTERN = {
+    'django': re.compile(r'tests/.*\.py$'),
+}
+
 def extract_modified_lines(patch_content: str)->Dict[str, Dict]:
     """
     Parses a patch file content and extracts metadata about the changes.
@@ -76,10 +80,21 @@ def read_patch(input_filepath: Path)->str:
         return f.read()
 
 def get_diff_info_per_instance(agent_output_dir: Path, instance_id: Path)->Dict[str, Dict]:
+    repo = str(instance_id).split("__")[0]
+    test_file_pattern = TEST_FILE_PATTERN.get(repo, None)
     patch_path = Path(agent_output_dir, instance_id, "patch.diff")
     try:
         patch_content = read_patch(patch_path)
         modified_lines = extract_modified_lines(patch_content)
+        if test_file_pattern:
+            added_files = list(modified_lines["added"].keys())
+            removed_files = list(modified_lines["removed"].keys())
+            for filename in added_files:
+                if test_file_pattern.match(filename):
+                    del modified_lines["added"][filename]
+            for filename in removed_files:
+                if test_file_pattern.match(filename):
+                    del modified_lines["removed"][filename]
         return modified_lines
     except FileNotFoundError:
         # ignore warning for now due to incomplete data
