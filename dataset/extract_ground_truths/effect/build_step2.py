@@ -89,6 +89,7 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
             if not metadata:
                 metadata = gold_data[agent][instance_id]
             if not metadata:
+                print(f"[WARNING] metadata not found for agent={agent} | instance_id={instance_id}")
                 continue
             pre_code, post_code = get_function_code(
                 instance_id,
