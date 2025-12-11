@@ -78,6 +78,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
+    diffing_started = False
     while True:
         try:
             buggy_event = next(buggy_function)
@@ -91,6 +92,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 continue
             logger.debug("> END")
             break
+        if buggy_function.is_pmf or patched_function.is_pmf:
+            logger.debug(f">> Start Diffing Now")
+            diffing_started = True
         logger.debug(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
         logger.debug(f"Function: {buggy_function.name} vs {patched_function.name}")
         logger.debug(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
@@ -113,6 +117,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     buggy_function = buggy_callee
                     patched_function = patched_callee
             else:
+                if not diffing_started:
+                    continue
                 diff = state_diff(
                     buggy_event,
                     patched_event,
@@ -148,19 +154,21 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
             logger.debug("> Control flow diverged")
             lhs_event = buggy_function.return_event
             rhs_event = patched_function.return_event
-            diff = state_diff(
-                lhs_event,
-                rhs_event,
-                repo_name,
-                test_id=test_id,
-                function_name=buggy_function.name,
-                buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
-                patched_line_count=lambda: get_event_count(rhs_event, patched_traces),
-                buggy_function_param=buggy_function.params,
-                patched_function_param=patched_function.params,
-                instance_id=instance_id,
-                agent=agent,
-            )
+            diff = {}
+            if diffing_started:
+                diff = state_diff(
+                    lhs_event,
+                    rhs_event,
+                    repo_name,
+                    test_id=test_id,
+                    function_name=buggy_function.name,
+                    buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
+                    patched_line_count=lambda: get_event_count(rhs_event, patched_traces),
+                    buggy_function_param=buggy_function.params,
+                    patched_function_param=patched_function.params,
+                    instance_id=instance_id,
+                    agent=agent,
+                )
             if diff:
                 return diff
             else:
