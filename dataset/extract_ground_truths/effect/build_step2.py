@@ -86,11 +86,14 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
         results[instance_id] = {}
         try:
             metadata = agent_data[agent][instance_id]
-            if not metadata:
+            if metadata is None:
+                print(f"[INFO] metadata not found due to errors for agent={agent} | instance_id={instance_id}")
+                continue
+            if metadata == {}:
                 metadata = gold_data["gold"][instance_id]
-                print(f"[INFO] metadata not found for agent={agent} | instance_id={instance_id}")
+                print(f"[INFO] no behavior delta for agent={agent} | instance_id={instance_id}")
                 print(f"[INFO] falling back to gold metadata for instance_id={instance_id}")
-            if not metadata:
+            if metadata == {}:
                 print(f"[INFO] metadata not found for agent=gold | instance_id={instance_id}")
                 continue
             pre_code, post_code = get_function_code(
