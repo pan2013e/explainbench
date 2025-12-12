@@ -5,6 +5,7 @@ from pathlib import Path
 
 TEST_FILE_PATTERN = {
     'django': re.compile(r'tests/.*\.py$'),
+    'pydata': re.compile(r'xarray/tests/.*\.py$'),
 }
 
 def extract_modified_lines(patch_content: str)->Dict[str, Dict]:
