@@ -17,6 +17,21 @@ SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
 AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
 
+EXCLUDED_IDS = [
+    "astropy__astropy-7606",
+    "astropy__astropy-8707",
+    "django__django-10097",
+    "psf__requests-1724",
+    "psf__requests-1766",
+    "psf__requests-1921",
+    "psf__requests-2317",
+    "pylint-dev__pylint-6528",
+    "pylint-dev__pylint-7277",
+    "scikit-learn__scikit-learn-14710",
+    "sphinx-doc__sphinx-8595",
+    "sphinx-doc__sphinx-9711",
+]
+
 class _IterableReader(RawIOBase):
     def __init__(self, iterable):
         self._iter = iter(iterable)
@@ -84,7 +99,7 @@ def get_instance_ids(value: list[str]) -> list[str]:
     return value
 
 def all_instances():
-    return [data['instance_id'] for data in SWEBENCH]
+    return [data['instance_id'] for data in SWEBENCH if data['instance_id'] not in EXCLUDED_IDS]
 
 def instances_by_repo(repo_name: str | list[str]):
     if isinstance(repo_name, str):
@@ -93,6 +108,7 @@ def instances_by_repo(repo_name: str | list[str]):
         data['instance_id']
         for data in SWEBENCH
         if any(rn in data['repo'] for rn in repo_name)
+        and data['instance_id'] not in EXCLUDED_IDS
     ]
 
 def get_predictions_path(agent: str):
