@@ -5,8 +5,8 @@
 # and fallback if no divergence is found.
 import json
 import os
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import signal
+from concurrent.futures import ProcessPoolExecutor, as_completed, TimeoutError
+from tqdm import tqdm
 
 from tqdm.auto import tqdm
 
@@ -27,22 +27,32 @@ AGENTS = [
     "gold",
 ]
 
-def process_agent(agent, instance_ids):
-    def _timeout_handler(signum, frame):
-        raise TimeoutError("Timed out after 300 seconds")
+def _process_instance(instance_id, agent):
+    try:
+        return instance_id, serialize(get_divergent_lines.main(instance_id, agent=agent))
+    except FileNotFoundError:
+        return instance_id, None
+    except Exception as e:
+        print(f"Error for {instance_id} with agent {agent}: {e}", flush=True)
+        return instance_id, None
+
+def process_agent(agent, instance_ids, timeout=300, max_workers=10):
     results = {}
-    for instance_id in instance_ids:
-        try:
-            signal.signal(signal.SIGALRM, _timeout_handler)
-            signal.alarm(300)
-            results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent))
-        except FileNotFoundError:
-            results[instance_id] = None
-        except Exception as e:
-            print(f"Error for {instance_id} with agent {agent}: {e}", flush=True)
-            results[instance_id] = None
-        finally:
-            signal.alarm(0)
+
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_process_instance, instance_id, agent): instance_id
+            for instance_id in instance_ids
+        }
+        for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing agent {agent}"):
+            instance_id = futures[future]
+            try:
+                _, result = future.result(timeout=timeout)
+            except TimeoutError:
+                print(f"Timeout for {instance_id} with agent {agent}", flush=True)
+                result = None
+            results[instance_id] = result
+
     return results
 
 if __name__ == "__main__":
