@@ -6,6 +6,7 @@
 import json
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import signal
 
 from tqdm.auto import tqdm
 
@@ -20,35 +21,33 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 #         open(os.path.join(DIR, "../../explanations/agents.txt")).readlines()
 #     )
 # )
-AGENTS = ["20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"]
+AGENTS = [
+    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    "20250612_trae",
+    "gold",
+]
 
 def process_agent(agent, instance_ids):
+    def _timeout_handler(signum, frame):
+        raise TimeoutError("Timed out after 300 seconds")
     results = {}
     for instance_id in instance_ids:
         try:
+            signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(300)
             results[instance_id] = serialize(get_divergent_lines.main(instance_id, agent=agent))
         except FileNotFoundError:
             results[instance_id] = None
         except Exception as e:
-            print(f"Error for {instance_id} with agent {agent}: {e}")
+            print(f"Error for {instance_id} with agent {agent}: {e}", flush=True)
             results[instance_id] = None
+        finally:
+            signal.alarm(0)
     return results
 
 if __name__ == "__main__":
     results = {}
-    ids = [
-        "astropy__astropy-12907",
-        "astropy__astropy-13453",
-        "astropy__astropy-13579",
-        "astropy__astropy-14096",
-        "astropy__astropy-14365",
-        "sympy__sympy-12096",
-        "sympy__sympy-12419",
-        "sympy__sympy-12489",
-        "sympy__sympy-13551",
-        "sympy__sympy-13615",
-    ]
-    instance_ids = get_instance_ids(ids)
+    instance_ids = get_instance_ids(["all"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, agent, instance_ids): agent
