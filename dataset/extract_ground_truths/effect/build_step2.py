@@ -82,20 +82,20 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
 
 def process_agent(agent_data, gold_data, agent, instance_ids):
     results = {}
-    for instance_id in instance_ids:
-        results[instance_id] = {}
+    
+    def process_instance(instance_id):
         try:
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(f"[INFO] metadata not found due to errors for agent={agent} | instance_id={instance_id}")
-                continue
+                return None
             if metadata == {}:
                 metadata = gold_data["gold"][instance_id]
                 print(f"[INFO] no behavior delta for agent={agent} | instance_id={instance_id}")
                 print(f"[INFO] falling back to gold metadata for instance_id={instance_id}")
             if metadata == {}:
                 print(f"[INFO] metadata not found for agent=gold | instance_id={instance_id}")
-                continue
+                return None
             pre_code, post_code = get_function_code(
                 instance_id,
                 metadata['file_path'],
@@ -121,36 +121,37 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
                     changed_expressions = expr_strings
             instance_result.update(metadata)
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
-            results[instance_id] = instance_result
+            return instance_result
         except Exception as e:
-            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {e}")
+            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}")
+            return None
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {
+            executor.submit(process_instance, instance_id): instance_id
+            for instance_id in instance_ids
+        }
+        for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing agent {agent}"):
+            instance_id = futures[future]
+            result = future.result()
+            if result is not None:
+                results[instance_id] = result
     return results
 
 if __name__ == "__main__":
     import time
     start = time.time()
 
-    STEP1_PATH = os.path.join(DIR, "tmp/step1_openhands.json")
-    GOLD_PATH = os.path.join(DIR, "tmp/step1_gold.json")
+    STEP1_PATH = os.path.join(DIR, "tmp/step1.json")
+    GOLD_PATH = os.path.join(DIR, "tmp/step1.json")
     step1 = read_json(STEP1_PATH)
     gold = read_json(GOLD_PATH)
     results = {}
-    list_ids = [
-        # "astropy__astropy-12907",
-        # "astropy__astropy-13453",
-        # "astropy__astropy-13579",
-        # "astropy__astropy-14096",
-        # "sympy__sympy-12096",
-        # "sympy__sympy-12419",
-        # "sympy__sympy-12489",
-        # "sympy__sympy-13615",
-        "django__django-16429"
-    ]
-    instance_ids = get_instance_ids(list_ids)
+    instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, gold, agent, instance_ids): agent
-            for agent in AGENTS if agent
+            for agent in AGENTS if agent and agent != 'gold'
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
