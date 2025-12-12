@@ -22,7 +22,7 @@ def main(**kwargs):
         clean=False,
         open_file_limit=4096,
         run_id=f"track.{kwargs["agent"]}.{os.getuid()}",
-        timeout=10800,
+        timeout=1800,
         namespace="swebench",
         rewrite_reports=False,
         modal=False,
