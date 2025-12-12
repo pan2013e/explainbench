@@ -29,7 +29,24 @@ AGENTS = [
 
 def _process_instance(instance_id, agent):
     try:
-        return instance_id, serialize(get_divergent_lines.main(instance_id, agent=agent))
+        test_id = 0
+        while True:
+            try:
+                result = get_divergent_lines.main(
+                    instance_id,
+                    agent=agent,
+                    test_id=test_id,
+                )
+            except IndexError:
+                result = {}
+                break
+
+            if result:
+                break
+            test_id += 1
+
+        return instance_id, serialize(result)
+
     except FileNotFoundError:
         return instance_id, None
     except Exception as e:
