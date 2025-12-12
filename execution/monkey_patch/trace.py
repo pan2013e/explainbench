@@ -23,7 +23,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 GLOBAL_ARGS = dict()
 
 def get_allowed_functions(agent, instance_id):
-    dataset_file = "/home/yusuf/explainbench/shared_logs/allowed_functions.json"
+    dataset_file = "/home/yusuf/explainbench/shared_logs/allowed_functions_all.json"
     if not os.path.exists(dataset_file):
         print(f"Warning: Allowed functions dataset file not found at {dataset_file}")
         return 'none'
