@@ -108,6 +108,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
             if event_type == 'Function':
                 buggy_callee = buggy_function.step_into(buggy_event)
                 patched_callee = patched_function.step_into(patched_event)
+                if not diffing_started and (buggy_callee.is_pmf or patched_callee.is_pmf):
+                    logger.debug(f">> Start Diffing Now")
+                    diffing_started = True
                 if (
                     buggy_callee.return_value is None and patched_callee.return_value is None
                     or not buggy_callee.returns_equals(patched_callee)
@@ -190,5 +193,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(f"django__django-{instance_id}", test_id=0,  agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main(instance_id, test_id=0,  agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
