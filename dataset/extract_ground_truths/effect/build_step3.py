@@ -174,20 +174,21 @@ def validate_expressions(agent, instance_id, test_id=0, expr_id=0):
 
 def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
-    for instance_id in instance_ids:
+    
+    def process_instance(instance_id):
         try:
+            if instance_id not in data[agent]:
+                return None
             metadata = data[agent][instance_id]
             if metadata is None:
-                results[instance_id] = None
-                continue
+                return None
 
             changed_candidates = metadata["changed_candidates"]
             unchanged_candidates = metadata["unchanged_candidates"]
 
             all_candidates = changed_candidates + unchanged_candidates
 
-            if instance_id not in results:
-                results[instance_id] = {}
+            result = {}
 
             if do_execute and all_candidates:
                 execute_candidate_expressions(
@@ -221,13 +222,21 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
                     if expr_change_map.get(e) is False
                 ]
 
-                results[instance_id]["valid_changed_expressions"] = valid_changed
-                results[instance_id]["valid_unchanged_expressions"] = valid_unchanged
+                result["valid_changed_expressions"] = valid_changed
+                result["valid_unchanged_expressions"] = valid_unchanged
            
-            results[instance_id].update(metadata)
-
+            result.update(metadata)
+            return result
         except Exception as e:
-            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {e}")
+            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}")
+            return None
+    
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = {executor.submit(process_instance, instance_id): instance_id for instance_id in instance_ids}
+        for future in as_completed(futures):
+            instance_id = futures[future]
+            results[instance_id] = future.result()
+    
     return results
 
 def main():
@@ -254,21 +263,11 @@ def main():
         
     step2 = read_step2_results()
     results = {}
-    list_ids = [
-        # "astropy__astropy-12907",
-        "astropy__astropy-13453",
-        "astropy__astropy-13579",
-        # "astropy__astropy-14096",
-        "sympy__sympy-12096",
-        "sympy__sympy-12419",
-        "sympy__sympy-12489",
-        "sympy__sympy-13615",
-    ]
-    instance_ids = get_instance_ids(list_ids)
+    instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
-            for agent in AGENTS if agent
+            for agent in AGENTS if agent and agent != "gold"
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
