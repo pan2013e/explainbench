@@ -30,9 +30,8 @@ def main(argv: list[str] | None = None) -> None:
     if argv is None:
         argv = sys.argv
 
-    base_dir = Path(__file__).parent
-
     input_path = Path(argv[1])
+    base_dir = input_path.parent
 
     with input_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
