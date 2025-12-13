@@ -135,6 +135,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     patched_function_param=patched_function.params,
                     instance_id=instance_id,
                     agent=agent,
+                    seen_pmf=is_pmf_exist,
                 )
                 if diff:
                     if isinstance(buggy_event, LineEvent) and isinstance(patched_event, LineEvent):
@@ -172,6 +173,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     patched_function_param=patched_function.params,
                     instance_id=instance_id,
                     agent=agent,
+                    seen_pmf=is_pmf_exist,
                 )
             if diff:
                 return diff
