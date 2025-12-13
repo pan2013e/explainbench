@@ -23,10 +23,9 @@ def main(argv: list[str] | None = None) -> None:
           ...
         }
 
-    identify instances with oversized serialized variables and write
-    a summary JSON of the form:
-
-        {agent: [instance_ids, ...]}
+    identify instances with oversized serialized variables and write 
+    a JSONL file where each line is the original per-instance
+    metadata record, filtered to only include \"good\" instances.
     """
     if argv is None:
         argv = sys.argv
@@ -42,7 +41,7 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(f"{input_path} does not contain a top-level JSON object")
 
     bad_by_agent: dict[str, set[str]] = {}
-    good_by_agent: dict[str, set[str]] = {}
+    good_instances: dict[str, dict[str, dict]] = {}
     instances_per_agent: dict[str, int] = {}
 
     for agent, instances in data.items():
@@ -68,27 +67,31 @@ def main(argv: list[str] | None = None) -> None:
                             all_good = False
 
             if all_good:
-                good_by_agent.setdefault(agent, set()).add(instance_id)
+                good_instances.setdefault(agent, {})[instance_id] = entry
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
 
-    output_mapping = {
-        agent: sorted(list(instance_ids)) for agent, instance_ids in good_by_agent.items()
-    }
-
-    output_path = base_dir / "good_serialization_instances.json"
-    with output_path.open("w", encoding="utf-8") as f:
-        json.dump(output_mapping, f, indent=2, sort_keys=True)
+    # Also write a JSONL file with one record per (agent, instance_id),
+    # preserving the original metadata structure.
+    jsonl_path = base_dir / "step1-filtered.jsonl"
+    with jsonl_path.open("w", encoding="utf-8") as f:
+        for agent, instances in sorted(good_instances.items()):
+            for instance_id, entry in sorted(instances.items()):
+                record = dict(entry)
+                # Ensure instance_id/agent are present in the record.
+                record.setdefault("instance_id", instance_id)
+                record.setdefault("agent", agent)
+                f.write(json.dumps(record) + "\n")
     agents_with_any = set(instances_per_agent.keys())
 
     print("=== Serialization report ===")
     print(f"Input JSON: {input_path}")
-    print(f"Output JSON written to: {output_path}")
+    print(f"Output JSONL written to: {jsonl_path}")
     print()
     print("Per-agent breakdown:")
     for agent in sorted(agents_with_any):
         bad_count = len(bad_by_agent.get(agent, set()))
-        good_count = len(good_by_agent.get(agent, set()))
+        good_count = len(good_instances.get(agent, {}))
         total = instances_per_agent.get(agent, 0)
         print(f"  Agent: {agent}")
         print(f"    Total instances:             {total}")
