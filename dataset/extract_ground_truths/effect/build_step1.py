@@ -40,7 +40,14 @@ def _process_instance(instance_id, agent):
             except IndexError:
                 result = {}
                 break
-
+            except AssertionError as e:
+                print(
+                    f"AssertionError for {instance_id} "
+                    f"(agent={agent}, test_id={test_id}): {e}",
+                    flush=True,
+                )
+                test_id += 1
+                continue
             if result:
                 break
             test_id += 1
@@ -83,7 +90,7 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    os.makedirs(os.path.join(DIR, "tmp"), exist_ok=True)
-    with open(os.path.join(DIR, "tmp/step1.json"), "w") as f:
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1-debug.json")
+    with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
-    print("Saved step1 results to tmp/step1.json")
+    print(f"Saved step1 results to {OUTPUT_DIR}")
