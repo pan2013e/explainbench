@@ -5,10 +5,12 @@ import argparse
 import json
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass
 from io import StringIO
 from itertools import zip_longest
+from typing import Any, Dict, Optional, Tuple
 
 from deepdiff import DeepDiff
 from tqdm.auto import tqdm
@@ -18,7 +20,6 @@ from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests, get_instance_ids
 from tracer.inspector import encode_expr_list
-
 
 def read_step2_results():
     with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
@@ -172,71 +173,108 @@ def validate_expressions(agent, instance_id, test_id=0, expr_id=0):
         return {}
     return compute_expr_change_map(patched_inspect, buggy_inspect)
 
+@dataclass(frozen=True)
+class InstanceJob:
+    agent: str
+    instance_id: str
+    metadata: Dict[str, Any]
+    do_execute: bool
+    do_validate: bool
+    expr_id: int = 0
+    test_id: int = 0
+
+def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
+    """
+    Returns: (instance_id, result_dict_or_None)
+    This is process-safe as long as job contains only picklable data.
+    """
+    try:
+        metadata = job.metadata
+        if not metadata:
+            return job.instance_id, None
+
+        changed_candidates = metadata["changed_candidates"]
+        unchanged_candidates = metadata["unchanged_candidates"]
+        all_candidates = changed_candidates + unchanged_candidates
+
+        result: Dict[str, Any] = {}
+
+        if job.do_execute and all_candidates:
+            execute_candidate_expressions(
+                all_candidates,
+                metadata["instance_id"],
+                metadata["agent"],
+                metadata["file_path"],
+                metadata["buggy_lineno"],
+                metadata["patched_lineno"],
+                metadata["test_id"],
+                metadata["buggy_line_count"],
+                metadata["patched_line_count"],
+                metadata["before_or_after"],
+                expr_id=job.expr_id,
+            )
+
+        if job.do_validate and all_candidates:
+            expr_change_map = validate_expressions(
+                job.agent,
+                job.instance_id,
+                test_id=job.test_id,
+                expr_id=job.expr_id,
+            )
+
+            valid_changed = [e for e in changed_candidates if expr_change_map.get(e) is True]
+            valid_unchanged = [e for e in unchanged_candidates if expr_change_map.get(e) is False]
+
+            result["valid_changed_expressions"] = valid_changed
+            result["valid_unchanged_expressions"] = valid_unchanged
+
+        result.update(metadata)
+        return job.instance_id, result
+
+    except Exception as e:
+        print(f"[ERROR] run_instance_job crashed for agent={job.agent} | {job.instance_id}: {type(e).__name__} {e}")
+        return job.instance_id, None
+
 def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
-    
-    def process_instance(instance_id):
-        try:
-            if instance_id not in data[agent]:
-                return None
-            metadata = data[agent][instance_id]
-            if metadata is None:
-                return None
 
-            changed_candidates = metadata["changed_candidates"]
-            unchanged_candidates = metadata["unchanged_candidates"]
+    jobs = []
+    for instance_id in instance_ids:
+        if agent not in data:
+            continue
+        if instance_id not in data[agent]:
+            continue
+        metadata = data[agent][instance_id]
+        if metadata is None:
+            continue
 
-            all_candidates = changed_candidates + unchanged_candidates
+        jobs.append(InstanceJob(
+            agent=agent,
+            instance_id=instance_id,
+            metadata=metadata,
+            do_execute=do_execute,
+            do_validate=do_validate,
+            expr_id=0,
+            test_id=0,
+        ))
 
-            result = {}
+    if not jobs:
+        return results
 
-            if do_execute and all_candidates:
-                execute_candidate_expressions(
-                    all_candidates,
-                    metadata["instance_id"],
-                    metadata["agent"],
-                    metadata["file_path"],
-                    metadata["buggy_lineno"],
-                    metadata["patched_lineno"],
-                    metadata["test_id"],
-                    metadata["buggy_line_count"],
-                    metadata["patched_line_count"],
-                    metadata["before_or_after"],
-                    expr_id=0,
-                )
-                                
-            if do_validate and all_candidates:
-                expr_change_map = validate_expressions(
-                    agent,
-                    instance_id,
-                    test_id=0,
-                    expr_id=0,
-                )
+    Executor = ProcessPoolExecutor if do_execute else ThreadPoolExecutor
+    max_workers = 8 if do_execute else 20
 
-                valid_changed = [
-                    e for e in changed_candidates
-                    if expr_change_map.get(e) is True
-                ]
-                valid_unchanged = [
-                    e for e in unchanged_candidates
-                    if expr_change_map.get(e) is False
-                ]
-
-                result["valid_changed_expressions"] = valid_changed
-                result["valid_unchanged_expressions"] = valid_unchanged
-           
-            result.update(metadata)
-            return result
-        except Exception as e:
-            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}")
-            return None
-    
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = {executor.submit(process_instance, instance_id): instance_id for instance_id in instance_ids}
+    with Executor(max_workers=max_workers) as executor:
+        futures = {executor.submit(run_instance_job, job): job.instance_id for job in jobs}
         for future in as_completed(futures):
-            instance_id = futures[future]
-            results[instance_id] = future.result()
-    
+            iid = futures[future]
+            try:
+                instance_id, res = future.result()
+                results[instance_id] = res
+            except Exception as e:
+                print(f"[ERROR] Future failed for agent={agent} | {iid}: {type(e).__name__} {e}")
+                results[iid] = None
+
     return results
 
 def main():
@@ -264,7 +302,7 @@ def main():
     step2 = read_step2_results()
     results = {}
     instance_ids = get_instance_ids(["all"])
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
             for agent in AGENTS if agent and agent != "gold"
