@@ -29,6 +29,10 @@ def is_input_param_good(value) -> bool:
     serialized = json.dumps(value)
     return len(serialized) < 4000
 
+def is_contains_password(value) -> bool:
+    serialized = json.dumps(value)
+    return "password" in serialized.lower()
+
 def main(argv: list[str] | None = None) -> None:
     """
     Given a single JSON file with structure:
@@ -90,7 +94,7 @@ def main(argv: list[str] | None = None) -> None:
                     for _, val in section_vals.items():
                         if not is_var_good(val):
                             all_good = False
-                    if contains_datetime_object(section_vals):
+                    if contains_datetime_object(section_vals) or is_contains_password(section_vals):
                         all_good = False
 
             for section in ("buggy_function_param", "patched_function_param"):
@@ -99,7 +103,7 @@ def main(argv: list[str] | None = None) -> None:
                     for _, val in section_vals.items():
                         if not is_input_param_good(val):
                             all_good = False
-                    if contains_datetime_object(section_vals):
+                    if contains_datetime_object(section_vals) or is_contains_password(section_vals):
                         all_good = False
                 
             # if not entry.get("seen_pmf"):
