@@ -157,8 +157,11 @@ def extract_seed_exp(input_diff):
 
     seed_expr = []
     for change_kind, full_path, payload in iter_diff_items(input_diff):
+
+        # default pattern: root[seen_variables][var_name]
         var_name = extract_var_name(full_path, 1)
         
+        # another pattern: root[return_value] or root[exception_value]
         if var_name == "":
             var_name = extract_var_name(full_path, 0)
 
