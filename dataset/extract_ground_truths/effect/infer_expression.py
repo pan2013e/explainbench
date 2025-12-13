@@ -3,6 +3,7 @@ import ast
 import json
 import shutil
 from pprint import pprint
+import re
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
 from pydantic import BaseModel, field_validator
@@ -10,7 +11,7 @@ from pydantic import BaseModel, field_validator
 from evaluation.inference import Model
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests
-from dataset.extract_ground_truths.effect.postprocessing_util import extract_var_name
+from dataset.extract_ground_truths.effect.postprocessing_util import iter_diff_items
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -144,11 +145,32 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 MODEL = Model("gemini/gemini-2.5-pro", n=1)
 
 # NOTE: Currently, it is possibel that input diff contains more than 1. In this case, this function outputs the first object.
-# It can be modified in the future
+# It can be modified in the future\
+_BRACKETED_NAME_RE = re.compile(r"\[['\"]([^'\"]+)['\"]\]")
 def extract_seed_exp(input_diff):
-    for key, item in input_diff.items():
-        var_name = extract_var_name(item)
-        return var_name
+
+    def extract_var_name(full_path: str, key_idx) -> str:
+        tokens = _BRACKETED_NAME_RE.findall(str(full_path))
+        if len(tokens) > key_idx:
+            return tokens[key_idx]
+        return "" 
+
+    seed_expr = []
+    for change_kind, full_path, payload in iter_diff_items(input_diff):
+        var_name = extract_var_name(full_path, 1)
+        
+        if var_name == "":
+            var_name = extract_var_name(full_path, 0)
+
+        if var_name == "return_value":
+            var_name = "__return__"
+            return var_name
+
+        elif var_name == "exception_value":
+            var_name = "__exception__"
+
+        seed_expr.append(var_name)
+    return seed_expr[0]
 
 def main(code, line, diff, before, after, should_change, changed_expressions=None):
     if should_change:
@@ -171,6 +193,8 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             n_output=5,
             changed_expressions=changed_expressions if changed_expressions else ""
         )
+    print(prompt)
+    breakpoint()
     expr_list = MODEL.infer_once(prompt, ExpressionList)
     return expr_list
 
