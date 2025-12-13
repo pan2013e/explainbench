@@ -154,6 +154,9 @@ class Traces:
                     stack.append(new_block)
                 case ReturnEvent():
                     stack[-1].return_value = e.return_value
+                    if stack[-1].return_value is not None and stack[-1].exception is not None:
+                        if stack[-1].exception[0] == "StopIteration":
+                            stack[-1].exception = None
                     stack.pop()
                 case ExceptionEvent():
                     ne = self._events[idx + 1] if idx + 1 < len(self._events) else None
