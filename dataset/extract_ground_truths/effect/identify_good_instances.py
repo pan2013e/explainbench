@@ -24,8 +24,17 @@ def main(argv: list[str] | None = None) -> None:
         }
 
     identify instances with oversized serialized variables and write 
-    a JSONL file where each line is the original per-instance
-    metadata record, filtered to only include \"good\" instances.
+    a JSON file that preserves the original structure:
+
+        {
+          agent: {
+            instance_id: {...},  # original metadata entry
+            ...
+          },
+          ...
+        }
+
+    but filtered to only include \"good\" instances.
     """
     if argv is None:
         argv = sys.argv
@@ -70,22 +79,16 @@ def main(argv: list[str] | None = None) -> None:
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
 
-    # Also write a JSONL file with one record per (agent, instance_id),
-    # preserving the original metadata structure.
-    jsonl_path = base_dir / "step1-filtered.jsonl"
-    with jsonl_path.open("w", encoding="utf-8") as f:
-        for agent, instances in sorted(good_instances.items()):
-            for instance_id, entry in sorted(instances.items()):
-                record = dict(entry)
-                # Ensure instance_id/agent are present in the record.
-                record.setdefault("instance_id", instance_id)
-                record.setdefault("agent", agent)
-                f.write(json.dumps(record) + "\n")
+    # Write JSON preserving the original nested structure:
+    # {agent: {instance_id: {metadata}}}, but only for \"good\" instances.
+    json_path = base_dir / "step1-filtered.json"
+    with json_path.open("w", encoding="utf-8") as f:
+        json.dump(good_instances, f, indent=2, sort_keys=True)
     agents_with_any = set(instances_per_agent.keys())
 
     print("=== Serialization report ===")
     print(f"Input JSON: {input_path}")
-    print(f"Output JSONL written to: {jsonl_path}")
+    print(f"Output JSON written to: {json_path}")
     print()
     print("Per-agent breakdown:")
     for agent in sorted(agents_with_any):
