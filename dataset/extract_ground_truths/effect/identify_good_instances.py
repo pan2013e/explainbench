@@ -3,14 +3,17 @@ import sys
 from pathlib import Path
 
 
-def is_good(value) -> bool:
+def is_var_good(value) -> bool:
     """
     Return True if the JSON-serialized value satisfies the
     \"good\" size criterion (naming is misleading on purpose).
     """
     serialized = json.dumps(value)
-    return len(serialized) < 500
+    return len(serialized) < 1000
 
+def is_input_param_good(value) -> bool:
+    serialized = json.dumps(value)
+    return len(serialized) < 4000
 
 def main(argv: list[str] | None = None) -> None:
     """
@@ -71,8 +74,18 @@ def main(argv: list[str] | None = None) -> None:
                 section_vals = entry.get(section, {})
                 if isinstance(section_vals, dict):
                     for _, val in section_vals.items():
-                        if not is_good(val):
+                        if not is_var_good(val):
                             all_good = False
+
+            for section in ("buggy_function_param", "patched_function_param"):
+                section_vals = entry.get(section, {})
+                if isinstance(section_vals, dict):
+                    for _, val in section_vals.items():
+                        if not is_input_param_good(val):
+                            all_good = False
+                
+            # if not entry.get("seen_pmf"):
+            #     all_good = False
 
             if all_good:
                 good_instances.setdefault(agent, {})[instance_id] = entry
