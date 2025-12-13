@@ -105,9 +105,15 @@ def main(argv: list[str] | None = None) -> None:
                             all_good = False
                     if contains_datetime_object(section_vals) or is_contains_password(section_vals):
                         all_good = False
-                
-            # if not entry.get("seen_pmf"):
-            #     all_good = False
+
+            # If either event type is a line event, require that we
+            # have seen a PMF; otherwise mark the instance as bad.
+            if (
+                entry.get("buggy_event_type") == "Line"
+                or entry.get("patched_event_type") == "Line"
+            ):
+                if not entry.get("seen_pmf"):
+                    all_good = False
 
             if all_good:
                 good_instances.setdefault(agent, {})[instance_id] = entry
