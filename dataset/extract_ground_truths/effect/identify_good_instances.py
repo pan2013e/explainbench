@@ -3,6 +3,20 @@ import sys
 from pathlib import Path
 
 
+def contains_datetime_object(value) -> bool:
+    """
+    Recursively check whether a (possibly nested) JSON-like structure
+    contains a dict with {"py/object": "datetime.datetime"}.
+    """
+    if isinstance(value, dict):
+        if value.get("py/object") == "datetime.datetime":
+            return True
+        return any(contains_datetime_object(v) for v in value.values())
+    if isinstance(value, list):
+        return any(contains_datetime_object(v) for v in value)
+    return False
+
+
 def is_var_good(value) -> bool:
     """
     Return True if the JSON-serialized value satisfies the
@@ -70,12 +84,14 @@ def main(argv: list[str] | None = None) -> None:
 
             # An instance is \"good\" only if *all* relevant values
             # satisfy `is_good` (our good criterion).
-            for section in ("buggy_variable", "patched_variable"):
+            for section in ("buggy_variables", "patched_variables"):
                 section_vals = entry.get(section, {})
                 if isinstance(section_vals, dict):
                     for _, val in section_vals.items():
                         if not is_var_good(val):
                             all_good = False
+                    if contains_datetime_object(section_vals):
+                        all_good = False
 
             for section in ("buggy_function_param", "patched_function_param"):
                 section_vals = entry.get(section, {})
@@ -83,6 +99,8 @@ def main(argv: list[str] | None = None) -> None:
                     for _, val in section_vals.items():
                         if not is_input_param_good(val):
                             all_good = False
+                    if contains_datetime_object(section_vals):
+                        all_good = False
                 
             # if not entry.get("seen_pmf"):
             #     all_good = False
@@ -92,8 +110,6 @@ def main(argv: list[str] | None = None) -> None:
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
 
-    # Write JSON preserving the original nested structure:
-    # {agent: {instance_id: {metadata}}}, but only for \"good\" instances.
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
         json.dump(good_instances, f, indent=2, sort_keys=True)
