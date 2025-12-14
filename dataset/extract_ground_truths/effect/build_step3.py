@@ -252,6 +252,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
         metadata = data[agent][instance_id]
         if metadata is None:
             continue
+        is_fallback_to_gold = False
         if metadata == {}:
             print(f"Falling back to gold for instance {instance_id}")
             if "gold" not in data or instance_id not in data["gold"]:
@@ -261,7 +262,10 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             metadata = data["gold"][instance_id]
             do_execute = False
             do_validate = False
-
+            is_fallback_to_gold = True
+            
+        metadata = dict(metadata)
+        metadata["is_fallback_to_gold"] = is_fallback_to_gold
         jobs.append(InstanceJob(
             agent=agent,
             instance_id=instance_id,
