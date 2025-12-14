@@ -59,7 +59,7 @@ def get_simple_function_name(metadata):
         name = name.split(".")[-1]
     return name
 
-@backoff.on_exception(backoff.constant, Exception, max_tries=5)
+@backoff.on_exception(backoff.expo, Exception, max_tries=5)
 def infer_expressions(pre_code, post_code, metadata, should_change, changed_expressions):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
@@ -136,7 +136,7 @@ def process_agent(agent_data, agent, instance_ids):
             )
             return None
     
-    with ThreadPoolExecutor(max_workers=25) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
