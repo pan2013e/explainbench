@@ -196,8 +196,6 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             n_output=5,
             changed_expressions=changed_expressions if changed_expressions else ""
         )
-    print(prompt)
-    breakpoint()
     expr_list = MODEL.infer_once(prompt, ExpressionList)
     return expr_list
 
