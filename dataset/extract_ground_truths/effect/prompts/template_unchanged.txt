@@ -12,9 +12,9 @@ You will be given:
 Produce exactly {n_output} Python expressions `<expr>` that:
 1. have the same outcome between the buggy and patched programs:
    (a) yield the same values, or
-   (b) yield the same program state between the buggy and patched programs (e.g., both are raising exceptions)
-2. Have the same complexity as the correct expressions if possible
-3. If resemblance is not reasonably achievable, still produce a strong, non-trivial distractor that meets all constraints. You are allowed to pick reasonable variable within the input function and generate a reasonable expression based on this variable
+   (b) yield the same program state between the buggy and patched programs (e.g., both are raising exceptions), and
+2. have the same complexity as the correct expressions if possible, and
+3. if resemblance is not reasonably achievable, still produce a strong, non-trivial distractor that meets all constraints. You are allowed to pick reasonable variable within the input function and generate a reasonable expression based on this variable
 
 ### General Rules
 1. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
