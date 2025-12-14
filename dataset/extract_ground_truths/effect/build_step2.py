@@ -151,25 +151,33 @@ if __name__ == "__main__":
     start = time.time()
 
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
+    agents_to_process = AGENTS.copy()
     
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
-    if not os.path.exists(STEP2_GOLD_PATH):
-        gold_results = process_agent(step1, "gold", instance_ids)
-        with open(STEP2_GOLD_PATH, "w") as f:
-            json.dump(gold_results, f, indent=2)
-        print(f"Saved step2 gold results to {STEP2_GOLD_PATH}")
+    if os.path.exists(STEP2_GOLD_PATH):
+        agents_to_process.remove("gold")
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, agent, instance_ids): agent
-            for agent in AGENTS if agent != "gold"
+            for agent in agents_to_process
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
+    
+    if "gold" in results:
+        with open(STEP2_GOLD_PATH, "w") as f:
+            json.dump({"gold": results["gold"]}, f, indent=2)
+        print(
+            "Saved step2 gold results to %s",
+            STEP2_GOLD_PATH,
+        )
+        del results["gold"]
+    
     with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
         json.dump(results, f, indent=2)
     print(
