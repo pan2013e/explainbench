@@ -2,6 +2,7 @@
 # Step 2. Provide step 1 info to an LLM to infer an expression,
 # then inspect the expr value in buggy and patched versions
 import json
+import logging
 import os
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,6 +18,8 @@ from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
     remove_docstrings,
 )
+
+logger = logging.getLogger(__name__)
 
 def read_json(path):
     with open(os.path.join(path), "r") as f:
@@ -82,22 +85,36 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
 
 def process_agent(agent_data, gold_data, agent, instance_ids):
     results = {}
-    print(f"[INFO] Starting agent {agent} with {len(instance_ids)} instances", flush=True)
+    logger.info("Starting agent %s with %d instances", agent, len(instance_ids))
     
     def process_instance(instance_id):
-        print(f"[INFO] agent={agent} instance_id={instance_id} starting", flush=True)
+        logger.info("agent=%s instance_id=%s starting", agent, instance_id)
 
         try:
             metadata = agent_data[agent][instance_id]
             if metadata is None:
-                print(f"[INFO] metadata not found due to errors for agent={agent} | instance_id={instance_id}", flush=True)
+                logger.info(
+                    "metadata not found due to errors for agent=%s | instance_id=%s",
+                    agent,
+                    instance_id,
+                )
                 return None
             if metadata == {}:
                 metadata = gold_data["gold"][instance_id]
-                print(f"[INFO] no behavior delta for agent={agent} | instance_id={instance_id}", flush=True)
-                print(f"[INFO] falling back to gold metadata for instance_id={instance_id}", flush=True)
+                logger.info(
+                    "no behavior delta for agent=%s | instance_id=%s",
+                    agent,
+                    instance_id,
+                )
+                logger.info(
+                    "falling back to gold metadata for instance_id=%s",
+                    instance_id,
+                )
             if metadata == {}:
-                print(f"[INFO] metadata not found for agent=gold | instance_id={instance_id}", flush=True)
+                logger.info(
+                    "metadata not found for agent=gold | instance_id=%s",
+                    instance_id,
+                )
                 return None
             pre_code, post_code = get_function_code(
                 instance_id,
@@ -126,7 +143,13 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
         except Exception as e:
-            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}", flush=True)
+            logger.error(
+                "process_agent crashed for agent=%s | %s: %s %s",
+                agent,
+                instance_id,
+                type(e).__name__,
+                e,
+            )
             return None
     
     with ThreadPoolExecutor(max_workers=20) as executor:
@@ -143,6 +166,17 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
 
 if __name__ == "__main__":
     import time
+
+    log_path = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/build_step2.log"
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(log_path, mode="w"),
+            logging.StreamHandler(),
+        ],
+    )
+
     start = time.time()
 
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
@@ -156,14 +190,17 @@ if __name__ == "__main__":
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, gold, agent, instance_ids): agent
-            for agent in AGENTS if agent and agent != 'gold'
+            for agent in ["gold"]
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
     with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json"), "w") as f:
         json.dump(results, f, indent=2)
-    print("Saved step2 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.gold.json")
+    logger.info(
+        "Saved step2 results to %s",
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.gold.json",
+    )
 
     end = time.time()
-    print(f"Execution time: {end - start:.2f} seconds")
+    logger.info("Execution time: %.2f seconds", end - start)
