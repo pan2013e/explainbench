@@ -343,23 +343,21 @@ def main():
             results["gold"] = read_json(STEP3_GOLD_PATH)
             print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries", flush=True)
     else:
-        if do_execute:
-            results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
+        results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
         if do_validate:
             with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json"), "w") as f:
                 json.dump(results, f, indent=2)
             print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.gold.json")
 
-    if do_execute: 
-        with ThreadPoolExecutor(max_workers=10) as executor:        
-            futures = {
-                executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
-                for agent in AGENTS if agent and agent != "gold"
-            }
-            for future in tqdm(as_completed(futures), total=len(futures)):
-                agent = futures[future]
-                results[agent] = future.result()
-                print(f"[INFO] Completed processing for agent={agent}", flush=True)
+    with ThreadPoolExecutor(max_workers=10) as executor:        
+        futures = {
+            executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
+            for agent in AGENTS if agent and agent != "gold"
+        }
+        for future in tqdm(as_completed(futures), total=len(futures)):
+            agent = futures[future]
+            results[agent] = future.result()
+            print(f"[INFO] Completed processing for agent={agent}", flush=True)
     
     if do_validate:
         with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.json"), "w") as f:
