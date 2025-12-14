@@ -72,6 +72,7 @@ def main(argv: list[str] | None = None) -> None:
     bad_by_agent: dict[str, set[str]] = {}
     good_instances: dict[str, dict[str, dict]] = {}
     instances_per_agent: dict[str, int] = {}
+    pmf_stats: dict[tuple[str, str, str], int] = {}
 
     for agent, instances in data.items():
         if not isinstance(instances, dict):
@@ -83,6 +84,13 @@ def main(argv: list[str] | None = None) -> None:
             if not entry:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
                 continue
+
+            # Track distribution of PMF / event types.
+            pmf_val = entry.get("seen_pmf")
+            buggy_type = entry.get("buggy_event_type")
+            patched_type = entry.get("patched_event_type")
+            key = (str(pmf_val), str(buggy_type), str(patched_type))
+            pmf_stats[key] = pmf_stats.get(key, 0) + 1
 
             all_good = True
 
@@ -138,6 +146,15 @@ def main(argv: list[str] | None = None) -> None:
         print(f"    Total instances:             {total}")
         print(f"    Bad instances:               {bad_count}")
         print(f"    Good instances:              {good_count}")
+
+    print()
+    print("PMF / event type stats:")
+    for (pmf_val, buggy_type, patched_type), count in sorted(pmf_stats.items()):
+        print(
+            f"  seen_pmf={pmf_val!r}, "
+            f"buggy_event_type={buggy_type!r}, "
+            f"patched_event_type={patched_type!r}: {count}"
+        )
 
 
 if __name__ == "__main__":
