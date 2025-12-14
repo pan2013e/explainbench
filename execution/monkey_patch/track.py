@@ -56,7 +56,7 @@ def get_injected_script(instance_id: str, mode: str):
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
-            'python -m pip install -e /root/py-tracer\n'
+            'python -m pip install /root/py-tracer\n'
             'SITEPKG=$(python -c "import site;print(site.getsitepackages()[0])")\n'
             f'echo \'import os; _path = "/root/py-tracer/tracer_plugin/{project}_plugin.py"; code = open(_path).read(); code = compile(code, _path, "exec"); exec(code, {{"__name__": "__main__"}})\' > "${{SITEPKG}}/zzz_tracer_boot.pth"\n'
             'export ENABLE_TRACKER=1\n'
@@ -68,7 +68,7 @@ def get_injected_script(instance_id: str, mode: str):
         return (
             'source /opt/miniconda3/bin/activate\n'
             'conda activate testbed\n'
-            'python -m pip install -e /root/py-tracer\n'
+            'python -m pip install /root/py-tracer\n'
             'export PYTHONHASHSEED=42'
         )
 
