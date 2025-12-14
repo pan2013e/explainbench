@@ -72,19 +72,26 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             correct_pool = metadata["valid_changed_expressions"]
             incorrect_pool = metadata["valid_unchanged_expressions"]
 
-            if len(correct_pool) < n_correct:
+            use_n_correct = n_correct
+            use_n_incorrect = n_incorrect
+            if metadata.get("is_fallback_to_gold"):
+                # Gold fallback instances should only surface incorrect options.
+                use_n_incorrect = n_correct + n_incorrect
+                use_n_correct = 0
+
+            if len(correct_pool) < use_n_correct:
                 print(
                     "> Warning: number of correct answers is < n_correct. Use len(pool)"
                 )
 
-            if len(incorrect_pool) < n_incorrect:
+            if len(incorrect_pool) < use_n_incorrect:
                 print(
                     "> Warning: number of incorrect answers is < n_incorrect. Use len(pool)"
                 )
 
             choices, answer = build_choices_and_answer(
-                n_correct=n_correct,
-                n_incorrect=n_incorrect,
+                n_correct=use_n_correct,
+                n_incorrect=use_n_incorrect,
                 correct_pool=correct_pool,
                 incorrect_pool=incorrect_pool,
                 sampler_function=sampler_function,
