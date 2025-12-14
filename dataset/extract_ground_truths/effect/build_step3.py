@@ -54,7 +54,7 @@ def execute_candidate_expressions(
             "--post-count", str(patched_line_count),
             "--inspector-mode", before_or_after,
         ])
-            
+
 def rv_equals(v1, v2):
     diff = DeepDiff(v1, v2, significant_digits=5, ignore_private_variables=False)
     return diff == {}
@@ -141,10 +141,9 @@ def compute_expr_change_map(patched, buggy):
 
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
-    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+    run_id = f"inspect.{agent}.1020.{expr_id}"
     log_dir = os.path.join(
-        DIR,
-        "../../../shared_logs/logs/run_evaluation",
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation",
         run_id,
         agent,
         instance_id,
@@ -253,6 +252,14 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
         metadata = data[agent][instance_id]
         if metadata is None:
             continue
+        if metadata == {}:
+            print(f"Falling back to gold for instance {instance_id}")
+            if "gold" not in data or instance_id not in data["gold"]:
+                print(f"Gold patch metadata not found for instance {instance_id}")
+                continue
+            metadata = data["gold"][instance_id]
+            do_execute = False
+            do_validate = False
 
         jobs.append(InstanceJob(
             agent=agent,
@@ -323,6 +330,7 @@ def main():
     gold = read_json(GOLD_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
+    results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
