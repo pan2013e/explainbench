@@ -169,10 +169,14 @@ def get_function_code(instance_id: str, file_path: str, fn_name: str,
         pre_hint = post_hint = None
     container = start_docker_container(instance_id)
     test_patch = get_test_patch(instance_id)
-    if test_patch: apply_patch(container, test_patch)
+    try:
+        if test_patch: apply_patch(container, test_patch)
+    finally: pass
     try:
         pre_file = read_from_container(container, file_path)
-        if patch: apply_patch(container, patch)
+        try:
+            if patch: apply_patch(container, patch)
+        finally: pass
         post_file = read_from_container(container, file_path)
     finally:
         cleanup_container(container.client, container, 'quiet')
