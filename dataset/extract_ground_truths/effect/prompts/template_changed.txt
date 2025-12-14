@@ -20,9 +20,11 @@ Produce exactly {n_output} Python expressions `<expr>` that:
 
 ### General Rules
 1. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
-2. If both `__return__` and `__exception__` exist eigher buggy return and patched exception or buggy variable exception and patch return:
-  - You must use `__return__` as the seed of the generated expressions
-  - You are not allowed to use  `__exception__` in the generated expressions
+2. Handling cases where return and exception differ between versions
+If exactly one of the buggy or patched executions has a return value and the other has a exception (i.e., one version returns normally while the other raises an exception):
+  - You must treat return as the seed for all generated expressions, regardless of which version produces it.
+  - You are not allowed to reference exception in any generated expression.
+  - All generated expressions must be derived from or composed using return and other permitted in-scope variables only.
 3. If `__return__` does not exist and __exception__ is present in both the buggy and patched versions, treat `__exception__` as a restricted two-field, tuple-like value representing the exception raised by the current function. You may reference only:
   - `__exception__[0]`: the exception type as a string
   - `__exception__[1]`: the exception message as a string
