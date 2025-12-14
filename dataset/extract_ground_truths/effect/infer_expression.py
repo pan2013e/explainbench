@@ -80,7 +80,7 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             diff=diff,
             before=before,
             after=after,
-            n_output=5,
+            n_output=10,
             seed_expression=extract_seed_exp(diff)
         )
     else:
@@ -90,7 +90,7 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             diff=diff,
             before=before,
             after=after,
-            n_output=5,
+            n_output=10,
             changed_expressions=changed_expressions if changed_expressions else ""
         )
     expr_list = MODEL.infer_once(prompt, ExpressionList)
