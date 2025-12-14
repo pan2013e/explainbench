@@ -4,7 +4,6 @@
 import json
 import logging
 import os
-import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 
@@ -78,7 +77,7 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
     )
     return expr
 
-def process_agent(agent_data, gold_data, agent, instance_ids):
+def process_agent(agent_data, agent, instance_ids):
     results = {}
     logger.info("Starting agent %s with %d instances", agent, len(instance_ids))
     
@@ -95,22 +94,12 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
                 )
                 return None
             if metadata == {}:
-                metadata = gold_data["gold"][instance_id]
                 logger.info(
-                    "no behavior delta for agent=%s | instance_id=%s",
+                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3",
                     agent,
                     instance_id,
                 )
-                logger.info(
-                    "falling back to gold metadata for instance_id=%s",
-                    instance_id,
-                )
-            if metadata == {}:
-                logger.info(
-                    "metadata not found for agent=gold | instance_id=%s",
-                    instance_id,
-                )
-                return None
+                return {}
             pre_code, post_code = get_function_code(
                 instance_id,
                 metadata['file_path'],
@@ -147,7 +136,7 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
             )
             return None
     
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    with ThreadPoolExecutor(max_workers=25) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
@@ -175,26 +164,22 @@ if __name__ == "__main__":
     start = time.time()
 
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
-    GOLD_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
     step1 = read_json(STEP1_PATH)
-    gold = read_json(GOLD_PATH)
-    gold = {agent: instance_ids for agent, instance_ids in gold.items() if agent == "gold"}
-    assert len(gold) == 1
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step1, gold, agent, instance_ids): agent
-            for agent in ["gold"]
+            executor.submit(process_agent, step1, agent, instance_ids): agent
+            for agent in AGENTS if agent != "gold"
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json"), "w") as f:
+    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
         json.dump(results, f, indent=2)
     logger.info(
         "Saved step2 results to %s",
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.gold.json",
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
     )
 
     end = time.time()
