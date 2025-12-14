@@ -97,7 +97,6 @@ def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
 
     # Otherwise, treat any value difference as a change.
     return True
-
 def index_selected(buggy_val, buggy_exc, patched_val, patched_exc, should_change: bool):
     changed = index_changed(buggy_val, buggy_exc, patched_val, patched_exc)
     return changed if should_change else not changed
@@ -135,7 +134,7 @@ def compute_expr_change_map(patched, buggy):
     for i, (expr, pv, pe, bv, be) in enumerate(
         zip_longest(p_expr, p_vals, p_excs, b_vals, b_excs, fillvalue=None)
     ):
-        changed = index_changed(pv, pe, bv, be)
+        changed = index_changed(bv, be, pv, pe)
         expr_change[expr] = changed
 
     return expr_change
@@ -262,7 +261,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             do_execute=do_execute,
             do_validate=do_validate,
             expr_id=0,
-            test_id=0,
+            test_id=metadata["test_id"],
         ))
 
     if not jobs:
