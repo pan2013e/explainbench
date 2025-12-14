@@ -1,4 +1,5 @@
 import os
+import mmap
 import orjson as json
 
 from deepdiff import DeepDiff
@@ -16,8 +17,15 @@ from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_traces(file_path):
-    with open(file_path, 'rb', buffering=1024*1024) as f:
-        return [Event.from_dict(json.loads(line)) for line in f]
+    with open(file_path, 'rb') as f:
+        mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+        try:
+            out = []
+            while line := mm.readline():
+                out.append(Event.from_dict(json.loads(line)))
+            return out
+        finally:
+            mm.close()
 
 def get_trace_dir(agent='gold'):
     # return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
