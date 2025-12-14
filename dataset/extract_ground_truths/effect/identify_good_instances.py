@@ -84,7 +84,12 @@ def main(argv: list[str] | None = None) -> None:
         for instance_id, entry in instances.items():
             instances_per_agent[agent] = instances_per_agent.get(agent, 0) + 1
 
-            if not entry:
+            if entry is None:
+                bad_by_agent.setdefault(agent, set()).add(instance_id)
+                output_instances.setdefault(agent, {})[instance_id] = None
+                continue
+
+            if entry == {}:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
                 output_instances.setdefault(agent, {})[instance_id] = {}
                 continue
@@ -132,7 +137,7 @@ def main(argv: list[str] | None = None) -> None:
                 output_instances.setdefault(agent, {})[instance_id] = entry
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
-                output_instances.setdefault(agent, {})[instance_id] = {}
+                output_instances.setdefault(agent, {})[instance_id] = None
 
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
