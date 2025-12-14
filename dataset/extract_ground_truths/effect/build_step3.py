@@ -257,6 +257,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             if "gold" not in data or instance_id not in data["gold"]:
                 print(f"Gold patch metadata not found for instance {instance_id}")
                 continue
+            # Use gold metadata that was already run
             metadata = data["gold"][instance_id]
             do_execute = False
             do_validate = False
@@ -328,9 +329,23 @@ def main():
     GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
     step2 = read_json(STEP2_PATH)
     gold = read_json(GOLD_PATH)
+    step2["gold"] = gold["gold"]
+    
     results = {}
     instance_ids = get_instance_ids(["all"])
-    results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
+    
+    # Run gold patch first
+    STEP3_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json")
+    if os.path.exists(STEP3_GOLD_PATH):
+        results["gold"] = read_json(STEP3_GOLD_PATH)
+        print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries", flush=True)
+    else:
+        results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
+        if do_validate:
+            with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json"), "w") as f:
+                json.dump(results, f, indent=2)
+            print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.gold.json")
+
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
@@ -343,6 +358,8 @@ def main():
     
     if do_validate:
         with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.json"), "w") as f:
+            if "gold" in results:
+                del results["gold"]
             json.dump(results, f, indent=2)
         print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json")
     
