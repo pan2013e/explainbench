@@ -329,8 +329,8 @@ def main():
         flush=True,
     )
 
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.combined.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.combined.json")
     step2 = read_json(STEP2_PATH)
     gold = read_json(GOLD_PATH)
     step2["gold"] = gold["gold"]
