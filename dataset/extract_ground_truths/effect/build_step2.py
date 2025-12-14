@@ -25,6 +25,34 @@ def read_json(path):
     with open(os.path.join(path), "r") as f:
         return json.load(f)
 
+
+def load_success_instance_ids(*paths):
+    success_by_agent = {}
+    for path in paths:
+        if not path or not os.path.exists(path):
+            continue
+        data = read_json(path)
+        for agent, ids in data.items():
+            if not ids:
+                continue
+            success_by_agent.setdefault(agent, set()).update(
+                instance_id for instance_id in ids if instance_id
+            )
+    return success_by_agent
+
+
+def filter_instance_ids(instance_ids, agent, success_by_agent):
+    success_ids = success_by_agent.get(agent)
+    if not success_ids:
+        return instance_ids
+    filtered_ids = [
+        instance_id for instance_id in instance_ids if instance_id not in success_ids
+    ]
+    skipped = len(instance_ids) - len(filtered_ids)
+    if skipped:
+        logger.info("Skipping %s successful ids for agent %s", skipped, agent)
+    return filtered_ids
+
 @lru_cache
 def read_agent_patch_data(agent):
     with open(os.path.join(DIR, f"../../explanations/agent_patches/{agent}.json"), "r") as f:
@@ -151,39 +179,46 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
+    STEP1_PATH = os.path.join(OUTPUT_DIR, "step1-filtered.json")
+    STEP2_GOLD_OUTPUT_PATH = os.path.join(OUTPUT_DIR, "step2.gold.part2.json")
+    STEP2_RESULTS_PATH = os.path.join(OUTPUT_DIR, "step2.part2.json")
+    STEP2_SUCCESS_GOLD_PATH = os.path.join(OUTPUT_DIR, "step2.success_ids.gold.json")
+    STEP2_SUCCESS_PATH = os.path.join(OUTPUT_DIR, "step2.success_ids.json")
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
     agents_to_process = AGENTS.copy()
+    success_by_agent = load_success_instance_ids(
+        STEP2_SUCCESS_GOLD_PATH,
+        STEP2_SUCCESS_PATH,
+    )
     
-    if os.path.exists(STEP2_GOLD_PATH):
-        agents_to_process.remove("gold")
-
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {
-            executor.submit(process_agent, step1, agent, instance_ids): agent
-            for agent in agents_to_process
-        }
+        futures = {}
+        for agent in agents_to_process:
+            agent_instance_ids = filter_instance_ids(instance_ids, agent, success_by_agent)
+            futures[
+                executor.submit(process_agent, step1, agent, agent_instance_ids)
+            ] = agent
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
     
     if "gold" in results:
-        with open(STEP2_GOLD_PATH, "w") as f:
+        with open(STEP2_GOLD_OUTPUT_PATH, "w") as f:
             json.dump({"gold": results["gold"]}, f, indent=2)
         print(
             "Saved step2 gold results to %s",
-            STEP2_GOLD_PATH,
+            STEP2_GOLD_OUTPUT_PATH,
         )
         del results["gold"]
     
-    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
+    with open(STEP2_RESULTS_PATH, "w") as f:
         json.dump(results, f, indent=2)
     print(
         "Saved step2 results to %s",
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
+        STEP2_RESULTS_PATH,
     )
 
     end = time.time()
