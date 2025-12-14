@@ -22,7 +22,7 @@ from execution.util import get_fail_to_pass_tests, get_instance_ids
 from tracer.inspector import encode_expr_list
 
 def read_step2_results():
-    with open(os.path.join(DIR, "tmp/step2.json"), "r") as f:
+    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "r") as f:
         return json.load(f)
 
 def execute_candidate_expressions(
@@ -145,7 +145,7 @@ def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
     run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
     log_dir = os.path.join(
         DIR,
-        "../../../logs/run_evaluation",
+        "../../../shared_logs/logs/run_evaluation",
         run_id,
         agent,
         instance_id,
@@ -238,6 +238,13 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
 def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     results = {}
 
+    print(
+        f"[INFO] Starting process_agent for agent={agent} "
+        f"with {len(instance_ids)} instances "
+        f"(execute={do_execute}, validate={do_validate})",
+        flush=True,
+    )
+
     jobs = []
     for instance_id in instance_ids:
         if agent not in data:
@@ -262,7 +269,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
         return results
 
     Executor = ProcessPoolExecutor if do_execute else ThreadPoolExecutor
-    max_workers = 8 if do_execute else 20
+    max_workers = 10 if do_execute else 20
 
     with Executor(max_workers=max_workers) as executor:
         futures = {executor.submit(run_instance_job, job): job.instance_id for job in jobs}
@@ -274,6 +281,12 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             except Exception as e:
                 print(f"[ERROR] Future failed for agent={agent} | {iid}: {type(e).__name__} {e}")
                 results[iid] = None
+
+    print(
+        f"[INFO] Finished process_agent for agent={agent}; "
+        f"processed {len(results)} instances",
+        flush=True,
+    )
 
     return results
 
@@ -298,11 +311,17 @@ def main():
 
     do_execute = args.execute
     do_validate = args.validate
-        
+
+    print(
+        f"[INFO] Step3 main starting "
+        f"(execute={do_execute}, validate={do_validate})",
+        flush=True,
+    )
+
     step2 = read_step2_results()
     results = {}
     instance_ids = get_instance_ids(["all"])
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
             for agent in AGENTS if agent and agent != "gold"
@@ -310,11 +329,12 @@ def main():
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
+            print(f"[INFO] Completed processing for agent={agent}", flush=True)
     
     if do_validate:
-        with open(os.path.join(DIR, "tmp/step3.json"), "w") as f:
+        with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.json"), "w") as f:
             json.dump(results, f, indent=2)
-        print("Saved step3 results to tmp/step3.json")
+        print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json")
     
     end_time = time.time()
     print(f"Total execution time: {end_time - start_time:.2f} seconds")
