@@ -22,9 +22,10 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 #     )
 # )
 AGENTS = [
+    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
     "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
     "20250612_trae",
-    "gold",
+    # "gold",
 ]
 
 def _process_instance(instance_id, agent):
@@ -90,7 +91,7 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1-debug.json")
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
     with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Saved step1 results to {OUTPUT_DIR}")
