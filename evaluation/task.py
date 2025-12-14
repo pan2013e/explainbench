@@ -222,7 +222,40 @@ if __name__ == "__main__":
                 'individual_scores': scores,
                 'average': sum(scores) / len(scores) if scores else 0.0,
             }
-    out_path = os.path.join(os.path.dirname(__file__), 'effect_eval_output.json')
+    out_dir = os.path.dirname(__file__)
+    out_path = os.path.join(out_dir, 'effect_eval_output.json')
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2)
+
+    # Compute per-agent metrics
+    metrics = {}
+    for agent, instances in output.items():
+        best_scores = []
+        mean_scores = []
+        for instance in instances.values():
+            scores = instance.get('individual_scores') or []
+            if not scores:
+                continue
+            best_scores.append(max(scores))
+            mean_scores.append(instance.get('average', 0.0))
+        if best_scores:
+            best_per_instance_mean = sum(best_scores) / len(best_scores)
+        else:
+            best_per_instance_mean = 0.0
+        if mean_scores:
+            mean_of_instance_means = sum(mean_scores) / len(mean_scores)
+        else:
+            mean_of_instance_means = 0.0
+        metrics[agent] = {
+            'best_per_instance_mean': best_per_instance_mean,
+            'mean_of_instance_means': mean_of_instance_means,
+        }
+
+    metrics_path = os.path.join(out_dir, 'metric.json')
+    with open(metrics_path, 'w') as f:
+        json.dump(metrics, f, indent=2)
+
     print(f"Saved results to {out_path}")
+    print(f"Saved metrics to {metrics_path}")
+    print("Agent metrics:")
+    print(json.dumps(metrics, indent=2))
