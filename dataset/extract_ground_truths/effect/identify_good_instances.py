@@ -71,6 +71,9 @@ def main(argv: list[str] | None = None) -> None:
 
     bad_by_agent: dict[str, set[str]] = {}
     good_instances: dict[str, dict[str, dict]] = {}
+    # This will be written out as JSON: it includes all instance IDs.
+    # Good instances keep their full metadata; bad instances get {}.
+    output_instances: dict[str, dict[str, dict]] = {}
     instances_per_agent: dict[str, int] = {}
     pmf_stats: dict[tuple[str, str, str], int] = {}
 
@@ -83,6 +86,7 @@ def main(argv: list[str] | None = None) -> None:
 
             if not entry:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
+                output_instances.setdefault(agent, {})[instance_id] = {}
                 continue
 
             # Track distribution of PMF / event types.
@@ -125,12 +129,14 @@ def main(argv: list[str] | None = None) -> None:
 
             if all_good:
                 good_instances.setdefault(agent, {})[instance_id] = entry
+                output_instances.setdefault(agent, {})[instance_id] = entry
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
+                output_instances.setdefault(agent, {})[instance_id] = {}
 
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
-        json.dump(good_instances, f, indent=2, sort_keys=True)
+        json.dump(output_instances, f, indent=2, sort_keys=True)
     agents_with_any = set(instances_per_agent.keys())
 
     print("=== Serialization report ===")
