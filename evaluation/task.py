@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 from typing import Generic, ClassVar, TypeVar
 from pydantic import BaseModel
+from tqdm.auto import tqdm
 
 from evaluation import schema
 from evaluation.inference import Model
@@ -209,7 +210,12 @@ if __name__ == "__main__":
                         executor.submit(infer_instance, agent, instance_id, instance_data)
                     )
 
-        for future in as_completed(futures):
+        for future in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc="Evaluating instances",
+            unit="inst",
+        ):
             try:
                 agent, instance_id, res, gt = future.result()
                 scores = Effect.eval(res, gt)
