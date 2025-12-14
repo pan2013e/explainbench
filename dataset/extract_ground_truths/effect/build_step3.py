@@ -260,8 +260,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
                 continue
             # Use gold metadata that was already run
             metadata = data["gold"][instance_id]
-            do_execute = False
-            do_validate = False
             is_fallback_to_gold = True
             
         metadata = dict(metadata)
@@ -270,8 +268,8 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             agent=agent,
             instance_id=instance_id,
             metadata=metadata,
-            do_execute=do_execute,
-            do_validate=do_validate,
+            do_execute=False if is_fallback_to_gold else do_execute,
+            do_validate=False if is_fallback_to_gold else do_validate,
             expr_id=0,
             test_id=metadata["test_id"],
         ))
