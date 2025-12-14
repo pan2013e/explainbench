@@ -60,11 +60,6 @@ def get_simple_function_name(metadata):
         name = name.split(".")[-1]
     return name
 
-def shuffle_list_pair(a: list, b: list):
-    combined = list(zip(a, b, strict=True))
-    random.shuffle(combined)
-    a[:], b[:] = zip(*combined)
-
 @backoff.on_exception(backoff.constant, Exception, max_tries=5)
 def infer_expressions(pre_code, post_code, metadata, should_change, changed_expressions):
     expr = infer_main(
