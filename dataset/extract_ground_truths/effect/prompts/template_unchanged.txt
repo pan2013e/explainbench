@@ -12,16 +12,22 @@ You will be given:
 Produce exactly {n_output} Python expressions `<expr>` that:
 1. have the same outcome between the buggy and patched programs:
    (a) yield the same values, or
-   (b) yield the same program state between the buggy and patched programs:
-      - raising the same exceptions, or
+   (b) yield the same program state between the buggy and patched programs (e.g., both are raising exceptions)
 2. Have the same complexity as the correct expressions if possible
-3. If resemblance is not reasonably achievable, still produce a strong, non-trivial distractor that meets all constraints.
+3. If resemblance is not reasonably achievable, still produce a strong, non-trivial distractor that meets all constraints. You are allowed to pick reasonable variable within the input function and generate a reasonable expression based on this variable
 
 ### General Rules
 1. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
-2. If `__return__` present and `__exception__` exist; you must reference `__return__` instead of `__exception__`.
-3. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
-4. Follow `### Actions to Build the Expressions` to build more complex `<expr>`
+2. Handling cases where return and exception differ between versions
+If exactly one of the buggy or patched executions has a return value and the other has a exception (i.e., one version returns normally while the other raises an exception):
+  - You must treat `__return__` as the seed for all generated expressions, regardless of which version produces it.
+  - You are not allowed to reference `__exception__` in any generated expression.
+  - All generated expressions must be derived from or composed using return and other permitted in-scope variables only.
+3. If `__return__` does not exist and __exception__ is present in both the buggy and patched versions, treat `__exception__` as a restricted two-field, tuple-like value representing the exception raised by the current function. You may reference only:
+  - `__exception__[0]`: the exception type as a string
+  - `__exception__[1]`: the exception message as a string
+4. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
+5. Follow `### Actions to Build the Expressions` to build more complex `<expr>`
 
 ### Actions to Build the Expressions
 You choose 1 or more of the following to build more expressions with similar complexity as the correct expressions.
