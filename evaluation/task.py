@@ -144,7 +144,7 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP2_PATH = "/home/yusuf/explainbench/dataset/extract_ground_truths/effect/tmp/step2.json"
+    STEP2_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
 
     # Helpers
     def get_expl(agent, instance_id):
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         return ctx, gt
 
 
-    model = Model('gemini/gemini-2.5-flash', n=5)
+    model = Model('gemini/gemini-2.5-pro', n=5)
     with open(STEP2_PATH, 'r') as f:
         step2_data = json.load(f)
 
