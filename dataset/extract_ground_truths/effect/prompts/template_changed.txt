@@ -20,13 +20,15 @@ Produce exactly {n_output} Python expressions `<expr>` that:
 
 ### General Rules
 1. If `__return__` present; you can treat this as a special local variable that holds the value of the current function's return value. You can access it anytime.
-2. If `__return__` present and `__exception__` exist; you must reference `__return__` instead of `__exception__`.
-3. If __exception__ is present in both the buggy and patch versions, treat it as a restricted two-field, tuple-like value representing the exception raised by the current function. You may reference only:
+2. If both `__return__` and `__exception__` exist eigher buggy return and patched exception or buggy variable exception and patch return:
+  - You must use `__return__` as the seed of the generated expressions
+  - You are not allowed to use  `__exception__` in the generated expressions
+3. If `__return__` does not exist and __exception__ is present in both the buggy and patched versions, treat `__exception__` as a restricted two-field, tuple-like value representing the exception raised by the current function. You may reference only:
   - `__exception__[0]`: the exception type as a string
   - `__exception__[1]`: the exception message as a string
 4. The final value of `<expr>` must be a primitive (`None`, `int`, `float`, `str`, `bool`) or a built-in collection of primitives.
 5. Follow `### Actions to Build the Expressions` to build more complex `<expr>` from the seed expression
-6. Aim for diverse and non-trivial expressions **if possible**.
+6. Aim for diverse and non-trivial expressions.
 
 ### Actions to Build the Expressions
 You choose 1 or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
