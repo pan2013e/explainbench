@@ -185,7 +185,7 @@ if __name__ == "__main__":
         return ctx, gt
 
 
-    model = Model('gemini/gemini-2.5-pro', n=5)
+    model = Model('gemini/gemini-2.5-flash', n=5)
     with open(STEP2_PATH, 'r') as f:
         step2_data = json.load(f)
 
@@ -210,8 +210,13 @@ if __name__ == "__main__":
                     )
 
         for future in as_completed(futures):
-            agent, instance_id, res, gt = future.result()
-            scores = Effect.eval(res, gt)
+            try:
+                agent, instance_id, res, gt = future.result()
+                scores = Effect.eval(res, gt)
+            except Exception as e:
+                # Log the error and continue processing other instances
+                print(f"Error during evaluation of an instance: {e}")
+                continue
             output[agent][instance_id] = {
                 'all_pred': [p.answer for p in res],
                 'individual_scores': scores,
