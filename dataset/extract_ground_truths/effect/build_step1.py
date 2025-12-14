@@ -25,7 +25,7 @@ AGENTS = [
     "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
     "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
     "20250612_trae",
-    # "gold",
+    "gold",
 ]
 
 def _process_instance(instance_id, agent):
@@ -56,6 +56,7 @@ def _process_instance(instance_id, agent):
         return instance_id, serialize(result)
 
     except FileNotFoundError:
+        print(f"FileNotFoundError for {instance_id} with agent {agent}", flush=True)
         return instance_id, None
     except Exception as e:
         print(f"Error for {instance_id} with agent {agent}: {e}", flush=True)
