@@ -82,19 +82,22 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
 
 def process_agent(agent_data, gold_data, agent, instance_ids):
     results = {}
+    print(f"[INFO] Starting agent {agent} with {len(instance_ids)} instances", flush=True)
     
     def process_instance(instance_id):
+        print(f"[INFO] agent={agent} instance_id={instance_id} starting", flush=True)
+
         try:
             metadata = agent_data[agent][instance_id]
             if metadata is None:
-                print(f"[INFO] metadata not found due to errors for agent={agent} | instance_id={instance_id}")
+                print(f"[INFO] metadata not found due to errors for agent={agent} | instance_id={instance_id}", flush=True)
                 return None
             if metadata == {}:
                 metadata = gold_data["gold"][instance_id]
-                print(f"[INFO] no behavior delta for agent={agent} | instance_id={instance_id}")
-                print(f"[INFO] falling back to gold metadata for instance_id={instance_id}")
+                print(f"[INFO] no behavior delta for agent={agent} | instance_id={instance_id}", flush=True)
+                print(f"[INFO] falling back to gold metadata for instance_id={instance_id}", flush=True)
             if metadata == {}:
-                print(f"[INFO] metadata not found for agent=gold | instance_id={instance_id}")
+                print(f"[INFO] metadata not found for agent=gold | instance_id={instance_id}", flush=True)
                 return None
             pre_code, post_code = get_function_code(
                 instance_id,
@@ -123,10 +126,10 @@ def process_agent(agent_data, gold_data, agent, instance_ids):
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
         except Exception as e:
-            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}")
+            print(f"[ERROR] process_agent crashed for agent={agent} | {instance_id}: {type(e).__name__} {e}", flush=True)
             return None
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
@@ -142,10 +145,12 @@ if __name__ == "__main__":
     import time
     start = time.time()
 
-    STEP1_PATH = os.path.join(DIR, "tmp/step1.json")
-    GOLD_PATH = os.path.join(DIR, "tmp/step1.json")
+    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
+    GOLD_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
     step1 = read_json(STEP1_PATH)
     gold = read_json(GOLD_PATH)
+    gold = {agent: instance_ids for agent, instance_ids in gold.items() if agent == "gold"}
+    assert len(gold) == 1
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -156,9 +161,9 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-    with open(os.path.join(DIR, "tmp/step2.json"), "w") as f:
+    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
         json.dump(results, f, indent=2)
-    print("Saved step2 results to tmp/step2.json")
+    print("Saved step2 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json")
 
     end = time.time()
     print(f"Execution time: {end - start:.2f} seconds")
