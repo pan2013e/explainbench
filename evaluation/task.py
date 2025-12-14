@@ -1,6 +1,7 @@
 import os
 import json
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 from typing import Generic, ClassVar, TypeVar
 from pydantic import BaseModel
@@ -189,19 +190,33 @@ if __name__ == "__main__":
         step2_data = json.load(f)
 
     output = {}
-    for agent, instances in step2_data.items():
+    for agent in step2_data:
         output[agent] = {}
-        for instance_id in instances.keys():
-            if step2_data[agent][instance_id]:
-                explanation = get_expl(agent, instance_id)
-                context, gt = get_ctx_and_gt(step2_data[agent][instance_id])
-                res = Effect.predict(model, explanation, **context)
-                scores = Effect.eval(res, gt)
-                output[agent][instance_id] = {
-                    'all_pred': [p.answer for p in res],
-                    'individual_scores': scores,
-                    'average': sum(scores) / len(scores) if scores else 0.0,
-                }
+
+    def infer_instance(agent, instance_id, instance_data):
+        explanation = get_expl(agent, instance_id)
+        context, gt = get_ctx_and_gt(instance_data)
+        res = Effect.predict(model, explanation, **context)
+        return agent, instance_id, res, gt
+
+    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "4"))
+    futures = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for agent, instances in step2_data.items():
+            for instance_id, instance_data in instances.items():
+                if instance_data:
+                    futures.append(
+                        executor.submit(infer_instance, agent, instance_id, instance_data)
+                    )
+
+        for future in as_completed(futures):
+            agent, instance_id, res, gt = future.result()
+            scores = Effect.eval(res, gt)
+            output[agent][instance_id] = {
+                'all_pred': [p.answer for p in res],
+                'individual_scores': scores,
+                'average': sum(scores) / len(scores) if scores else 0.0,
+            }
     out_path = os.path.join(os.path.dirname(__file__), 'effect_eval_output.json')
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2)
