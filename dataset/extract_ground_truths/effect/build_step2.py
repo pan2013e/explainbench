@@ -79,22 +79,19 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
 
 def process_agent(agent_data, agent, instance_ids):
     results = {}
-    logger.info("Starting agent %s with %d instances", agent, len(instance_ids))
-    
+        
     def process_instance(instance_id):
-        logger.info("agent=%s instance_id=%s starting", agent, instance_id)
-
         try:
             metadata = agent_data[agent][instance_id]
             if metadata is None:
-                logger.info(
+                print(
                     "metadata not found due to errors for agent=%s | instance_id=%s",
                     agent,
                     instance_id,
                 )
                 return None
             if metadata == {}:
-                logger.info(
+                print(
                     "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3",
                     agent,
                     instance_id,
@@ -127,7 +124,7 @@ def process_agent(agent_data, agent, instance_ids):
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
         except Exception as e:
-            logger.error(
+            print(
                 "process_agent crashed for agent=%s | %s: %s %s",
                 agent,
                 instance_id,
@@ -151,22 +148,20 @@ def process_agent(agent_data, agent, instance_ids):
 if __name__ == "__main__":
     import time
 
-    log_path = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/build_step2.log"
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler(log_path, mode="w"),
-            logging.StreamHandler(),
-        ],
-    )
-
     start = time.time()
 
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
+    
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    if not os.path.exists(STEP2_GOLD_PATH):
+        gold_results = process_agent(step1, "gold", instance_ids)
+        with open(STEP2_GOLD_PATH, "w") as f:
+            json.dump(gold_results, f, indent=2)
+        print(f"Saved step2 gold results to {STEP2_GOLD_PATH}")
+
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step1, agent, instance_ids): agent
@@ -177,10 +172,10 @@ if __name__ == "__main__":
             results[agent] = future.result()
     with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
         json.dump(results, f, indent=2)
-    logger.info(
+    print(
         "Saved step2 results to %s",
         "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
     )
 
     end = time.time()
-    logger.info("Execution time: %.2f seconds", end - start)
+    print("Execution time: %.2f seconds", end - start)
