@@ -341,8 +341,9 @@ def main():
     # Run gold patch first
     STEP3_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json")
     if os.path.exists(STEP3_GOLD_PATH):
-        results["gold"] = read_json(STEP3_GOLD_PATH)
-        print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries", flush=True)
+        if do_validate:
+            results["gold"] = read_json(STEP3_GOLD_PATH)
+            print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries", flush=True)
     else:
         results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
         if do_validate:
