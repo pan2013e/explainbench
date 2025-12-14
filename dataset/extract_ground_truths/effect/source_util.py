@@ -12,6 +12,8 @@ from docker.models.containers import Container
 from swebench.harness.run_evaluation import GIT_APPLY_CMDS
 from swebench.harness.docker_utils import cleanup_container, copy_to_container
 
+from execution.util import get_test_patch
+
 __all__ = [
     'get_function_code',
 ]
@@ -118,6 +120,7 @@ def apply_patch(container: Container, patch: str):
             print(f'Attempt to apply patch with "{cmd}" failed: {result.output.decode("utf-8")}')
     if not applied_patch:
         raise ValueError('Failed to apply patch inside container')
+    container.exec_run('rm -f /tmp/patch.diff', user='root')
 
 def read_from_container(container: Container, file_path: str):
     tar_stream, _ = container.get_archive(file_path)
@@ -165,6 +168,8 @@ def get_function_code(instance_id: str, file_path: str, fn_name: str,
     else:
         pre_hint = post_hint = None
     container = start_docker_container(instance_id)
+    test_patch = get_test_patch(instance_id)
+    if test_patch: apply_patch(container, test_patch)
     try:
         pre_file = read_from_container(container, file_path)
         if patch: apply_patch(container, patch)
