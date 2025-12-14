@@ -21,8 +21,8 @@ from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests, get_instance_ids
 from tracer.inspector import encode_expr_list
 
-def read_step2_results():
-    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "r") as f:
+def read_json(input_path):
+    with open(input_path, "r") as f:
         return json.load(f)
 
 def execute_candidate_expressions(
@@ -317,7 +317,10 @@ def main():
         flush=True,
     )
 
-    step2 = read_step2_results()
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    step2 = read_json(STEP2_PATH)
+    gold = read_json(GOLD_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
