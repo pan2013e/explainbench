@@ -91,6 +91,11 @@ def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
     return json.loads(instance['FAIL_TO_PASS'])
 
+@lru_cache
+def get_test_patch(instance_id: str) -> str:
+    instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
+    return instance['test_patch'] or ""
+
 def get_instance_ids(value: list[str]) -> list[str]:
     if value == ["all"]:
         return all_instances()
