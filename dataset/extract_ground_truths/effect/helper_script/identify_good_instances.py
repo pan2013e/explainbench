@@ -2,6 +2,7 @@ import json
 import sys
 from pathlib import Path
 
+from execution.util import EXCLUDED_IDS
 
 def contains_datetime_object(value) -> bool:
     """
@@ -140,7 +141,8 @@ def main(argv: list[str] | None = None) -> None:
                 output_instances.setdefault(agent, {})[instance_id] = None
             
             if not all_good:
-                print(instance_id)
+                if instance_id not in EXCLUDED_IDS:
+                    print(instance_id)
 
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
