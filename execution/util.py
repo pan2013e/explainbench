@@ -18,8 +18,11 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
 
 EXCLUDED_IDS = [
+    # Whatever reasons, the offical SWE-bench test harness (Release v4.1.0)
+    # reports failures on developer patches (without tracker/tracer injected)
     "astropy__astropy-7606",
     "astropy__astropy-8707",
+    "astropy__astropy-8872",
     "django__django-10097",
     "psf__requests-1724",
     "psf__requests-1766",
@@ -27,9 +30,11 @@ EXCLUDED_IDS = [
     "psf__requests-2317",
     "pylint-dev__pylint-6528",
     "pylint-dev__pylint-7277",
-    "scikit-learn__scikit-learn-14710",
     "sphinx-doc__sphinx-8595",
     "sphinx-doc__sphinx-9711",
+    # Tests consume ~100% CPU resources, making concurrent
+    # tests/docker operations in other containers timeout
+    "scikit-learn__scikit-learn-14710",
 ]
 
 class _IterableReader(RawIOBase):
