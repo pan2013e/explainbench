@@ -138,6 +138,9 @@ def main(argv: list[str] | None = None) -> None:
             else:
                 bad_by_agent.setdefault(agent, set()).add(instance_id)
                 output_instances.setdefault(agent, {})[instance_id] = None
+            
+            if not all_good:
+                print(instance_id)
 
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
