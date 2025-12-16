@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 from swebench.harness.utils import load_swebench_dataset
-from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
 from tqdm.auto import tqdm 
@@ -298,7 +297,6 @@ def main() -> None:
     # Ensure the parent directory exists for the output file.
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    monkey_patch_dataset()
     ds = load_swebench_dataset(
         name="SWE-bench/SWE-bench_Verified",
         instance_ids=INSTANCE_IDS,

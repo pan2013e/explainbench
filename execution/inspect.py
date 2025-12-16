@@ -3,12 +3,10 @@ import os
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
-from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.monkey_patch.inspect import monkey_patch_execution
 from execution.util import prepare_tracer, get_predictions_path
 
 def inspect(**kwargs):
-    monkey_patch_dataset()
     monkey_patch_execution(**kwargs)
     prepare_tracer()
     run_evaluation_main(

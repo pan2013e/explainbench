@@ -4,11 +4,9 @@ import os
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
-from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.util import get_instance_ids, get_predictions_path
 
 def main(**kwargs):
-    monkey_patch_dataset()
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",

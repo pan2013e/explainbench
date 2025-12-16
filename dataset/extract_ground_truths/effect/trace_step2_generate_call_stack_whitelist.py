@@ -5,7 +5,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Set
 
-from execution.monkey_patch.dataset import monkey_patch_dataset
 from execution.util import get_instance_ids
 
 
