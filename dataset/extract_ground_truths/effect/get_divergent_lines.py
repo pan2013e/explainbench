@@ -111,10 +111,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 if not diffing_started and (buggy_callee.is_pmf or patched_callee.is_pmf):
                     logger.debug(f">> Start Diffing Now")
                     diffing_started = True
-                if (
-                    buggy_callee.return_value is None and patched_callee.return_value is None
-                    or not buggy_callee.returns_equals(patched_callee)
-                ) and buggy_callee.name not in RANDOMIZED_FUNCTIONS:
+                if buggy_callee.name not in RANDOMIZED_FUNCTIONS:
                     if buggy_callee.is_pmf:
                         logger.debug(">> Step into patch-modified function")
                         logger.debug(">> Directly go to the return point")
@@ -195,5 +192,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0,  agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main(instance_id, test_id=0,  agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct", base_dir="/home/zhiyuan/explainbench/logs/run_evaluation/trace.debug.gold.1021/gold_old")
     print(result)
