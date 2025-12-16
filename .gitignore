@@ -10,3 +10,7 @@ logs*/
 !results/**/*.json
 !dataset/context/*.json
 dataset/extract_ground_truths/effect/ignore/*
+*.log
+*.txt
+explainbench.egg-info/PKG-INFO
+helpers/*
