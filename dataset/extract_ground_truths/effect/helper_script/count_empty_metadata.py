@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
+from execution.util import EXCLUDED_IDS
+
 path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json")
 
 with path.open() as f:
@@ -16,13 +18,18 @@ for agent, instances in data.items():
     if not isinstance(instances, dict):
         continue
 
-    total_per_agent[agent] = len(instances)
+    filtered_total = 0
 
-    for metadata in instances.values():
+    for instance_id, metadata in instances.items():
+        if instance_id in EXCLUDED_IDS:
+            continue
+        filtered_total += 1
         if metadata is None:
             empty_none_per_agent[agent] += 1
         elif metadata == {}:
             empty_dict_per_agent[agent] += 1
+
+    total_per_agent[agent] = filtered_total
 
 non_empty_per_agent = {}
 for agent in total_per_agent:
