@@ -1,0 +1,45 @@
+import json
+from pathlib import Path
+from collections import defaultdict
+
+path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json")
+
+with path.open() as f:
+    data = json.load(f)
+
+empty_none_per_agent = defaultdict(int)
+empty_dict_per_agent = defaultdict(int)
+total_per_agent = {}
+
+# data structure: {agent: {instance_id: metadata}}
+for agent, instances in data.items():
+    if not isinstance(instances, dict):
+        continue
+
+    total_per_agent[agent] = len(instances)
+
+    for metadata in instances.values():
+        if metadata is None:
+            empty_none_per_agent[agent] += 1
+        elif metadata == {}:
+            empty_dict_per_agent[agent] += 1
+
+non_empty_per_agent = {}
+for agent in total_per_agent:
+    non_empty_per_agent[agent] = (
+        total_per_agent[agent]
+        - empty_none_per_agent[agent]
+        - empty_dict_per_agent[agent]
+    )
+
+print("Empty dict metadata counts per agent:")
+for agent in sorted(total_per_agent):
+    print(f"- {agent}: {empty_dict_per_agent[agent]} empty dict out of {total_per_agent[agent]} instances")
+
+print("\nNone metadata counts per agent (treated as errors):")
+for agent in sorted(total_per_agent):
+    print(f"- {agent}: {empty_none_per_agent[agent]} None out of {total_per_agent[agent]} instances")
+
+print("\nValid metadata counts per agent:")
+for agent in sorted(total_per_agent):
+    print(f"- {agent}: {non_empty_per_agent[agent]} non-empty out of {total_per_agent[agent]} instances")
