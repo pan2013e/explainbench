@@ -35,6 +35,18 @@ EXCLUDED_IDS = [
     # Tests consume ~100% CPU resources, making concurrent
     # tests/docker operations in other containers timeout
     "scikit-learn__scikit-learn-14710",
+    # Tests fail before test function is even reached
+    "django__django-14011",
+    "django__django-14672",
+    "django__django-16116",
+    "pylint-dev__pylint-4551",
+    "pylint-dev__pylint-4604",
+    "pylint-dev__pylint-4661",
+    "pytest-dev__pytest-7521",
+    "sphinx-doc__sphinx-7462",
+    "sphinx-doc__sphinx-8265",
+    "sphinx-doc__sphinx-8621",
+    "sphinx-doc__sphinx-9367"
 ]
 
 class _IterableReader(RawIOBase):
