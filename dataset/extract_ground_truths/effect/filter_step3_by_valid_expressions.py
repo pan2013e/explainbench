@@ -103,13 +103,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--n-valid",
         type=int,
-        required=True,
+        default=1,
         help="Minimum number of valid_changed_expressions required to keep an instance.",
     )
     parser.add_argument(
         "--n-invalid",
         type=int,
-        required=True,
+        default=3,
         help="Minimum number of valid_unchanged_expressions required to keep an instance.",
     )
     parser.add_argument(
