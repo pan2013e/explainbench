@@ -74,6 +74,7 @@ def get_injected_script(instance_id: str, mode: str):
 
 def get_hijacked_test_runner_call(instance_id: str, mode: str, orig_line: str):
     fail_to_pass_tests = get_fail_to_pass_tests(instance_id)
+    fail_to_pass_tests = [f'"{test}"' for test in fail_to_pass_tests]
     if 'django' in instance_id:
         return None
     elif 'sympy' in instance_id:
