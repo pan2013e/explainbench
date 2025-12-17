@@ -177,11 +177,11 @@ def get_test_patch(instance_id: str) -> str:
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
     return instance['test_patch'] or ""
 
-def get_instance_ids(value: list[str]) -> list[str]:
+def get_instance_ids(value: list[str], apply_exclusions=True) -> list[str]:
     if value == ["all"]:
-        return all_instances()
+        return all_instances(apply_exclusions=apply_exclusions)
     if all('__' not in v and '-' not in v for v in value):
-        return instances_by_repo(value)
+        return instances_by_repo(value, apply_exclusions=apply_exclusions)
     return value
 
 def all_instances(apply_exclusions=True):
