@@ -63,6 +63,7 @@ EXCLUDED_IDS = [
     "django__django-11734",
     "django__django-11885",
     "django__django-11951",
+    "django__django-12209",
     "django__django-12419",
     "django__django-12965",
     "django__django-13028",
@@ -72,6 +73,7 @@ EXCLUDED_IDS = [
     "django__django-13516",
     "django__django-13590",
     "django__django-13658",
+    "django__django-14559",
     "django__django-15128",
     "django__django-15280",
     "django__django-15554",
@@ -92,23 +94,20 @@ EXCLUDED_IDS = [
     "matplotlib__matplotlib-26113",
     "matplotlib__matplotlib-26342",
     "matplotlib__matplotlib-26466",
+    "pytest-dev__pytest-8399",
     "scikit-learn__scikit-learn-12682",
     "sphinx-doc__sphinx-8056",
-    # (the following not so accurate now, need re-verify after new tracing done)
+    # Timeout after 6h
     "astropy__astropy-14539",
     "django__django-11149",
     "django__django-11400",
     "django__django-11749",
     "django__django-12143",
-    "django__django-12209",
     "django__django-13417",
-    "django__django-14559",
     "django__django-15022",
     "matplotlib__matplotlib-20826",
     "matplotlib__matplotlib-20859",
-    "matplotlib__matplotlib-26291",
-    "pytest-dev__pytest-8399",
-    "sphinx-doc__sphinx-7590"
+    "sympy__sympy-15599",
 ]
 
 class _IterableReader(RawIOBase):
