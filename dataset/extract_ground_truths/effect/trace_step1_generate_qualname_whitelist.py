@@ -87,6 +87,8 @@ def _path_to_module_name(file_path: str) -> str:
         parts[-1] = parts[-1][:-3]  # strip .py
 
     parts = [p for p in parts if p]
+    if parts and (parts[0] == "lib" or parts[0] == "src"):
+        parts = parts[1:]
     return ".".join(parts) if parts else "<unknown_module>"
 
 
@@ -282,7 +284,7 @@ def main() -> None:
     args = parser.parse_args()
 
     AGENT_NAMES = args.agents
-    INSTANCE_IDS = get_instance_ids(args.instance_ids)
+    INSTANCE_IDS = get_instance_ids(args.instance_ids, apply_exclusions=False)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
 
