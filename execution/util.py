@@ -31,6 +31,7 @@ EXCLUDED_IDS = [
     "pylint-dev__pylint-6528",
     "pylint-dev__pylint-7277",
     "sphinx-doc__sphinx-8595",
+    "sphinx-doc__sphinx-8621",
     "sphinx-doc__sphinx-9711",
     # Tests consume ~100% CPU resources, making concurrent
     # tests/docker operations in other containers timeout
@@ -44,7 +45,6 @@ EXCLUDED_IDS = [
     "pylint-dev__pylint-4604",
     "pylint-dev__pylint-4661",
     "sphinx-doc__sphinx-8265",
-    "sphinx-doc__sphinx-8621",
     # Intrusiveness of tracker/injection plugin causes failures
     "astropy__astropy-13398",
     "django__django-11276",
@@ -166,6 +166,9 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
 
 @lru_cache
 def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
+    # Patch the errors in SWE-bench dataset
+    if instance_id == "sphinx-doc__sphinx-8265":
+        return ["tests/test_pycode_ast.py::test_unparse[(1, 2, 3)-(1, 2, 3)]"]
     if 'django__django' in instance_id:
         return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
     instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
