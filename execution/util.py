@@ -184,17 +184,19 @@ def get_instance_ids(value: list[str]) -> list[str]:
         return instances_by_repo(value)
     return value
 
-def all_instances():
-    return [data['instance_id'] for data in SWEBENCH if data['instance_id'] not in EXCLUDED_IDS]
+def all_instances(apply_exclusions=True):
+    exclusion = EXCLUDED_IDS if apply_exclusions else []
+    return [data['instance_id'] for data in SWEBENCH if data['instance_id'] not in exclusion]
 
-def instances_by_repo(repo_name: str | list[str]):
+def instances_by_repo(repo_name: str | list[str], apply_exclusions=True):
     if isinstance(repo_name, str):
         repo_name = [repo_name]
+    exclusion = EXCLUDED_IDS if apply_exclusions else []
     return [
         data['instance_id']
         for data in SWEBENCH
         if any(rn in data['repo'] for rn in repo_name)
-        and data['instance_id'] not in EXCLUDED_IDS
+        and data['instance_id'] not in exclusion
     ]
 
 def get_predictions_path(agent: str):
