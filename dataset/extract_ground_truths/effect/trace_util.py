@@ -108,6 +108,10 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
+    @property
+    def return_type(self):
+        return self.return_event.event_type
+    
     def _init_index(self):
         if not self.is_pmf:
             return 0
