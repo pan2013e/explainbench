@@ -115,7 +115,7 @@ def main() -> None:
 
     ROOT_PATH = args.root_path
     AGENT_NAMES = args.agents
-    INSTANCE_IDS_ARG = get_instance_ids(args.instance_ids, apply_exclusions=False)
+    INSTANCE_IDS_ARG = get_instance_ids(args.instance_ids)
     TARGETS_JSON = args.targets_json
     OUTPUT_PATH = args.output_path
 

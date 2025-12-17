@@ -12,7 +12,7 @@ def main(**kwargs):
     run_evaluation_main(
         dataset_name="SWE-bench/SWE-bench_Verified",
         split="test",
-        instance_ids=get_instance_ids(kwargs["instance_ids"], apply_exclusions=False),
+        instance_ids=get_instance_ids(kwargs["instance_ids"]),
         predictions_path=get_predictions_path(kwargs["agent"]),
         max_workers=kwargs["max_workers"],
         force_rebuild=False,

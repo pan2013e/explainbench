@@ -284,7 +284,7 @@ def main() -> None:
     args = parser.parse_args()
 
     AGENT_NAMES = args.agents
-    INSTANCE_IDS = get_instance_ids(args.instance_ids, apply_exclusions=False)
+    INSTANCE_IDS = get_instance_ids(args.instance_ids)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
 
