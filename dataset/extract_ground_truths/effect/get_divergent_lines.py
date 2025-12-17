@@ -98,6 +98,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
         if not diffing_started and (buggy_function.is_pmf or patched_function.is_pmf):
             logger.debug(f">> Start Diffing Now")
             diffing_started = True
+        logger.debug(f'diffing_started status: {diffing_started}')
         logger.debug(f"Buggy ID: {buggy_event.event_id}, Patched ID: {patched_event.event_id}")
         logger.debug(f"Function: {buggy_function.name} vs {patched_function.name}")
         logger.debug(f'- {buggy_event.event_type:<10} {buggy_event.statement}')
