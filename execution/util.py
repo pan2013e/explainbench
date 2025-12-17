@@ -44,7 +44,6 @@ EXCLUDED_IDS = [
     "pylint-dev__pylint-4551",
     "pylint-dev__pylint-4604",
     "pylint-dev__pylint-4661",
-    "sphinx-doc__sphinx-8265",
     # Intrusiveness of tracker/injection plugin causes failures
     "astropy__astropy-13398",
     "django__django-11276",
