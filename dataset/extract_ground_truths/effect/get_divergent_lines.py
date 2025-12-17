@@ -155,25 +155,25 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                             break
                     return diff
         else:
+            diffing_started = True
             logger.debug("> Control flow diverged")
+            logger.debug(">> Start Diffing Now")
             lhs_event = buggy_function.return_event
             rhs_event = patched_function.return_event
-            diff = {}
-            if diffing_started:
-                diff = state_diff(
-                    lhs_event,
-                    rhs_event,
-                    repo_name,
-                    test_id=test_id,
-                    function_name=buggy_function.name,
-                    buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
-                    patched_line_count=lambda: get_event_count(rhs_event, patched_traces),
-                    buggy_function_param=buggy_function.params,
-                    patched_function_param=patched_function.params,
-                    instance_id=instance_id,
-                    agent=agent,
-                    seen_pmf=is_pmf_exist,
-                )
+            diff = state_diff(
+                lhs_event,
+                rhs_event,
+                repo_name,
+                test_id=test_id,
+                function_name=buggy_function.name,
+                buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
+                patched_line_count=lambda: get_event_count(rhs_event, patched_traces),
+                buggy_function_param=buggy_function.params,
+                patched_function_param=patched_function.params,
+                instance_id=instance_id,
+                agent=agent,
+                seen_pmf=is_pmf_exist,
+            )
             if diff:
                 return diff
             else:
