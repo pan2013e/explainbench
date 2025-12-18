@@ -17,12 +17,25 @@ from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+def _sanitize_bigints(obj, max_safe_int_bits=53):
+    if isinstance(obj, int):
+        if obj.bit_length() > max_safe_int_bits:
+            return str(obj)
+        return obj
+    if isinstance(obj, list):
+        return [_sanitize_bigints(x, max_safe_int_bits) for x in obj]
+    if isinstance(obj, tuple):
+        return tuple(_sanitize_bigints(x, max_safe_int_bits) for x in obj)
+    if isinstance(obj, dict):
+        return {k: _sanitize_bigints(v, max_safe_int_bits) for k, v in obj.items()}
+    return obj
+
 def json_loads_fast(data):
     try:
         return orjson.loads(data)
     except orjson.JSONDecodeError as e:
         if "number is infinity" in str(e):
-            return json.loads(data)
+            return _sanitize_bigints(json.loads(data))
         raise e
 
 def load_traces(file_path):
