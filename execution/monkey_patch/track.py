@@ -105,6 +105,7 @@ def update_eval_script(instance_id: str, eval_script: str, mode: str):
         assert install_line_idx != -1, "Install line not found in eval script"
         lines[install_line_idx] = "# " + lines[install_line_idx]
     lines.append("git clean -fd")
+    lines.append("rm -rf /tmp/*")
     return "\n".join(lines)
 
 def run_buggy_code(container, instance_id, test_spec, logger, log_dir, timeout):
