@@ -109,10 +109,12 @@ EXCLUDED_IDS = [
     "django__django-14559",
     "django__django-15022",
     "sympy__sympy-15599",
-    # Use of `self.subTest` causes exceptions not raised in test functions
+    # Use of internal context manager in `self.subTest` or `self.assertNumQueries` causes exceptions not raised in test functions
     "django__django-11451",
     "django__django-11964",
+    "django__django-14792",
     "django__django-14999",
+    "django__django-15561",
     "django__django-16429"
 ]
 
