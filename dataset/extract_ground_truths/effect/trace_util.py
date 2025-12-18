@@ -1,6 +1,7 @@
 import os
 import mmap
-import orjson as json
+import json
+import orjson
 
 from deepdiff import DeepDiff
 from tracer.protocol import (
@@ -16,13 +17,21 @@ from dataset.extract_ground_truths.effect.postprocessing_util import get_ignore_
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+def json_loads_fast(data):
+    try:
+        return orjson.loads(data)
+    except orjson.JSONDecodeError as e:
+        if "number is infinity" in str(e):
+            return json.loads(data)
+        raise e
+
 def load_traces(file_path):
     with open(file_path, 'rb') as f:
         mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         try:
             out = []
             while line := mm.readline():
-                out.append(Event.from_dict(json.loads(line)))
+                out.append(Event.from_dict(json_loads_fast(line)))
             return out
         finally:
             mm.close()
@@ -56,6 +65,8 @@ def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
             ignore_private_variables=False,
             **kwargs,
         )
+    except TimeoutError as e:
+        raise e
     except Exception as e:
         print(f"Error diffing events: {e}\nBuggy - at line {buggy.line_number} in {buggy.filepath}: {buggy.statement}\nPatched - at line {patched.line_number} in {patched.filepath}: {patched.statement}")
         return dict()
