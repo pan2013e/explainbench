@@ -3,11 +3,11 @@
 # This should be done outside of this script.
 # Step 1. Extract locations of divergent lines, state differences;
 # and fallback if no divergence is found.
-import json
 import os
-from concurrent.futures import ProcessPoolExecutor, as_completed, TimeoutError
-from tqdm import tqdm
+import json
+import signal
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm.auto import tqdm
 
 from dataset.extract_ground_truths.effect import get_divergent_lines
@@ -22,14 +22,18 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 #     )
 # )
 AGENTS = [
-    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-    "20250612_trae",
+    # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+    # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    # "20250612_trae",
     "gold",
 ]
 
-def _process_instance(instance_id, agent):
+def _process_instance(instance_id, agent, timeout=300):
+    def _timeout_handler(signum, frame):
+        raise TimeoutError()
     try:
+        signal.signal(signal.SIGALRM, _timeout_handler)
+        signal.alarm(timeout)
         test_id = 0
         while True:
             try:
@@ -52,17 +56,20 @@ def _process_instance(instance_id, agent):
             if result:
                 break
             test_id += 1
-
-        return instance_id, serialize(result)
-
+        return serialize(result)
     except FileNotFoundError:
         print(f"FileNotFoundError for {instance_id} with agent {agent}", flush=True)
-        return instance_id, None
+        return None
+    except TimeoutError:
+        print(f"Timeout for {instance_id} with agent {agent}", flush=True)
+        return None
     except Exception as e:
         print(f"Error for {instance_id} with agent {agent}: {e}", flush=True)
-        return instance_id, None
+        return None
+    finally:
+        signal.alarm(0)
 
-def process_agent(agent, instance_ids, timeout=300, max_workers=10):
+def process_agent(agent, instance_ids, max_workers=10):
     results = {}
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -70,14 +77,9 @@ def process_agent(agent, instance_ids, timeout=300, max_workers=10):
             executor.submit(_process_instance, instance_id, agent): instance_id
             for instance_id in instance_ids
         }
-        for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing agent {agent}"):
+        for future in tqdm(as_completed(futures), total=len(futures), desc=agent):
             instance_id = futures[future]
-            try:
-                _, result = future.result(timeout=timeout)
-            except TimeoutError:
-                print(f"Timeout for {instance_id} with agent {agent}", flush=True)
-                result = None
-            results[instance_id] = result
+            results[instance_id] = future.result()
 
     return results
 
@@ -89,10 +91,10 @@ if __name__ == "__main__":
             executor.submit(process_agent, agent, instance_ids): agent
             for agent in AGENTS if agent
         }
-        for future in tqdm(as_completed(futures), total=len(futures)):
+        for future in as_completed(futures):
             agent = futures[future]
             results[agent] = future.result()
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
     with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Saved step1 results to {OUTPUT_DIR}")
