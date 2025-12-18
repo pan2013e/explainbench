@@ -44,7 +44,7 @@ EXCLUDED_IDS = [
     "pylint-dev__pylint-4551",
     "pylint-dev__pylint-4604",
     "pylint-dev__pylint-4661",
-    # Intrusiveness of tracker/injection plugin causes failures
+    # Intrusiveness of tracker/injection plugin causes incorrect patched behavior (should pass, but failed)
     "astropy__astropy-13398",
     "django__django-11276",
     "pytest-dev__pytest-5631",
@@ -56,24 +56,21 @@ EXCLUDED_IDS = [
     "sphinx-doc__sphinx-8120",
     "sphinx-doc__sphinx-8721",
     "sphinx-doc__sphinx-9229",
-    # Intrusiveness of tracer/serializer causes failures
+    # Intrusiveness of tracer/serializer causes incorrect patched behavior (should pass, but failed)
     "django__django-11066",
     "django__django-11087",
     "django__django-11265",
     "django__django-11734",
     "django__django-11885",
     "django__django-11951",
-    "django__django-12209",
     "django__django-12419",
     "django__django-12965",
     "django__django-13028",
     "django__django-13128",
     "django__django-13158",
     "django__django-13406",
-    "django__django-13516",
     "django__django-13590",
     "django__django-13658",
-    "django__django-14559",
     "django__django-15128",
     "django__django-15280",
     "django__django-15554",
@@ -97,17 +94,26 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-8399",
     "scikit-learn__scikit-learn-12682",
     "sphinx-doc__sphinx-8056",
-    # Timeout after 6h
+    # Intrusiveness of tracer/serializer causes incorrect buggy behavior (should fail, but passed)
+    "django__django-14351",
+    # Intrusiveness of tracer/serializer causes pipeline errors
     "astropy__astropy-14539",
     "django__django-11149",
     "django__django-11400",
     "django__django-11749",
     "django__django-12143",
     "django__django-13417",
-    "django__django-15022",
     "matplotlib__matplotlib-20826",
     "matplotlib__matplotlib-20859",
+    # Timeout after 6h
+    "django__django-14559",
+    "django__django-15022",
     "sympy__sympy-15599",
+    # Use of `self.subTest` causes exceptions not raised in test functions
+    "django__django-11451",
+    "django__django-11964",
+    "django__django-14999",
+    "django__django-16429"
 ]
 
 class _IterableReader(RawIOBase):
