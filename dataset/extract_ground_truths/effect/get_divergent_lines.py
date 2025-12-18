@@ -4,6 +4,7 @@ from tracer.protocol import Event, LineEvent
 from dataset.extract_ground_truths.effect.trace_util import (
     diff_events,
     load_trace_pair,
+    rv_equals,
     Traces,
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import (
@@ -141,24 +142,36 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     if isinstance(buggy_event, LineEvent) and isinstance(patched_event, LineEvent):
                         buggy_variables = diff['buggy_variables'].keys() | diff['patched_variables'].keys()
                         function_param_names = (buggy_function.params.keys() if isinstance(buggy_function.params, dict) else set()) | (patched_function.params.keys() if isinstance(patched_function.params, dict) else set())
-                        if buggy_variables & function_param_names:
-                            logger.debug(">> Function parameters reveal the divergence")
-                            logger.debug(">> Buggy variable names: " + ", ".join(sorted(buggy_variables)))
-                            logger.debug(">> Parameter names: " + ", ".join(sorted(function_param_names)))
-                            logger.debug(">> Jumping back to caller")
-                            buggy_caller = buggy_function.parent
-                            patched_caller = patched_function.parent
-                            if buggy_caller and patched_caller:
-                                buggy_function = buggy_caller
-                                patched_function = patched_caller
-                                continue
-                            logger.debug("> END")
-                            break
+                        if intersect := buggy_variables & function_param_names:
+                            if all(
+                                rv_equals(
+                                    diff['buggy_variables'].get(var, None),
+                                    buggy_function.params.get(var, None)
+                                )
+                                and 
+                                rv_equals(
+                                    diff['patched_variables'].get(var, None),
+                                    patched_function.params.get(var, None)
+                                )
+                                for var in intersect
+                            ):
+                                logger.debug(">> Function parameters reveal the divergence")
+                                logger.debug(">> Related variables: " + ", ".join(sorted(intersect)))
+                                logger.debug(">> Jumping back to caller")
+                                buggy_caller = buggy_function.parent
+                                patched_caller = patched_function.parent
+                                if buggy_caller and patched_caller:
+                                    buggy_function = buggy_caller
+                                    patched_function = patched_caller
+                                    continue
+                                logger.debug("> END")
+                                break
                     return diff
         else:
-            diffing_started = True
             logger.debug("> Control flow diverged")
-            logger.debug(">> Start Diffing Now")
+            if not diffing_started:
+                logger.debug(">> Start Diffing Now")
+                diffing_started = True
             lhs_event = buggy_function.return_event
             rhs_event = patched_function.return_event
             diff = state_diff(
@@ -195,5 +208,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="gold", base_dir="/home/zhiyuan/explainbench/logs/run_evaluation/trace.debug.gold.1021/gold_old")
+    result = main(instance_id, test_id=0, agent="gold", base_dir="/home/zhiyuan/explainbench/logs/run_evaluation/trace.debug.gold.1021/gold")
     print(result)
