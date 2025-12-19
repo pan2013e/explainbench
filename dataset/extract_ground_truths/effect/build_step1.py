@@ -28,12 +28,17 @@ AGENTS = [
     "gold",
 ]
 
+EXTRA_LONG_TIMEOUT = {
+    'django__django-16667': 1800,
+    'sphinx-doc__sphinx-7590': 3600,
+}
+
 def _process_instance(instance_id, agent, timeout=300):
     def _timeout_handler(signum, frame):
         raise TimeoutError()
     try:
         signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(timeout)
+        signal.alarm(EXTRA_LONG_TIMEOUT.get(instance_id, timeout))
         test_id = 0
         while True:
             try:
