@@ -1,4 +1,6 @@
+import io
 import logging
+import tokenize
 
 from tracer.protocol import Event, LineEvent
 from dataset.extract_ground_truths.effect.trace_util import (
@@ -98,9 +100,84 @@ def get_common_lines(function_block: FunctionBlock):
         if not current_event.excluded and isinstance(current_event, LineEvent):
             statements.append(current_event.statement)
             line_nums.append(current_event.line_number)
-    return statements, line_nums
+    return "\n".join(statements), line_nums
 
-def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=5):
+def get_logical_lines(code: str, line_nums):
+    lines = code.splitlines(keepends=True)
+    if len(lines) != len(line_nums):
+        raise ValueError(f"line_nums must align with code lines: {len(lines)=} vs {len(line_nums)=}")
+
+    statements= []
+    ranges= []
+
+    buf= []
+    last = (1, 0)
+
+    cur_start_line = None
+    cur_end_line = None
+
+    def grab(upto):
+        nonlocal last
+        (l1, c1), (l2, c2) = last, upto
+        if (l1, c1) == (l2, c2):
+            return ""
+        if l1 == l2:
+            s = lines[l1 - 1][c1:c2]
+        else:
+            s = lines[l1 - 1][c1:]
+            for ln in range(l1, l2 - 1):
+                s += lines[ln]
+            s += lines[l2 - 1][:c2]
+        last = upto
+        return s
+
+    def touch_span(sline: int, eline: int):
+        nonlocal cur_start_line, cur_end_line
+        if cur_start_line is None:
+            cur_start_line = sline
+            cur_end_line = eline
+        else:
+            cur_end_line = max(cur_end_line or eline, eline)
+
+    def flush():
+        nonlocal buf, cur_start_line, cur_end_line
+        text = "".join(buf).strip()
+        if text:
+            statements.append(text)
+            start = line_nums[cur_start_line - 1]
+            end = line_nums[cur_end_line - 1]
+            ranges.append((start, end))
+        buf = []
+        cur_start_line = None
+        cur_end_line = None
+
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(code).readline):
+            toknum, tokval, (sline, scol), (eline, ecol), _ = tok
+
+            buf.append(grab((sline, scol)))
+            buf.append(tokval)
+            last = (eline, ecol)
+
+            if toknum not in (tokenize.INDENT, tokenize.DEDENT, tokenize.ENCODING):
+                if toknum != tokenize.NL:
+                    touch_span(sline, eline)
+
+            if toknum == tokenize.NEWLINE:
+                flush()
+
+    except tokenize.TokenError as exc:
+        msg = str(exc)
+        if "EOF in multi-line statement" not in msg and "unexpected EOF in multi-line statement" not in msg:
+            raise
+        flush()
+
+    if buf:
+        flush()
+
+    return statements, ranges
+
+def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=2):
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
@@ -227,9 +304,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     # pattern2: buggy function crashes, patched function ok
                         reference = buggy_function
                     statements, line_nums = get_common_lines(reference)
-                    if len(statements) > n_common_line_threshold:
-                        diff["common_lines"] = statements
-                        diff["line_nums"] = line_nums
+                    logical_statements, logical_line_nums = get_logical_lines(statements, line_nums)
+                    if len(logical_statements) > n_common_line_threshold:
+                        diff["common_lines"] = logical_statements
+                        diff["line_nums"] = logical_line_nums
                         diff["source_common_lines"] = "patched" if pattern == 1 else "buggy"
                 return diff
             else:
