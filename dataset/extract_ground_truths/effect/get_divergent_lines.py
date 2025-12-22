@@ -287,7 +287,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     
                     if len(delta) + len(intersection) >= n_common_line_threshold:
                         diff["choices"] = delta + intersection
-                        diff["answers"] = delta
+                        diff["answer"] = delta
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
