@@ -3,6 +3,7 @@ import mmap
 import json
 import orjson
 
+from functools import cached_property
 from deepdiff import DeepDiff
 from tracer.protocol import (
     Event,
@@ -120,7 +121,7 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
-    @property
+    @cached_property
     def return_event(self):
         match self.return_value, self.exception:
             case _, None:
@@ -132,9 +133,15 @@ class FunctionBlock:
             case _:
                 raise ValueError("Exception and return value cannot coexist")
     
-    @property
+    @cached_property
     def return_type(self):
         return self.return_event.event_type
+    
+    @cached_property
+    def depth(self):
+        if self.parent is None:
+            return 0
+        return self.parent.depth + 1
     
     def _init_index(self):
         if not self.is_pmf:
@@ -210,7 +217,7 @@ class Traces:
                 modified_functions.add(e.function_name)
         return list(modified_functions)
 
-    @property
+    @cached_property
     def entry(self):
         fbs = list(self._entry._links.values())
         assert len(fbs) > 0, "<module> does not call any test functions"

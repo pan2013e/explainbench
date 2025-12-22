@@ -140,7 +140,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     diffing_started = True
                 if buggy_callee.name not in RANDOMIZED_FUNCTIONS:
                     if buggy_callee.is_pmf:
-                        if 'Exception' not in {buggy_callee.return_type, patched_callee.return_type}:
+                        if (
+                            'Exception' not in {buggy_callee.return_type, patched_callee.return_type}
+                            and buggy_function.depth > 1
+                        ):
                             continue
                         logger.debug(">> Step into patch-modified function")
                         logger.debug(">> Directly go to the return point")
@@ -247,5 +250,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="20250720_Lingxi-v1.5_claude-4-sonnet-20250514", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.20250720_Lingxi-v1.5_claude-4-sonnet-20250514.1020/20250720_Lingxi-v1.5_claude-4-sonnet-20250514")
+    result = main(instance_id, test_id=0, agent="gold", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.gold.1020/gold")
     print(result)
