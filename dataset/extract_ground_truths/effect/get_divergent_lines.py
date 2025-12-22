@@ -104,7 +104,7 @@ def lcs_equal_lines(a_lines: list, b_lines: list) -> list:
             out.extend(a[i1:i2])
     return out
 
-def main(instance_id, agent='gold', test_id=0, base_dir=None):
+def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=5):
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
@@ -222,7 +222,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     whole_buggy_fn = get_whole_fn_statements(buggy_function)
                     whole_patched_fn = get_whole_fn_statements(patched_function)
                     intersection = lcs_equal_lines(whole_buggy_fn, whole_patched_fn)
-                    if len(intersection) > 2:
+                    if len(intersection) > n_common_line_threshold:
                         diff["common_lines"] = intersection
                 return diff
             else:
