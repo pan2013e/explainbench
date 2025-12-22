@@ -223,11 +223,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                     whole_buggy_fn = get_whole_fn_statements(buggy_function)
                     whole_patched_fn = get_whole_fn_statements(patched_function)
                     intersection = lcs_equal_lines(whole_buggy_fn, whole_patched_fn)
-                    
-                    # add relevant metadata:
-                    # -> get buggy function and patched function
-                    # -> get common lines between buggy and patched
-                    # -> add relevant metadata
+                    if len(intersection) > 2:
+                        diff["common_lines"] = intersection
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
