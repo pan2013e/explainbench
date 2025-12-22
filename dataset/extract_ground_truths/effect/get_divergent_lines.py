@@ -286,8 +286,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     intersection = list(set(buggy_logical_statements) & set(patched_logical_statements))
                     
                     if len(delta) + len(intersection) >= n_common_line_threshold:
-                        diff["delta_reach"] = delta
-                        diff["intersect_reach"] = intersection
+                        diff["choices"] = delta + intersection
+                        diff["answers"] = delta
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
