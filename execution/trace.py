@@ -19,7 +19,7 @@ def main(**kwargs):
         cache_level="env",
         clean=False,
         open_file_limit=4096,
-        run_id=f"trace.debug.{kwargs["agent"]}.{os.getuid()}",
+        run_id=f"trace.{kwargs["agent"]}.{os.getuid()}",
         timeout=21600,
         namespace="swebench",
         rewrite_reports=False,
