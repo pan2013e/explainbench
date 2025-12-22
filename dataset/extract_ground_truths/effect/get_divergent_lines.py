@@ -227,6 +227,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     if len(statements) > n_common_line_threshold:
                         diff["common_lines"] = statements
                         diff["line_nums"] = line_nums
+                        diff["source_common_lines"] = "patched" if pattern == 1 else "buggy"
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
