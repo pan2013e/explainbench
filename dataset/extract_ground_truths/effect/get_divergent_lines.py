@@ -6,6 +6,7 @@ from dataset.extract_ground_truths.effect.trace_util import (
     load_trace_pair,
     rv_equals,
     Traces,
+    FunctionBlock
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import (
     get_complete_variable_views_from_diff
@@ -81,6 +82,15 @@ def is_exception_vs_return_none(diff_dict: dict):
     if diff_dict == pattern1 or diff_dict == pattern2:
         return True
     return False
+
+def get_whole_fn_statements(function_block: FunctionBlock):
+    events = function_block._events
+    lines = []
+    for current_event in events:
+        event_type = current_event.event_type
+        if event_type in ("Line",):
+            lines.append(current_event.statement)
+    return "\n".join(lines)
 
 def main(instance_id, agent='gold', test_id=0, base_dir=None):
     repo_name = instance_id.split("__")[0]
@@ -197,8 +207,9 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
             )
             if diff:
                 # check return None vs Exception
-                if is_exception_vs_return_none(diff["dict"]):
-                    
+                if is_exception_vs_return_none(diff["diff"]):
+                    whole_buggy_fn = get_whole_fn_statements(buggy_function)
+                    whole_patched_fn = get_whole_fn_statements(patched_function)
                     # add relevant metadata:
                     # -> get buggy function and patched function
                     # -> get common lines between buggy and patched
