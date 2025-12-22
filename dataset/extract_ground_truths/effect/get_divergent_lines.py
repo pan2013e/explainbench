@@ -107,29 +107,11 @@ def get_logical_lines(code: str, line_nums):
     if len(lines) != len(line_nums):
         raise ValueError(f"line_nums must align with code lines: {len(lines)=} vs {len(line_nums)=}")
 
-    statements= []
-    ranges= []
-
-    buf= []
-    last = (1, 0)
-
+    statements = []
+    ranges = []
+    tokbuf = []
     cur_start_line = None
     cur_end_line = None
-
-    def grab(upto):
-        nonlocal last
-        (l1, c1), (l2, c2) = last, upto
-        if (l1, c1) == (l2, c2):
-            return ""
-        if l1 == l2:
-            s = lines[l1 - 1][c1:c2]
-        else:
-            s = lines[l1 - 1][c1:]
-            for ln in range(l1, l2 - 1):
-                s += lines[ln]
-            s += lines[l2 - 1][:c2]
-        last = upto
-        return s
 
     def touch_span(sline: int, eline: int):
         nonlocal cur_start_line, cur_end_line
@@ -140,29 +122,25 @@ def get_logical_lines(code: str, line_nums):
             cur_end_line = max(cur_end_line or eline, eline)
 
     def flush():
-        nonlocal buf, cur_start_line, cur_end_line
-        text = "".join(buf).strip()
+        nonlocal tokbuf, cur_start_line, cur_end_line
+        text = tokenize.untokenize(tokbuf).strip()
+        text = text.replace("\\\n", "")
         if text:
+            start_idx = min(cur_start_line or 1, len(line_nums)) - 1
+            end_idx = min(cur_end_line or (cur_start_line or 1), len(line_nums)) - 1
             statements.append(text)
-            start = line_nums[cur_start_line - 1]
-            end = line_nums[cur_end_line - 1]
-            ranges.append((start, end))
-        buf = []
+            ranges.append((line_nums[start_idx], line_nums[end_idx]))
+        tokbuf = []
         cur_start_line = None
         cur_end_line = None
 
     try:
         for tok in tokenize.generate_tokens(io.StringIO(code).readline):
-            toknum, tokval, (sline, scol), (eline, ecol), _ = tok
-
-            buf.append(grab((sline, scol)))
-            buf.append(tokval)
-            last = (eline, ecol)
-
-            if toknum not in (tokenize.INDENT, tokenize.DEDENT, tokenize.ENCODING):
-                if toknum != tokenize.NL:
-                    touch_span(sline, eline)
-
+            toknum, tokval, (sline, scol), (eline, ecol), line = tok
+            if toknum in (tokenize.INDENT, tokenize.DEDENT, tokenize.ENCODING):
+                continue
+            tokbuf.append(tok)
+            touch_span(sline, eline)
             if toknum == tokenize.NEWLINE:
                 flush()
 
@@ -172,7 +150,7 @@ def get_logical_lines(code: str, line_nums):
             raise
         flush()
 
-    if buf:
+    if tokbuf:
         flush()
 
     return statements, ranges
@@ -296,19 +274,20 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
             if diff:
                 flag_exception_vs_return_none, pattern = is_exception_vs_return_none(diff["diff"])
                 if flag_exception_vs_return_none:
-                    assert pattern in {1, 2}
-                    # pattern1: buggy function ok, patched function crashes
-                    if pattern == 1:
-                        reference = patched_function
-                    else:
-                    # pattern2: buggy function crashes, patched function ok
-                        reference = buggy_function
-                    statements, line_nums = get_common_lines(reference)
-                    logical_statements, logical_line_nums = get_logical_lines(statements, line_nums)
-                    if len(logical_statements) > n_common_line_threshold:
-                        diff["common_lines"] = logical_statements
-                        diff["line_nums"] = logical_line_nums
-                        diff["source_common_lines"] = "patched" if pattern == 1 else "buggy"
+                    buggy_statements, buggy_lines = get_common_lines(buggy_function)
+                    buggy_statements, buggy_lines = get_logical_lines(buggy_statements, buggy_lines)                    
+                    buggy_logical_statements = [(x, y) for x, y in zip(buggy_statements, buggy_lines)]
+                    
+                    patched_statements, patched_lines = get_common_lines(patched_function)
+                    patched_statements, patched_lines = get_logical_lines(patched_statements, patched_lines)
+                    patched_logical_statements = [(x, y) for x, y in zip(patched_statements, patched_lines)]
+
+                    delta = list(set(buggy_logical_statements) ^ set(patched_logical_statements))
+                    intersection = list(set(buggy_logical_statements) & set(patched_logical_statements))
+                    
+                    if len(delta) + len(intersection) >= n_common_line_threshold:
+                        diff["delta_reach"] = delta
+                        diff["intersect_reach"] = intersection
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
