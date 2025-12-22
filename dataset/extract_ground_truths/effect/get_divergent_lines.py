@@ -1,4 +1,5 @@
 import logging
+import difflib
 
 from tracer.protocol import Event, LineEvent
 from dataset.extract_ground_truths.effect.trace_util import (
@@ -91,6 +92,17 @@ def get_whole_fn_statements(function_block: FunctionBlock):
         if event_type in ("Line",):
             lines.append(current_event.statement)
     return "\n".join(lines)
+
+
+def lcs_equal_lines(a_lines: list, b_lines: list) -> list:
+    a = list(a_lines)
+    b = list(b_lines)
+    sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
+    out: list = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "equal":
+            out.extend(a[i1:i2])
+    return out
 
 def main(instance_id, agent='gold', test_id=0, base_dir=None):
     repo_name = instance_id.split("__")[0]
@@ -210,6 +222,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 if is_exception_vs_return_none(diff["diff"]):
                     whole_buggy_fn = get_whole_fn_statements(buggy_function)
                     whole_patched_fn = get_whole_fn_statements(patched_function)
+                    intersection = lcs_equal_lines(whole_buggy_fn, whole_patched_fn)
+                    
                     # add relevant metadata:
                     # -> get buggy function and patched function
                     # -> get common lines between buggy and patched
