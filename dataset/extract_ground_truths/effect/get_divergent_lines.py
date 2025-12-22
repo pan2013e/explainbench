@@ -218,7 +218,6 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 seen_pmf=is_pmf_exist,
             )
             if diff:
-                # check return None vs Exception
                 if is_exception_vs_return_none(diff["diff"]):
                     whole_buggy_fn = get_whole_fn_statements(buggy_function)
                     whole_patched_fn = get_whole_fn_statements(patched_function)
