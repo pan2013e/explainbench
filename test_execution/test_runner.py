@@ -25,11 +25,11 @@ def run_test(container: Container, test_content: str, patch: str = ""):
     return exit_code, response  
 
 def evaluate_test(
-    instance_id: str, test_content: str
+    instance_id: str, test_content: str, distinct_id: int = 0
 ) -> FullReproResult:
     container = None
     try:
-        container, instance_info = setup(instance_id)
+        container, instance_info = setup(instance_id, distinct_id)
         buggy_exit_code, buggy_response = run_test(container, test_content)
         fixed_exit_code, fixed_response = run_test(
             container, test_content,

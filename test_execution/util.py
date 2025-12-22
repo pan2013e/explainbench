@@ -26,7 +26,8 @@ from swebench.harness.utils import load_swebench_dataset
 RUN_ID = "test-execution"
 REPRODUCER_LOC = "/testbed/reproducer.py"
 
-def setup(instance_id: str) -> tuple[Container, dict]:
+def setup(instance_id: str, distinct_id: int) -> tuple[Container, dict]:
+    local_run_id = f"{RUN_ID}.{distinct_id}"
     all_instances = load_swebench_dataset(
         instance_ids = [instance_id]
     )
@@ -34,7 +35,7 @@ def setup(instance_id: str) -> tuple[Container, dict]:
     relevant_instance = all_instances[0]
 
     client = docker.from_env()
-    log_dir = RUN_EVALUATION_LOG_DIR / RUN_ID / instance_id
+    log_dir = RUN_EVALUATION_LOG_DIR / local_run_id / instance_id
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / LOG_INSTANCE
     logger = setup_logger(instance_id, log_file)
@@ -45,7 +46,7 @@ def setup(instance_id: str) -> tuple[Container, dict]:
         env_image_tag="latest",
     )
     container = build_container(
-        test_spec, client, RUN_ID, logger, False, False
+        test_spec, client, local_run_id, logger, False, False
     )
     container.start()
 

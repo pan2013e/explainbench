@@ -1,4 +1,5 @@
 import json
+from multiprocessing import Pool
 
 from functools import lru_cache
 from typing import Generic, ClassVar, TypeVar
@@ -155,21 +156,54 @@ class Intent:
                     for p in pred]
         
         @staticmethod
+        def _run_indiv_test(exec_idx, other_infos):
+            indiv_pred, template_test, replace_answer, instance_id = other_infos
+            predict_answer = indiv_pred.assertion
+            predicted_test = template_test.replace(replace_answer, predict_answer)
+            reproduce_result = evaluate_test(instance_id, predicted_test, exec_idx)
+            return reproduce_result.reproduced
+
+        @staticmethod
         def eval(pred: list[schema.PBTAssertion], gt: dict, **kwargs):
             instance_id = gt['instance_id']
             template_test = gt['test']
             replace_answer = gt['answers'][0]
-            grades = []
-            for idx, indiv_pred in enumerate(pred):
-                predict_answer = indiv_pred.assertion
-                predicted_test = template_test.replace(replace_answer, predict_answer)
-                reproduce_result = evaluate_test(instance_id, predicted_test)
-                grades.append(reproduce_result.reproduced)
+            
+            args = list(enumerate([
+                (indiv_pred, template_test, replace_answer, instance_id)
+                for indiv_pred in pred
+            ]))
+            p = Pool(len(pred))
+            grades = p.starmap(
+                Intent.PBTAssertion._run_indiv_test, args
+            )
             return grades
         
         @classmethod
         def predict(cls, model: Model, explanation: str, **kwargs):
-            masked_test = kwargs["test"]
+            import ast
+            class RemoveExceptionMessages(ast.NodeTransformer):
+                def visit_Module(self, node: ast.Module):
+                    node.body = [
+                        elem for elem in node.body
+                        if not (isinstance(elem, ast.Import) or
+                                isinstance(elem, ast.ImportFrom))
+                    ]
+                    return self.generic_visit(node)
+                
+                def visit_Raise(self, node: ast.Raise):
+                    if node.exc and isinstance(node.exc, ast.Call) and node.exc.args:
+                        node.exc.args = []
+                    return self.generic_visit(node)
+
+                def visit_Assert(self, node: ast.Assert):
+                    if node.msg:
+                        node.msg = None
+                    return self.generic_visit(node)
+
+            masked_test = ast.unparse(
+                RemoveExceptionMessages().visit(ast.parse(kwargs["test"]))
+            )
             for idx, answer in enumerate(kwargs["answers"]):
                 masked_test = masked_test.replace(answer, f"[[MASKED {idx+1}]]")
             prompt = cls._build_prompt(explanation, masked_test=masked_test)
@@ -177,7 +211,7 @@ class Intent:
 
     class FunctionOutput(Task[schema.FunctionOutputs]):
         QUESTION = (
-            'For the provided method and inputs, what are the **intended return values**? Return one value per input.'
+            'For the provided function and inputs, what are the **intended return values**, strictly according to the explanation? When answering this question, adhere to the following instructions:\n\n1. Return one value per input. Make sure the number matches.\n2. When the function should raise an exception according to the explanation, provide the type of exception that would be triggered.\n3. Do your best to predict what the output would look like when printed. For example, primitive values like integers would be printed as is, while complex objects can be predicted as e.g. <path.to.Object object at 0xdeadbeef>, or through their representation as apparent from the input.\n4. Do NOT explain what is intended in natural language, except when there is NO good way to describe the intended behavior.\n\nNow, provide a list with intended return values according to the instructions above, each corresponding to a provided input scenario.'
         )
         SCHEMA = schema.FunctionOutputs
 
@@ -195,9 +229,13 @@ class Intent:
         def predict(cls, model: Model, explanation: str, **kwargs):
             method_signature = kwargs["signature"]
             example_inputs = kwargs["example_inputs"]
+            example_input_str = "\n\n".join(
+                f"Example {i+1}:\n{example_input}"
+                for i, example_input in enumerate(example_inputs)
+            )
             prompt = cls._build_prompt(
                 explanation,
                 method_signature = method_signature,
-                example_inputs = example_inputs
+                example_inputs = example_input_str
             )
             return model.infer(prompt, cls.SCHEMA)

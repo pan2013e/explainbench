@@ -17,13 +17,15 @@ class FunctionInfo():
 class IOInfo():
     input_values: str
     output_value: str
+    exception: str
 
     def to_dict(self) -> dict[str, str]:
         return {
             "input_values": self.input_values,
             "output_value": self.output_value,
+            "exception": self.exception,
         }
     
     @classmethod
     def from_dict(cls, io_info: dict):
-        return IOInfo(io_info["input_values"], io_info["output_value"])
+        return IOInfo(io_info["input_values"], io_info["output_value"], io_info["exception"])

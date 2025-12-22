@@ -15,6 +15,13 @@ import subprocess as sp
 from subprocess import Popen
 import json
 
+def remove_suffix(org_str, suffix):
+    suffix_length = len(suffix)
+    if org_str[-suffix_length:] == suffix:
+        return org_str[:-suffix_length]
+    else:
+        return org_str
+
 def read_output(p):
     output = ""
     while not output.endswith("(Pdb) "):
@@ -27,7 +34,7 @@ def read_output(p):
             return True, output
         else:
             output += char
-    return False, output.removesuffix("(Pdb) ").strip()
+    return False, remove_suffix(output, "(Pdb) ").strip()
 
 def get_pdb_response(p, prog_input):
     if not prog_input.endswith("\n"):
@@ -60,8 +67,6 @@ for idx in range({max_iter}):
     _, _ = get_pdb_response(p, "import inspect")
     _, param_values = get_pdb_response(p, PORTABLE_PARAMS_CMD)
     if "{func_name}".startswith("self."):
-        _, self_value = get_pdb_response(p, "self")
-        param_values += "\nself = " + self_value
         _, self_attrs_value = get_pdb_response(p, "vars(self)")
         param_values += "\nvars(self) = " + self_attrs_value
     print(json.dumps({{
@@ -72,12 +77,17 @@ for idx in range({max_iter}):
     
     return_stack(p)
     _, return_value = get_pdb_response(p, '__return__')
+    get_pdb_response(p, 's')
+    _, exception_value = get_pdb_response(p, '__exception__[1]')
+    if "*** NameError:" in exception_value.strip()[:15]:
+        exception_value = ""
     if return_value == "":
         return_value = "None"
     print(json.dumps({{
         "value_type": "return_value",
         "iteration_no": idx,
-        "value_str": return_value
+        "value_str": return_value,
+        "exc_str": exception_value,
     }}))
     proc_end, _ = get_pdb_response(p, "c")
     if proc_end:
@@ -144,6 +154,7 @@ class PDBManager():
             io_info.append(IOInfo(
                 input_values = input_info["value_str"],
                 output_value = output_info["value_str"],
+                exception = output_info["exc_str"],
             ))
         return io_info, ""
 

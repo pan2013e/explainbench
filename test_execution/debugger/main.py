@@ -19,6 +19,8 @@ def get_buggy_function_info(function_file: Path, instance_id: str) -> list[Funct
         info for info in bugloc_infos
         if info["instance_id"] == instance_id
     ]
+    if len(target_bugloc_info) == 0:
+        return []
     assert len(target_bugloc_info) == 1, f"Target bug locations non-singular: {target_bugloc_info}"
 
     buggy_methods = []
@@ -56,6 +58,8 @@ def get_single_instance_io(
     save_bug_dir.mkdir(exist_ok = True, parents = True)
     reproducer = get_reproducer(reproducer_file, instance_id)
     buggy_funcs = get_buggy_function_info(function_file, instance_id)
+    if not buggy_funcs:
+        return
 
     container, bug_info = setup(instance_id)
     pdb_manager = PDBManager(container, bug_info, reproducer)
