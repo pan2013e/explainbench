@@ -98,6 +98,13 @@ def process_agent(agent_data, agent, instance_ids):
                     instance_id,
                 )
                 return {}
+            if metadata.get("common_lines"):
+                print(
+                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4",
+                    agent,
+                    instance_id
+                )
+                return metadata
             pre_code, post_code = get_function_code(
                 instance_id,
                 metadata['file_path'],
