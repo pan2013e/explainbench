@@ -77,11 +77,18 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
     return None
 
 def is_exception_vs_return_none(diff_dict: dict):
+    # pattern1: buggy function ok, patched function crashes
     pattern1 = {'dictionary_item_added': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_removed': ["root['return_value']"]}
+    # pattern2: buggy_function crashes, patched function ok
     pattern2 = {'dictionary_item_removed': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_added': ["root['return_value']"]}
-    if diff_dict == pattern1 or diff_dict == pattern2:
-        return True
-    return False
+    pattern = -1
+    if diff_dict == pattern1:
+        pattern = 1
+    elif diff_dict == pattern2:
+        pattern = 2
+    if pattern != -1:
+        return True, pattern 
+    return False, pattern
 
 def get_whole_fn_statements(function_block: FunctionBlock):
     events = function_block._events
@@ -205,8 +212,16 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                 seen_pmf=is_pmf_exist,
             )
             if diff:
-                if is_exception_vs_return_none(diff["diff"]):
-                    intersection = get_whole_fn_statements(buggy_function)
+                flag_exception_vs_return_none, pattern = is_exception_vs_return_none(diff["diff"])
+                if flag_exception_vs_return_none:
+                    assert pattern in {1, 2}
+                    # pattern1: buggy function ok, patched function crashes
+                    if pattern == 1:
+                        reference = patched_function
+                    else:
+                    # pattern1: buggy function crashes, patched function ok
+                        reference = buggy_function
+                    intersection = get_whole_fn_statements(reference)
                     if len(intersection) > n_common_line_threshold:
                         diff["common_lines"] = intersection
                 return diff
