@@ -23,7 +23,7 @@ RANDOMIZED_FUNCTIONS = [
 def get_event_count(event: Event, traces: Traces):
     count = 0
     for e in traces._events:
-        if e.line_number == event.line_number:
+        if e.line_number == event.line_number and e.filepath == event.filepath:
             count += 1
         if e is event:
             break
