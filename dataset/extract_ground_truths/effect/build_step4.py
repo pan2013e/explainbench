@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import random
+import string
 import time
 from typing import Callable, List, Tuple
 
@@ -59,12 +60,40 @@ def build_choices_and_answer(
     answer = [labels[i] for i, flag in enumerate(is_correct) if flag]
     return choices, answer
 
+def shuffle_choices_and_label_answer(choices, answers, seed=None):
+    rng = random.Random(seed)
+
+    shuffled = choices[:]
+    rng.shuffle(shuffled)
+
+    idx_map = {c: i for i, c in enumerate(shuffled)}
+
+    def idx_to_label(i):
+        if i < 26:
+            return string.ascii_lowercase[i]
+        s = ""
+        i += 1
+        while i:
+            i, r = divmod(i - 1, 26)
+            s = string.ascii_lowercase[r] + s
+        return s
+
+    answer_labels = [idx_to_label(idx_map[a]) for a in answers]
+    return shuffled, answer_labels
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     results = {}
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
+            if metadata.get("choices"):
+                shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answers"], seed=7)
+                results[instance_id] = {
+                    "choices": shuffled_choices,
+                    "answer": answer_labels,
+                    **metadata,
+                }
+                return results
             if metadata is None:
                 results[instance_id] = None
                 continue
