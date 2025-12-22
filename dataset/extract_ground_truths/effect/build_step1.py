@@ -29,7 +29,7 @@ AGENTS = [
 ]
 
 EXTRA_LONG_TIMEOUT = {
-    'django__django-16667': 1800,
+    'django__django-16667': 3600,
     'sphinx-doc__sphinx-7590': 3600,
 }
 
