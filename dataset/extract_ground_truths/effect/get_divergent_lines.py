@@ -92,11 +92,13 @@ def is_exception_vs_return_none(diff_dict: dict):
 
 def get_whole_fn_statements(function_block: FunctionBlock):
     events = function_block._events
-    lines = []
+    statements = []
+    line_nums = []
     for current_event in events:
         if not current_event.excluded:
-            lines.append(current_event.statement)
-    return lines
+            statements.append(current_event.statement)
+            line_nums.append(current_event.line_number)
+    return statements, line_nums
 
 def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=5):
     repo_name = instance_id.split("__")[0]
@@ -221,9 +223,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     else:
                     # pattern1: buggy function crashes, patched function ok
                         reference = buggy_function
-                    intersection = get_whole_fn_statements(reference)
-                    if len(intersection) > n_common_line_threshold:
-                        diff["common_lines"] = intersection
+                    statements, line_nums = get_whole_fn_statements(reference)
+                    if len(statements) > n_common_line_threshold:
+                        diff["common_lines"] = statements
+                        diff["line_nums"] = line_nums
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
