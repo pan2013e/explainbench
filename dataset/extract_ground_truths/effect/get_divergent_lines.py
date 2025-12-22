@@ -95,7 +95,7 @@ def get_common_lines(function_block: FunctionBlock):
     statements = []
     line_nums = []
     for current_event in events:
-        if not current_event.excluded:
+        if not current_event.excluded and current_event.event_type == "Line":
             statements.append(current_event.statement)
             line_nums.append(current_event.line_number)
     return statements, line_nums
