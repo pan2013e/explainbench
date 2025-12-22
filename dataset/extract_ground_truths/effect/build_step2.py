@@ -98,7 +98,7 @@ def process_agent(agent_data, agent, instance_ids):
                     instance_id,
                 )
                 return {}
-            if metadata.get("common_lines"):
+            if metadata.get("choices"):
                 print(
                     "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4",
                     agent,

@@ -261,7 +261,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             # Use gold metadata that was already run
             metadata = data["gold"][instance_id]
             is_fallback_to_gold = True
-        if metadata.get("common_lines"):
+        if metadata.get("choices"):
             print(f"Falling back to reachability question in step 4 for instance {instance_id}")
             fallback_reachability[instance_id] = metadata
             continue
