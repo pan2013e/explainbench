@@ -91,7 +91,7 @@ def get_whole_fn_statements(function_block: FunctionBlock):
         event_type = current_event.event_type
         if event_type in ("Line",):
             lines.append(current_event.statement)
-    return "\n".join(lines)
+    return lines
 
 
 def lcs_equal_lines(a_lines: list, b_lines: list) -> list:
