@@ -90,7 +90,7 @@ def is_exception_vs_return_none(diff_dict: dict):
         return True, pattern 
     return False, pattern
 
-def get_whole_fn_statements(function_block: FunctionBlock):
+def get_common_lines(function_block: FunctionBlock):
     events = function_block._events
     statements = []
     line_nums = []
@@ -223,7 +223,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     else:
                     # pattern1: buggy function crashes, patched function ok
                         reference = buggy_function
-                    statements, line_nums = get_whole_fn_statements(reference)
+                    statements, line_nums = get_common_lines(reference)
                     if len(statements) > n_common_line_threshold:
                         diff["common_lines"] = statements
                         diff["line_nums"] = line_nums
