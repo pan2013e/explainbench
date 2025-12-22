@@ -130,7 +130,6 @@ def process_agent(agent_data, agent, instance_ids):
                     changed_expressions = expr_strings
             instance_result.update(metadata)
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
-            instance_result["function_code_after_patch"] = remove_docstrings(post_code)
             return instance_result
         except Exception as e:
             print(
