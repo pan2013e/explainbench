@@ -75,6 +75,13 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
         }
     return None
 
+def is_exception_vs_return_none(diff_dict: dict):
+    pattern1 = {'dictionary_item_added': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_removed': ["root['return_value']"]}
+    pattern2 = {'dictionary_item_removed': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_added': ["root['return_value']"]}
+    if diff_dict == pattern1 or diff_dict == pattern2:
+        return True
+    return False
+
 def main(instance_id, agent='gold', test_id=0, base_dir=None):
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
@@ -189,6 +196,13 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None):
                 seen_pmf=is_pmf_exist,
             )
             if diff:
+                # check return None vs Exception
+                if is_exception_vs_return_none(diff["dict"]):
+                    
+                    # add relevant metadata:
+                    # -> get buggy function and patched function
+                    # -> get common lines between buggy and patched
+                    # -> add relevant metadata
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
@@ -208,5 +222,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="gold", base_dir="/home/zhiyuan/explainbench/logs/run_evaluation/trace.debug.gold.1021/gold")
+    result = main(instance_id, test_id=0, agent="20250720_Lingxi-v1.5_claude-4-sonnet-20250514", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.20250720_Lingxi-v1.5_claude-4-sonnet-20250514.1020/20250720_Lingxi-v1.5_claude-4-sonnet-20250514")
     print(result)
