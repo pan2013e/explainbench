@@ -221,7 +221,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     if pattern == 1:
                         reference = patched_function
                     else:
-                    # pattern1: buggy function crashes, patched function ok
+                    # pattern2: buggy function crashes, patched function ok
                         reference = buggy_function
                     statements, line_nums = get_common_lines(reference)
                     if len(statements) > n_common_line_threshold:
