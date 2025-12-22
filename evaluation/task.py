@@ -15,6 +15,7 @@ from evaluation.util import (
     simple_name_eq,
     set_f1_score,
     mcq_score,
+    params_eq,
 )
 
 __all__ = ['Task']
@@ -160,7 +161,7 @@ if __name__ == "__main__":
         output = io.StringIO()
         pre = metadata['buggy_function_param']
         post = metadata['patched_function_param']
-        if pre == post:
+        if params_eq(pre, post):
             print(pre, file=output)
         else:
             print("\n# Before Patch:\n", file=output)

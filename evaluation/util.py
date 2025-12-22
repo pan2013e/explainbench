@@ -8,6 +8,7 @@ import numpy as np
 from functools import wraps
 from operator import eq
 from typing import Any, Callable
+from deepdiff import DeepDiff
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(DIR, '..', 'dataset')
@@ -58,6 +59,10 @@ def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = eq):
     fp = len(pred) - tp
     fn = len(gt) - tp
     return f1_score(tp, fp, fn)
+
+def params_eq(a, b):
+    diff = DeepDiff(a, b, significant_digits=5, ignore_private_variables=False)
+    return diff == {}
 
 def mcq_score(pred: list[str], gt: list[str]):
     assert len(gt) > 0
