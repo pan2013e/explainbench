@@ -1,5 +1,6 @@
 import io
 import logging
+import random
 import tokenize
 
 from tracer.protocol import Event, LineEvent
@@ -21,6 +22,7 @@ RANDOMIZED_FUNCTIONS = [
     'django.contrib.auth.base_user:AbstractBaseUser.set_password',
     'django.core.cache.backends.base:BaseCache.get_backend_timeout',
 ]
+RANDOM_SEED = 42
 
 def get_event_count(event: Event, traces: Traces):
     count = 0
@@ -155,7 +157,8 @@ def get_logical_lines(code: str, line_nums):
 
     return statements, ranges
 
-def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=2):
+def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=5):
+    random.seed(RANDOM_SEED)
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
     buggy_function, patched_function = buggy_traces.entry, patched_traces.entry
@@ -294,13 +297,20 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
 
                     if len(delta) + len(intersection) >= n_common_line_threshold:
                         remaining = n_common_line_threshold
-                        must_take_intersection = 1 if intersection and remaining > 0 else 0
-                        remaining -= must_take_intersection
-                        chosen_delta = delta[:remaining]
+                        chosen_intersection = []
+                        if intersection and remaining > 0:
+                            chosen_intersection = random.sample(intersection, 1)
+                            remaining -= 1
+                        chosen_delta = random.sample(delta, min(len(delta), remaining))
                         remaining -= len(chosen_delta)
-                        chosen_intersection = intersection[:must_take_intersection]
                         if remaining > 0:
-                            chosen_intersection += intersection[must_take_intersection:must_take_intersection + remaining]
+                            leftover_intersection = [
+                                stmt for stmt in intersection if stmt not in chosen_intersection
+                            ]
+                            chosen_intersection += random.sample(
+                                leftover_intersection,
+                                min(len(leftover_intersection), remaining),
+                            )
                         diff["choices"] = chosen_delta + chosen_intersection
                         diff["answer"] = chosen_delta
                 return diff
