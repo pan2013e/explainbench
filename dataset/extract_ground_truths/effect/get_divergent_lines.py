@@ -282,12 +282,27 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                     patched_statements, patched_lines = get_logical_lines(patched_statements, patched_lines)
                     patched_logical_statements = [(x, y) for x, y in zip(patched_statements, patched_lines)]
 
-                    delta = list(set(buggy_logical_statements) ^ set(patched_logical_statements))
-                    intersection = list(set(buggy_logical_statements) & set(patched_logical_statements))
-                    
+                    buggy_set = set(buggy_logical_statements)
+                    patched_set = set(patched_logical_statements)
+                    delta = (
+                        [stmt for stmt in buggy_logical_statements if stmt not in patched_set]
+                        + [stmt for stmt in patched_logical_statements if stmt not in buggy_set]
+                    )
+                    intersection = [
+                        stmt for stmt in buggy_logical_statements if stmt in patched_set
+                    ]
+
                     if len(delta) + len(intersection) >= n_common_line_threshold:
-                        diff["choices"] = delta + intersection
-                        diff["answer"] = delta
+                        remaining = n_common_line_threshold
+                        must_take_intersection = 1 if intersection and remaining > 0 else 0
+                        remaining -= must_take_intersection
+                        chosen_delta = delta[:remaining]
+                        remaining -= len(chosen_delta)
+                        chosen_intersection = intersection[:must_take_intersection]
+                        if remaining > 0:
+                            chosen_intersection += intersection[must_take_intersection:must_take_intersection + remaining]
+                        diff["choices"] = chosen_delta + chosen_intersection
+                        diff["answer"] = chosen_delta
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
