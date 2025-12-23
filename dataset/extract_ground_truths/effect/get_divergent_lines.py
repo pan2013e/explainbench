@@ -1,6 +1,7 @@
 import io
 import logging
 import random
+import re
 import tokenize
 
 from tracer.protocol import Event, LineEvent
@@ -96,12 +97,18 @@ def is_exception_vs_return_none(diff_dict: dict):
 
 def get_common_lines(function_block: FunctionBlock):
     events = function_block._events
-    statements = []
-    line_nums = []
+    items = []
+    seen = set()
     for current_event in events:
         if not current_event.excluded and isinstance(current_event, LineEvent):
-            statements.append(current_event.statement)
-            line_nums.append(current_event.line_number)
+            key = (current_event.statement, current_event.line_number)
+            if key in seen:
+                continue
+            seen.add(key)
+            items.append((current_event.line_number, current_event.statement))
+    items.sort(key=lambda item: item[0])
+    line_nums = [line_num for line_num, _ in items]
+    statements = [statement for _, statement in items]
     return "\n".join(statements), line_nums
 
 def get_logical_lines(code: str, line_nums):
@@ -146,11 +153,17 @@ def get_logical_lines(code: str, line_nums):
             if toknum == tokenize.NEWLINE:
                 flush()
 
-    except tokenize.TokenError as exc:
+    except (tokenize.TokenError, IndentationError, SyntaxError) as exc:
         msg = str(exc)
-        if "EOF in multi-line statement" not in msg and "unexpected EOF in multi-line statement" not in msg:
+        if (
+            "EOF in multi-line statement" in msg
+            or "unexpected EOF in multi-line statement" in msg
+            or "unexpected EOF while parsing" in msg
+        ):
+            flush()
+        else:
+            logger.debug(f">> tokenize failed in get_logical_lines: {exc}")
             raise
-        flush()
 
     if tokbuf:
         flush()
@@ -313,6 +326,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                             )
                         diff["choices"] = chosen_delta + chosen_intersection
                         diff["answer"] = chosen_delta
+                breakpoint()
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
@@ -332,5 +346,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="gold", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.gold.1020/gold")
+    result = main(instance_id, test_id=0, agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1020/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
     print(result)
