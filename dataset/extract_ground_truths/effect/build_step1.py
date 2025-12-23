@@ -14,20 +14,6 @@ from dataset.extract_ground_truths.effect import get_divergent_lines
 from execution.util import get_instance_ids
 from tracer.serializer import serialize
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-# AGENTS = list(
-#     map(
-#         lambda x: x.strip(),
-#         open(os.path.join(DIR, "../../explanations/agents.txt")).readlines()
-#     )
-# )
-AGENTS = [
-    # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-    # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-    # "20250612_trae",
-    "gold",
-]
-
 EXTRA_LONG_TIMEOUT = {
     'django__django-16667': 3600,
     'sphinx-doc__sphinx-7590': 3600,
@@ -89,6 +75,16 @@ def process_agent(agent, instance_ids, max_workers=10):
     return results
 
 if __name__ == "__main__":
+    # PARAMETER
+    AGENTS = [
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250612_trae",
+        "gold",
+    ]
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
+
+
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ProcessPoolExecutor(max_workers=10) as executor:
@@ -99,7 +95,6 @@ if __name__ == "__main__":
         for future in as_completed(futures):
             agent = futures[future]
             results[agent] = future.result()
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
     with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Saved step1 results to {OUTPUT_DIR}")
