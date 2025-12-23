@@ -326,7 +326,6 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                             )
                         diff["choices"] = chosen_delta + chosen_intersection
                         diff["answer"] = chosen_delta
-                breakpoint()
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
