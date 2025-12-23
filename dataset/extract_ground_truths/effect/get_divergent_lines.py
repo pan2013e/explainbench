@@ -157,7 +157,7 @@ def get_logical_lines(code: str, line_nums):
 
     return statements, ranges
 
-def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_threshold=5):
+def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
     random.seed(RANDOM_SEED)
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
@@ -295,8 +295,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, n_common_line_thre
                         stmt for stmt in buggy_logical_statements if stmt in patched_set
                     ]
 
-                    if len(delta) + len(intersection) >= n_common_line_threshold:
-                        remaining = n_common_line_threshold
+                    if len(delta) + len(intersection) >= total_choices:
+                        remaining = total_choices
                         chosen_intersection = []
                         if intersection and remaining > 0:
                             chosen_intersection = random.sample(intersection, 1)

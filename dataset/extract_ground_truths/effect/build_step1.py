@@ -19,7 +19,7 @@ EXTRA_LONG_TIMEOUT = {
     'sphinx-doc__sphinx-7590': 3600,
 }
 
-def _process_instance(instance_id, agent, n_common_line_threshold, timeout=300):
+def _process_instance(instance_id, agent, total_choices, timeout=300):
     def _timeout_handler(signum, frame):
         raise TimeoutError()
     try:
@@ -32,7 +32,7 @@ def _process_instance(instance_id, agent, n_common_line_threshold, timeout=300):
                     instance_id,
                     agent=agent,
                     test_id=test_id,
-                    n_common_line_threshold=n_common_line_threshold
+                    n_common_line_threshold=total_choices
                 )
             except IndexError:
                 result = {}
@@ -84,13 +84,13 @@ if __name__ == "__main__":
         "gold",
     ]
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
-    N_COMMON_LINE_THRESHOLD = 5
+    TOTAL_CHOICES = 5
 
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, agent, instance_ids, N_COMMON_LINE_THRESHOLD): agent
+            executor.submit(process_agent, agent, instance_ids, TOTAL_CHOICES): agent
             for agent in AGENTS if agent
         }
         for future in as_completed(futures):
