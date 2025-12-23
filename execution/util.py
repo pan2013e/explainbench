@@ -98,11 +98,14 @@ EXCLUDED_IDS = [
     "django__django-14351",
     # Intrusiveness of tracer/serializer causes pipeline errors
     "astropy__astropy-14539",
+    "django__django-7530",
     "django__django-11149",
     "django__django-11400",
     "django__django-11749",
     "django__django-12143",
+    "django__django-13297",
     "django__django-13417",
+    "django__django-14608",
     "matplotlib__matplotlib-20826",
     "matplotlib__matplotlib-20859",
     # Timeout after 6h
@@ -115,7 +118,9 @@ EXCLUDED_IDS = [
     "django__django-14792",
     "django__django-14999",
     "django__django-15561",
-    "django__django-16429"
+    "django__django-16429",
+    # Gigantic trace files, very high memory consumption
+    "sphinx-doc__sphinx-7590",
 ]
 
 class _IterableReader(RawIOBase):
