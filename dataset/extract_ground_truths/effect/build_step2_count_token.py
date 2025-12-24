@@ -105,23 +105,26 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(
-                    "metadata not found due to errors for agent=%s | instance_id=%s",
-                    agent,
-                    instance_id,
+                    "metadata not found due to errors for agent=%s | instance_id=%s".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return None
             if metadata == {}:
                 print(
-                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3",
-                    agent,
-                    instance_id,
+                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return 0
             if metadata.get("choices"):
                 print(
-                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4",
-                    agent,
-                    instance_id,
+                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return 0
 
@@ -136,11 +139,12 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
             return count_prompt_tokens(encoder, pre_code, post_code, metadata)
         except Exception as e:
             print(
-                "process_agent crashed for agent=%s | %s: %s %s",
-                agent,
-                instance_id,
-                type(e).__name__,
-                e,
+                "process_agent crashed for agent=%s | %s: %s %s".format(
+                    agent,
+                    instance_id,
+                    type(e).__name__,
+                    e,
+                )
             )
             return None
 

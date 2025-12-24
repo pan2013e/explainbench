@@ -41,6 +41,7 @@ def json_loads_fast(data):
 
 def load_traces(file_path):
     with open(file_path, 'rb') as f:
+        assert os.fstat(f.fileno()).st_size > 0, f"Trace file {os.path.basename(file_path)} is empty"
         mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         try:
             out = []
@@ -52,7 +53,7 @@ def load_traces(file_path):
 
 def get_trace_dir(agent='gold'):
     # return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
-    return f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.debug.{agent}.1020/{agent}"
+    return f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.{agent}.1020/{agent}"
 
 def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
     # test_id refers to the index of FAIL_TO_PASS tests

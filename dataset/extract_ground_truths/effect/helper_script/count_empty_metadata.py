@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from execution.util import EXCLUDED_IDS
 
-path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json")
+path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2/step1.json")
 
 with path.open() as f:
     data = json.load(f)
@@ -25,6 +25,7 @@ for agent, instances in data.items():
             continue
         filtered_total += 1
         if metadata is None:
+            print(instance_id)
             empty_none_per_agent[agent] += 1
         elif metadata == {}:
             empty_dict_per_agent[agent] += 1

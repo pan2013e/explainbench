@@ -118,9 +118,9 @@ def apply_patch(container: Container, patch: str):
             break
         else:
             print(f'Attempt to apply patch with "{cmd}" failed: {result.output.decode("utf-8")}')
+    container.exec_run('rm -f /tmp/patch.diff', user='root')
     if not applied_patch:
         raise ValueError('Failed to apply patch inside container')
-    container.exec_run('rm -f /tmp/patch.diff', user='root')
 
 def read_from_container(container: Container, file_path: str):
     tar_stream, _ = container.get_archive(file_path)

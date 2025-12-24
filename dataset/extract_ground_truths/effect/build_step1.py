@@ -15,8 +15,10 @@ from execution.util import get_instance_ids
 from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
-    'django__django-16667': 3600,
+    'django__django-16667': 600,
+    'pylint-dev__pylint-7080': 600,
     'sphinx-doc__sphinx-7590': 3600,
+    'sympy__sympy-21379': 600,
 }
 
 def _process_instance(instance_id, agent, total_choices, timeout=300):
@@ -32,7 +34,7 @@ def _process_instance(instance_id, agent, total_choices, timeout=300):
                     instance_id,
                     agent=agent,
                     test_id=test_id,
-                    n_common_line_threshold=total_choices
+                    total_choices=total_choices
                 )
             except IndexError:
                 result = {}
@@ -61,12 +63,12 @@ def _process_instance(instance_id, agent, total_choices, timeout=300):
     finally:
         signal.alarm(0)
 
-def process_agent(agent, instance_ids, max_workers=10):
+def process_agent(agent, instance_ids, total_choices, max_workers=10):
     results = {}
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(_process_instance, instance_id, agent): instance_id
+            executor.submit(_process_instance, instance_id, agent, total_choices): instance_id
             for instance_id in instance_ids
         }
         for future in tqdm(as_completed(futures), total=len(futures), desc=agent):
@@ -78,13 +80,13 @@ def process_agent(agent, instance_ids, max_workers=10):
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     AGENTS = [
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250612_trae",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250612_trae",
         "gold",
     ]
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
-    TOTAL_CHOICES = 5
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", f"step1.json")
+    TOTAL_CHOICES = 4
     # ------------------------------------------- #
 
     results = {}

@@ -18,6 +18,7 @@ from dataset.extract_ground_truths.effect.source_util import (
     remove_docstrings,
 )
 
+DIR = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger(__name__)
 
 def read_json(path):
@@ -159,17 +160,16 @@ if __name__ == "__main__":
     start = time.time()
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2/step1.json"
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.json")
     AGENTS = [
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250612_trae",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250612_trae",
         "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
     OUTPUT_JSON = "step2.json"
-    DIR = os.path.dirname(os.path.abspath(__file__))
     N_OUTPUT = 10
     # ------------------------------------------- #
 
