@@ -76,7 +76,7 @@ def process_agent(agent, instance_ids, max_workers=10):
     return results
 
 if __name__ == "__main__":
-    # PARAMETER
+    # ------------ SCRIPT PARAMETERS ------------ #
     AGENTS = [
         # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -85,6 +85,7 @@ if __name__ == "__main__":
     ]
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/", f"step1.debug.gold.json")
     TOTAL_CHOICES = 5
+    # ------------------------------------------- #
 
     results = {}
     instance_ids = get_instance_ids(["all"])
