@@ -138,11 +138,12 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             return instance_result
         except Exception as e:
             print(
-                "process_agent crashed for agent=%s | %s: %s %s",
-                agent,
-                instance_id,
-                type(e).__name__,
-                e,
+                "process_agent crashed for agent=%s | %s: %s %s".format(
+                    agent,
+                    instance_id,
+                    type(e).__name__,
+                    e,
+                )
             )
             return None
     
