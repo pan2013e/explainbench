@@ -13,7 +13,6 @@ from tqdm.auto import tqdm
 
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.build_step2 import (
-    build_prompt_inputs,
     get_agent_patch,
     get_simple_function_name,
 )
@@ -26,6 +25,33 @@ from dataset.extract_ground_truths.effect.source_util import get_function_code
 
 logger = logging.getLogger(__name__)
 
+def build_fn_code(pre_code, post_code):
+    if pre_code == post_code:
+        return pre_code
+    return f"# Before Patch:\n{pre_code}\n\n# After Patch:\n{post_code}"
+
+def build_statement(pre_stmt, post_stmt, pre_type, post_type):
+    def exc_tag(event_type):
+        if event_type == "Exception":
+            return " (crashed here)"
+        return " (normally executed)"
+    if pre_stmt == post_stmt:
+        return pre_stmt
+    return f"# Before Patch:\n{pre_stmt}{exc_tag(pre_type)}\n\n# After Patch:\n{post_stmt}{exc_tag(post_type)}"
+
+def build_prompt_inputs(pre_code, post_code, metadata):
+    return {
+        "code": build_fn_code(pre_code, post_code),
+        "line": build_statement(
+            metadata["buggy_statement"],
+            metadata["patched_statement"],
+            metadata["buggy_event_type"],
+            metadata["patched_event_type"],
+        ),
+        "diff": metadata["diff"],
+        "before": metadata["buggy_variables"],
+        "after": metadata["patched_variables"],
+    }
 
 
 def read_json(path):
