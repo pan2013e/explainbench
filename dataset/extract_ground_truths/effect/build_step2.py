@@ -87,23 +87,26 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(
-                    "metadata not found due to errors for agent=%s | instance_id=%s",
-                    agent,
-                    instance_id,
+                    "metadata not found due to errors for agent=%s | instance_id=%s".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return None
             if metadata == {}:
                 print(
-                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3",
-                    agent,
-                    instance_id,
+                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return {}
             if metadata.get("choices"):
                 print(
-                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4",
-                    agent,
-                    instance_id
+                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4".format(
+                        agent,
+                        instance_id,
+                    )
                 )
                 return metadata
             pre_code, post_code = get_function_code(
@@ -143,7 +146,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             )
             return None
     
-    with ThreadPoolExecutor(max_workers=30//min(10, len(AGENTS))) as executor:
+    with ThreadPoolExecutor(max_workers=40//min(10, len(AGENTS))) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
