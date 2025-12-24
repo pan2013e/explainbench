@@ -12,7 +12,6 @@ from tqdm.auto import tqdm
 from pydantic import ValidationError
 
 from execution.util import get_instance_ids
-from dataset.extract_ground_truths.effect.build_step1 import AGENTS, DIR
 from dataset.extract_ground_truths.effect.infer_expression import main as infer_main
 from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
@@ -155,11 +154,22 @@ def process_agent(agent_data, agent, instance_ids):
 
 if __name__ == "__main__":
     import time
-
     start = time.time()
 
+    # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1-filtered.json"
     STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    AGENTS = [
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250612_trae",
+        "gold",
+    ]
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
+    OUTPUT_JSON = "step2.json"
+    DIR = os.path.dirname(os.path.abspath(__file__))
+    # ------------------------------------------- #
+
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
@@ -186,11 +196,11 @@ if __name__ == "__main__":
         )
         del results["gold"]
     
-    with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json"), "w") as f:
+    with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
         json.dump(results, f, indent=2)
     print(
         "Saved step2 results to %s",
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
+        f"{OUTPUT_DIR}/{OUTPUT_JSON}",
     )
 
     end = time.time()
