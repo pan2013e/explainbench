@@ -72,7 +72,7 @@ def extract_seed_exp(input_diff):
         seed_expr.append(var_name)
     return seed_expr[0]
 
-def main(code, line, diff, before, after, should_change, changed_expressions=None):
+def main(code, line, diff, before, after, should_change, n_output, changed_expressions=None):
     if should_change:
         prompt = TEMPLATE_CHANGED.format(
             code=code,
@@ -80,7 +80,7 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             diff=diff,
             before=before,
             after=after,
-            n_output=10,
+            n_output=n_output,
             seed_expression=extract_seed_exp(diff)
         )
     else:
@@ -90,7 +90,7 @@ def main(code, line, diff, before, after, should_change, changed_expressions=Non
             diff=diff,
             before=before,
             after=after,
-            n_output=10,
+            n_output=n_output,
             changed_expressions=changed_expressions if changed_expressions else ""
         )
     expr_list = MODEL.infer_once(prompt, ExpressionList)

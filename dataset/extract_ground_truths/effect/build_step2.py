@@ -60,7 +60,7 @@ def get_simple_function_name(metadata):
     return name
 
 @backoff.on_exception(backoff.expo, ValidationError, max_tries=5)
-def infer_expressions(pre_code, post_code, metadata, should_change, changed_expressions):
+def infer_expressions(pre_code, post_code, metadata, should_change, n_output, changed_expressions):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -73,11 +73,12 @@ def infer_expressions(pre_code, post_code, metadata, should_change, changed_expr
         metadata["buggy_variables"],
         metadata["patched_variables"],
         should_change,
+        n_output,
         changed_expressions
     )
     return expr
 
-def process_agent(agent_data, agent, instance_ids):
+def process_agent(agent_data, agent, instance_ids, n_output):
     results = {}
         
     def process_instance(instance_id):
@@ -120,6 +121,7 @@ def process_agent(agent_data, agent, instance_ids):
                     post_code,
                     metadata,
                     should_change,
+                    n_output,
                     changed_expressions,
                 )
                 key = "changed_candidates" if should_change else "unchanged_candidates"
@@ -168,6 +170,7 @@ if __name__ == "__main__":
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
     OUTPUT_JSON = "step2.json"
     DIR = os.path.dirname(os.path.abspath(__file__))
+    N_OUTPUT = 10
     # ------------------------------------------- #
 
     step1 = read_json(STEP1_PATH)
@@ -180,7 +183,7 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step1, agent, instance_ids): agent
+            executor.submit(process_agent, step1, agent, instance_ids, N_OUTPUT): agent
             for agent in agents_to_process
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
