@@ -15,7 +15,6 @@ from typing import Any, Dict, Optional, Tuple
 from deepdiff import DeepDiff
 from tqdm.auto import tqdm
 
-from dataset.extract_ground_truths.effect.build_step1 import AGENTS, DIR
 from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests, get_instance_ids
@@ -143,7 +142,7 @@ def compute_expr_change_map(patched, buggy):
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
     run_id = f"inspect.{agent}.1020.{expr_id}"
     log_dir = os.path.join(
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation",
+        BASE_OUTPUT_DIR,
         run_id,
         agent,
         instance_id,
@@ -305,7 +304,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
 
     return results
 
-def main():
+if __name__ == "__main__":
 
     start_time = time.time()
     
@@ -333,8 +332,21 @@ def main():
         flush=True,
     )
 
+    # ------------ SCRIPT PARAMETERS ------------ #
     STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.combined.json")
     GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.combined.json")
+    BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
+    OUTPUT_DIR = f"{BASE_OUTPUT_DIR}/output_per_step-2"
+    OUTPUT_JSON = "step3.json"
+    OUTPUT_JSON_GOLD = "step3.gold.json"
+    AGENTS = [
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250612_trae",
+        "gold",
+    ]
+    # ------------------------------------------- #
+    
     step2 = read_json(STEP2_PATH)
     gold = read_json(GOLD_PATH)
     step2["gold"] = gold["gold"]
@@ -343,7 +355,7 @@ def main():
     instance_ids = get_instance_ids(["all"])
     
     # Run gold patch first
-    STEP3_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json")
+    STEP3_GOLD_PATH = os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD)
     if os.path.exists(STEP3_GOLD_PATH):
         if do_validate:
             results["gold"] = read_json(STEP3_GOLD_PATH)
@@ -351,9 +363,9 @@ def main():
     else:
         results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
         if do_validate:
-            with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.gold.json"), "w") as f:
+            with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
                 json.dump(results, f, indent=2)
-            print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.gold.json")
+            print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON_GOLD}")
 
     with ThreadPoolExecutor(max_workers=10) as executor:        
         futures = {
@@ -366,14 +378,11 @@ def main():
             print(f"[INFO] Completed processing for agent={agent}", flush=True)
     
     if do_validate:
-        with open(os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step3.json"), "w") as f:
+        with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
             if "gold" in results:
                 del results["gold"]
             json.dump(results, f, indent=2)
-        print("Saved step3 results to /home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json")
+        print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON}")
     
     end_time = time.time()
     print(f"Total execution time: {end_time - start_time:.2f} seconds")
-    
-if __name__ == "__main__":
-    main()
