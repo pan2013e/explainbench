@@ -239,7 +239,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
         f"[INFO] Starting process_agent for agent={agent} "
         f"with {len(instance_ids)} instances "
         f"(execute={do_execute}, validate={do_validate})",
-        flush=True,
     )
 
     jobs = []
@@ -299,7 +298,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     print(
         f"[INFO] Finished process_agent for agent={agent}; "
         f"processed {len(results)} instances",
-        flush=True,
     )
 
     return results
@@ -329,7 +327,6 @@ if __name__ == "__main__":
     print(
         f"[INFO] Step3 main starting "
         f"(execute={do_execute}, validate={do_validate})",
-        flush=True,
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
@@ -359,7 +356,7 @@ if __name__ == "__main__":
     if os.path.exists(STEP3_GOLD_PATH):
         if do_validate:
             results["gold"] = read_json(STEP3_GOLD_PATH)
-            print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries", flush=True)
+            print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries")
     else:
         results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
         if do_validate:
@@ -375,7 +372,7 @@ if __name__ == "__main__":
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
-            print(f"[INFO] Completed processing for agent={agent}", flush=True)
+            print(f"[INFO] Completed processing for agent={agent}")
     
     if do_validate:
         with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
