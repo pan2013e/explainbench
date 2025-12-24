@@ -147,7 +147,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             )
             return None
     
-    with ThreadPoolExecutor(max_workers=40//min(10, len(AGENTS))) as executor:
+    with ThreadPoolExecutor(max_workers=20//min(10, len(AGENTS))) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
