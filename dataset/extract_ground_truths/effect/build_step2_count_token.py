@@ -105,7 +105,7 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(
-                    "metadata not found due to errors for agent=%s | instance_id=%s".format(
+                    "metadata not found due to errors for agent={} | instance_id={}".format(
                         agent,
                         instance_id,
                     )
@@ -113,7 +113,7 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
                 return None
             if metadata == {}:
                 print(
-                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3".format(
+                    "no behavior delta for agent={} | instance_id={}, need to fallback to gold in step 3".format(
                         agent,
                         instance_id,
                     )
@@ -121,7 +121,7 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
                 return 0
             if metadata.get("choices"):
                 print(
-                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4".format(
+                    "exception vs return None for agent={} | instance_id={}, fallback to reachability question in step 4".format(
                         agent,
                         instance_id,
                     )
@@ -139,7 +139,7 @@ def process_agent(agent_data, agent, instance_ids, encoder, max_workers):
             return count_prompt_tokens(encoder, pre_code, post_code, metadata)
         except Exception as e:
             print(
-                "process_agent crashed for agent=%s | %s: %s %s".format(
+                "process_agent crashed for agent={} | {}: {} {}".format(
                     agent,
                     instance_id,
                     type(e).__name__,
@@ -220,10 +220,10 @@ def main():
 
     with open(args.output_path, "w") as f:
         json.dump(results, f, indent=2)
-    print("Saved step2 token results to %s", args.output_path)
+    print("Saved step2 token results to {}".format(args.output_path))
 
     end = time.time()
-    print("Execution time: %.2f seconds", end - start)
+    print("Execution time: {:.2f} seconds".format(end - start))
 
 
 if __name__ == "__main__":

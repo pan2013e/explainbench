@@ -87,7 +87,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(
-                    "metadata not found due to errors for agent=%s | instance_id=%s".format(
+                    "metadata not found due to errors for agent={} | instance_id={}".format(
                         agent,
                         instance_id,
                     )
@@ -95,7 +95,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
                 return None
             if metadata == {}:
                 print(
-                    "no behavior delta for agent=%s | instance_id=%s, need to fallback to gold in step 3".format(
+                    "no behavior delta for agent={} | instance_id={}, need to fallback to gold in step 3".format(
                         agent,
                         instance_id,
                     )
@@ -103,7 +103,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
                 return {}
             if metadata.get("choices"):
                 print(
-                    "exception vs return None for agent=%s | instance_id=%s, fallback to reachability question in step 4".format(
+                    "exception vs return None for agent={} | instance_id={}, fallback to reachability question in step 4".format(
                         agent,
                         instance_id,
                     )
@@ -138,7 +138,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             return instance_result
         except Exception as e:
             print(
-                "process_agent crashed for agent=%s | %s: %s %s".format(
+                "process_agent crashed for agent={} | {}: {} {}".format(
                     agent,
                     instance_id,
                     type(e).__name__,
@@ -198,17 +198,16 @@ if __name__ == "__main__":
         with open(STEP2_GOLD_PATH, "w") as f:
             json.dump({"gold": results["gold"]}, f, indent=2)
         print(
-            "Saved step2 gold results to %s",
-            STEP2_GOLD_PATH,
+            "Saved step2 gold results to {}".format(STEP2_GOLD_PATH),
         )
         del results["gold"]
     
     with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
         json.dump(results, f, indent=2)
     print(
-        "Saved step2 results to %s",
+        "Saved step2 results to {}".format(os.path.join(OUTPUT_DIR, OUTPUT_JSON)),
         f"{OUTPUT_DIR}/{OUTPUT_JSON}",
     )
 
     end = time.time()
-    print("Execution time: %.2f seconds", end - start)
+    print("Execution time: {:.2f} seconds".format(end - start))
