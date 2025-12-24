@@ -8,7 +8,6 @@ from typing import Callable, List, Tuple
 
 from tqdm.auto import tqdm
 
-from dataset.extract_ground_truths.effect.build_step1 import AGENTS, DIR
 from execution.util import get_instance_ids
 
 
@@ -137,11 +136,22 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-    step3 = read_step3_results()
+    # ------------ SCRIPT PARAMETERS ------------ #
     N_CHOICES = 5
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
+    AGENTS = [
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250612_trae",
+        "gold",
+    ]
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
+    OUTPUT_JSON = "step4.json"
+    # ------------------------------------------- #
+    
+    start_time = time.time()
+    step3 = read_step3_results()
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -158,13 +168,13 @@ if __name__ == "__main__":
 
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/",
-            "step4.json",
+            OUTPUT_DIR,
+            OUTPUT_JSON,
         ),
         "w",
     ) as f:
         json.dump(results, f, indent=2)
-    print("Saved step4 results to step4.json")
+    print(f"Saved step4 results to {OUTPUT_DIR}/{OUTPUT_JSON}")
 
     end_time = time.time()
     print(f"Total execution time: {end_time - start_time:.2f} seconds")
