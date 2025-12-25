@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
     # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2/step1.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.json")
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.debug.json")
     AGENTS = [
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -173,13 +173,18 @@ if __name__ == "__main__":
         "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
-    OUTPUT_JSON = "step2.json"
+    OUTPUT_JSON = "step2.debug.json"
+    DIR = os.path.dirname(os.path.abspath(__file__))
     N_OUTPUT = 10
     # ------------------------------------------- #
 
     step1 = read_json(STEP1_PATH)
     results = {}
-    instance_ids = get_instance_ids(["all"])
+    # instance_ids = get_instance_ids(["all"])
+    with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
+        instance_ids = f.readlines()
+
+    instance_ids = [x.strip() for x in instance_ids]
     agents_to_process = AGENTS.copy()
     
     if os.path.exists(STEP2_GOLD_PATH):
