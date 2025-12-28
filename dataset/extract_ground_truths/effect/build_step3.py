@@ -13,7 +13,6 @@ from itertools import zip_longest
 from typing import Any, Dict, Optional, Tuple
 
 from deepdiff import DeepDiff
-from tqdm.auto import tqdm
 
 from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
@@ -140,7 +139,7 @@ def compute_expr_change_map(patched, buggy):
 
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
-    run_id = f"inspect.{agent}.1020.{expr_id}"
+    run_id = f"inspect.{agent}.1021.{expr_id}"
     log_dir = os.path.join(
         BASE_OUTPUT_DIR,
         run_id,
@@ -330,16 +329,16 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.combined.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.combined.json")
-    BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
-    OUTPUT_DIR = f"{BASE_OUTPUT_DIR}/output_per_step-2"
-    OUTPUT_JSON = "step3.json"
-    OUTPUT_JSON_GOLD = "step3.gold.json"
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.debug.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.debug.json")
+    BASE_OUTPUT_DIR = "/home/zhiyuan/explainbench/logs/run_evaluation"
+    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
+    OUTPUT_JSON = "step3.debug.json"
+    OUTPUT_JSON_GOLD = "step3.gold.debug.json"
     AGENTS = [
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250612_trae",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250612_trae",
         "gold",
     ]
     # ------------------------------------------- #
@@ -349,7 +348,11 @@ if __name__ == "__main__":
     step2["gold"] = gold["gold"]
     
     results = {}
-    instance_ids = get_instance_ids(["all"])
+    # instance_ids = get_instance_ids(["all"])
+    with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
+        instance_ids = f.readlines()
+
+    instance_ids = [x.strip() for x in instance_ids]
     
     # Run gold patch first
     STEP3_GOLD_PATH = os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD)
@@ -363,13 +366,14 @@ if __name__ == "__main__":
             with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
                 json.dump(results, f, indent=2)
             print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON_GOLD}")
+    step2["gold"] = results["gold"]["gold"]
 
     with ThreadPoolExecutor(max_workers=10) as executor:        
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
             for agent in AGENTS if agent and agent != "gold"
         }
-        for future in tqdm(as_completed(futures), total=len(futures)):
+        for future in as_completed(futures):
             agent = futures[future]
             results[agent] = future.result()
             print(f"[INFO] Completed processing for agent={agent}")
