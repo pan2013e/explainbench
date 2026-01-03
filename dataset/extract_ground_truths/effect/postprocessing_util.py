@@ -298,13 +298,9 @@ def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
         return_value = event.return_value if hasattr(event, "return_value") else None
         exception_type = event.exception_type if hasattr(event, "exception_type") else None
         exception_value = event.exception_value if hasattr(event, "exception_value") else None
-        return_dict = {"__exception__": {
-                            "type": exception_type,
-                            "value": exception_value
-                        },
-                       "__return__": {
-                           "value": return_value
-                        }
+        return_dict = {
+            "__exception__": [exception_type, exception_value],
+            "__return__": return_value,
         }
 
         if exception_type is not None and return_value is None:
@@ -312,44 +308,3 @@ def get_complete_variable_views_from_diff(event, diff) -> Dict[str, Any]:
         elif exception_type is None:
             del return_dict["__exception__"]
         return return_dict
-
-# EXCLUSION_RULES: Dict[str, Dict[str, Set[str]]] = {
-#     "astropy__astropy-14182": {
-#         "astropy.table.connect.TableRead": {"__doc__", "description"}
-#     },
-# }
-
-# def make_excluder() -> Callable[[str, Dict[str, Any]], Dict[str, Any]]:
-#     def _recursive_clean(data: Any) -> None:
-#         """
-#         Recursively traverse `data` and delete attributes according to `EXCLUSION_RULES`.
-#         """
-#         if isinstance(data, MutableMapping):
-#             # Check if this dict represents an object or function
-#             obj_name = data.get("py/object") or data.get("py/function")
-#             if isinstance(obj_name, str) and obj_name in EXCLUSION_RULES:
-#                 for attr in EXCLUSION_RULES[obj_name]:
-#                     if attr in data:
-#                         del data[attr]
-
-#             # Continue recursion for nested structures
-#             for value in list(data.values()):
-#                 if isinstance(value, (MutableMapping, list)):
-#                     _recursive_clean(value)
-
-#         elif isinstance(data, list):
-#             for item in data:
-#                 if isinstance(item, (MutableMapping, list)):
-#                     _recursive_clean(item)
-
-#     def excluder(instance_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
-#         """
-#         Apply exclusion rules for a specific instance.
-#         """
-#         if instance_id not in EXCLUSION_RULES:
-#             return data
-#         _recursive_clean(data)
-#         return data
-
-#     return excluder
-
