@@ -146,15 +146,11 @@ def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
         agent,
         instance_id,
     )
-    stdout = StringIO()
-    stderr = StringIO()
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
     buggy_path = os.path.join(log_dir, f"buggy_traces/{test_name}.jsonl")
     patched_path = os.path.join(log_dir, f"patched_traces/{test_name}.jsonl")
     if not os.path.exists(buggy_path) or not os.path.exists(patched_path):
         print(f"Inspection results not found for {instance_id}, test {test_name}")
-        print(f"Inspection stdout:\n{stdout.getvalue()}")
-        print(f"Inspection stderr:\n{stderr.getvalue()}")
         return None, None
 
     with open(buggy_path, "r") as f:
