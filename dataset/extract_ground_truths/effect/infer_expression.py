@@ -8,16 +8,6 @@ from dataset.extract_ground_truths.effect.postprocessing_util import iter_diff_i
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-def convert_to_valid_arg(expr: str):
-    expr = expr.strip()
-    if (
-        expr.startswith("`") and expr.endswith("`")
-        or expr.startswith('"') and expr.endswith('"')
-        or expr.startswith("'") and expr.endswith("'")
-    ):
-        expr = expr[1:-1].strip()
-    return expr
-
 class Expression(BaseModel):
     expr: str
     
@@ -27,7 +17,7 @@ class Expression(BaseModel):
         tree = ast.parse(v, mode='eval')
         assert isinstance(tree, ast.Expression)
         assert not isinstance(tree.body, ast.Constant)
-        return convert_to_valid_arg(v)
+        return v
 
 class ExpressionList(BaseModel):
     expressions: list[Expression]
@@ -38,7 +28,7 @@ with open(os.path.join(DIR, "prompts/template_changed.txt"), "r") as f:
 with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
     TEMPLATE_UNCHANGED = f.read()
 
-MODEL = Model("gpt-5.1-codex", n=1, reasoning_effort="medium")
+MODEL = Model("gpt-5.1-codex", n=1, reasoning_effort="low")
 
 # NOTE: Currently, it is possibel that input diff contains more than 1. In this case, this function outputs the first object.
 # It can be modified in the future\
