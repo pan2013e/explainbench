@@ -4,34 +4,21 @@ from pathlib import Path
 
 from execution.util import EXCLUDED_IDS
 
-def contains_datetime_object(value) -> bool:
-    """
-    Recursively check whether a (possibly nested) JSON-like structure
-    contains a dict with {"py/object": "datetime.datetime"}.
-    """
-    if isinstance(value, dict):
-        if value.get("py/object") == "datetime.datetime":
-            return True
-        return any(contains_datetime_object(v) for v in value.values())
-    if isinstance(value, list):
-        return any(contains_datetime_object(v) for v in value)
-    return False
-
 def is_var_good(value) -> bool:
     """
     Return True if the JSON-serialized value satisfies the
     \"good\" size criterion (naming is misleading on purpose).
     """
     serialized = json.dumps(value)
-    return len(serialized) < 4000
+    return len(serialized) < 8000
 
 def is_input_param_good(value) -> bool:
     serialized = json.dumps(value)
-    return len(serialized) < 8000
+    return len(serialized) < 16000
 
 def is_contains_password(value) -> bool:
     serialized = json.dumps(value)
-    return "password" in serialized.lower()
+    return "password" in serialized.lower() and "md5$" in serialized.lower()
 
 def is_contains_tmpdir(value) -> bool:
     serialized = json.dumps(value)
@@ -115,7 +102,7 @@ def main(argv: list[str] | None = None) -> None:
                     for _, val in section_vals.items():
                         if not is_var_good(val):
                             all_good = False
-                    if contains_datetime_object(section_vals) or is_contains_password(section_vals) or is_contains_tmpdir(section_vals):
+                    if is_contains_password(section_vals) or is_contains_tmpdir(section_vals):
                         all_good = False
 
             for section in ("buggy_function_param", "patched_function_param"):
