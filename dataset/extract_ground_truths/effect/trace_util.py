@@ -83,7 +83,9 @@ def diff_events(buggy: Event, patched: Event, repo_name, **kwargs):
     except TimeoutError as e:
         raise e
     except Exception as e:
+        import traceback
         print(f"Error diffing events: {e}\nBuggy - at line {buggy.line_number} in {buggy.filepath}: {buggy.statement}\nPatched - at line {patched.line_number} in {patched.filepath}: {patched.statement}")
+        traceback.print_exc()
         return dict()
 
 def rv_equals(rv1, rv2):
