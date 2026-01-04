@@ -10,19 +10,11 @@ def is_var_good(value) -> bool:
     \"good\" size criterion (naming is misleading on purpose).
     """
     serialized = json.dumps(value)
-    return len(serialized) < 8000
+    return len(serialized) < 40000
 
 def is_input_param_good(value) -> bool:
     serialized = json.dumps(value)
-    return len(serialized) < 16000
-
-def is_contains_password(value) -> bool:
-    serialized = json.dumps(value)
-    return "password" in serialized.lower() and "md5$" in serialized.lower()
-
-def is_contains_tmpdir(value) -> bool:
-    serialized = json.dumps(value)
-    return "/tmp" in serialized.lower() and "/tmp/pytest-of-" not in serialized.lower()
+    return len(serialized) < 40000
 
 def main(argv: list[str] | None = None) -> None:
     """
@@ -102,8 +94,6 @@ def main(argv: list[str] | None = None) -> None:
                     for _, val in section_vals.items():
                         if not is_var_good(val):
                             all_good = False
-                    if is_contains_password(section_vals) or is_contains_tmpdir(section_vals):
-                        all_good = False
 
             for section in ("buggy_function_param", "patched_function_param"):
                 section_vals = entry.get(section, {})
@@ -130,7 +120,7 @@ def main(argv: list[str] | None = None) -> None:
             
             if not all_good:
                 if instance_id not in EXCLUDED_IDS:
-                    print(instance_id)
+                    print(agent, instance_id)
 
     json_path = base_dir / "step1-filtered.json"
     with json_path.open("w", encoding="utf-8") as f:
