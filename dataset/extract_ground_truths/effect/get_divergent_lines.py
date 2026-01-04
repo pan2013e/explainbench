@@ -23,6 +23,10 @@ RANDOMIZED_FUNCTIONS = [
     'django.contrib.auth.base_user:AbstractBaseUser.set_password',
     'django.core.cache.backends.base:BaseCache.get_backend_timeout',
 ]
+WRAPPER_FUNCTIONS = [
+    'sympy.multipledispatch.dispatcher:Dispatcher.__call__',
+    'sympy.core.cache:__cacheit.<locals>.func_wrapper.<locals>.wrapper'
+]
 RANDOM_SEED = 42
 
 def get_event_count(event: Event, traces: Traces):
@@ -206,10 +210,10 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
             if event_type == 'Function':
                 buggy_callee = buggy_function.step_into(buggy_event)
                 patched_callee = patched_function.step_into(patched_event)
-                if not diffing_started and (buggy_callee.is_pmf or patched_callee.is_pmf):
+                if not diffing_started and (buggy_callee.is_pmf or patched_callee.is_pmf or buggy_callee.name in WRAPPER_FUNCTIONS):
                     logger.debug(f">> Start Diffing Now")
                     diffing_started = True
-                if buggy_callee.name not in RANDOMIZED_FUNCTIONS:
+                if buggy_callee.name not in RANDOMIZED_FUNCTIONS and buggy_callee.name not in WRAPPER_FUNCTIONS:
                     if buggy_callee.is_pmf:
                         if (
                             'Exception' not in {buggy_callee.return_type, patched_callee.return_type}
@@ -290,6 +294,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
             if diff:
                 flag_exception_vs_return_none, pattern = is_exception_vs_return_none(diff["diff"])
                 if flag_exception_vs_return_none:
+                    logger.debug(">> Exception-vs-Return-None pattern detected")
                     buggy_statements, buggy_lines = get_common_lines(buggy_function)
                     buggy_statements, buggy_lines = get_logical_lines(buggy_statements, buggy_lines)                    
                     buggy_logical_statements = [(x, y) for x, y in zip(buggy_statements, buggy_lines)]
@@ -326,6 +331,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                             )
                         diff["choices"] = chosen_delta + chosen_intersection
                         diff["answer"] = chosen_delta
+                    else:
+                        logger.debug(">> Not enough choices to form the question.")
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
@@ -345,5 +352,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="20250805_openhands-Qwen3-Coder-480B-A35B-Instruct", base_dir="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/trace.20250805_openhands-Qwen3-Coder-480B-A35B-Instruct.1020/20250805_openhands-Qwen3-Coder-480B-A35B-Instruct")
+    result = main(instance_id, test_id=0, agent="gold")
     print(result)
