@@ -50,7 +50,7 @@ def filter_instances(
             valid_changed = metadata.get("valid_changed_expressions") or []
             valid_unchanged = metadata.get("valid_unchanged_expressions") or []
 
-            if len(valid_changed) >= n_valid and len(valid_unchanged) >= n_invalid:
+            if (len(valid_changed) >= n_valid and len(valid_unchanged) >= n_invalid) or "choices" in metadata:
                 kept_for_agent[instance_id] = metadata
             else:
                 removed += 1
@@ -116,7 +116,7 @@ def parse_args() -> argparse.Namespace:
         "--input",
         type=Path,
         default=Path(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step3.json"
         ),
         help="Path to input step3 JSON file.",
     )
@@ -124,7 +124,7 @@ def parse_args() -> argparse.Namespace:
         "--output",
         type=Path,
         default=Path(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3-filtered.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step3-filtered.json"
         ),
         help="Path to write filtered JSON.",
     )
