@@ -325,12 +325,12 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.debug.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.debug.json")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.gold.json")
     BASE_OUTPUT_DIR = "/home/zhiyuan/explainbench/logs/run_evaluation"
-    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
-    OUTPUT_JSON = "step3.debug.json"
-    OUTPUT_JSON_GOLD = "step3.gold.debug.json"
+    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3"
+    OUTPUT_JSON = "step3.json"
+    OUTPUT_JSON_GOLD = "step3.gold.json"
     AGENTS = [
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -344,17 +344,17 @@ if __name__ == "__main__":
     step2["gold"] = gold["gold"]
     
     results = {}
-    # instance_ids = get_instance_ids(["all"])
-    with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
-        instance_ids = f.readlines()
+    instance_ids = get_instance_ids(["all"])
+    # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
+    #     instance_ids = f.readlines()
 
-    instance_ids = [x.strip() for x in instance_ids]
+    # instance_ids = [x.strip() for x in instance_ids]
     
     # Run gold patch first
     STEP3_GOLD_PATH = os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD)
     if os.path.exists(STEP3_GOLD_PATH):
         if do_validate:
-            results["gold"] = read_json(STEP3_GOLD_PATH)
+            results["gold"] = read_json(STEP3_GOLD_PATH)["gold"]
             print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries")
     else:
         results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
@@ -362,9 +362,9 @@ if __name__ == "__main__":
             with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
                 json.dump(results, f, indent=2)
             print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON_GOLD}")
-    step2["gold"] = results["gold"]["gold"]
+    step2["gold"] = results["gold"]
 
-    with ThreadPoolExecutor(max_workers=10) as executor:        
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
             for agent in AGENTS if agent and agent != "gold"

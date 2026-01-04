@@ -85,7 +85,7 @@ if __name__ == "__main__":
         "20250612_trae",
         "gold",
     ]
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", f"step1.json")
+    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", f"step1.json")
     TOTAL_CHOICES = 4
     # ------------------------------------------- #
 

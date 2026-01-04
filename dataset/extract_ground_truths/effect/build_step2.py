@@ -147,7 +147,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             )
             return None
     
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
@@ -164,27 +164,27 @@ if __name__ == "__main__":
     start = time.time()
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2/step1.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2", "step2.gold.debug.json")
+    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step1-filtered.json"
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.gold.json")
     AGENTS = [
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250612_trae",
         "gold",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-2"
-    OUTPUT_JSON = "step2.debug.json"
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3"
+    OUTPUT_JSON = "step2.json"
     DIR = os.path.dirname(os.path.abspath(__file__))
     N_OUTPUT = 10
     # ------------------------------------------- #
 
     step1 = read_json(STEP1_PATH)
     results = {}
-    # instance_ids = get_instance_ids(["all"])
-    with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
-        instance_ids = f.readlines()
+    instance_ids = get_instance_ids(["all"])
+    # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
+    #     instance_ids = f.readlines()
 
-    instance_ids = [x.strip() for x in instance_ids]
+    # instance_ids = [x.strip() for x in instance_ids]
     agents_to_process = AGENTS.copy()
     
     if os.path.exists(STEP2_GOLD_PATH):
