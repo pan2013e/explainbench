@@ -1,30 +1,28 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
 import os
+import json
+import time
 import random
 import string
-import time
-from typing import Callable, List, Tuple
+import hashlib
 
 from tqdm.auto import tqdm
+from typing import Callable, List, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from execution.util import get_instance_ids
-
 
 def read_step3_results():
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3-filtered.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step3-filtered.json"
         ),
         "r",
     ) as f:
         return json.load(f)
 
-
 def sampler_function(pool: List[str], k: int) -> List[str]:
     k = min(k, len(pool))
     return random.sample(list(pool), k=k)
-
 
 def build_choices_and_answer(
     n_correct: int,
@@ -34,7 +32,11 @@ def build_choices_and_answer(
     sampler_function: Callable,
     add_none_of_the_above: bool = True,
     labels: str = "abcdefghijklmnopqrstuvwxyz",
+    is_fallback_to_gold: bool = False,
 ) -> Tuple[List[str], List[str]]:
+    if is_fallback_to_gold:
+        incorrect_pool = incorrect_pool + correct_pool
+    
     sampled_correct = sampler_function(correct_pool, n_correct)
     sampled_incorrect = sampler_function(incorrect_pool, n_incorrect)
 
@@ -59,13 +61,17 @@ def build_choices_and_answer(
     answer = [labels[i] for i, flag in enumerate(is_correct) if flag]
     return choices, answer
 
+def hash_list(x):
+    s = json.dumps(x, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(s).hexdigest()
+
 def shuffle_choices_and_label_answer(choices, answers, seed=None):
     rng = random.Random(seed)
 
     shuffled = choices[:]
     rng.shuffle(shuffled)
 
-    idx_map = {c: i for i, c in enumerate(shuffled)}
+    idx_map = {hash_list(c): i for i, c in enumerate(shuffled)}
 
     def idx_to_label(i):
         if i < 26:
@@ -77,7 +83,7 @@ def shuffle_choices_and_label_answer(choices, answers, seed=None):
             s = string.ascii_lowercase[r] + s
         return s
 
-    answer_labels = [idx_to_label(idx_map[a]) for a in answers]
+    answer_labels = [idx_to_label(idx_map[hash_list(a)]) for a in answers]
     return shuffled, answer_labels
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
@@ -85,14 +91,17 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
-            if metadata.get("choices"):
-                shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answers"], seed=7)
-                results[instance_id] = {
+            if metadata.get("choices", None):
+                shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answer"], seed=42)
+                shuffled_choices.append(["None of the above", [-1, -1]])
+                if len(answer_labels) == 0:
+                    answer_labels.append(string.ascii_lowercase[len(shuffled_choices)-1])
+                metadata.update({
                     "choices": shuffled_choices,
                     "answer": answer_labels,
-                    **metadata,
-                }
-                return results
+                })
+                results[instance_id] = metadata
+                continue
             if metadata is None:
                 results[instance_id] = None
                 continue
@@ -123,6 +132,7 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 correct_pool=correct_pool,
                 incorrect_pool=incorrect_pool,
                 sampler_function=sampler_function,
+                is_fallback_to_gold=metadata.get("is_fallback_to_gold", False),
             )
 
             results[instance_id] = {
@@ -130,23 +140,28 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 "answer": answer,
                 **metadata,
             }
-        except Exception:
+        except KeyError:
+            continue
+        except Exception as e:
+            import traceback
+            print(f"Error processing {agent} {instance_id}: {e}")
+            traceback.print_exc()
             continue
     return results
 
 
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
-    N_CHOICES = 5
+    N_CHOICES = 4
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
     AGENTS = [
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250612_trae",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250612_trae",
         "gold",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/"
     OUTPUT_JSON = "step4.json"
     # ------------------------------------------- #
     
@@ -160,7 +175,7 @@ if __name__ == "__main__":
                 process_agent, step3, agent, instance_ids, N_CORRECT, N_INCORRECT
             ): agent
             for agent in AGENTS
-            if agent
+            if agent and agent != "gold"
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
