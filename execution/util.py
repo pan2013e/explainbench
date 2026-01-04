@@ -59,10 +59,12 @@ EXCLUDED_IDS = [
     # Intrusiveness of tracer/serializer causes incorrect patched behavior (should pass, but failed)
     "django__django-11066",
     "django__django-11087",
+    "django__django-11211",
     "django__django-11265",
     "django__django-11734",
     "django__django-11885",
     "django__django-11951",
+    "django__django-12209",
     "django__django-12419",
     "django__django-12965",
     "django__django-13028",
