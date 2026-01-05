@@ -98,7 +98,7 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
     return None
 
 def is_exception_vs_return_none(diff: dict):
-    diff_dict = diff["dict"]
+    diff_dict = diff["diff"]
     # pattern1: buggy function ok, patched function crashes
     pattern1 = {'dictionary_item_added': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_removed': ["root['return_value']"]}
     # pattern2: buggy_function crashes, patched function ok
