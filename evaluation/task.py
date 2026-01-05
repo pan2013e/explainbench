@@ -168,8 +168,11 @@ class Reachability(Task[schema.Effect]):
         for i, choice in enumerate(choices):
             code, lines = choice
             code_str = str(code).strip()
-            line_start, line_end = lines
-            formatted.append(f'{labels[i]}) {code_str} [{line_start}, {line_end}]')
+            if code_str == "None of the above":
+                formatted.append(f'{labels[i]}) {code_str}')
+            else:
+                line_start, line_end = lines
+                formatted.append(f'{labels[i]}) {code_str} [{line_start}, {line_end}]')
         return '\n'.join(formatted)
 
     @classmethod
