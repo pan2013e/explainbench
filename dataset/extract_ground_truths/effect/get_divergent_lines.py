@@ -303,12 +303,8 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                     patched_statements, patched_lines = get_logical_lines(patched_statements, patched_lines)
                     patched_logical_statements = [(x, y) for x, y in zip(patched_statements, patched_lines)]
 
-                    buggy_set = set(buggy_logical_statements)
                     patched_set = set(patched_logical_statements)
-                    delta = (
-                        [stmt for stmt in buggy_logical_statements if stmt not in patched_set]
-                        + [stmt for stmt in patched_logical_statements if stmt not in buggy_set]
-                    )
+                    delta = [stmt for stmt in buggy_logical_statements if stmt not in patched_set]
                     intersection = [
                         stmt for stmt in buggy_logical_statements if stmt in patched_set
                     ]
