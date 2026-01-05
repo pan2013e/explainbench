@@ -157,15 +157,32 @@ class Reachability(Task[schema.Effect]):
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
 
+    @staticmethod
+    def _format_choices(choices: list):
+        assert len(choices) <= 26, 'Too many choices to label with single letters'
+        labels = 'abcdefghijklmnopqrstuvwxyz'
+        formatted = []
+        for i, choice in enumerate(choices):
+            code, lines = choice
+            code_str = str(code).strip()
+            line_start, line_end = lines
+            formatted.append(f'{labels[i]}) {code_str} [{line_start}, {line_end}]')
+        return '\n'.join(formatted)
+
     @classmethod
     def _build_prompt(cls, explanation, **kwargs):
         choices = kwargs.pop('choices')
         return cls.TEMPLATE.format(
             schema=cls._schema_string(),
             explanation=explanation,
-            question=cls.QUESTION.format(choices=Effect._format_choices(choices)),
+            question=cls.QUESTION.format(choices=cls._format_choices(choices)),
             context=cls._build_context(**kwargs),
         )
+
+    @staticmethod
+    def eval(pred: list[schema.Effect], gt: dict, **kwargs):
+        answers = gt.get('answer', gt)
+        return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
     STEP2_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
