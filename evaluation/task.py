@@ -116,7 +116,7 @@ class RootCause:
             gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
             return [set_f1_score(p, gt, simple_name_eq) for p in pred]
 
-class Effect(Task[schema.Effect]):
+class ExpressionChanges(Task[schema.Effect]):
     QUESTION = (
         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
         'Choices:\n'
@@ -223,7 +223,7 @@ if __name__ == "__main__":
                 'choices': data['choices'],
                 'before_or_after': data['before_or_after'],
             }
-            task_cls = Effect
+            task_cls = ExpressionChanges
         elif question_type == 'reachability':
             ctx = {
                 'function_code_before_patch': data['function_code_before_patch'],
