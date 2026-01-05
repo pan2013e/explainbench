@@ -147,6 +147,26 @@ class Effect(Task[schema.Effect]):
         answers = gt.get('answer', gt)
         return [mcq_score(p.answer, answers) for p in pred]
 
+class Reachability(Task[schema.Effect]):
+    QUESTION = (
+        '\n\n'
+        'Choices:\n'
+        '{choices}\n\n'
+        'Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
+    )
+    SCHEMA = schema.Effect
+    CTX_AGENT_SPECIFIC = True
+
+    @classmethod
+    def _build_prompt(cls, explanation, **kwargs):
+        choices = kwargs.pop('choices')
+        return cls.TEMPLATE.format(
+            schema=cls._schema_string(),
+            explanation=explanation,
+            question=cls.QUESTION.format(choices=Effect._format_choices(choices)),
+            context=cls._build_context(**kwargs),
+        )
+
 if __name__ == "__main__":
     STEP2_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
 
@@ -174,17 +194,29 @@ if __name__ == "__main__":
         return contents
 
     def get_ctx_and_gt(data):
-        ctx = {
-            'function_code_before_patch': data['function_code_before_patch'],
-            'function_inputs': get_function_input(data),
-            'line': data['location'],
-            'choices': data['choices'],
-            'before_or_after': data['before_or_after'],
-        }
+        question_type = data.get('question_type', 'expression changes')
+        if question_type == 'expression changes':
+            ctx = {
+                'function_code_before_patch': data['function_code_before_patch'],
+                'function_inputs': get_function_input(data),
+                'line': data['location'],
+                'choices': data['choices'],
+                'before_or_after': data['before_or_after'],
+            }
+            task_cls = Effect
+        elif question_type == 'reachability':
+            ctx = {
+                'function_code_before_patch': data['function_code_before_patch'],
+                'function_inputs': get_function_input(data),
+                'choices': data['choices'],
+            }
+            task_cls = Reachability
+        else:
+            raise ValueError(f'Unknown question_type: {question_type}')
         gt = {
             'answer': data['answer']
         }
-        return ctx, gt
+        return ctx, gt, task_cls
 
 
     model = Model('gemini/gemini-2.5-flash', n=5)
@@ -197,9 +229,9 @@ if __name__ == "__main__":
 
     def infer_instance(agent, instance_id, instance_data):
         explanation = get_expl(agent, instance_id)
-        context, gt = get_ctx_and_gt(instance_data)
-        res = Effect.predict(model, explanation, **context)
-        return agent, instance_id, res, gt
+        context, gt, task_cls = get_ctx_and_gt(instance_data)
+        res = task_cls.predict(model, explanation, **context)
+        return agent, instance_id, res, gt, task_cls
 
     max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "4"))
     futures = []
@@ -218,8 +250,8 @@ if __name__ == "__main__":
             unit="inst",
         ):
             try:
-                agent, instance_id, res, gt = future.result()
-                scores = Effect.eval(res, gt)
+                agent, instance_id, res, gt, task_cls = future.result()
+                scores = task_cls.eval(res, gt)
             except Exception as e:
                 # Log the error and continue processing other instances
                 print(f"Error during evaluation of an instance: {e}")
