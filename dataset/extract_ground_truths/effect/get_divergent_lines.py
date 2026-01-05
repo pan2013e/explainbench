@@ -97,7 +97,8 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwarg
         }
     return None
 
-def is_exception_vs_return_none(diff_dict: dict):
+def is_exception_vs_return_none(diff: dict):
+    diff_dict = diff["dict"]
     # pattern1: buggy function ok, patched function crashes
     pattern1 = {'dictionary_item_added': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_removed': ["root['return_value']"]}
     # pattern2: buggy_function crashes, patched function ok
@@ -107,8 +108,16 @@ def is_exception_vs_return_none(diff_dict: dict):
         pattern = 1
     elif diff_dict == pattern2:
         pattern = 2
-    if pattern != -1:
-        return True, pattern 
+    
+    patched_variables = diff["patched_variables"]
+    buggy_variables = diff["buggy_variables"]
+    if (
+        (pattern != -1)
+        and (("__return__" in patched_variables and patched_variables["__return__"] == None and "__exception__" in buggy_variables) or
+             ("__return__" in buggy_variables and buggy_variables["__return__"] == None and "__exception__" in patched_variables))
+        ):
+        return True, pattern
+    
     return False, pattern
 
 def get_common_lines(function_block: FunctionBlock):
@@ -304,7 +313,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                 seen_pmf=is_pmf_exist,
             )
             if diff:
-                flag_exception_vs_return_none, pattern = is_exception_vs_return_none(diff["diff"])
+                flag_exception_vs_return_none, pattern = is_exception_vs_return_none(diff)
                 if flag_exception_vs_return_none:
                     logger.debug(">> Exception-vs-Return-None pattern detected")
                     buggy_statements, buggy_lines = get_common_lines(buggy_function)
