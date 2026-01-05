@@ -53,7 +53,10 @@ def process_file(input_path):
     for agent, agent_data in data.items():
         agent_results = {}
         for instance_id, metadata in agent_data.items():
-            if not metadata or not isinstance(metadata, dict):
+            if metadata == {}:
+                agent_results[instance_id] = {}
+                continue
+            if metadata == None:
                 agent_results[instance_id] = None
                 continue
             diff_dict = metadata.get("diff")
@@ -67,10 +70,14 @@ def depth_stats(results, threshold):
     for agent, agent_results in results.items():
         total = 0
         below = 0
-        missing = 0
+        none = 0
+        empty = 0
         for depth in agent_results.values():
-            if depth is None:
-                missing += 1
+            if depth == None:
+                none += 1
+                continue
+            if depth == {}:
+                empty += 1
                 continue
             total += 1
             if depth < threshold:
@@ -79,7 +86,8 @@ def depth_stats(results, threshold):
             "threshold": threshold,
             "below_threshold": below, # how many instances for that agent have a computed depth strictly less than the threshold.
             "total_valid": total, # how many instances had a valid depth (i.e., not None).
-            "empty diff": missing, # how many instances had no depth (missing/empty diff or metadata).
+            "empty diff": empty, # how many instances are empty diff.
+            "none metadata": none # how many instances are None (error when getting the delta behavior)
         }
     return stats
 
