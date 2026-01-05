@@ -149,10 +149,13 @@ class Effect(Task[schema.Effect]):
 
 class Reachability(Task[schema.Effect]):
     QUESTION = (
-        '\n\n'
+        'Within the context of the provided function and inputs, which of the following lines are reachable during execution?'
         'Choices:\n'
         '{choices}\n\n'
-        'Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
+        'Hints:\n'
+        '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
+        '2. It is possible that all lines are reachable. In this case, the range will always be [-1, -1]'
+        '3. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
