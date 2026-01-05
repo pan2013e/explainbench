@@ -99,6 +99,7 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 metadata.update({
                     "choices": shuffled_choices,
                     "answer": answer_labels,
+                    "question_type": "reachability"
                 })
                 results[instance_id] = metadata
                 continue
@@ -138,6 +139,7 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             results[instance_id] = {
                 "choices": choices,
                 "answer": answer,
+                "question_type": "expression changes"
                 **metadata,
             }
         except KeyError:
