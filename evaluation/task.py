@@ -154,7 +154,7 @@ class Reachability(Task[schema.Effect]):
         '{choices}\n\n'
         'Hints:\n'
         '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. It is possible that all lines are reachable. In this case, the range will always be [-1, -1]'
+        '2. It is possible that all lines are not reachable.'
         '3. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
