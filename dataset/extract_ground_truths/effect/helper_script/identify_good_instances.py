@@ -10,11 +10,11 @@ def is_var_good(value) -> bool:
     \"good\" size criterion (naming is misleading on purpose).
     """
     serialized = json.dumps(value)
-    return len(serialized) < 40000
+    return len(serialized) < 10000
 
 def is_input_param_good(value) -> bool:
     serialized = json.dumps(value)
-    return len(serialized) < 40000
+    return len(serialized) < 10000
 
 def main(argv: list[str] | None = None) -> None:
     """
@@ -73,7 +73,8 @@ def main(argv: list[str] | None = None) -> None:
                 continue
 
             if entry == {}:
-                bad_by_agent.setdefault(agent, set()).add(instance_id)
+                if agent == "gold":
+                    bad_by_agent.setdefault(agent, set()).add(instance_id)
                 output_instances.setdefault(agent, {})[instance_id] = {}
                 continue
 
@@ -113,7 +114,7 @@ def main(argv: list[str] | None = None) -> None:
                 if instance_id not in EXCLUDED_IDS:
                     print(agent, instance_id)
 
-    json_path = base_dir / "step1-filtered.json"
+    json_path = base_dir / "step1-filtered-test.json"
     with json_path.open("w", encoding="utf-8") as f:
         json.dump(output_instances, f, indent=2, sort_keys=True)
     agents_with_any = set(instances_per_agent.keys())
@@ -125,12 +126,12 @@ def main(argv: list[str] | None = None) -> None:
     print("Per-agent breakdown:")
     for agent in sorted(agents_with_any):
         bad_count = len(bad_by_agent.get(agent, set()))
-        good_count = len(good_instances.get(agent, {}))
+        # good_count = len(good_instances.get(agent, {}))
         total = instances_per_agent.get(agent, 0)
         print(f"  Agent: {agent}")
         print(f"    Total instances:             {total}")
         print(f"    Bad instances:               {bad_count}")
-        print(f"    Good instances:              {good_count}")
+        print(f"    Good instances:              {total - bad_count}")
 
     print()
     print("PMF / event type stats:")
