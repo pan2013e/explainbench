@@ -1,6 +1,7 @@
 import io
 import logging
 import random
+import string
 import re
 import tokenize
 
@@ -28,6 +29,17 @@ WRAPPER_FUNCTIONS = [
     'sympy.core.cache:__cacheit.<locals>.func_wrapper.<locals>.wrapper'
 ]
 RANDOM_SEED = 42
+
+def index_to_label(index: int) -> str:
+    letters = string.ascii_lowercase
+    base = len(letters)
+    label = ""
+    idx = index
+    while True:
+        label = letters[idx % base] + label
+        idx = idx // base - 1
+        if idx < 0:
+            return label
 
 def get_event_count(event: Event, traces: Traces):
     count = 0
@@ -325,8 +337,15 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                                 leftover_intersection,
                                 min(len(leftover_intersection), remaining),
                             )
-                        diff["choices"] = chosen_delta + chosen_intersection
-                        diff["answer"] = chosen_delta
+                        choices = chosen_delta + chosen_intersection
+                        random.shuffle(choices)
+                        diff["choices"] = choices
+                        chosen_delta_set = set(chosen_delta)
+                        diff["answer"] = [
+                            index_to_label(idx)
+                            for idx, item in enumerate(choices)
+                            if item in chosen_delta_set
+                        ]
                     else:
                         logger.debug(">> Not enough choices to form the question.")
                 return diff
