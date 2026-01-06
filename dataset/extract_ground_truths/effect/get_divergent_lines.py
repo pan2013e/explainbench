@@ -17,6 +17,8 @@ from dataset.extract_ground_truths.effect.postprocessing_util import (
     get_complete_variable_views_from_diff
 )
 
+import deepdiff
+
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
@@ -65,8 +67,58 @@ def before_or_after(buggy_event: Event, patched_event: Event):
     else:
         return 'before'
 
+# Helper to get the depth of the diff    
+# TO DO: We need to refactor this later by moving to another file. This file becomes too complicated.
+def collect_paths(diff_entry):
+    # case: values_changed, iterable_item_removed, etc
+    if isinstance(diff_entry, dict):
+        return [k for k in diff_entry.keys() if isinstance(k, str)]
+    # case: dictionary_item_added, dictionary_iterm_removed
+    if isinstance(diff_entry, (list, set, tuple)):
+        return [x for x in diff_entry if isinstance(x, str)]
+    return []
+
+def _strip_quotes(text):
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in ("'", '"'):
+        return text[1:-1]
+    return text
+
+def path_depth(path):
+    segments = re.findall(r"\[(.*?)\]", path)
+    if not segments:
+        return 0
+    cleaned = [_strip_quotes(s.strip()) for s in segments]
+    if cleaned[0] in {"return_value", "exception_type", "exception_value", "seen_variables"}:
+        return len(cleaned) - 1
+    return len(cleaned)
+
+def depth_filter(diff_dict, threshold):
+    filtered_diff = {}
+    for change_kind, diff_entry in diff_dict.items():
+        if isinstance(diff_entry, list) or isinstance(diff_entry, deepdiff.helper.SetOrdered):
+            for current_path in diff_entry:
+                current_depth = path_depth(current_path)
+                if current_depth <= threshold:
+                    if change_kind not in filtered_diff:
+                        filtered_diff[change_kind] = []
+                    filtered_diff[change_kind].append(current_path)
+
+        elif isinstance(diff_entry, dict):
+            for current_path, payload in diff_entry.items():
+                current_depth = path_depth(current_path)
+                if current_depth <= threshold:
+                    if change_kind not in filtered_diff:
+                        filtered_diff[change_kind] = {}
+                    filtered_diff[change_kind][current_path] = payload
+
+        else:
+            raise TypeError(f"Unsupported diff entry type for {change_kind}: {type(diff_entry)}")
+
+    return filtered_diff
+
 def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
+    diff = depth_filter(diff, 3)
     if diff:
         logger.debug(f"> State diff found at Buggy ID {buggy_event.event_id} vs Patched ID {patched_event.event_id}")
         logger.debug(f"Function: {buggy_event.function_name} vs {patched_event.function_name}")
