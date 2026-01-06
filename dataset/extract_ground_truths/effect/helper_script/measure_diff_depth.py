@@ -24,11 +24,9 @@ def path_depth(path):
     if not segments:
         return 0
     cleaned = [_strip_quotes(s.strip()) for s in segments]
-    if len(cleaned) == 1:
-        return 1
-    if len(cleaned) == 0:
-        return 0
-    return len(cleaned) - 1
+    if cleaned[0] in {"return_value", "exception_type", "exception_value", "seen_variables"}:
+        return len(cleaned) - 1
+    return len(cleaned)
 
 
 def min_depth_for_diff(diff_dict):
