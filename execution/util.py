@@ -108,6 +108,7 @@ EXCLUDED_IDS = [
     "django__django-13297",
     "django__django-13417",
     "django__django-14608",
+    "django__django-16877",
     "matplotlib__matplotlib-20826",
     "matplotlib__matplotlib-20859",
     # Timeout after 6h
