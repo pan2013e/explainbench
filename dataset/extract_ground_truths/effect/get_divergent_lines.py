@@ -116,9 +116,9 @@ def depth_filter(diff_dict, threshold):
 
     return filtered_diff
 
-def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, **kwargs):
+def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, depth_threshold: int, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
-    diff = depth_filter(diff, 3)
+    diff = depth_filter(diff, depth_threshold)
     if diff:
         logger.debug(f"> State diff found at Buggy ID {buggy_event.event_id} vs Patched ID {patched_event.event_id}")
         logger.debug(f"Function: {buggy_event.function_name} vs {patched_event.function_name}")
@@ -245,7 +245,7 @@ def get_logical_lines(code: str, line_nums):
 
     return statements, ranges
 
-def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
+def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, depth_threshold=3):
     random.seed(RANDOM_SEED)
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
@@ -302,6 +302,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                     buggy_event,
                     patched_event,
                     repo_name,
+                    depth_threshold,
                     test_id=test_id,
                     function_name=buggy_function.name,
                     buggy_line_count=lambda: get_event_count(buggy_event, buggy_traces),
@@ -352,6 +353,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5):
                 lhs_event,
                 rhs_event,
                 repo_name,
+                depth_threshold,
                 test_id=test_id,
                 function_name=buggy_function.name,
                 buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
@@ -426,5 +428,5 @@ if __name__ == "__main__":
     instance_id = sys.argv[1]
     logger.setLevel(logging.DEBUG)
     # from pprint import pprint
-    result = main(instance_id, test_id=0, agent="gold")
+    result = main(instance_id, test_id=0, agent="gold", depth_threshold=3)
     print(result)

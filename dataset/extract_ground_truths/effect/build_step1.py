@@ -21,7 +21,7 @@ EXTRA_LONG_TIMEOUT = {
     'sympy__sympy-21379': 600,
 }
 
-def _process_instance(instance_id, agent, total_choices, timeout=300):
+def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=300):
     def _timeout_handler(signum, frame):
         raise TimeoutError()
     try:
@@ -34,7 +34,8 @@ def _process_instance(instance_id, agent, total_choices, timeout=300):
                     instance_id,
                     agent=agent,
                     test_id=test_id,
-                    total_choices=total_choices
+                    total_choices=total_choices, 
+                    depth_threshold=depth_threshold
                 )
             except IndexError:
                 result = {}
@@ -63,12 +64,12 @@ def _process_instance(instance_id, agent, total_choices, timeout=300):
     finally:
         signal.alarm(0)
 
-def process_agent(agent, instance_ids, total_choices, max_workers=10):
+def process_agent(agent, instance_ids, total_choices, depth_threshold, max_workers=10):
     results = {}
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(_process_instance, instance_id, agent, total_choices): instance_id
+            executor.submit(_process_instance, instance_id, agent, total_choices, depth_threshold): instance_id
             for instance_id in instance_ids
         }
         for future in tqdm(as_completed(futures), total=len(futures), desc=agent):
@@ -87,13 +88,14 @@ if __name__ == "__main__":
     ]
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", f"step1.json")
     TOTAL_CHOICES = 4
+    DEPTH_THRESHOLD = 3
     # ------------------------------------------- #
 
     results = {}
     instance_ids = get_instance_ids(["all"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, agent, instance_ids, TOTAL_CHOICES): agent
+            executor.submit(process_agent, agent, instance_ids, TOTAL_CHOICES, DEPTH_THRESHOLD): agent
             for agent in AGENTS if agent
         }
         for future in as_completed(futures):
