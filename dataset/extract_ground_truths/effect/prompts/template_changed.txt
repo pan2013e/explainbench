@@ -22,10 +22,10 @@ Produce exactly {n_output} Python expressions `<expr>` that:
 - A variable state is serialized into a dictionary-like format.
 - In the serialization, `py/TAG` indicates a serialization type.
 - Examples:
-    - {"py/set": [1, 2, 3]} represents a set containing 1, 2, and 3 in runtime.
-    - {"py/tuple": [1, 2]} represents a tuple (1, 2) in runtime.
-    - {"py/type": "collections.OrderedDict"} represents the type 'collections.OrderedDict' in runtime.
-    - {"py/object": "module.ClassName", "attr1": val1, "attr2": val2} represents an instance of ClassName with attributes attr1 and attr2. "py/object" is not an attribute.
+    - {{"py/set": [1, 2, 3]}} represents a set containing 1, 2, and 3 in runtime.
+    - {{"py/tuple": [1, 2]}} represents a tuple (1, 2) in runtime.
+    - {{"py/type": "collections.OrderedDict"}} represents the type 'collections.OrderedDict' in runtime.
+    - {{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}} represents an instance of ClassName with attributes attr1 and attr2. "py/object" is not an attribute.
     - Other primitive types (int, float, str, bool, None) and built-in collections (list, dict) are represented as is.
 - The serialization may contain nested structures of the above.
 
