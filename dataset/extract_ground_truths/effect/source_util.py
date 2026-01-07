@@ -116,8 +116,6 @@ def apply_patch(container: Container, patch: str):
         if result.exit_code == 0:
             applied_patch = True
             break
-        else:
-            print(f'Attempt to apply patch with "{cmd}" failed: {result.output.decode("utf-8")}')
     container.exec_run('rm -f /tmp/patch.diff', user='root')
     if not applied_patch:
         raise ValueError('Failed to apply patch inside container')
