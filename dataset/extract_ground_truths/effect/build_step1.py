@@ -19,6 +19,7 @@ EXTRA_LONG_TIMEOUT = {
     'pylint-dev__pylint-7080': 600,
     'sphinx-doc__sphinx-7590': 3600,
     'sympy__sympy-21379': 600,
+    'django__django-14500': 600,
 }
 
 def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=300):
