@@ -116,9 +116,32 @@ def depth_filter(diff_dict, threshold):
 
     return filtered_diff
 
+def get_shallowest_diff(diff_dict):
+    candidates = []
+    for change_kind, diff_entry in diff_dict.items():
+        if isinstance(diff_entry, (list, deepdiff.helper.SetOrdered)):
+            for current_path in diff_entry:
+                candidates.append((path_depth(current_path), change_kind, "list", current_path, None))
+        elif isinstance(diff_entry, dict):
+            for current_path, payload in diff_entry.items():
+                candidates.append((path_depth(current_path), change_kind, "dict", current_path, payload))
+        else:
+            raise TypeError(f"Unsupported diff entry type for {change_kind}: {type(diff_entry)}")
+
+    if not candidates:
+        return {}
+
+    min_depth = min(depth for depth, _, _, _, _ in candidates)
+    min_candidates = [c for c in candidates if c[0] == min_depth]
+    _, change_kind, kind_type, current_path, payload = random.choice(min_candidates)
+    if kind_type == "list":
+        return {change_kind: [current_path]}
+    return {change_kind: {current_path: payload}}
+
 def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, depth_threshold: int, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
     diff = depth_filter(diff, depth_threshold)
+    diff = get_shallowest_diff(diff)
     if diff:
         logger.debug(f"> State diff found at Buggy ID {buggy_event.event_id} vs Patched ID {patched_event.event_id}")
         logger.debug(f"Function: {buggy_event.function_name} vs {patched_event.function_name}")
