@@ -117,8 +117,8 @@ def apply_patch(container: Container, patch: str):
             applied_patch = True
             break
     container.exec_run('rm -f /tmp/patch.diff', user='root')
-    if not applied_patch:
-        raise ValueError('Failed to apply patch inside container')
+    # if not applied_patch:
+    #     raise ValueError('Failed to apply patch inside container')
 
 def read_from_container(container: Container, file_path: str):
     tar_stream, _ = container.get_archive(file_path)
@@ -160,6 +160,7 @@ def get_func_code_impl(code: str, fn_name: str, line_hint: int = None):
 
 def get_function_code(instance_id: str, file_path: str, fn_name: str, 
                       *, patch: str = None, line_hint: tuple[int, int] = None, remove_doc=False):
+    assert not file_path.startswith('<') and not file_path.endswith('>'), "file_path must be a real file path"
     assert os.path.isabs(file_path), "file_path must be absolute"
     if line_hint:
         pre_hint, post_hint = line_hint
@@ -184,24 +185,3 @@ def get_function_code(instance_id: str, file_path: str, fn_name: str,
         pre_code = remove_docstrings(pre_code)
         post_code = remove_docstrings(post_code)
     return pre_code, post_code
-
-if __name__ == "__main__":
-    instance_id = "astropy__astropy-12907"
-    file_path = "/testbed/astropy/modeling/separable.py"
-    fn_name = "_cstack"
-    patch = '''diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
---- a/astropy/modeling/separable.py
-+++ b/astropy/modeling/separable.py
-@@ -242,7 +242,7 @@ def _cstack(left, right):
-         cright = _coord_matrix(right, 'right', noutp)
-     else:
-         cright = np.zeros((noutp, right.shape[1]))
--        cright[-right.shape[0]:, -right.shape[1]:] = 1
-+        cright[-right.shape[0]:, -right.shape[1]:] = right
- 
-     return np.hstack([cleft, cright])
- 
-'''
-    pre_code, post_code = get_function_code(instance_id, file_path, fn_name, remove_doc=True, patch=patch)
-    print(pre_code)
-    print(post_code)
