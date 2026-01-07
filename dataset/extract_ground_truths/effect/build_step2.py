@@ -87,28 +87,16 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             metadata = agent_data[agent][instance_id]
             if metadata is None:
                 print(
-                    "metadata not found due to errors for agent={} | instance_id={}".format(
+                    "metadata not found due to step1 error for agent={} | instance_id={}".format(
                         agent,
                         instance_id,
                     )
                 )
                 return None
             if metadata == {}:
-                print(
-                    "no behavior delta for agent={} | instance_id={}, need to fallback to gold in step 3".format(
-                        agent,
-                        instance_id,
-                    )
-                )
-                return {}
+                return {} # fallback to gold
             if metadata.get("choices"):
-                print(
-                    "exception vs return None for agent={} | instance_id={}, fallback to reachability question in step 4".format(
-                        agent,
-                        instance_id,
-                    )
-                )
-                return metadata
+                return metadata # fallback to reachability
             pre_code, post_code = get_function_code(
                 instance_id,
                 metadata['file_path'],
@@ -119,7 +107,8 @@ def process_agent(agent_data, agent, instance_ids, n_output):
 
             instance_result = {}
             changed_expressions = None
-            for should_change in (True, False):
+            # for should_change in (True, False):
+            for should_change in (True,):
                 expr_list = infer_expressions(
                     pre_code,
                     post_code,
@@ -137,6 +126,7 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
         except Exception as e:
+            import traceback, sys
             print(
                 "process_agent crashed for agent={} | {}: {} {}".format(
                     agent,
@@ -145,9 +135,10 @@ def process_agent(agent_data, agent, instance_ids, n_output):
                     e,
                 )
             )
+            traceback.print_exc(file=sys.stdout)
             return None
     
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
@@ -164,16 +155,18 @@ if __name__ == "__main__":
     start = time.time()
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step1-filtered.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.gold.json")
+    STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json"
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.change-only.gold.json")
     AGENTS = [
-        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250612_trae",
+        # "20250603_Refact_Agent_claude-4-sonnet",
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250928_trae_doubao_seed_code",
+        # "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3"
-    OUTPUT_JSON = "step2.json"
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
+    OUTPUT_JSON = "step2.change-only.json"
     DIR = os.path.dirname(os.path.abspath(__file__))
     N_OUTPUT = 10
     # ------------------------------------------- #
@@ -181,10 +174,6 @@ if __name__ == "__main__":
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
-    # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
-    #     instance_ids = f.readlines()
-
-    # instance_ids = [x.strip() for x in instance_ids]
     agents_to_process = AGENTS.copy()
     
     if os.path.exists(STEP2_GOLD_PATH):
