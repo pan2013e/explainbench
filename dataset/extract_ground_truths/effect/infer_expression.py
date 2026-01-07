@@ -70,7 +70,6 @@ def main(code, line, diff, before, after, should_change, n_output, changed_expre
             before=before,
             after=after,
             n_output=n_output,
-            seed_expression=extract_seed_exp(diff)
         )
     else:
         prompt = TEMPLATE_UNCHANGED.format(
