@@ -138,9 +138,9 @@ def get_shallowest_diff(diff_dict):
         return {change_kind: [current_path]}
     return {change_kind: {current_path: payload}}
 
-def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, depth_threshold: int, agent: str, **kwargs):
+def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, depth_threshold: int, agent_name: str, **kwargs):
     diff = diff_events(buggy_event, patched_event, repo_name)
-    if agent == "gold":
+    if agent_name == "gold":
         diff = depth_filter(diff, depth_threshold)
     diff = get_shallowest_diff(diff)
     if diff:
@@ -327,7 +327,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, d
                     patched_event,
                     repo_name,
                     depth_threshold,
-                    agent=agent,
+                    agent_name=agent,
                     test_id=test_id,
                     function_name=buggy_function.name,
                     buggy_line_count=lambda: get_event_count(buggy_event, buggy_traces),
@@ -379,7 +379,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, d
                 rhs_event,
                 repo_name,
                 depth_threshold,
-                agent=agent,
+                agent_name=agent,
                 test_id=test_id,
                 function_name=buggy_function.name,
                 buggy_line_count=lambda: get_event_count(lhs_event, buggy_traces),
