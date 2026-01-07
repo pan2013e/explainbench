@@ -9,6 +9,26 @@ You will be given:
 - Complete variable states before and after the patch
 - A seed expression
 
+Input:
+Function:
+{code}
+
+Line:
+{line}
+
+State Differences:
+{diff}
+
+Complete Variable States before and after patch:
+Before:
+{before}
+
+After:
+{after}
+
+Seed Expression:
+{seed_expression}
+
 ### Task
 Produce exactly {n_output} Python expressions `<expr>` that:
 1. have a different outcome between the buggy and patched programs based on the seed expression:
@@ -105,23 +125,3 @@ You choose 1 or more of the following to build more complex expressions from the
    - Example:
      - `[seed_expr, other_var]`
      - `(seed_expr == other_var, other_var is None)`
-
-Input:
-Function:
-{code}
-
-Line:
-{line}
-
-State Differences:
-{diff}
-
-Complete Variable States before and after patch:
-Before:
-{before}
-
-After:
-{after}
-
-Seed Expression:
-{seed_expression}
