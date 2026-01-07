@@ -20,6 +20,7 @@ AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
 EXCLUDED_IDS = [
     # Whatever reasons, the offical SWE-bench test harness (Release v4.1.0)
     # reports failures on developer patches (without tracker/tracer injected)
+    # (Based on developer patches)
     "astropy__astropy-7606",
     "astropy__astropy-8707",
     "astropy__astropy-8872",
@@ -35,16 +36,28 @@ EXCLUDED_IDS = [
     "sphinx-doc__sphinx-9711",
     # Tests consume ~100% CPU resources, making concurrent
     # tests/docker operations in other containers timeout
+    # (Based on developer patches)
     "scikit-learn__scikit-learn-14710",
     # For patched code, tests fail before test function is even reached
     # In other words, call stack does not include test function
+    # (Based on developer and agent patches)
+    "django__django-11333",
     "django__django-14011",
     "django__django-14672",
+    "django__django-15375",
+    "django__django-15973",
     "django__django-16116",
+    "django__django-16256",
+    "django__django-16315",
     "pylint-dev__pylint-4551",
     "pylint-dev__pylint-4604",
     "pylint-dev__pylint-4661",
-    # Intrusiveness of tracker/injection plugin causes incorrect patched behavior (should pass, but failed)
+    "pylint-dev__pylint-8898",
+    "sphinx-doc__sphinx-9602",
+    "sympy__sympy-14248",
+    # Intrusiveness of tracker/injection plugin 
+    # causes incorrect patched behavior (should pass, but failed)
+    # (Based on developer patches)
     "astropy__astropy-13398",
     "django__django-11276",
     "pytest-dev__pytest-5631",
@@ -56,7 +69,9 @@ EXCLUDED_IDS = [
     "sphinx-doc__sphinx-8120",
     "sphinx-doc__sphinx-8721",
     "sphinx-doc__sphinx-9229",
-    # Intrusiveness of tracer/serializer causes incorrect patched behavior (should pass, but failed)
+    # Intrusiveness of tracer/serializer 
+    # causes incorrect patched behavior (should pass, but failed)
+    # (Based on developer patches)
     "django__django-11066",
     "django__django-11087",
     "django__django-11211",
@@ -96,9 +111,13 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-8399",
     "scikit-learn__scikit-learn-12682",
     "sphinx-doc__sphinx-8056",
-    # Intrusiveness of tracer/serializer causes incorrect buggy behavior (should fail, but passed)
+    # Intrusiveness of tracer/serializer 
+    # causes incorrect buggy behavior (should fail, but passed)
+    # (Based on developer patches)
     "django__django-14351",
-    # Intrusiveness of tracer/serializer causes pipeline errors
+    # Intrusiveness of tracer/serializer 
+    # causes pipeline errors
+    # (Based on developer and agent patches)
     "astropy__astropy-14539",
     "django__django-7530",
     "django__django-11149",
@@ -114,7 +133,8 @@ EXCLUDED_IDS = [
     "django__django-16877",
     "matplotlib__matplotlib-20826",
     "matplotlib__matplotlib-20859",
-    # Timeout after 6h
+    # Timeout after reasonable time limit
+    # (Based on developer and agent patches)
     "django__django-14559",
     "django__django-15022",
     "django__django-16612",
@@ -125,7 +145,10 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-10081",
     "sympy__sympy-15599",
     "sympy__sympy-19954",
-    # Use of internal context manager in `self.subTest` or `self.assertNumQueries` causes exceptions not raised in test functions
+    # Custom test framework: Use of internal context manager 
+    # in `self.subTest` or `self.assertNumQueries`
+    # causes exceptions not raised in test functions
+    # (Based on developer patches)
     "django__django-11451",
     "django__django-11964",
     "django__django-14315",
@@ -134,8 +157,12 @@ EXCLUDED_IDS = [
     "django__django-15561",
     "django__django-16429",
     # Gigantic trace files, very high memory consumption
+    # (Based on developer patches)
     "sphinx-doc__sphinx-7590",
-    # Excluded due to the distance between without-depth-filter and with-depth-filter is larger than 1 (not in the same function)
+    # Excluded due to the distance between 
+    # without-depth-filter and with-depth-filter
+    # is larger than 1 (not in the same function)
+    # (Based on developer patches)
     "astropy__astropy-14182",
     "django__django-11299",
     "django__django-11740",
@@ -168,6 +195,7 @@ EXCLUDED_IDS = [
     "sympy__sympy-24661",
     # Function source code is unavailable at divergent line
     # <lambda>, <listcomp>, <genexpr> and dynamically generated functions
+    # (Based on developer and agent patches)
     "django__django-11551",
     "django__django-12039",
     "django__django-16899",
