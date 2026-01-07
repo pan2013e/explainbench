@@ -26,17 +26,12 @@ Before:
 After:
 {after}
 
-Seed Expression:
-{seed_expression}
-
 ### Task
-Produce exactly {n_output} Python expressions `<expr>` that:
-1. Have a different outcome between the buggy and patched programs based on the seed expression:
+Produce exactly {n_output} Python expressions `<expr>` that have a different outcome between the buggy and patched programs based on the state differences and complete variable states:
    (a) yield different values, or
    (b) yield different program state between the buggy and patched programs:
       - raising an exception vs. returning None or a value, or
       - raising different exceptions
-2. Are more complex than the seed expression, as constructed using the actions listed below.
 
 ### Notes on the Serialization of the Variable States Before and After the Patch
 - A variable state is serialized into a dictionary-like format.
@@ -68,14 +63,13 @@ Produce exactly {n_output} Python expressions `<expr>` that:
 You may choose one or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
 
 1. Binary operations
-   - Combine the seed expression (or a subpart of it) with:
-     - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`
-     - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
-     - logical operators: `and`, `or`, `not`
-     - identity/membership operators: `is`, `is not`, `in`, `not in`
+  - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`
+  - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
+  - logical operators: `and`, `or`, `not`
+  - identity/membership operators: `is`, `is not`, `in`, `not in`
 
 2. Attribute access
-   - Access attributes or methods of the seed expression or other variables:
+   - Access attributes or methods of the variables:
      - `foo.bar`, `foo.bar()`
    - Only use attributes or methods that exist in the provided variable states.
 
@@ -84,7 +78,7 @@ You may choose one or more of the following to build more complex expressions fr
      - `foo[bar]`, `foo[0]`, `foo[-1]`, `foo[1:3]`
 
 4. Wrapping with functions
-   - Wrap the seed expression or a related expression using:
+   - Wrap the expression using:
      1. Python built-ins:
         `len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, `tuple`, `list`, `dict`, `set`, `bool`, `str`, `int`, `float`, `abs`, `round`, `hash`, `type`, `isinstance`, `getattr`, `hasattr`, `enumerate`, `zip`
      2. NumPy functions (if `np` is available in the states):
@@ -95,7 +89,7 @@ You may choose one or more of the following to build more complex expressions fr
      - `expr_if_true if condition else expr_if_false`
 
 6. Combination with other changed variables
-   - Identify variables whose values differ between before and after, and combine them with the seed expression.
+   - Identify variables whose values differ between before and after, and combine them with the generated expression that differs in value.
 
 7. Collection-building expressions
    - Build small collections of primitives or expressions:
