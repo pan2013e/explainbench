@@ -166,6 +166,13 @@ EXCLUDED_IDS = [
     "sphinx-doc__sphinx-10449",
     "sphinx-doc__sphinx-10673",
     "sympy__sympy-24661",
+    # Function source code is unavailable at divergent line
+    # <lambda>, <listcomp>, <genexpr> and dynamically generated functions
+    "django__django-11551",
+    "django__django-12039",
+    "django__django-16899",
+    "sympy__sympy-13647",
+    "sympy__sympy-20154",
 ]
 
 class _IterableReader(RawIOBase):
