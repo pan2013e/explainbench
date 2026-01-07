@@ -248,12 +248,12 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            # "gold",
-            # "20250603_Refact_Agent_claude-4-sonnet",
-            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            # "20250928_trae_doubao_seed_code",
-            "20250807_mini-v1.7.0_gpt-5-mini"
+            "gold",
+            "20250603_Refact_Agent_claude-4-sonnet",
+            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+            "20250928_trae_doubao_seed_code",
+            "20250807_mini-v1.7.0_gpt-5-mini",
         ],
         help="List of agent names to process (used as top-level keys in the JSON).",
     )
