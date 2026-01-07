@@ -136,6 +136,9 @@ def extract_modified_qualnames(
 
     def _process(path_to_lines: Dict[str, List[int]]) -> None:
         for rel_path, lines in path_to_lines.items():
+            if not rel_path.endswith(".py"):
+                continue
+            
             file_on_disk = repo_root_path / rel_path
             source = file_on_disk.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(file_on_disk))
@@ -245,11 +248,11 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            "gold",
-            "20250603_Refact_Agent_claude-4-sonnet",
-            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            "20250928_trae_doubao_seed_code",
+            # "gold",
+            # "20250603_Refact_Agent_claude-4-sonnet",
+            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+            # "20250928_trae_doubao_seed_code",
             "20250807_mini-v1.7.0_gpt-5-mini"
         ],
         help="List of agent names to process (used as top-level keys in the JSON).",
