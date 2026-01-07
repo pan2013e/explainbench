@@ -135,7 +135,8 @@ def process_agent(agent_data, agent, instance_ids, n_output):
                     e,
                 )
             )
-            traceback.print_exc(file=sys.stdout)
+            if not isinstance(e, ValueError):
+                traceback.print_exc(file=sys.stdout)
             return None
     
     with ThreadPoolExecutor(max_workers=10) as executor:
