@@ -28,7 +28,7 @@ with open(os.path.join(DIR, "prompts/template_changed.txt"), "r") as f:
 with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
     TEMPLATE_UNCHANGED = f.read()
 
-MODEL = Model("gpt-5.1-codex", n=1, reasoning_effort="low")
+MODEL = Model("gpt-5.1-2025-11-13", n=1, reasoning_effort="low")
 
 # NOTE: Currently, it is possibel that input diff contains more than 1. In this case, this function outputs the first object.
 # It can be modified in the future\
