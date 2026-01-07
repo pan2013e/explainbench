@@ -81,9 +81,11 @@ def process_agent(agent, instance_ids, total_choices, depth_threshold, max_worke
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     AGENTS = [
+        # "20250603_Refact_Agent_claude-4-sonnet",
         # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250612_trae",
+        # "20250928_trae_doubao_seed_code",
+        # "20250807_mini-v1.7.0_gpt-5-mini"
         "gold",
     ]
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.gold.json")
