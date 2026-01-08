@@ -19,6 +19,7 @@ dependencies = [
     "deepdiff == 8.6.1",
     "datasets == 4.2.0",
     "orjson == 3.11.3",
+    "joblib == 1.5.2",
 ]
 
 [build-system]
