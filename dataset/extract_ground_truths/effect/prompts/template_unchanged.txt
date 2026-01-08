@@ -25,9 +25,9 @@ After:
 {after}
 
 ### Task
-Produce exactly {n_output} Python expressions `<expr>` that have a different outcome between the buggy and patched programs based on the state differences and complete variable states:
-   (a) yield same values, or
-   (b) yield same program state between the buggy and patched programs (e.g., both raise exceptions)
+Produce exactly {n_output} Python expressions <expr> that have the same outcome between the buggy and patched programs, based on the state differences and complete variable states:
+   (a) yield the same values, or
+   (b) yield the same program state between the buggy and patched programs (e.g., both raise exceptions)
 
 ### Notes on the Serialization of the Variable States Before and After the Patch
 - A variable state is serialized into a dictionary-like format.
@@ -56,7 +56,7 @@ Produce exactly {n_output} Python expressions `<expr>` that have a different out
 6. Aim for diverse and non-trivial expressions.
 
 ### Actions to Build the Expressions
-You may choose one or more of the following to build more complex expressions based on the diff and the variable states before and after the patch, or other in-scope variables that differ between the two versions.
+You may choose one or more of the following to build more complex expressions based on the diff and the variable states before and after the patch, or other in-scope variables.
 
 1. Binary operations
   - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`
@@ -85,7 +85,7 @@ You may choose one or more of the following to build more complex expressions ba
      - `expr_if_true if condition else expr_if_false`
 
 6. Combination with other changed variables
-   - Identify variables whose values differ between before and after, and combine them with the generated expression that differs in value.
+   - Identify variables whose values the same between before and after, and combine them with the generated expression that identical in value.
 
 7. Collection-building expressions
    - Build small collections of primitives or expressions:
