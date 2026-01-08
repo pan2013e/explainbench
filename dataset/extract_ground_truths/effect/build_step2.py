@@ -1,6 +1,7 @@
 # Build ground truth for effect
 # Step 2. Provide step 1 info to an LLM to infer an expression,
 # then inspect the expr value in buggy and patched versions
+import argparse
 import json
 import logging
 import os
@@ -12,7 +13,10 @@ from tqdm.auto import tqdm
 from pydantic import ValidationError
 
 from execution.util import get_instance_ids
-from dataset.extract_ground_truths.effect.infer_expression import main as infer_main
+from dataset.extract_ground_truths.effect.infer_expression import (
+    main as infer_main,
+    build_prompt,
+)
 from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
     remove_docstrings,
@@ -61,24 +65,18 @@ def get_simple_function_name(metadata):
     return name
 
 @backoff.on_exception(backoff.expo, ValidationError, max_tries=5)
-def infer_expressions(pre_code, post_code, metadata, n_changed, n_unchanged):
-    expr = infer_main(
-        build_fn_code(pre_code, post_code),
-        build_statement(
-            metadata["buggy_statement"],
-            metadata["patched_statement"],
-            metadata["buggy_event_type"],
-            metadata["patched_event_type"],
-        ),
-        metadata["diff"],
-        metadata["buggy_variables"],
-        metadata["patched_variables"],
-        n_changed,
-        n_unchanged
-    )
+def infer_expressions(prompt):
+    expr = infer_main(prompt)
     return expr
 
-def process_agent(agent_data, agent, instance_ids, n_changed, n_unchanged):
+def process_agent(
+    agent_data,
+    agent,
+    instance_ids,
+    n_changed,
+    n_unchanged,
+    do_inference,
+):
     results = {}
         
     def process_instance(instance_id):
@@ -104,19 +102,30 @@ def process_agent(agent_data, agent, instance_ids, n_changed, n_unchanged):
                 line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
             )
 
-            instance_result = {}
-            expr_list = infer_expressions(
-                pre_code,
-                post_code,
-                metadata,
+            prompt = build_prompt(
+                build_fn_code(pre_code, post_code),
+                build_statement(
+                    metadata["buggy_statement"],
+                    metadata["patched_statement"],
+                    metadata["buggy_event_type"],
+                    metadata["patched_event_type"],
+                ),
+                metadata["diff"],
+                metadata["buggy_variables"],
+                metadata["patched_variables"],
                 n_changed,
                 n_unchanged,
             )
-            expr_strings = [x.expr for x in expr_list.expressions]
-            instance_result["changed_candidates"] = expr_strings[:n_changed]
-            instance_result["unchanged_candidates"] = expr_strings[n_changed:] 
-            instance_result.update(metadata)
-            instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
+            instance_result = {"prompt_length_chars": len(prompt)}
+            
+            if do_inference:
+                expr_list = infer_expressions(prompt)
+                if expr_list is not None:
+                    expr_strings = [x.expr for x in expr_list.expressions]
+                    instance_result["changed_candidates"] = expr_strings[:n_changed]
+                    instance_result["unchanged_candidates"] = expr_strings[n_changed:] 
+                instance_result.update(metadata)
+                instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
         except Exception as e:
             import traceback, sys
@@ -146,11 +155,13 @@ def process_agent(agent_data, agent, instance_ids, n_changed, n_unchanged):
 
 if __name__ == "__main__":
     import time
-    start = time.time()
 
     # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.run2.gold.json1")
+    STEP2_GOLD_PATH = os.path.join(
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step",
+        "step2.prompt.gold.json",
+    )
     AGENTS = [
         # "20250603_Refact_Agent_claude-4-sonnet",
         # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
@@ -160,29 +171,41 @@ if __name__ == "__main__":
         "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
-    OUTPUT_JSON = "step2.merged.run2.json1"
-    DIR = os.path.dirname(os.path.abspath(__file__))
+    OUTPUT_JSON = "step2.prompt.json"
     N_CHANGED = 10
     N_UNCHANGED = 10
+    DO_INFERENCE = False
     # ------------------------------------------- #
-
+    start = time.time()
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
-    instance_ids = [
-        "astropy__astropy-14365",
-        # "astropy__astropy-14508",
-        "astropy__astropy-14309",
-        "django__django-14725",
-        # "django__django-12050",
-        # "django__django-16139",
-        "sympy__sympy-16597",
-        "sympy__sympy-22714",
-        # "sympy__sympy-24562",
-        # "matplotlib__matplotlib-24570",
-        # "matplotlib__matplotlib-21568",
-        "matplotlib__matplotlib-24177",
-    ]
+    # instance_ids = [
+    #     # "astropy__astropy-14365",
+    #     # "astropy__astropy-14508",
+    #     # "astropy__astropy-14309",
+    #     # "django__django-14725",
+    #     # "django__django-12050",
+    #     # "django__django-16139",
+    #     # "sympy__sympy-16597",
+    #     # "sympy__sympy-22714",
+    #     # "sympy__sympy-24562",
+    #     # "matplotlib__matplotlib-24570",
+    #     # "matplotlib__matplotlib-21568",
+    #     # "matplotlib__matplotlib-24177",
+    #     # failing
+    #     "sympy__sympy-11618", 
+    #     "sympy__sympy-18189",
+    #     "sphinx-doc__sphinx-7462",
+    #     "sympy__sympy-21847",
+    #     "pydata__xarray-6744",
+    #     # random sample
+    #     "django__django-15161",
+    #     "matplotlib__matplotlib-22719",
+    #     "scikit-learn__scikit-learn-12973",
+    #     "astropy__astropy-12907",
+    #     "pydata__xarray-6992",
+    # ]
     agents_to_process = AGENTS.copy()
     
     if os.path.exists(STEP2_GOLD_PATH):
@@ -190,7 +213,15 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step1, agent, instance_ids, N_CHANGED, N_UNCHANGED): agent
+            executor.submit(
+                process_agent,
+                step1,
+                agent,
+                instance_ids,
+                N_CHANGED,
+                N_UNCHANGED,
+                DO_INFERENCE
+            ): agent
             for agent in agents_to_process
         }
         for future in tqdm(as_completed(futures), total=len(futures)):

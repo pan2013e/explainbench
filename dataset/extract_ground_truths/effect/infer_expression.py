@@ -25,8 +25,12 @@ with open(os.path.join(DIR, "prompts/template_merged.txt"), "r") as f:
 
 MODEL = Model("gpt-5.2-2025-12-11", n=1, reasoning_effort="medium")
 
-def main(code, line, diff, before, after, n_changed, n_unchanged):
-    prompt = TEMPLATE.format(
+def main(prompt):
+    expr_list = MODEL.infer_once(prompt, ExpressionList)
+    return expr_list
+
+def build_prompt(code, line, diff, before, after, n_changed, n_unchanged):
+    return TEMPLATE.format(
         code=code,
         line=line,
         diff=diff,
@@ -36,5 +40,3 @@ def main(code, line, diff, before, after, n_changed, n_unchanged):
         n_changed=n_changed,
         n_unchanged=n_unchanged
     )
-    expr_list = MODEL.infer_once(prompt, ExpressionList)
-    return expr_list
