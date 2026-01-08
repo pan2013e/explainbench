@@ -8,6 +8,26 @@ You will be given:
 - Complete variable states before and after the patch
 - The correct expressions
 
+Input:
+Function:
+{code}
+
+Line:
+{line}
+
+State Differences:
+{diff}
+
+Complete Variable States before and after patch:
+Before:
+{before}
+
+After:
+{after}
+
+The correct expressions (has a different outcome between the buggy and patched programs):
+{changed_expressions}
+
 ### Task
 Produce exactly {n_output} Python expressions `<expr>` that:
 1. have the same outcome between the buggy and patched programs:
@@ -73,24 +93,3 @@ You may choose one or more of the following to build more complex expressions fr
    - wrapping/casting,
    - reordering subexpressions.
 3. The distractor should *feel* like a plausible candidate that could have changed—unless resemblance is not possible—while still being semantically stable.
-
-### Input:
-
-Function:
-{code}
-
-Line:
-{line}
-
-State Differences:
-{diff}
-
-Complete Variable States before and after patch:
-Before:
-{before}
-
-After:
-{after}
-
-The correct expressions (has a different outcome between the buggy and patched programs):
-{changed_expressions}
