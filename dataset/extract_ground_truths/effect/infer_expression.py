@@ -1,10 +1,8 @@
 import os
 import ast
-import re
 from pydantic import BaseModel, field_validator
 
 from evaluation.inference import Model
-from dataset.extract_ground_truths.effect.postprocessing_util import iter_diff_items
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,7 +23,7 @@ class ExpressionList(BaseModel):
 with open(os.path.join(DIR, "prompts/template_merged.txt"), "r") as f:
     TEMPLATE = f.read()
 
-MODEL = Model("gpt-5.1-2025-11-13", n=1, reasoning_effort="low")
+MODEL = Model("gpt-5.2-2025-12-11", n=1, reasoning_effort="medium")
 
 def main(code, line, diff, before, after, n_changed, n_unchanged):
     prompt = TEMPLATE.format(
