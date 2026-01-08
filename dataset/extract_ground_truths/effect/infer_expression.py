@@ -30,37 +30,6 @@ with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
 
 MODEL = Model("gpt-5.1-2025-11-13", n=1, reasoning_effort="low")
 
-# NOTE: Currently, it is possibel that input diff contains more than 1. In this case, this function outputs the first object.
-# It can be modified in the future\
-_BRACKETED_NAME_RE = re.compile(r"\[['\"]([^'\"]+)['\"]\]")
-def extract_seed_exp(input_diff):
-
-    def extract_var_name(full_path: str, key_idx) -> str:
-        tokens = _BRACKETED_NAME_RE.findall(str(full_path))
-        if len(tokens) > key_idx:
-            return tokens[key_idx]
-        return "" 
-
-    seed_expr = []
-    for change_kind, full_path, payload in iter_diff_items(input_diff):
-
-        # default pattern: root[seen_variables][var_name]
-        var_name = extract_var_name(full_path, 1)
-        
-        # another pattern: root[return_value] or root[exception_value]
-        if var_name == "":
-            var_name = extract_var_name(full_path, 0)
-
-        if var_name == "return_value":
-            var_name = "__return__"
-            return var_name
-
-        elif var_name == "exception_value":
-            var_name = "__exception__"
-
-        seed_expr.append(var_name)
-    return seed_expr[0]
-
 def main(code, line, diff, before, after, should_change, n_output, changed_expressions=None):
     if should_change:
         prompt = TEMPLATE_CHANGED.format(
