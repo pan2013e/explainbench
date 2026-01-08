@@ -1,4 +1,4 @@
-You are designing a set of Python expressions `<expr>` to be used as a multiple-choice distractor. The correct expressions are the ones that change value before and after a code patch. Your task is to generate {n_output} expressions that resemble the correct ones if possible, but actually incorrect because it does NOT change value before and after a code patch.
+You are designing a set of Python expressions `<expr>` to be used as a multiple-choice distractor. The correct expressions are the ones that change value before and after a code patch. Your task is to generate {n_output} expressions that resemble the correct ones if possible, but are actually incorrect because they do NOT change value before and after a code patch.
 
 ### Inputs
 You will be given:
