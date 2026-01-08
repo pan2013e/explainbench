@@ -1,17 +1,3 @@
-You are designing Python expressions `<expr>` to probe a code change.
-
-Another LLM will later be given several candidate expressions, including your `<expr>` outputs, and asked to choose which ones produce different evaluation outcomes before and after the patch.
-
-These expressions will be used as a multiple-choice question (MCQ):
-- Expressions that change between buggy and patched executions are the correct options.
-- Expressions that do NOT change act as distractors.
-- UNCHANGED expressions must be plausible alternatives: they should look similar to CHANGED expressions and differ only subtly, not trivially.
-
-Evaluation context:
-- Each `<expr>` is evaluated at the specified line within the function, in that line’s local scope.
-- Variable bindings correspond exactly to the provided “Complete Variable States” before and after the patch.
-- Expressions must be pure (no mutation or side effects).
-
 ### Inputs
 You will be given:
 - A Python function from a repository
@@ -19,7 +5,6 @@ You will be given:
 - State differences at that line before and after the patch
 - Complete variable states before and after the patch (serialized)
 
-Input:
 Function:
 {code}
 
@@ -29,7 +14,7 @@ Line:
 State Differences:
 {diff}
 
-Complete Variable States before and after the patch:
+Complete Variable States Before and After the Patch:
 Before:
 {before}
 
@@ -37,12 +22,25 @@ After:
 {after}
 
 ### Task
+You are designing Python expressions `<expr>` to probe a code change.
+
+Another LLM will later be given several candidate expressions, including your `<expr>` outputs, and asked to choose which ones produce different evaluation outcomes before and after the patch.
+
+These expressions will be used as a multiple-choice question (MCQ):
+- Expressions that change between buggy and patched executions are the correct options.
+- Expressions that do NOT change act as distractors.
+
+Evaluation context:
+- Each `<expr>` is evaluated at the specified line within the function, in that line’s local scope.
+- Variable bindings correspond to the runtime local scope at the specified line; the provided “Complete Variable States” are a partial serialization of selected variables for guidance, not an exhaustive list of all locals.
+- Expressions must be pure (no mutation or side effects).
+
 Produce exactly {n_total} Python expressions `<expr>`.
 
 You must output two groups, in this exact order:
 
 1) CHANGED group ({n_changed} expressions):
-   Expressions that have a different evaluation outcome between the buggy and patched programs based on the state differences and complete variable states:
+   Expressions that have a different evaluation outcome between the buggy and patched programs:
    - yielding different values, OR
    - raising an exception in one version and returning a value or None in the other, OR
    - raising exceptions of different types or with different messages
@@ -50,76 +48,49 @@ You must output two groups, in this exact order:
 2) UNCHANGED group ({n_unchanged} expressions):
    Expressions that have the same evaluation outcome between the buggy and patched programs:
    - Same value (`==`) in both versions, OR
-   - Both versions raise an exception of the same type and same message (when message is stable in the provided state)
+   - Both versions raise an exception of the same type and same message (when message is stable)
 
-### How to Construct UNCHANGED Expressions (Distractors)
-- For each CHANGED expression, create a corresponding UNCHANGED expression with the same structure and variables.
-- Apply minimal modifications that neutralize the difference (e.g., select a stable key/index, access an unchanged attribute, apply a no-op wrapper, or alter a comparator, etc.).
-- Avoid expressions that are obviously constant, unrelated, or syntactically trivial.
-
-
-MCQ requirement (important):
+### Rules to Construct UNCHANGED Expressions
 - UNCHANGED expressions act as distractors.
-- Each UNCHANGED expression should be structurally similar to a corresponding CHANGED expression (e.g., same variables, access pattern, or expression shape), but modified minimally so that it does NOT change across versions.
-- Avoid UNCHANGED expressions that are obviously invariant, unrelated, or trivial (e.g., tautologies like `x == x`).
-
-Ordering rule (required):
-- expressions[0..{n_changed}-1] MUST be the CHANGED group.
-- expressions[{n_changed}-1..{n_total}-1] MUST be the UNCHANGED group.
-
-### Notes on the Serialization of the Variable States
-- Variable states are serialized to describe runtime objects; expressions must target the runtime semantics, not the serialization structure itself.
-- `py/TAG` entries indicate serialization types and are NOT runtime attributes or keys and must not be accessed.
-- Examples:
-    - `{{"py/set": [1, 2, 3]}}` represents a set `{{1, 2, 3}}` at runtime.
-    - `{{"py/tuple": [1, 2]}}` represents a tuple `(1, 2)` at runtime.
-    - `{{"py/type": "collections.OrderedDict"}}` represents the type `collections.OrderedDict`.
-    - `{{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}}` represents an instance of `ClassName` with attributes `attr1` and `attr2`.
-- Primitive types (`int`, `float`, `str`, `bool`, `None`) and built-in collections (`list`, `dict`) are represented directly.
+- Each UNCHANGED expression should be a plausible alternative to a CHANGED expression:
+  - structurally similar (same variables, access pattern, or expression shape),
+  - modified minimally so that it does NOT change across versions.
+- Apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator).
+- Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x`).
 
 ### General Rules
-1. Each expression must reference at least one variable from the provided states.
+1. Each expression must reference at least one variable from the function input. 
 2. The final value of `<expr>` must be:
    - a primitive (`None`, `int`, `float`, `str`, `bool`), OR
    - a built-in collection (`list`, `tuple`, `set`, `dict`) containing only primitives.
-3. Do not use mutation or side-effectful operations (e.g., no `append`, `pop`, assignments, or in-place updates).
-4. Attribute access and method calls are allowed only if valid for the runtime object’s type (built-in methods may be assumed based on type).
+3. Do not use mutation or side-effectful operations.
+4. Attribute access and method calls are allowed only if valid for the runtime object’s type.
 5. If `__return__` is present, treat it as a special local variable holding the function’s return value.
 6. Handling return vs. exception mismatches:
    - If exactly one version returns and the other raises an exception:
-     - CHANGED expressions MUST reference __return__.
-     - Do NOT reference __exception__ in any expression.
-     - UNCHANGED expressions must be evaluable in both versions without raising NameError.
+     - CHANGED expressions MUST reference `__return__`.
+     - Do NOT reference `__exception__`.
+     - UNCHANGED expressions must be evaluable in both versions without raising `NameError`.
      - In this mismatch case only, UNCHANGED expressions do not need to be structurally similar to CHANGED expressions.
-
+     - If __return__ is present and equals None:
+         - Do NOT use __return__ as the base expression you start from.
+         - Prefer generating expressions from variables referenced at the probe line
+            (and their dependencies), especially predicates appearing in assert / if statements.
+         - Avoid expressions whose only purpose is checking the existence or value of __return__.
+     - In case of conflict, the rules in section 6 apply only to the specified mismatch scenario and override Rule 1.
 7. If `__return__` does not exist and `__exception__` is present in both versions:
    - Treat `__exception__` as a restricted tuple-like value:
      - `__exception__[0]`: exception type string
      - `__exception__[1]`: exception message string
 
-### Actions to Build the Expressions
-You may use one or more of the following (purely):
-
-1. Binary operations  
-   `+ - * / // % == != < <= > >= and or not is is not in not in`
-
-2. Attribute access and non-mutating method calls
-
-3. Indexing and slicing  
-   `foo[bar]`, `foo[0]`, `foo[-1]`, `foo[1:3]`
-
-4. Wrapping with functions  
-   Built-ins:  
-   `len, sum, min, max, any, all, sorted, tuple, list, dict, set, bool, str, int, float, abs, round, hash, isinstance, getattr, hasattr`  
-   (If iterators are produced, they must be fully materialized into allowed final types.)
-
-5. Conditional expressions  
-   `expr_if_true if condition else expr_if_false`
-
-6. Combination with multiple changed variables
-
-7. Collection-building expressions  
-   - tuples, lists, sets, dicts of primitives or valid subexpressions
+### Notes on the Serialization of the Variable States
+- Variable states are serialized to describe runtime objects; expressions must target runtime semantics, not the serialization structure.
+- `py/TAG` entries indicate serialization types and are NOT runtime attributes or keys.
+- Examples:
+    - `{{"py/set": [1, 2, 3]}}` represents a set `{{1, 2, 3}}` at runtime.
+    - `{{"py/tuple": [1, 2]}}` represents a tuple `(1, 2)` at runtime.
+    - `{{"py/type": "collections.OrderedDict"}}` represents the type `collections.OrderedDict`.
+    - `{{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}}` represents an instance of `ClassName`.
 
 ### Output Schema (must follow exactly)
 Your output will be parsed using the following Pydantic models:
@@ -148,3 +119,7 @@ Return exactly one JSON object:
     {{"expr": "<expr_20>"}}
   ]
 }}
+
+Ordering rule:
+- expressions[0..{n_changed}-1] MUST be the CHANGED group.
+- expressions[{n_changed}..{n_total}-1] MUST be the UNCHANGED group.
