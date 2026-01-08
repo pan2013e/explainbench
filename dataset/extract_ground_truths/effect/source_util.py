@@ -101,7 +101,7 @@ def start_docker_container(instance_id: str):
         raise e
     return container
 
-def apply_patch(container: Container, patch: str):
+def apply_patch(container: Container, patch: str, raise_on_fail=False):
     with tempfile.NamedTemporaryFile('w') as f:
         f.write(patch)
         f.flush()
@@ -117,8 +117,8 @@ def apply_patch(container: Container, patch: str):
             applied_patch = True
             break
     container.exec_run('rm -f /tmp/patch.diff', user='root')
-    # if not applied_patch:
-    #     raise ValueError('Failed to apply patch inside container')
+    if not applied_patch and raise_on_fail:
+        raise ValueError('Failed to apply patch inside container')
 
 def read_from_container(container: Container, file_path: str):
     tar_stream, _ = container.get_archive(file_path)
@@ -160,6 +160,7 @@ def get_func_code_impl(code: str, fn_name: str, line_hint: int = None):
 
 def get_function_code(instance_id: str, file_path: str, fn_name: str, 
                       *, patch: str = None, line_hint: tuple[int, int] = None, remove_doc=False):
+    assert fn_name not in ["<listcomp>", "<dictcomp>", "<setcomp>", "<genexpr>", "<lambda>"], "fn_name cannot be a comprehension or lambda"
     assert not file_path.startswith('<') and not file_path.endswith('>'), "file_path must be a real file path"
     assert os.path.isabs(file_path), "file_path must be absolute"
     if line_hint:
@@ -169,7 +170,7 @@ def get_function_code(instance_id: str, file_path: str, fn_name: str,
     container = start_docker_container(instance_id)
     test_patch = get_test_patch(instance_id)
     try:
-        if test_patch: apply_patch(container, test_patch)
+        if test_patch: apply_patch(container, test_patch, raise_on_fail=True)
     finally: pass
     try:
         pre_file = read_from_container(container, file_path)
@@ -180,7 +181,10 @@ def get_function_code(instance_id: str, file_path: str, fn_name: str,
     finally:
         cleanup_container(container.client, container, 'quiet')
     pre_code = get_func_code_impl(pre_file, fn_name, pre_hint)
-    post_code = get_func_code_impl(post_file, fn_name, post_hint)
+    try:
+        post_code = get_func_code_impl(post_file, fn_name, post_hint)
+    except Exception:
+        post_code = pre_code # fallback to pre_code
     if remove_doc:
         pre_code = remove_docstrings(pre_code)
         post_code = remove_docstrings(post_code)
