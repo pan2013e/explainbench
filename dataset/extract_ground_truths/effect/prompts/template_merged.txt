@@ -56,7 +56,7 @@ You must output two groups, in this exact order:
   - structurally similar (same variables, access pattern, or expression shape),
   - modified minimally so that it does NOT change across versions.
 - Apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator).
-- Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x`).
+- Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x` or expressions that always return the same value regardless of program state).
 - When possible, UNCHANGED expressions should be derived by replacing the version-discriminating subexpression of a CHANGED expression with a stable alternative, while preserving the surrounding logical structure (e.g., keep the same `and` composition).
 
 ### General Rules
