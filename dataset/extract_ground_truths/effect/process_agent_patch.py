@@ -4,8 +4,15 @@ from typing import Dict, List
 from pathlib import Path
 
 TEST_FILE_PATTERN = {
+    'astropy': re.compile(r'astropy/.*/tests/.*\.py$'),
     'django': re.compile(r'tests/.*\.py$'),
-    'pydata': re.compile(r'xarray/tests/.*\.py$'),
+    'matplotlib': re.compile(r'(lib/matplotlib/tests/.*\.py)|(lib/mpl_toolkits/tests/.*\.py)$'),
+    'pallets': re.compile(r'tests/.*\.py$'), # flask
+    'pydata': re.compile(r'xarray/tests/.*\.py$'), # xarray
+    'pytest-dev': re.compile(r'testing/.*\.py$'),
+    'scikit-learn': re.compile(r'sklearn/.*/tests/.*\.py$'),
+    'sphinx-doc': re.compile(r'tests/.*\.py$'),
+    'sympy': re.compile(r'sympy/.*/tests/.*\.py$'),
 }
 
 def extract_modified_lines(patch_content: str)->Dict[str, Dict]:
