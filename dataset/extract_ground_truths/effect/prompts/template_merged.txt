@@ -59,26 +59,26 @@ You must output two groups, in this exact order:
 - Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x`).
 
 ### General Rules
-1. Each expression must reference at least one variable from the function input. 
+1. Each expression must reference at least one variable available in the runtime local scope at the specified line; prefer variables shown in the provided complete variable states before and after the patch.
 2. The final value of `<expr>` must be:
    - a primitive (`None`, `int`, `float`, `str`, `bool`), OR
    - a built-in collection (`list`, `tuple`, `set`, `dict`) containing only primitives.
 3. Do not use mutation or side-effectful operations.
 4. Attribute access and method calls are allowed only if valid for the runtime object’s type.
 5. If `__return__` is present, treat it as a special local variable holding the function’s return value.
-6. Handling return vs. exception mismatches:
+6. Do not introduce undefined identifiers (avoid `NameError`), except that CHANGED expressions may raise `NameError` when referencing `__return__` in mismatch cases.
+7. Handling return vs. exception mismatches:
    - If exactly one version returns and the other raises an exception:
      - CHANGED expressions MUST reference `__return__`.
-     - Do NOT reference `__exception__`.
+     - In this mismatch case, do NOT reference `__exception__`.
      - UNCHANGED expressions must be evaluable in both versions without raising `NameError`.
      - In this mismatch case only, UNCHANGED expressions do not need to be structurally similar to CHANGED expressions.
      - If __return__ is present and equals None:
          - Do NOT use __return__ as the base expression you start from.
-         - Prefer generating expressions from variables referenced at the probe line
-            (and their dependencies), especially predicates appearing in assert / if statements.
+         - Prefer generating expressions from variables referenced at the probe line (and their dependencies), especially predicates appearing in assert / if statements.
          - Avoid expressions whose only purpose is checking the existence or value of __return__.
-     - In case of conflict, the rules in section 6 apply only to the specified mismatch scenario and override Rule 1.
-7. If `__return__` does not exist and `__exception__` is present in both versions:
+     - In case of conflict, the rules in section 7 apply only to the specified mismatch scenario and override Rule 1.
+8. If `__return__` does not exist and `__exception__` is present in both versions:
    - Treat `__exception__` as a restricted tuple-like value:
      - `__exception__[0]`: exception type string
      - `__exception__[1]`: exception message string
