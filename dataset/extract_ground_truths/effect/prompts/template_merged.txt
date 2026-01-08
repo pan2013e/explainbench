@@ -98,6 +98,7 @@ You must output two groups, in this exact order:
     - `{{"py/tuple": [1, 2]}}` represents a tuple `(1, 2)` at runtime.
     - `{{"py/type": "collections.OrderedDict"}}` represents the type `collections.OrderedDict`.
     - `{{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}}` represents an instance of `ClassName`.
+- Treat serialized types exactly as given; do not reinterpret or coerce values based on their textual appearance. For example, a serialized string "[a, b]" must be treated as a string, not as a list; only explicit structural markers (e.g., lists, tuples, py/TAGs) determine type.
 
 ### Output Schema (must follow exactly)
 Your output will be parsed using the following Pydantic models:
