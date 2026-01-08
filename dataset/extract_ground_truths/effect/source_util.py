@@ -6,6 +6,7 @@ import tempfile
 import docker
 
 from io import BytesIO
+from joblib import Memory
 from pathlib import Path, PurePosixPath
 from docker.client import DockerClient
 from docker.models.containers import Container
@@ -13,6 +14,9 @@ from swebench.harness.run_evaluation import GIT_APPLY_CMDS
 from swebench.harness.docker_utils import cleanup_container, copy_to_container
 
 from execution.util import get_test_patch
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+mem = Memory(os.path.join(DIR, '../../.joblib_cache'), verbose=0)
 
 __all__ = [
     'get_function_code',
@@ -158,6 +162,7 @@ def get_func_code_impl(code: str, fn_name: str, line_hint: int = None):
         chosen = visitor.candidates[0][0]
     return ast.unparse(chosen)
 
+@mem.cache
 def get_function_code(instance_id: str, file_path: str, fn_name: str, 
                       *, patch: str = None, line_hint: tuple[int, int] = None, remove_doc=False):
     assert fn_name not in ["<listcomp>", "<dictcomp>", "<setcomp>", "<genexpr>", "<lambda>"], "fn_name cannot be a comprehension or lambda"
