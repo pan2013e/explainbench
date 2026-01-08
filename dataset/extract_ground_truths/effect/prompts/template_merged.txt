@@ -57,6 +57,7 @@ You must output two groups, in this exact order:
   - modified minimally so that it does NOT change across versions.
 - Apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator).
 - Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x`).
+- When possible, UNCHANGED expressions should be derived by replacing the version-discriminating subexpression of a CHANGED expression with a stable alternative, while preserving the surrounding logical structure (e.g., keep the same `and` composition).
 
 ### General Rules
 1. Each expression must reference at least one variable available in the runtime local scope at the specified line; prefer variables shown in the provided complete variable states before and after the patch.
@@ -75,13 +76,19 @@ You must output two groups, in this exact order:
      - In this mismatch case only, UNCHANGED expressions do not need to be structurally similar to CHANGED expressions.
      - If __return__ is present and equals None:
          - Do NOT use __return__ as the base expression you start from.
+         - CHANGED expressions must reference at least one non-__return__ runtime variable in addition to __return__.
          - Prefer generating expressions from variables referenced at the probe line (and their dependencies), especially predicates appearing in assert / if statements.
          - Avoid expressions whose only purpose is checking the existence or value of __return__.
      - In case of conflict, the rules in section 7 apply only to the specified mismatch scenario and override Rule 1.
-8. If `__return__` does not exist and `__exception__` is present in both versions:
+     - In this mismatch case, CHANGED and UNCHANGED expressions should still share the same outer boolean structure; only the discriminating clause (e.g., referencing `__return__`) should differ.
+8. If `__return__ does not exist and `__exception__` is present in both versions:
    - Treat `__exception__` as a restricted tuple-like value:
      - `__exception__[0]`: exception type string
      - `__exception__[1]`: exception message string
+9. Structural parity constraint:
+   - CHANGED and UNCHANGED expressions must be syntactically indistinguishable at a glance.
+   - In particular, if CHANGED expressions predominantly use a logical form (e.g., `A and B`), UNCHANGED expressions must use the same logical form.
+   - Avoid structural cues (such as `and` appearing mainly in CHANGED expressions) that trivially reveal the correct answers.
 
 ### Notes on the Serialization of the Variable States
 - Variable states are serialized to describe runtime objects; expressions must target runtime semantics, not the serialization structure.
