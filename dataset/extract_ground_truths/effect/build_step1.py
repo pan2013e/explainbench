@@ -21,7 +21,10 @@ EXTRA_LONG_TIMEOUT = {
     'pylint-dev__pylint-7080': 600,
     'sphinx-doc__sphinx-9230': 600,
     'sympy__sympy-17655': 600,
-    'sympy__sympy-21379': 1200,
+}
+
+ADHOC_TEST_ID = {
+    ("20250720_Lingxi-v1.5_claude-4-sonnet-20250514", "sympy__sympy-17655"): 1,
 }
 
 def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=300):
@@ -31,6 +34,8 @@ def _process_instance(instance_id, agent, total_choices, depth_threshold, timeou
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(EXTRA_LONG_TIMEOUT.get(instance_id, timeout))
         test_id = 0
+        if (agent, instance_id) in ADHOC_TEST_ID:
+            test_id = ADHOC_TEST_ID[(agent, instance_id)]
         while True:
             try:
                 result = get_divergent_lines.main(
