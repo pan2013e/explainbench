@@ -11,6 +11,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from execution.util import get_instance_ids
 
+random.seed(42)
+
 def read_step3_results():
     with open(
         os.path.join(
