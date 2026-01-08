@@ -16,7 +16,7 @@ from swebench.harness.docker_utils import cleanup_container, copy_to_container
 from execution.util import get_test_patch
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-mem = Memory(os.path.join(DIR, '../../.joblib_cache'), verbose=0)
+mem = Memory(os.path.join(DIR, '../../../.joblib_cache'), verbose=0)
 
 __all__ = [
     'get_function_code',
