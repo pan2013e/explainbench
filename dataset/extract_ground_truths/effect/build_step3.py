@@ -205,7 +205,6 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 metadata["file_path"],
                 metadata["buggy_lineno"],
                 metadata["patched_lineno"],
-                metadata["test_id"],
                 metadata["buggy_line_count"],
                 metadata["patched_line_count"],
                 metadata["before_or_after"],
