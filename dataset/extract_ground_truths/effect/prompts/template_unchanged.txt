@@ -30,67 +30,40 @@ If exactly one of the buggy or patched executions has a return value and the oth
 5. Follow `### Actions to Build the Expressions` to build more complex `<expr>`
 
 ### Actions to Build the Expressions
-You choose 1 or more of the following to build more expressions with similar complexity as the correct expressions.
+You may choose one or more of the following to build more complex expressions from the seed expression or other in-scope variables that differ between before and after.
 
 1. Binary operations
-   - Combine the seed expression (or a subpart of it) with:
-     - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`, ``
-     - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
-     - logical operators: `and`, `or`, `not`
-     - identity/membership: `is`, `is not`, `in`, `not in`
-   - Example:
-     - `seed_expr + 1`
-     - `seed_expr == other_var`
-     - `seed_expr in some_list`
+  - arithmetic operators: `+`, `-`, `*`, `/`, `//`, `%`
+  - comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
+  - logical operators: `and`, `or`, `not`
+  - identity/membership operators: `is`, `is not`, `in`, `not in`
 
 2. Attribute access
-   - Access attributes or methods of the seed expression or other variables:
+   - Access attributes or methods of the variables:
      - `foo.bar`, `foo.bar()`
-   - Only use attributes/methods that exist in the provided variable states.
-   - Example:
-     - `seed_expr.lower()`
-     - `result.status_code`
+   - Only use attributes or methods that exist in the provided variable states.
 
 3. Indexing and slicing
    - Index or slice sequences, mappings, or numpy arrays:
      - `foo[bar]`, `foo[0]`, `foo[-1]`, `foo[1:3]`
-   - Example:
-     - `seed_expr[0]`
-     - `seed_expr['key']`
-     - `seed_expr[:3]`
 
 4. Wrapping with functions
-   - Wrap the seed expression or a related expression using:
+   - Wrap the expression using:
      1. Python built-ins:
         `len`, `sum`, `min`, `max`, `any`, `all`, `sorted`, `tuple`, `list`, `dict`, `set`, `bool`, `str`, `int`, `float`, `abs`, `round`, `hash`, `type`, `isinstance`, `getattr`, `hasattr`, `enumerate`, `zip`
-     2. Numpy functions (if `np` is available in the states):
+     2. NumPy functions (if `np` is available in the states):
         `np.allclose`, `np.array_equal`, `np.isnan`, `np.isclose`, etc.
-   - Example:
-     - `len(seed_expr)`
-     - `sorted(seed_expr)`
-     - `np.array_equal(seed_expr, other_var)`
 
 5. Conditional expressions
    - Use Python’s ternary operator to build predicates that can flip between before and after:
      - `expr_if_true if condition else expr_if_false`
-   - Example:
-     - `1 if seed_expr is None else 0`
-     - `'ok' if seed_expr == other_var else 'diff'`
 
 6. Combination with other changed variables
-   - Identify variables whose values differ between before and after, and combine them with the seed expression:
-     - arithmetic, comparison, logical, or function-based combinations.
-   - Example:
-     - `seed_expr - changed_var`
-     - `changed_var in seed_expr`
-     - `len(changed_list) - len(seed_expr)`
+   - Identify variables whose values differ between before and after, and combine them with the generated expression that differs in value.
 
 7. Collection-building expressions
    - Build small collections of primitives or expressions:
      - tuples, lists, sets, dicts
-   - Example:
-     - `[seed_expr, other_var]`
-     - `(seed_expr == other_var, other_var is None)`
 
 ### Relationship to Existing Expressions
 1. `<expr>` must NOT be identical to any existing expression.
