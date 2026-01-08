@@ -71,6 +71,9 @@ def main(args=None):
     parser.add_argument(
         "--inspector-mode", type=str, choices=['before', 'after'], default='before',
     )
+    parser.add_argument(
+        "--bp-func", type=str, default=None, help="Function name where breakpoint is set",
+    )
     args = parser.parse_args(args)
     inspect(**vars(args))
 
