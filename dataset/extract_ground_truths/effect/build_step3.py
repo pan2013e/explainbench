@@ -139,7 +139,7 @@ def compute_expr_change_map(patched, buggy):
 
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
-    run_id = f"inspect.{agent}.1021.{expr_id}"
+    run_id = f"inspect.{agent}.1020.{expr_id}"
     log_dir = os.path.join(
         BASE_OUTPUT_DIR,
         run_id,
@@ -185,8 +185,8 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
         if not metadata:
             return job.instance_id, None
 
-        changed_candidates = metadata["changed_candidates"]
-        unchanged_candidates = metadata["unchanged_candidates"]
+        changed_candidates = metadata.get("changed_candidates", [])
+        unchanged_candidates = metadata.get("unchanged_candidates", [])
         all_candidates = changed_candidates + unchanged_candidates
 
         result: Dict[str, Any] = {}
@@ -325,16 +325,18 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3", "step2.gold.json")
-    BASE_OUTPUT_DIR = "/home/zhiyuan/explainbench/logs/run_evaluation"
-    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3"
-    OUTPUT_JSON = "step3.json"
-    OUTPUT_JSON_GOLD = "step3.gold.json"
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.change-only.gold.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.change-only.gold.json")
+    BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
+    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
+    OUTPUT_JSON = "step3.change-only.json"
+    OUTPUT_JSON_GOLD = "step3.change-only.gold.json"
     AGENTS = [
+        "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250612_trae",
+        "20250928_trae_doubao_seed_code",
+        "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
     # ------------------------------------------- #
