@@ -258,6 +258,7 @@ def get_logical_lines(code: str, line_nums):
             "EOF in multi-line statement" in msg
             or "unexpected EOF in multi-line statement" in msg
             or "unexpected EOF while parsing" in msg
+            or "EOF in multi-line string" in msg
         ):
             flush()
         else:
