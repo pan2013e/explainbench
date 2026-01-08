@@ -23,6 +23,12 @@ def read_json(input_path):
     with open(input_path, "r") as f:
         return json.load(f)
 
+def extract_qualname(func_name):
+    idx = func_name.find(':')
+    if idx == -1:
+        return func_name
+    return func_name[idx+1:]
+
 def execute_candidate_expressions(
             expression_candidates: list,
             instance_id: str,
@@ -30,11 +36,10 @@ def execute_candidate_expressions(
             file_path: str,
             buggy_lineno: int,
             patched_lineno: int,
-            test_id: int,
             buggy_line_count: int,
             patched_line_count: int,
             before_or_after: str,
-            should_change=True,
+            bp_func_name: str,
             expr_id=0,
         ):
     stdout = StringIO()
@@ -51,6 +56,7 @@ def execute_candidate_expressions(
             "--pre-count", str(buggy_line_count),
             "--post-count", str(patched_line_count),
             "--inspector-mode", before_or_after,
+            "--bp-func", bp_func_name,
         ])
 
 def rv_equals(v1, v2):
@@ -203,6 +209,7 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 metadata["buggy_line_count"],
                 metadata["patched_line_count"],
                 metadata["before_or_after"],
+                extract_qualname(metadata["function_name"]),
                 expr_id=job.expr_id,
             )
 
