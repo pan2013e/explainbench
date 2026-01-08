@@ -46,7 +46,11 @@ def index_to_label(index: int) -> str:
 def get_event_count(event: Event, traces: Traces):
     count = 0
     for e in traces._events:
-        if e.line_number == event.line_number and e.filepath == event.filepath:
+        if (
+            e.line_number == event.line_number
+            and e.filepath == event.filepath
+            and e.function_name == event.function_name
+        ):
             count += 1
         if e is event:
             break
