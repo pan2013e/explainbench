@@ -22,32 +22,21 @@ class Expression(BaseModel):
 class ExpressionList(BaseModel):
     expressions: list[Expression]
 
-with open(os.path.join(DIR, "prompts/template_changed.txt"), "r") as f:
-    TEMPLATE_CHANGED = f.read()
-
-with open(os.path.join(DIR, "prompts/template_unchanged.txt"), "r") as f:
-    TEMPLATE_UNCHANGED = f.read()
+with open(os.path.join(DIR, "prompts/template_merged.txt"), "r") as f:
+    TEMPLATE = f.read()
 
 MODEL = Model("gpt-5.1-2025-11-13", n=1, reasoning_effort="low")
 
-def main(code, line, diff, before, after, should_change, n_output, changed_expressions=None):
-    if should_change:
-        prompt = TEMPLATE_CHANGED.format(
-            code=code,
-            line=line,
-            diff=diff,
-            before=before,
-            after=after,
-            n_output=n_output,
-        )
-    else:
-        prompt = TEMPLATE_UNCHANGED.format(
-            code=code,
-            line=line,
-            diff=diff,
-            before=before,
-            after=after,
-            n_output=n_output,
-        )
+def main(code, line, diff, before, after, n_changed, n_unchanged):
+    prompt = TEMPLATE.format(
+        code=code,
+        line=line,
+        diff=diff,
+        before=before,
+        after=after,
+        n_total=n_changed+n_unchanged,
+        n_changed=n_changed,
+        n_unchanged=n_unchanged
+    )
     expr_list = MODEL.infer_once(prompt, ExpressionList)
     return expr_list

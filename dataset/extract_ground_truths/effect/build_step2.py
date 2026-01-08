@@ -79,7 +79,7 @@ def infer_expressions(pre_code, post_code, metadata, should_change, n_output, ch
     )
     return expr
 
-def process_agent(agent_data, agent, instance_ids, n_output):
+def process_agent(agent_data, agent, instance_ids, n_changed, n_unchanged):
     results = {}
         
     def process_instance(instance_id):
@@ -106,22 +106,16 @@ def process_agent(agent_data, agent, instance_ids, n_output):
             )
 
             instance_result = {}
-            changed_expressions = None
-            # for should_change in (True, False):
-            for should_change in (True,):
-                expr_list = infer_expressions(
-                    pre_code,
-                    post_code,
-                    metadata,
-                    should_change,
-                    n_output,
-                    changed_expressions,
-                )
-                key = "changed_candidates" if should_change else "unchanged_candidates"
-                expr_strings = [x.expr for x in expr_list.expressions]
-                instance_result[key] = expr_strings
-                if should_change:
-                    changed_expressions = expr_strings
+            expr_list = infer_expressions(
+                pre_code,
+                post_code,
+                metadata,
+                n_changed,
+                n_unchanged,
+            )
+            expr_strings = [x.expr for x in expr_list.expressions]
+            instance_result["changed_candidates"] = expr_strings[:n_changed]
+            instance_result["unchanged_candidates"] = expr_strings[n_changed:] 
             instance_result.update(metadata)
             instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
@@ -169,7 +163,8 @@ if __name__ == "__main__":
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
     OUTPUT_JSON = "step2.change-only.json"
     DIR = os.path.dirname(os.path.abspath(__file__))
-    N_OUTPUT = 10
+    N_CHANGED = 10
+    N_UNCHANGED = 10
     # ------------------------------------------- #
 
     step1 = read_json(STEP1_PATH)
@@ -182,7 +177,7 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step1, agent, instance_ids, N_OUTPUT): agent
+            executor.submit(process_agent, step1, agent, instance_ids, N_CHANGED, N_UNCHANGED): agent
             for agent in agents_to_process
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
