@@ -50,6 +50,7 @@ def get_event_count(event: Event, traces: Traces):
             e.line_number == event.line_number
             and e.filepath == event.filepath
             and e.function_name == event.function_name
+            and e.event_type != 'Function'
         ):
             count += 1
         if e is event:
