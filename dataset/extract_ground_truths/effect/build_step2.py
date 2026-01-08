@@ -61,7 +61,7 @@ def get_simple_function_name(metadata):
     return name
 
 @backoff.on_exception(backoff.expo, ValidationError, max_tries=5)
-def infer_expressions(pre_code, post_code, metadata, should_change, n_output, changed_expressions):
+def infer_expressions(pre_code, post_code, metadata, n_changed, n_unchanged):
     expr = infer_main(
         build_fn_code(pre_code, post_code),
         build_statement(
@@ -73,9 +73,8 @@ def infer_expressions(pre_code, post_code, metadata, should_change, n_output, ch
         metadata["diff"],
         metadata["buggy_variables"],
         metadata["patched_variables"],
-        should_change,
-        n_output,
-        changed_expressions
+        n_changed,
+        n_unchanged
     )
     return expr
 
@@ -151,7 +150,7 @@ if __name__ == "__main__":
 
     # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json"
-    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.change-only.gold.json")
+    STEP2_GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.run2.gold.json1")
     AGENTS = [
         # "20250603_Refact_Agent_claude-4-sonnet",
         # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
@@ -161,7 +160,7 @@ if __name__ == "__main__":
         "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
-    OUTPUT_JSON = "step2.change-only.json"
+    OUTPUT_JSON = "step2.merged.run2.json1"
     DIR = os.path.dirname(os.path.abspath(__file__))
     N_CHANGED = 10
     N_UNCHANGED = 10
@@ -170,6 +169,20 @@ if __name__ == "__main__":
     step1 = read_json(STEP1_PATH)
     results = {}
     instance_ids = get_instance_ids(["all"])
+    instance_ids = [
+        "astropy__astropy-14365",
+        # "astropy__astropy-14508",
+        "astropy__astropy-14309",
+        "django__django-14725",
+        # "django__django-12050",
+        # "django__django-16139",
+        "sympy__sympy-16597",
+        "sympy__sympy-22714",
+        # "sympy__sympy-24562",
+        # "matplotlib__matplotlib-24570",
+        # "matplotlib__matplotlib-21568",
+        "matplotlib__matplotlib-24177",
+    ]
     agents_to_process = AGENTS.copy()
     
     if os.path.exists(STEP2_GOLD_PATH):
@@ -194,7 +207,7 @@ if __name__ == "__main__":
     
     with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
         json.dump(results, f, indent=2)
-    print(
+        print(
         "Saved step2 results to {}".format(os.path.join(OUTPUT_DIR, OUTPUT_JSON)),
         f"{OUTPUT_DIR}/{OUTPUT_JSON}",
     )
