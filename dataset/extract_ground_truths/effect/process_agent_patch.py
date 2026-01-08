@@ -8,7 +8,9 @@ TEST_FILE_PATTERN = {
     'django': re.compile(r'tests/.*\.py$'),
     'matplotlib': re.compile(r'(lib/matplotlib/tests/.*\.py)|(lib/mpl_toolkits/tests/.*\.py)$'),
     'pallets': re.compile(r'tests/.*\.py$'), # flask
+    'psf': re.compile(r'tests/.*\.py$'), # requests
     'pydata': re.compile(r'xarray/tests/.*\.py$'), # xarray
+    'pylint-dev': re.compile(r'tests/.*\.py$'),
     'pytest-dev': re.compile(r'testing/.*\.py$'),
     'scikit-learn': re.compile(r'sklearn/.*/tests/.*\.py$'),
     'sphinx-doc': re.compile(r'tests/.*\.py$'),
