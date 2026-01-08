@@ -55,9 +55,9 @@ You must output two groups, in this exact order:
 - Each UNCHANGED expression should be a plausible alternative to a CHANGED expression:
   - structurally similar (same variables, access pattern, or expression shape),
   - modified minimally so that it does NOT change across versions.
-- Apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator).
 - Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x` or expressions that always return the same value regardless of program state).
-- When possible, UNCHANGED expressions should be derived by replacing the version-discriminating subexpression of a CHANGED expression with a stable alternative, while preserving the surrounding logical structure (e.g., keep the same `and` composition).
+- When possible, apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator) to the CHANGED expressions, while preserving the overall logical structure.
+- When possible, form each UNCHANGED expression by taking a CHANGED expression and replacing only the part that depends on the patch (e.g., a clause involving __return__) with a similar clause that is stable across versions, while keeping the rest of the expression the same (such as preserving the use of and).
 
 ### General Rules
 1. Each expression must reference at least one variable available in the runtime local scope at the specified line; prefer variables shown in the provided complete variable states before and after the patch.
