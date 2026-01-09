@@ -213,6 +213,7 @@ EXCLUDED_IDS = [
     # (Based on developer patches)
     "django__django-13279",
     "django__django-13551",
+    "django__django-16801",
 ]
 
 class _IterableReader(RawIOBase):
