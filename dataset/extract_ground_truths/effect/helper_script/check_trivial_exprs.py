@@ -27,9 +27,12 @@ with open(file, "r", encoding="utf-8") as f:
 for agent in data:
     for instance in data[agent]:
         print(f"Processing agent={agent}, instance={instance}", file=sys.stderr)
+        if not "valid_unchanged_expressions" in data[agent][instance]:
+            continue
         valid_unchanged = data[agent][instance]["valid_unchanged_expressions"]
         if len(valid_unchanged) == 0:
             print(f"> Empty valid_unchanged_expressions: agent={agent}, instance={instance}")
+            continue
         message = prompt.format(expressions="\n".join(valid_unchanged))
         answer = model.infer_once(message, Response)
         if answer.trivial_expressions:
