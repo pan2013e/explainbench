@@ -26,7 +26,7 @@ def get_pytest_addopts(mode):
     else:
         bp_line = GLOBAL_ARGS["post_bp_line"]
         count = GLOBAL_ARGS["post_count"]
-    return f'--output=/{mode}_traces --mode=inspector --bp-file={GLOBAL_ARGS["bp_file"]} --bp-line={bp_line} --expr=\'{GLOBAL_ARGS["expr"]}\' --count={count} --inspector-mode={GLOBAL_ARGS["inspector_mode"]} --bp-func={GLOBAL_ARGS["bp_func"]}'
+    return f'--output=/{mode}_traces --mode=inspector --bp-file={GLOBAL_ARGS["bp_file"]} --bp-line={bp_line} --expr=\'{GLOBAL_ARGS["expr"]}\' --count={count} --inspector-mode={GLOBAL_ARGS["inspector_mode"]} --bp-func=\'{GLOBAL_ARGS["bp_func"]}\''
 
 def get_pth_addenv(mode):
     if mode == "buggy":
