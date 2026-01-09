@@ -209,6 +209,10 @@ EXCLUDED_IDS = [
     "sympy__sympy-21379",
     "sympy__sympy-21930",
     "sympy__sympy-22456",
+    # Delta behavior is randomized or encoded
+    # (Based on developer patches)
+    "django__django-13279",
+    "django__django-13551",
 ]
 
 class _IterableReader(RawIOBase):
