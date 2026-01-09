@@ -203,15 +203,7 @@ if __name__ == "__main__":
         import io
         output = io.StringIO()
         pre = metadata['buggy_function_param']
-        post = metadata['patched_function_param']
-        if params_eq(pre, post):
-            print(pre, file=output)
-        else:
-            print("\n# Before Patch:\n", file=output)
-            print(pre, file=output)
-            print("\n# After Patch:\n", file=output)
-            print(post, file=output)
-            print("\n", file=output)
+        print(pre, file=output)
         contents = output.getvalue()
         output.close()
         return contents
@@ -221,7 +213,7 @@ if __name__ == "__main__":
         if question_type == 'expression changes':
             ctx = {
                 'function_code_before_patch': data['function_code_before_patch'],
-                'function_inputs': get_function_input(data),
+                'function_parameters_before_patch': get_function_input(data),
                 'line': data['location'],
                 'choices': data['choices'],
                 'before_or_after': data['before_or_after'],
@@ -230,7 +222,7 @@ if __name__ == "__main__":
         elif question_type == 'reachability':
             ctx = {
                 'function_code_before_patch': data['function_code_before_patch'],
-                'function_inputs': get_function_input(data),
+                'function_parameters_before_patch': get_function_input(data),
                 'choices': data['choices'],
             }
             task_cls = Reachability
@@ -242,7 +234,7 @@ if __name__ == "__main__":
         return ctx, gt, task_cls
 
 
-    model = Model('gemini/gemini-2.5-flash', n=5)
+    model = Model('gpt-5-mini-2025-08-07', n=5, reasoning_effort='none')
     with open(STEP2_PATH, 'r') as f:
         step2_data = json.load(f)
 
