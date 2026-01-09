@@ -23,12 +23,17 @@ if os.path.exists(ENV_FILE):
 Schema = TypeVar('Schema', bound=BaseModel)
 
 COSTINFO = {
-    # https://ai.google.dev/gemini-api/docs/pricing#gemini-2.5-flash-lite
-    'gemini/gemini-2.5-flash-lite': {
+    'gpt-5.2-2025-12-11': {
         'currency': '$',
         'unit': 1_000_000,
-        'input_price': 0.10,
-        'output_price': 0.40,
+        'input_price': 1.75,
+        'output_price': 14.00,
+    },
+    'gpt-5-mini-2025-08-07': {
+        'currency': '$',
+        'unit': 1_000_000,
+        'input_price': 0.25,
+        'output_price': 2.00,
     }
 }
 
