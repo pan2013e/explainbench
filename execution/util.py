@@ -215,6 +215,7 @@ EXCLUDED_IDS = [
     "django__django-13551",
     "django__django-16801",
     "pytest-dev__pytest-7236",
+    "pytest-dev__pytest-7432",
     "pytest-dev__pytest-7490",
 ]
 
