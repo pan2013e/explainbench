@@ -168,7 +168,7 @@ if __name__ == "__main__":
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
-        # "gold",
+        "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
     OUTPUT_JSON = "step2.json"
