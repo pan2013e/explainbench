@@ -331,18 +331,18 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.run2.gold.json1")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.run2.gold.json1")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
     BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
     OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
-    OUTPUT_JSON = "step3.merged.run2.json"
-    OUTPUT_JSON_GOLD = "step3.merged.run2.gold.json"
+    OUTPUT_JSON = "step3.json"
+    OUTPUT_JSON_GOLD = "step3.gold.json"
     AGENTS = [
-        # "20250603_Refact_Agent_claude-4-sonnet",
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250928_trae_doubao_seed_code",
-        # "20250807_mini-v1.7.0_gpt-5-mini",
+        "20250603_Refact_Agent_claude-4-sonnet",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250928_trae_doubao_seed_code",
+        "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
     # ------------------------------------------- #
@@ -353,20 +353,6 @@ if __name__ == "__main__":
     
     results = {}
     instance_ids = get_instance_ids(["all"])
-    instance_ids = [
-        "astropy__astropy-14365",
-        # "astropy__astropy-14508",
-        "astropy__astropy-14309",
-        "django__django-14725",
-        # "django__django-12050",
-        # "django__django-16139",
-        "sympy__sympy-16597",
-        "sympy__sympy-22714",
-        # "sympy__sympy-24562",
-        # "matplotlib__matplotlib-24570",
-        # "matplotlib__matplotlib-21568",
-        "matplotlib__matplotlib-24177",
-    ]
     # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
     #     instance_ids = f.readlines()
 
