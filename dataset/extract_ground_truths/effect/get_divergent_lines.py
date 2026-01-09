@@ -26,6 +26,7 @@ RANDOMIZED_FUNCTIONS = [
     'django.contrib.auth.base_user:AbstractBaseUser.set_password',
     'django.core.cache.backends.base:BaseCache.get_backend_timeout',
     'sphinx.util.logging:SphinxLoggerAdapter.log',
+    'tests.utils:create_server.<locals>.server',
 ]
 WRAPPER_FUNCTIONS = [
     'sympy.multipledispatch.dispatcher:Dispatcher.__call__',
