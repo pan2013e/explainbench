@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 RANDOMIZED_FUNCTIONS = [
     'django.contrib.auth.base_user:AbstractBaseUser.set_password',
     'django.core.cache.backends.base:BaseCache.get_backend_timeout',
+    'sphinx.util.logging:SphinxLoggerAdapter.log',
 ]
 WRAPPER_FUNCTIONS = [
     'sympy.multipledispatch.dispatcher:Dispatcher.__call__',
