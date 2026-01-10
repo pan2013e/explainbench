@@ -199,7 +199,7 @@ if __name__ == "__main__":
                 process_agent,
                 step1,
                 agent,
-                instance_ids if not instance_ids_per_agent else instance_ids_per_agent,
+                instance_ids if not instance_ids_per_agent else instance_ids_per_agent[agent],
                 N_CHANGED,
                 N_UNCHANGED,
                 DO_INFERENCE
