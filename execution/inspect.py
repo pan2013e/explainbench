@@ -20,7 +20,7 @@ def inspect(**kwargs):
         clean=False,
         open_file_limit=4096,
         run_id=f"inspect.{kwargs["agent"]}.{os.getuid()}.{kwargs["expr_id"]}",
-        timeout=1800,
+        timeout=3600,
         namespace="swebench",
         rewrite_reports=False,
         modal=False,
