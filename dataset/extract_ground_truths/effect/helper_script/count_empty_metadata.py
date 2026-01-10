@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from execution.util import EXCLUDED_IDS
 
-path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step1.json")
+path = Path("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json")
 
 with path.open() as f:
     data = json.load(f)

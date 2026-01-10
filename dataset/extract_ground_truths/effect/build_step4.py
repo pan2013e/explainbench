@@ -16,7 +16,7 @@ random.seed(42)
 def read_step3_results():
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step3-filtered.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
         ),
         "r",
     ) as f:
@@ -141,7 +141,7 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             results[instance_id] = {
                 "choices": choices,
                 "answer": answer,
-                "question_type": "expression changes"
+                "question_type": "expression changes",
                 **metadata,
             }
         except KeyError:
@@ -160,12 +160,14 @@ if __name__ == "__main__":
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
     AGENTS = [
+        "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250612_trae",
+        "20250928_trae_doubao_seed_code",
+        "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/"
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
     OUTPUT_JSON = "step4.json"
     # ------------------------------------------- #
     
