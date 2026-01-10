@@ -120,6 +120,7 @@ EXCLUDED_IDS = [
     # (Based on developer and agent patches)
     "astropy__astropy-14539",
     "django__django-7530",
+    "django__django-11095",
     "django__django-11149",
     "django__django-11400",
     "django__django-11749",
@@ -159,6 +160,8 @@ EXCLUDED_IDS = [
     # Gigantic trace files, very high memory consumption
     # (Based on developer patches)
     "sphinx-doc__sphinx-7590",
+    # (Based on agent patched)
+    "matplotlib__matplotlib-24177",
     # Excluded due to the distance between 
     # without-depth-filter and with-depth-filter
     # is larger than 1 (not in the same function)
@@ -196,7 +199,7 @@ EXCLUDED_IDS = [
     # Function source code is unavailable at divergent line
     # e.g., <lambda>, <listcomp>, <dictcomp>, <genexpr> and dynamically generated functions
     # e.g., dynamically generated source code
-    # (Based on developer patch)
+    # (Based on developer patches)
     "django__django-11551",
     "django__django-12039",
     "django__django-16899",
@@ -218,6 +221,9 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-7236",
     "pytest-dev__pytest-7432",
     "pytest-dev__pytest-7490",
+    # Tracer/Inspector does not support async/multi-process functions
+    # (Based on developer patches)
+    "django__django-13810",
 ]
 
 class _IterableReader(RawIOBase):
