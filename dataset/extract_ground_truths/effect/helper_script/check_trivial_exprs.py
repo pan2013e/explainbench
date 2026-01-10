@@ -1,6 +1,9 @@
-import sys
+import argparse
 import json
+import os
+import sys
 from typing import Optional
+
 from evaluation.inference import Model
 from pydantic import BaseModel
 
@@ -8,7 +11,8 @@ class Response(BaseModel):
     trivial_expressions: Optional[list[str]]
 
 model = Model("gpt-5.2", n=1)
-file = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
+DEFAULT_INPUT_FILE = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
+DEFAULT_OUTPUT_FILE = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/trivial_exprs.json"
 prompt = '''You will be given a list of Python expressions but no context. Your task is to identify and return only those expressions that are trivial, meaning you do not require any program context to evaluate their values and the result is always the same constant value. If there are no trivial expressions, return null.
 
 For example:
@@ -21,13 +25,26 @@ Expressions:
 {expressions}
 '''
 
-with open(file, "r", encoding="utf-8") as f:
+parser = argparse.ArgumentParser(description="Identify trivial expressions and save results as JSON.")
+parser.add_argument("--input", default=DEFAULT_INPUT_FILE, help="Path to step3.json input file.")
+parser.add_argument("--output", default=DEFAULT_OUTPUT_FILE, help="Path to write JSON results.")
+args = parser.parse_args()
+
+with open(args.input, "r", encoding="utf-8") as f:
     data = json.load(f)
+
+if os.path.exists(args.output):
+    with open(args.output, "r", encoding="utf-8") as f:
+        results: dict[str, dict[str, list[str]]] = json.load(f)
+else:
+    results = {}
 
 for agent in data:
     for instance in data[agent]:
+        if agent in results and instance in results[agent]:
+            continue
         print(f"Processing agent={agent}, instance={instance}", file=sys.stderr)
-        if not "valid_unchanged_expressions" in data[agent][instance]:
+        if "valid_unchanged_expressions" not in data[agent][instance]:
             continue
         valid_unchanged = data[agent][instance]["valid_unchanged_expressions"]
         if len(valid_unchanged) == 0:
@@ -39,3 +56,9 @@ for agent in data:
             print(f"> Suggested trivial expressions for agent={agent}, instance={instance}")
             for expr in answer.trivial_expressions:
                 print(f">>  {expr}")
+            results.setdefault(agent, {})[instance] = answer.trivial_expressions
+        else:
+            results.setdefault(agent, {})[instance] = []
+
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2, sort_keys=True)
