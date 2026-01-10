@@ -29,6 +29,7 @@ RANDOMIZED_FUNCTIONS = [
     'sphinx.environment:BuildEnvironment.__getstate__',
     '__init__:SphinxTransform.env',
     'tests.utils:create_server.<locals>.server',
+    'xarray.tests:create_test_data',
 ]
 WRAPPER_FUNCTIONS = [
     'sympy.multipledispatch.dispatcher:Dispatcher.__call__',
