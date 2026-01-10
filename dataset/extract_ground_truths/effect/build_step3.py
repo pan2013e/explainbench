@@ -331,8 +331,8 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.merged.json")
     BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
     OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
     OUTPUT_JSON = "step3.json"
@@ -345,6 +345,7 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
+    PARTIAL_RUN_JSON = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1_delta.json"
     # ------------------------------------------- #
     
     step2 = read_json(STEP2_PATH)
@@ -352,7 +353,14 @@ if __name__ == "__main__":
     step2["gold"] = gold["gold"]
     
     results = {}
-    instance_ids = get_instance_ids(["all"])
+    if os.path.exists(PARTIAL_RUN_JSON):
+        with open(PARTIAL_RUN_JSON, "r") as f:
+            instance_ids_per_agent = json.load(f)
+        print("[INFO] DO PARTIAL RUN!")
+    else:
+        instance_ids_per_agent = {}
+        instance_ids = get_instance_ids(["all"])
+
     # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
     #     instance_ids = f.readlines()
 
@@ -365,7 +373,12 @@ if __name__ == "__main__":
             results["gold"] = read_json(STEP3_GOLD_PATH)["gold"]
             print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries")
     else:
-        results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
+        results["gold"] = process_agent(
+            step2, 
+            "gold",
+            instance_ids if not instance_ids_per_agent else instance_ids_per_agent.get("gold", []),
+            do_execute,
+            do_validate)
         if do_validate:
             with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
                 json.dump(results, f, indent=2)
@@ -374,7 +387,12 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent
+            executor.submit(process_agent, 
+                            step2, 
+                            agent, 
+                            instance_ids if not instance_ids_per_agent else instance_ids_per_agent[agent], 
+                            do_execute, 
+                            do_validate): agent
             for agent in AGENTS if agent and agent != "gold"
         }
         for future in as_completed(futures):
