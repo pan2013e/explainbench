@@ -159,8 +159,7 @@ if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json"
     STEP2_GOLD_PATH = os.path.join(
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step",
-        "step2.gold.json",
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
     )
     AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
@@ -175,11 +174,19 @@ if __name__ == "__main__":
     N_CHANGED = 10
     N_UNCHANGED = 10
     DO_INFERENCE = True
+    PARTIAL_RUN_JSON = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1_delta.json"
     # ------------------------------------------- #
     start = time.time()
     step1 = read_json(STEP1_PATH)
     results = {}
-    instance_ids = get_instance_ids(["all"])
+    if os.path.exists(PARTIAL_RUN_JSON):
+        with open(PARTIAL_RUN_JSON, "r") as f:
+            instance_ids_per_agent = json.load(f)
+        STEP2_GOLD_PATH = STEP2_GOLD_PATH.replace(".json" ,".partial.json")
+        OUTPUT_JSON = OUTPUT_JSON.replace(".json" ,".partial.json")
+    else:
+        instance_ids_per_agent = {}
+        instance_ids = get_instance_ids(["all"])
 
     agents_to_process = AGENTS.copy()
     
@@ -192,7 +199,7 @@ if __name__ == "__main__":
                 process_agent,
                 step1,
                 agent,
-                instance_ids,
+                instance_ids if not instance_ids_per_agent else instance_ids_per_agent,
                 N_CHANGED,
                 N_UNCHANGED,
                 DO_INFERENCE
