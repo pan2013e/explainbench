@@ -36,6 +36,9 @@ Evaluation context:
 - Expressions must be pure (no mutation or side effects).
 
 Produce exactly {n_total} Python expressions `<expr>`.
+First generate more candidate expressions than needed.
+Then discard any that are trivial, invariant, or vacuous.
+Finally return exactly {n_total} expressions.
 
 You must output two groups, in this exact order:
 
@@ -50,24 +53,8 @@ You must output two groups, in this exact order:
    - Same value (`==`) in both versions, OR
    - Both versions raise an exception of the same type and same message (when message is stable)
 
-### Rules to Construct UNCHANGED Expressions
-- UNCHANGED expressions act as distractors.
-- Each UNCHANGED expression should be a plausible alternative to a CHANGED expression:
-  - structurally similar (same variables, access pattern, or expression shape),
-  - modified minimally so that it does NOT change across versions.
-- Avoid expressions that are obviously invariant, unrelated, constant, or syntactically trivial (e.g., `x == x` or expressions that always return the same value regardless of program state).
-   - trivial expressions are expressions that do not require any program context to evaluate their values and the result is always the same constant value
-   - example:
-      - constant expressions like "42", "'hello'", or "3.14" are trivial.
-      - logical expressions with short-circuit evaluation like "True and False", "True or A" or "False and A" are trivial.
-      - logical expressions like "A and not A" or "A or not A" are trivial. You need to think and deduce that these expressions will always evaluate to False or True respectively, regardless of the value of A.
-      - comparisons like "A == A", "3 > 2", or "'x' in 'xyz'" are trivial.
-- When possible:
-   - apply small neutralizing changes (e.g., stable key/index, unchanged attribute, no-op wrapper, altered comparator) to the CHANGED expressions, while preserving the overall logical structure, or
-   - form each UNCHANGED expression by taking a CHANGED expression and replacing only the part that depends on the patch (e.g., a clause involving __return__) with a similar clause that is stable across versions, while keeping the rest of the expression the same (such as preserving the use of and).
-
 ### General Rules
-1. Each expression must reference at least one variable available in the runtime local scope at the specified line; prefer variables shown in the provided complete variable states before and after the patch.
+1. Each expression must reference at least one variable available in the runtime local scope at the specified line
 2. The final value of `<expr>` must be:
    - a primitive (`None`, `int`, `float`, `str`, `bool`), OR
    - a built-in collection (`list`, `tuple`, `set`, `dict`) containing only primitives.
@@ -81,21 +68,54 @@ You must output two groups, in this exact order:
      - In this mismatch case, do NOT reference `__exception__`.
      - UNCHANGED expressions must be evaluable in both versions without raising `NameError`.
      - In this mismatch case only, UNCHANGED expressions do not need to be structurally similar to CHANGED expressions.
-     - If __return__ is present and equals None:
-         - Do NOT use __return__ as the base expression you start from.
-         - CHANGED expressions must reference at least one non-__return__ runtime variable in addition to __return__.
+     - If `__return__` is present and equals `None`:
+         - Do NOT use `__return__` as the base expression you start from.
+         - CHANGED expressions must reference at least one non-`__return__` runtime variable in addition to `__return__`.
          - Prefer generating expressions from variables referenced at the probe line (and their dependencies), especially predicates appearing in assert / if statements.
-         - Avoid expressions whose only purpose is checking the existence or value of __return__.
+         - Avoid expressions whose only purpose is checking the existence or value of `__return__`.
      - In case of conflict, the rules in section 7 apply only to the specified mismatch scenario and override Rule 1.
      - In this mismatch case, CHANGED and UNCHANGED expressions should still share the same outer boolean structure; only the discriminating clause (e.g., referencing `__return__`) should differ.
-8. If `__return__ does not exist and `__exception__` is present in both versions:
+8. If `__return__` does not exist and `__exception__` is present in both versions:
    - Treat `__exception__` as a restricted tuple-like value:
      - `__exception__[0]`: exception type string
      - `__exception__[1]`: exception message string
-9. Structural parity constraint:
-   - CHANGED and UNCHANGED expressions must be syntactically indistinguishable at a glance.
-   - In particular, if CHANGED expressions predominantly use a logical form (e.g., `A and B`), UNCHANGED expressions must use the same logical form.
-   - Avoid structural cues (such as `and` appearing mainly in CHANGED expressions) that trivially reveal the correct answers.
+
+### Rules to Construct CHANGED Expressions
+1. Each CHANGED expression MUST semantically depend on the runtime values of referenced variables.
+2. Each CHANGED expression SHOULD be coupled to the patch by targeting:
+  - variables referenced at the probe line, OR
+  - variables mentioned in State Differences, OR
+  - direct dependencies of those variables.
+3. Prefer expressions that expose the change directly (e.g., equality/inequality, membership, key/attribute presence, length, or a small projection).
+4. Do NOT rely on intentionally fragile operations purely to induce an exception difference (e.g., unsafe indexing, unsafe attribute access) Exception differences are allowed only if they are a direct consequence of the patch.
+5. Across the CHANGED group, diversify expression forms; do not repeat the same pattern with only superficial edits.
+6. Trivial expressions are DISALLOWED.
+  - An expression is considered trivial if its value is provably invariant across all possible runtime values of the referenced variables, or if it avoids inspecting those values in a meaningful way.
+  - This includes (but is not limited to):
+    - Tautologies or contradictions under all executions
+    - Self-comparisons (e.g., `x == x`, `id(x) == id(x)`)
+    - Empty slices or projections (e.g., `x[:0]`, `x[1:1]`, `list(x)[:0]`)
+    - Vacuous iteration (e.g., `any(... for _ in x if False)`)
+    - Length or count comparisons that are always true (e.g., `len(x) >= 0`)
+    - String predicates with empty literals (e.g., `s.startswith("")`)
+    - Type or existence checks that are always true (e.g., `isinstance(x, object)`)
+    - Algebraic identities or cancellations (e.g., `x - x`, `x * 0`, `x ^ x`)
+    - Boolean normalizations (e.g., `bool(x) in (True, False)`)
+7. Expressions that are too simple are DISALLOWED.
+8. Before finalizing each CHANGED expression, internally verify that it is not trivially invariant by reasoning about whether its value could change if the runtime variables were different.
+
+### Rules to Construct UNCHANGED Expressions
+1. UNCHANGED expressions act as distractors.
+2. Each UNCHANGED expression MUST semantically depend on the runtime values of referenced variables.
+  Specifically:
+  - While the expression must evaluate to the same result in the buggy and patched executions, there must exist at least two other plausible executions (consistent with the provided variable states) for which the expression would evaluate to different values.
+  - Expressions whose result is invariant under all value changes are forbidden, even if they reference runtime variables.
+3. Each UNCHANGED expression should be a plausible alternative to a CHANGED expression:
+  - structurally similar (same variables, access pattern, or expression shape),
+  - modified minimally so that it does NOT change across versions,
+  - without introducing tautologies, dead branches, or vacuous clauses whose sole purpose is to force invariance.
+4. UNCHANGED expressions must also avoid the disallowed trivial patterns listed for CHANGED expressions. 
+5. Before finalizing each UNCHANGED expression, internally verify that it is not trivially invariant by reasoning about whether its value could change if the runtime variables were different.
 
 ### Notes on the Serialization of the Variable States
 - Variable states are serialized to describe runtime objects; expressions must target runtime semantics, not the serialization structure.
@@ -104,10 +124,14 @@ You must output two groups, in this exact order:
     - `{{"py/set": [1, 2, 3]}}` represents a set `{{1, 2, 3}}` at runtime.
     - `{{"py/tuple": [1, 2]}}` represents a tuple `(1, 2)` at runtime.
     - `{{"py/type": "collections.OrderedDict"}}` represents the type `collections.OrderedDict`.
-    - `{{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}}` represents an instance of `ClassName`.
+    - `{{"py/object": "module.ClassName", "attr1": val1, "attr2": val2}}` represents an instance
+      of `ClassName`.
 - Treat serialized types exactly as given; do not reinterpret or coerce values based on their textual appearance. For example, a serialized string "[a, b]" must be treated as a string, not as a list; only explicit structural markers (e.g., lists, tuples, py/TAGs) determine type.
 
 ### Output Schema (must follow exactly)
+Note: Passing the AST validator does not imply that an expression is non-trivial;
+all semantic rules above must still be satisfied.
+
 Your output will be parsed using the following Pydantic models:
 
 class Expression(BaseModel):
