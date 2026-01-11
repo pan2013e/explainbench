@@ -17,10 +17,8 @@ from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
     'django__django-11999': 2400,
-    'django__django-13401': 2400,
     'django__django-13820': 1800,
     'django__django-14500': 1200,
-    'django__django-14855': 2400,
     'django__django-15503': 1800,
     'django__django-15563': 600,
     'django__django-16527': 600,

@@ -161,6 +161,8 @@ EXCLUDED_IDS = [
     "django__django-16429",
     # Gigantic trace files, very high memory consumption
     # (Based on developer patches)
+    "django__django-13401",
+    "django__django-14855",
     "matplotlib__matplotlib-22871",
     "sphinx-doc__sphinx-7590",
     # (Based on agent patches)
