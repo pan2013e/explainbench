@@ -26,6 +26,73 @@ def sampler_function(pool: List[str], k: int) -> List[str]:
     k = min(k, len(pool))
     return random.sample(list(pool), k=k)
 
+def levenshtein_distance(a: str, b: str) -> int:
+    if a == b:
+        return 0
+    if not a:
+        return len(b)
+    if not b:
+        return len(a)
+    if len(a) < len(b):
+        a, b = b, a
+    previous = list(range(len(b) + 1))
+    for i, ca in enumerate(a, start=1):
+        current = [i]
+        for j, cb in enumerate(b, start=1):
+            insert_cost = current[j - 1] + 1
+            delete_cost = previous[j] + 1
+            replace_cost = previous[j - 1] + (0 if ca == cb else 1)
+            current.append(min(insert_cost, delete_cost, replace_cost))
+        previous = current
+    return previous[-1]
+
+def normalized_similarity(a: str, b: str) -> float:
+    max_len = max(len(a), len(b), 1)
+    return 1.0 - (levenshtein_distance(a, b) / max_len)
+
+def avg_similarity(item: str, pool: List[str]) -> float:
+    if not pool:
+        return 0.0
+    return sum(normalized_similarity(item, other) for other in pool) / len(pool)
+
+def max_similarity(item: str, pool: List[str]) -> float:
+    if not pool:
+        return 0.0
+    return max(normalized_similarity(item, other) for other in pool)
+
+def select_hard_anchors(correct_pool: List[str], incorrect_pool: List[str], k: int) -> List[str]:
+    if k <= 0 or not correct_pool:
+        return []
+    scored = [
+        (avg_similarity(c, incorrect_pool), c)
+        for c in correct_pool
+    ]
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [c for _, c in scored[:k]]
+
+def select_distractors_mmr(
+    incorrect_pool: List[str],
+    anchors: List[str],
+    k: int,
+    lambda_weight: float,
+) -> List[str]:
+    if k <= 0 or not incorrect_pool:
+        return []
+    selected: List[str] = []
+    remaining = list(incorrect_pool)
+    while remaining and len(selected) < k:
+        best_idx = 0
+        best_score = None
+        for idx, candidate in enumerate(remaining):
+            relevance = max_similarity(candidate, anchors)
+            diversity_penalty = max_similarity(candidate, selected)
+            score = (lambda_weight * relevance) - ((1.0 - lambda_weight) * diversity_penalty)
+            if best_score is None or score > best_score:
+                best_score = score
+                best_idx = idx
+        selected.append(remaining.pop(best_idx))
+    return selected
+
 def build_choices_and_answer(
     n_correct: int,
     n_incorrect: int,
@@ -39,8 +106,16 @@ def build_choices_and_answer(
     if is_fallback_to_gold:
         incorrect_pool = incorrect_pool + correct_pool
     
-    sampled_correct = sampler_function(correct_pool, n_correct)
-    sampled_incorrect = sampler_function(incorrect_pool, n_incorrect)
+    sampled_correct = select_hard_anchors(correct_pool, incorrect_pool, n_correct)
+    sampled_incorrect = select_distractors_mmr(
+        incorrect_pool, sampled_correct, n_incorrect, lambda_weight=MMR_LAMBDA
+    )
+    if len(sampled_correct) < n_correct:
+        remaining = [c for c in correct_pool if c not in sampled_correct]
+        sampled_correct += sampler_function(remaining, n_correct - len(sampled_correct))
+    if len(sampled_incorrect) < n_incorrect:
+        remaining = [i for i in incorrect_pool if i not in sampled_incorrect]
+        sampled_incorrect += sampler_function(remaining, n_incorrect - len(sampled_incorrect))
 
     choices: List[str] = list(sampled_correct) + list(sampled_incorrect)
     is_correct: List[bool] = [True] * len(sampled_correct) + [False] * len(
@@ -159,6 +234,7 @@ if __name__ == "__main__":
     N_CHOICES = 4
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
+    MMR_LAMBDA = 0.7
     AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
