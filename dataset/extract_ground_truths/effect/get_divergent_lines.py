@@ -421,20 +421,46 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, d
 
                     if len(delta) + len(intersection) >= total_choices:
                         remaining = total_choices
+                        chosen_delta = []
                         chosen_intersection = []
-                        if intersection and remaining > 0:
-                            chosen_intersection = random.sample(intersection, 1)
-                            remaining -= 1
-                        chosen_delta = random.sample(delta, min(len(delta), remaining))
-                        remaining -= len(chosen_delta)
+
+                        def stmt_text(stmt):
+                            return stmt[0] if isinstance(stmt, tuple) else str(stmt)
+
+                        for stmt in delta:
+                            if remaining == 0:
+                                break
+                            if "assert" in stmt_text(stmt):
+                                chosen_delta.append(stmt)
+                                remaining -= 1
+                        for stmt in intersection:
+                            if remaining == 0:
+                                break
+                            if "assert" in stmt_text(stmt):
+                                chosen_intersection.append(stmt)
+                                remaining -= 1
+
+                        if remaining > 0:
+                            leftover_delta = [stmt for stmt in delta if stmt not in chosen_delta]
+                            if leftover_delta:
+                                pick = random.sample(
+                                    leftover_delta,
+                                    min(len(leftover_delta), remaining),
+                                )
+                                chosen_delta.extend(pick)
+                                remaining -= len(pick)
                         if remaining > 0:
                             leftover_intersection = [
                                 stmt for stmt in intersection if stmt not in chosen_intersection
                             ]
-                            chosen_intersection += random.sample(
-                                leftover_intersection,
-                                min(len(leftover_intersection), remaining),
-                            )
+                            if leftover_intersection:
+                                pick = random.sample(
+                                    leftover_intersection,
+                                    min(len(leftover_intersection), remaining),
+                                )
+                                chosen_intersection.extend(pick)
+                                remaining -= len(pick)
+
                         choices = chosen_delta + chosen_intersection
                         random.shuffle(choices)
                         diff["choices"] = choices
