@@ -27,7 +27,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         "An AI agent fixed a bug in a code repository and provided an explanation for the patch. "
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
         "You should respond in JSON format, complying with the following Pydantic schema: {schema}\n\n"
-        "Patch Explanation:\n{explanation}\n\n"
+        "Patch Explanation:\n*** Explanation Start ***\n{explanation}\n*** Explanation End ***\n\n"
         "{context}"
         "Question:\n{question}\n"
     )
