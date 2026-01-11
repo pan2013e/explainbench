@@ -124,7 +124,7 @@ class ExpressionChanges(Task[schema.Effect]):
         'Hints:\n'
         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
-        '3. The specified line may not be reached or executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
+        '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
         '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
