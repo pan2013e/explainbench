@@ -149,12 +149,12 @@ class ExpressionChanges(Task[schema.Effect]):
 
 class Reachability(Task[schema.Effect]):
     QUESTION = (
-        'Within the context of the provided function and inputs, which of the following lines are reachable during execution?'
+        'Within the context of the provided function and inputs, which of the following lines exhibit a change in reachability before and after the patch?'
         'Choices:\n'
         '{choices}\n\n'
         'Hints:\n'
         '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. It is possible that all lines are not reachable.'
+        '2. It is possible that none of the lines change in terms of reachability.'
         '3. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
