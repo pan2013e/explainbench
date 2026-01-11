@@ -154,8 +154,7 @@ class Reachability(Task[schema.Effect]):
         '{choices}\n\n'
         'Hints:\n'
         '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. It is possible that none of the lines change in terms of reachability.'
-        '3. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
+        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
