@@ -10,20 +10,26 @@ def main() -> None:
             "Simplify nested function param dicts by truncating beyond a max depth."
         )
     )
-    parser.add_argument("--input_json", help="Path to the input JSON file.", default="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step1.gold.depth-filtered-3.json")
-    parser.add_argument("--output_json", help="Path to write the simplified JSON.", default="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step-3/step1.gold.depth-filtered-3.simplified.json")
+    parser.add_argument("--input_json", help="Path to the input JSON file.", default="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json")
+    parser.add_argument("--output_json", help="Path to write the simplified JSON.", default="/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.simplified.json")
     parser.add_argument(
-        "--max-depth",
+        "--var-max-depth",
         type=int,
         default=4,
-        help="Maximum nested depth excluding the outermost container (default: 4).",
+        help="Maximum nested depth for variables excluding the outermost container (default: 4).",
+    )
+    parser.add_argument(
+        "--param-max-depth",
+        type=int,
+        default=3,
+        help="Maximum nested depth for function parameters excluding the outermost container (default: 3).",
     )
     args = parser.parse_args()
 
     with open(args.input_json, "r", encoding="utf-8") as handle:
         data = json.load(handle)
 
-    simplify_params(data, args.max_depth)
+    simplify_params(data, args.var_max_depth, args.param_max_depth)
 
     with open(args.output_json, "w", encoding="utf-8") as handle:
         json.dump(data, handle, ensure_ascii=True, indent=2)

@@ -117,17 +117,21 @@ def _simplify(value, max_depth: int, depth: int):
         return [_simplify(v, max_depth, depth + 1) for v in value]
     return value
 
-def simplify_params(data, max_depth: int) -> None:
+def simplify_params(data, var_max_depth: int, param_max_depth: int) -> None:
     for agent_data in data.values():
         for metadata in agent_data.values():
             if metadata:
                 for key in (
-                    "buggy_function_param",
                     "buggy_variables",
                     "patched_variables",
                 ):
                     if key in metadata:
-                        metadata[key] = _simplify(metadata[key], max_depth, depth=0)
+                        metadata[key] = _simplify(metadata[key], var_max_depth, depth=0)
+                for key in (
+                    "buggy_function_param",
+                ):
+                    if key in metadata:
+                        metadata[key] = _simplify(metadata[key], param_max_depth, depth=0)
 
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
@@ -142,8 +146,9 @@ if __name__ == "__main__":
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
     TOTAL_CHOICES = 4
     DEPTH_THRESHOLD = 3
-    DO_SIMPLIFICATION = False
-    SIMPLICIFY_MAX_DEPTH = 4
+    DO_SIMPLIFICATION = True
+    SIMPLIFY_VAR_MAX_DEPTH = 4
+    SIMPLIFY_PARAM_MAX_DEPTH = 3
     # ------------------------------------------- #
 
     results = {}
@@ -157,7 +162,7 @@ if __name__ == "__main__":
             agent = futures[future]
             results[agent] = future.result()
     if DO_SIMPLIFICATION:
-        simplify_params(results, SIMPLICIFY_MAX_DEPTH)
+        simplify_params(results, SIMPLIFY_VAR_MAX_DEPTH, SIMPLIFY_PARAM_MAX_DEPTH)
     with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Saved step1 results to {OUTPUT_DIR}")
