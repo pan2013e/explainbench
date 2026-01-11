@@ -16,21 +16,21 @@ from execution.util import get_instance_ids
 from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
-    'django__django-11999': 2400,
-    'django__django-13820': 1800,
-    'django__django-14500': 1200,
-    'django__django-15503': 1800,
-    'django__django-15563': 600,
-    'django__django-16527': 600,
-    'django__django-16667': 1200,
-    'pylint-dev__pylint-6386': 1800,
-    'pylint-dev__pylint-7080': 600,
-    'sphinx-doc__sphinx-8551': 600,
-    'sphinx-doc__sphinx-9230': 1200,
-    'sphinx-doc__sphinx-9698': 1800,
-    'sphinx-doc__sphinx-9673': 1200,
-    'sympy__sympy-17655': 600,
-    'sympy__sympy-20428': 1800,
+    'django__django-11999': 3000,
+    'django__django-13820': 3000,
+    'django__django-14500': 3000,
+    'django__django-15503': 3000,
+    'django__django-15563': 3000,
+    'django__django-16527': 3000,
+    'django__django-16667': 3000,
+    'pylint-dev__pylint-6386': 3000,
+    'pylint-dev__pylint-7080': 3000,
+    'sphinx-doc__sphinx-8551': 3000,
+    'sphinx-doc__sphinx-9230': 3000,
+    'sphinx-doc__sphinx-9698': 3000,
+    'sphinx-doc__sphinx-9673': 3000,
+    'sympy__sympy-17655': 3000,
+    'sympy__sympy-20428': 3000,
 }
 
 ADHOC_TEST_ID = {
