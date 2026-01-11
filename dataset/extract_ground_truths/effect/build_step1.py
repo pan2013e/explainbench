@@ -22,7 +22,10 @@ EXTRA_LONG_TIMEOUT = {
     'django__django-15503': 3000,
     'django__django-15563': 3000,
     'django__django-16527': 3000,
+    'django__django-16333': 3000,
     'django__django-16667': 3000,
+    'django__django-16938': 3000,
+    'matplotlib__matplotlib-24637': 3000,
     'pylint-dev__pylint-6386': 3000,
     'pylint-dev__pylint-7080': 3000,
     'sphinx-doc__sphinx-8551': 3000,
@@ -37,7 +40,7 @@ ADHOC_TEST_ID = {
     "sympy__sympy-17655": 1,
 }
 
-def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=300):
+def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=600):
     def _timeout_handler(signum, frame):
         raise TimeoutError()
     try:
