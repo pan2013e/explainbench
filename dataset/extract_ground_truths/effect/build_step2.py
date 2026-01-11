@@ -116,6 +116,9 @@ def process_agent(
                 n_changed,
                 n_unchanged,
             )
+            metadata.pop("diff", None)
+            metadata.pop("buggy_variables", None)
+            metadata.pop("patched_variables", None)
             instance_result = {"prompt_length_chars": len(prompt)}
             
             if do_inference:
