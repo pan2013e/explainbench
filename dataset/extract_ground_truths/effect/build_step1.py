@@ -12,7 +12,6 @@ from tqdm.auto import tqdm
 
 from dataset.extract_ground_truths.effect import get_divergent_lines
 from execution.util import get_instance_ids
-from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
     'django__django-11999': 1800,
@@ -59,7 +58,7 @@ def _process_instance(instance_id, agent, total_choices, depth_threshold, timeou
             if result:
                 break
             test_id += 1
-        return serialize(result)
+        return result
     except FileNotFoundError:
         return {} # fallback to gold
     except TimeoutError:
@@ -135,7 +134,7 @@ if __name__ == "__main__":
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
     TOTAL_CHOICES = 4
     DEPTH_THRESHOLD = 3
-    DO_SIMPLIFICATION = True
+    DO_SIMPLIFICATION = False
     SIMPLICIFY_MAX_DEPTH = 4
     # ------------------------------------------- #
 
