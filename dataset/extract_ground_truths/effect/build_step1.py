@@ -34,7 +34,7 @@ EXTRA_LONG_TIMEOUT = {
 }
 
 ADHOC_TEST_ID = {
-    ("20250720_Lingxi-v1.5_claude-4-sonnet-20250514", "sympy__sympy-17655"): 1,
+    "sympy__sympy-17655": 1,
 }
 
 def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=300):
@@ -43,9 +43,7 @@ def _process_instance(instance_id, agent, total_choices, depth_threshold, timeou
     try:
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(EXTRA_LONG_TIMEOUT.get(instance_id, timeout))
-        test_id = 0
-        if (agent, instance_id) in ADHOC_TEST_ID:
-            test_id = ADHOC_TEST_ID[(agent, instance_id)]
+        test_id = ADHOC_TEST_ID.get(instance_id, 0)
         while True:
             try:
                 result = get_divergent_lines.main(
@@ -92,6 +90,41 @@ def process_agent(agent, instance_ids, total_choices, depth_threshold, max_worke
 
     return results
 
+def _type_stub(value):
+    if isinstance(value, dict):
+        keys = [x for x in value.keys() if not x.startswith("py/")]
+        if "py/object" in value and keys:
+            return {"py/object": value["py/object"], "__dir__": keys}
+        if "py/type" in value and keys:
+            return value
+        return {"py/object": "builtins.dict"}
+    if isinstance(value, list):
+        return {"py/object": "builtins.list", "len": len(value)}
+    raise ValueError(f"Unexpected type {type(value)}")
+
+def _simplify(value, max_depth: int, depth: int):
+    if isinstance(value, dict):
+        if depth > max_depth:
+            return _type_stub(value)
+        return {k: _simplify(v, max_depth, depth + 1) for k, v in value.items()}
+    if isinstance(value, list):
+        if depth > max_depth:
+            return _type_stub(value)
+        return [_simplify(v, max_depth, depth + 1) for v in value]
+    return value
+
+def simplify_params(data, max_depth: int) -> None:
+    for agent_data in data.values():
+        for metadata in agent_data.values():
+            if metadata:
+                for key in (
+                    "buggy_function_param",
+                    "buggy_variables",
+                    "patched_variables",
+                ):
+                    if key in metadata:
+                        metadata[key] = _simplify(metadata[key], max_depth, depth=0)
+
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     AGENTS = [
@@ -105,6 +138,8 @@ if __name__ == "__main__":
     OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
     TOTAL_CHOICES = 4
     DEPTH_THRESHOLD = 3
+    DO_SIMPLIFICATION = True
+    SIMPLICIFY_MAX_DEPTH = 4
     # ------------------------------------------- #
 
     results = {}
@@ -117,6 +152,8 @@ if __name__ == "__main__":
         for future in as_completed(futures):
             agent = futures[future]
             results[agent] = future.result()
+    if DO_SIMPLIFICATION:
+        simplify_params(results, SIMPLICIFY_MAX_DEPTH)
     with open(OUTPUT_DIR, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Saved step1 results to {OUTPUT_DIR}")
