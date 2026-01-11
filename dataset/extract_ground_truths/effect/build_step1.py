@@ -13,6 +13,7 @@ from tqdm.auto import tqdm
 
 from dataset.extract_ground_truths.effect import get_divergent_lines
 from execution.util import get_instance_ids
+from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
     'django__django-11999': 2400,
@@ -88,7 +89,7 @@ def process_agent(agent, instance_ids, total_choices, depth_threshold, max_worke
         for future in tqdm(as_completed(futures), total=len(futures), desc=agent):
             instance_id = futures[future]
             try:
-                results[instance_id] = future.result()
+                results[instance_id] = serialize(future.result())
             except BrokenProcessPool:
                 print(f"Process unexpectedly terminated for {instance_id} with agent {agent}. Possibly by OOM killer.", flush=True)
                 results[instance_id] = None
