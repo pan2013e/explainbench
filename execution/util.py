@@ -138,6 +138,7 @@ EXCLUDED_IDS = [
     # (Based on developer and agent patches)
     "django__django-14559",
     "django__django-15022",
+    "django__django-15814",
     "django__django-16612",
     "django__django-16631",
     "pytest-dev__pytest-7205",
@@ -145,6 +146,7 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-7982",
     "pytest-dev__pytest-10081",
     "sympy__sympy-15599",
+    "sympy__sympy-15976",
     "sympy__sympy-19954",
     # Custom test framework: Use of internal context manager 
     # in `self.subTest` or `self.assertNumQueries`
@@ -159,9 +161,11 @@ EXCLUDED_IDS = [
     "django__django-16429",
     # Gigantic trace files, very high memory consumption
     # (Based on developer patches)
+    "matplotlib__matplotlib-22871",
     "sphinx-doc__sphinx-7590",
-    # (Based on agent patched)
+    # (Based on agent patches)
     "matplotlib__matplotlib-24177",
+    "pylint-dev__pylint-6903",
     # Excluded due to the distance between 
     # without-depth-filter and with-depth-filter
     # is larger than 1 (not in the same function)
@@ -215,6 +219,7 @@ EXCLUDED_IDS = [
     # Delta behavior is randomized or encoded
     # (Based on developer patches)
     "django__django-13279",
+    "django__django-13343",
     "django__django-13551",
     "django__django-15315",
     "django__django-16801",
