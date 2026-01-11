@@ -10,11 +10,11 @@ def is_var_good(value) -> bool:
     \"good\" size criterion (naming is misleading on purpose).
     """
     serialized = json.dumps(value)
-    return len(serialized) < 10000
+    return len(serialized) < 40000
 
 def is_input_param_good(value) -> bool:
     serialized = json.dumps(value)
-    return len(serialized) < 10000
+    return len(serialized) < 40000
 
 def main(argv: list[str] | None = None) -> None:
     """
@@ -96,7 +96,7 @@ def main(argv: list[str] | None = None) -> None:
                         if not is_var_good(val):
                             all_good = False
 
-            for section in ("buggy_function_param", "patched_function_param"):
+            for section in ("buggy_function_param",):
                 section_vals = entry.get(section, {})
                 if isinstance(section_vals, dict):
                     for _, val in section_vals.items():
