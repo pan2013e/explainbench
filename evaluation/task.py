@@ -234,7 +234,7 @@ if __name__ == "__main__":
         return ctx, gt, task_cls
 
 
-    model = Model('gpt-5-mini-2025-08-07', n=5, reasoning_effort='none')
+    model = Model('gpt-5-mini-2025-08-07', n=5)
     with open(STEP2_PATH, 'r') as f:
         step2_data = json.load(f)
 
