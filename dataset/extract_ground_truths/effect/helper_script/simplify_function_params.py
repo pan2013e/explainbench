@@ -1,45 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import json
-from typing import Any, Dict
 
-def _type_stub(value: Any) -> Dict[str, Any]:
-    if isinstance(value, dict):
-        keys = [x for x in value.keys() if not x.startswith("py/")]
-        if "py/object" in value and keys:
-            return {"py/object": value["py/object"], "__dir__": keys}
-        if "py/type" in value and keys:
-            return value
-        return {"py/object": "builtins.dict"}
-    if isinstance(value, list):
-        return {"py/object": "builtins.list", "len": len(value)}
-    raise ValueError(f"Unexpected type {type(value)}")
-
-def _simplify(value: Any, max_depth: int, depth: int) -> Any:
-    # Depth counts nested levels below the outermost container.
-    if isinstance(value, dict):
-        if depth > max_depth:
-            return _type_stub(value)
-        return {k: _simplify(v, max_depth, depth + 1) for k, v in value.items()}
-    if isinstance(value, list):
-        if depth > max_depth:
-            return _type_stub(value)
-        return [_simplify(v, max_depth, depth + 1) for v in value]
-    return value
-
-
-def simplify_params(data: Dict[str, Dict[str, Dict[str, Any]]], max_depth: int) -> None:
-    for agent_data in data.values():
-        for metadata in agent_data.values():
-            if metadata:
-                for key in (
-                    "buggy_function_param",
-                    "buggy_variables",
-                    "patched_variables",
-                ):
-                    if key in metadata:
-                        metadata[key] = _simplify(metadata[key], max_depth, depth=0)
-
+from dataset.extract_ground_truths.effect.build_step1 import simplify_params
 
 def main() -> None:
     parser = argparse.ArgumentParser(
