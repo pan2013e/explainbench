@@ -237,6 +237,9 @@ EXCLUDED_IDS = [
     "psf__requests-5414",
     "pylint-dev__pylint-6386",
     "pytest-dev__pytest-5840",
+    ## timeout inspection
+    "django__django-11477",
+    "pydata__xarray-3305"
     # Tracer/Inspector does not support async/multi-process functions
     # (Based on developer patches)
     "django__django-13810",
