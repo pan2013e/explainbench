@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 import argparse
 import json
-from typing import Any, Dict, List
-
+from typing import Any, Dict
 
 def _type_stub(value: Any) -> Dict[str, Any]:
     if isinstance(value, dict):
         keys = [x for x in value.keys() if not x.startswith("py/")]
         if "py/object" in value and keys:
-            return {"__type__": value["py/object"], "__available_attributes__": keys}
+            return {"py/object": value["py/object"], "__dir__": keys}
         if "py/type" in value and keys:
-            return {"__type__": value["py/type"], "__available_attributes__": keys}
-        return {"__type__": "dict"}
+            return value
+        return {"py/object": "builtins.dict"}
     if isinstance(value, list):
-        return {"__type__": "list", "len": len(value)}
-    return {"__type__": type(value).__name__}
-
+        return {"py/object": "builtins.list", "len": len(value)}
+    raise ValueError(f"Unexpected type {type(value)}")
 
 def _simplify(value: Any, max_depth: int, depth: int) -> Any:
     # Depth counts nested levels below the outermost container.
@@ -36,7 +34,6 @@ def simplify_params(data: Dict[str, Dict[str, Dict[str, Any]]], max_depth: int) 
             if metadata:
                 for key in (
                     "buggy_function_param",
-                    "patched_function_param",
                     "buggy_variables",
                     "patched_variables",
                 ):
@@ -55,8 +52,8 @@ def main() -> None:
     parser.add_argument(
         "--max-depth",
         type=int,
-        default=3,
-        help="Maximum nested depth excluding the outermost container (default: 3).",
+        default=4,
+        help="Maximum nested depth excluding the outermost container (default: 4).",
     )
     args = parser.parse_args()
 
