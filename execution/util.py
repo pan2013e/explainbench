@@ -229,8 +229,13 @@ EXCLUDED_IDS = [
     "pytest-dev__pytest-7432",
     "pytest-dev__pytest-7490",
     # (Based on agent patches)
+    "django__django-11555",
+    "django__django-11999",
+    "django__django-15629",
+    "django__django-16527",
     "matplotlib__matplotlib-22719",
     "psf__requests-5414",
+    "pylint-dev__pylint-6386",
     "pytest-dev__pytest-5840",
     # Tracer/Inspector does not support async/multi-process functions
     # (Based on developer patches)
