@@ -253,15 +253,13 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             continue
         is_fallback_to_gold = False
         if metadata == {}:
-            print(f"Falling back to gold for instance {instance_id}")
             if "gold" not in data or instance_id not in data["gold"]:
-                print(f"Gold patch metadata not found for instance {instance_id}")
+                print(f"During processing of fallback, gold patch metadata not found for instance {instance_id}")
                 continue
             # Use gold metadata that was already run
             metadata = data["gold"][instance_id]
             is_fallback_to_gold = True
         if metadata.get("choices"):
-            print(f"Falling back to reachability question in step 4 for instance {instance_id}")
             fallback_reachability[instance_id] = metadata
             continue
         metadata = dict(metadata)
@@ -361,11 +359,6 @@ if __name__ == "__main__":
         instance_ids_per_agent = {}
         instance_ids = get_instance_ids(["all"])
 
-    # with open("/home/yusuf/explainbench/instance_ids.txt", "r") as f:
-    #     instance_ids = f.readlines()
-
-    # instance_ids = [x.strip() for x in instance_ids]
-    
     # Run gold patch first
     STEP3_GOLD_PATH = os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD)
     if os.path.exists(STEP3_GOLD_PATH):
