@@ -15,21 +15,18 @@ from execution.util import get_instance_ids
 from tracer.serializer import serialize
 
 EXTRA_LONG_TIMEOUT = {
-    'django__django-14500': 600,
-    'django__django-16667': 600,
-    'pylint-dev__pylint-6903': 600,
-    'pylint-dev__pylint-7080': 600,
-    'sphinx-doc__sphinx-9230': 600,
-    'sympy__sympy-17655': 600,
-    'django__django-15503': 1800,
-    'sympy__sympy-17655': 1800, # still timeout, the traces are huge
     'django__django-11999': 1800,
     'django__django-13401': 1800,
     'django__django-13820': 1800,
+    'django__django-14500': 600,
     'django__django-14855': 1800,
-    'matplotlib__matplotlib-22871': 1800,
+    'django__django-15503': 1800,
+    'django__django-16667': 600,
     'pylint-dev__pylint-6386': 1800,
+    'pylint-dev__pylint-7080': 600,
+    'sphinx-doc__sphinx-9230': 600,
     'sphinx-doc__sphinx-9698': 1800,
+    'sympy__sympy-17655': 600,
     'sympy__sympy-20428': 1800,
 }
 
