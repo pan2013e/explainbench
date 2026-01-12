@@ -33,6 +33,15 @@ def intersect_instance_ids(step3_data, agents):
     intersection = set.intersection(*id_sets)
     return intersection
 
+def meets_min_pool(metadata, min_changed=1, min_unchanged=3):
+    if not isinstance(metadata, dict):
+        return False
+    if metadata.get("choices") is not None:
+        return True
+    valid_changed = metadata.get("valid_changed_expressions") or []
+    valid_unchanged = metadata.get("valid_unchanged_expressions") or []
+    return len(valid_changed) >= min_changed and len(valid_unchanged) >= min_unchanged
+
 def sampler_function(pool: List[str], k: int) -> List[str]:
     k = min(k, len(pool))
     return random.sample(list(pool), k=k)
@@ -161,6 +170,16 @@ def shuffle_choices_and_label_answer(choices, answers, seed=None):
 
     idx_map = {hash_list(c): i for i, c in enumerate(shuffled)}
 
+    def label_to_idx(label: str):
+        if not isinstance(label, str) or not label:
+            return None
+        idx = 0
+        for ch in label:
+            if ch not in string.ascii_lowercase:
+                return None
+            idx = idx * 26 + (ord(ch) - ord("a") + 1)
+        return idx - 1
+
     def idx_to_label(i):
         if i < 26:
             return string.ascii_lowercase[i]
@@ -171,12 +190,32 @@ def shuffle_choices_and_label_answer(choices, answers, seed=None):
             s = string.ascii_lowercase[r] + s
         return s
 
-    answer_labels = [idx_to_label(idx_map[hash_list(a)]) for a in answers]
+    answer_labels = []
+    missing = []
+    for a in answers:
+        key = hash_list(a)
+        if key in idx_map:
+            answer_labels.append(idx_to_label(idx_map[key]))
+        else:
+            missing.append(a)
+
+    if missing:
+        # REMOVE NEXT ITERATION
+        label_indices = []
+        for a in answers:
+            idx = label_to_idx(a)
+            if idx is None:
+                raise KeyError(f"Answer {a!r} does not match any shuffled choice.")
+            label_indices.append(idx)
+        if any(i < 0 or i >= len(choices) for i in label_indices):
+            raise IndexError("Answer label index out of bounds for choices list.")
+        answer_labels = [
+            idx_to_label(idx_map[hash_list(choices[i])]) for i in label_indices
+        ]
     return shuffled, answer_labels
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     results = {}
-    removed_due_to_pool = []
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
@@ -198,10 +237,6 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
 
             correct_pool = metadata["valid_changed_expressions"]
             incorrect_pool = metadata["valid_unchanged_expressions"]
-            if len(correct_pool) < 1 or len(incorrect_pool) < 3:
-                # Enforce minimum pools to build choices.
-                removed_due_to_pool.append(instance_id)
-                continue
 
             use_n_correct = n_correct
             use_n_incorrect = n_incorrect
@@ -209,16 +244,6 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 # Gold fallback instances should only surface incorrect options.
                 use_n_incorrect = n_correct + n_incorrect
                 use_n_correct = 0
-
-            if len(correct_pool) < use_n_correct:
-                print(
-                    "> Warning: number of correct answers is < n_correct. Use len(pool)"
-                )
-
-            if len(incorrect_pool) < use_n_incorrect:
-                print(
-                    "> Warning: number of incorrect answers is < n_incorrect. Use len(pool)"
-                )
 
             choices, answer = build_choices_and_answer(
                 n_correct=use_n_correct,
@@ -236,18 +261,12 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 **metadata,
             }
         except KeyError:
-            continue
+            raise
         except Exception as e:
             import traceback
             print(f"Error processing {agent} {instance_id}: {e}")
             traceback.print_exc()
             continue
-    if removed_due_to_pool:
-        print(
-            f"{agent} removed due to n_valid/n_invalid criteria: {len(removed_due_to_pool)}"
-        )
-        for instance_id in removed_due_to_pool:
-            print(instance_id)
     return results
 
 
@@ -263,17 +282,30 @@ if __name__ == "__main__":
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
-        "gold",
+        # "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
-    OUTPUT_JSON = "step4.json"
+    OUTPUT_JSON = "step4.debug.json"
     # ------------------------------------------- #
     
     start_time = time.time()
     step3 = read_step3_results()
     results = {}
-    instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
-    print(f"Intersection instance_ids count: {len(instance_ids)}")
+    base_instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
+    removed_due_to_pool = []
+    instance_ids = []
+    for instance_id in base_instance_ids:
+        failed_agents = [
+            agent
+            for agent in AGENTS
+            if not meets_min_pool(step3.get(agent, {}).get(instance_id))
+        ]
+        if failed_agents:
+            removed_due_to_pool.append(instance_id)
+
+    instance_ids = [x for x in base_instance_ids if x not in removed_due_to_pool]
+    print(f"Intersection instance_ids count: {len(base_instance_ids)}")
+    print(f"After min-pool filter count: {len(instance_ids)}")
     # Report per-agent removals relative to filtered step3 data.
     print("Per-agent removals vs filtered step3 (intersection pruning):")
     for agent in AGENTS:

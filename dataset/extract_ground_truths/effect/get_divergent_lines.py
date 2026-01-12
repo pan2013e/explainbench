@@ -464,9 +464,7 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, d
                         diff["choices"] = choices
                         chosen_delta_set = set(chosen_delta)
                         diff["answer"] = [
-                            index_to_label(idx)
-                            for idx, item in enumerate(choices)
-                            if item in chosen_delta_set
+                            item for item in choices if item in chosen_delta_set
                         ]
                     else:
                         logger.debug(">> Not enough choices to form the question.")
