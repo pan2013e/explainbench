@@ -16,11 +16,22 @@ random.seed(42)
 def read_step3_results():
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.all.filtered.json"
         ),
         "r",
     ) as f:
         return json.load(f)
+
+def intersect_instance_ids(step3_data, agents):
+    id_sets = []
+    for agent in agents:
+        instances = step3_data.get(agent, {})
+        if isinstance(instances, dict):
+            id_sets.append(set(instances.keys()))
+    if not id_sets:
+        return set()
+    intersection = set.intersection(*id_sets)
+    return intersection
 
 def sampler_function(pool: List[str], k: int) -> List[str]:
     k = min(k, len(pool))
@@ -165,6 +176,7 @@ def shuffle_choices_and_label_answer(choices, answers, seed=None):
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     results = {}
+    removed_due_to_pool = []
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
@@ -186,6 +198,10 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
 
             correct_pool = metadata["valid_changed_expressions"]
             incorrect_pool = metadata["valid_unchanged_expressions"]
+            if len(correct_pool) < 1 or len(incorrect_pool) < 3:
+                # Enforce minimum pools to build choices.
+                removed_due_to_pool.append(instance_id)
+                continue
 
             use_n_correct = n_correct
             use_n_incorrect = n_incorrect
@@ -226,6 +242,12 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             print(f"Error processing {agent} {instance_id}: {e}")
             traceback.print_exc()
             continue
+    if removed_due_to_pool:
+        print(
+            f"{agent} removed due to n_valid/n_invalid criteria: {len(removed_due_to_pool)}"
+        )
+        for instance_id in removed_due_to_pool:
+            print(instance_id)
     return results
 
 
@@ -250,7 +272,17 @@ if __name__ == "__main__":
     start_time = time.time()
     step3 = read_step3_results()
     results = {}
-    instance_ids = get_instance_ids(["all"])
+    instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
+    print(f"Intersection instance_ids count: {len(instance_ids)}")
+    print("Intersection instance_ids:")
+    for instance_id in instance_ids:
+        print(instance_id)
+    # Report per-agent removals relative to filtered step3 data.
+    print("Per-agent removals vs filtered step3 (intersection pruning):")
+    for agent in AGENTS:
+        total_filtered = len(step3.get(agent, {}) or {})
+        removed = total_filtered - len(instance_ids)
+        print(f"- {agent}: filtered_total={total_filtered}, removed_by_intersection={removed}")
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(
