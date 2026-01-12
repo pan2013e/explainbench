@@ -265,6 +265,9 @@ EXCLUDED_IDS = [
     "sympy__sympy-15345",
     "sympy__sympy-20428",
     "sympy__sympy-21612",
+    ## THis is on gold
+    "django__django-16485",
+    "django__django-16938"
 ]
 
 class _IterableReader(RawIOBase):
