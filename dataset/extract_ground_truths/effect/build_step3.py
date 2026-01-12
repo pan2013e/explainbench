@@ -227,6 +227,11 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 expr_id=job.expr_id,
             )
 
+            # if not all(k in all_candidates for k in expr_change_map.keys()):
+            #     print(f"!!!!!! {job.agent} {job.instance_id}")
+            #     print(expr_change_map)
+            #     print("----")
+            #     print(all_candidates)
             valid_changed = [e for e in changed_candidates if expr_change_map.get(e) is True]
             valid_unchanged = [e for e in unchanged_candidates if expr_change_map.get(e) is False]
 
@@ -399,7 +404,8 @@ if __name__ == "__main__":
             with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
                 json.dump(results, f, indent=2)
             print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON_GOLD}")
-    step2["gold"] = results["gold"]
+    if do_validate:
+        step2["gold"] = results["gold"]
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
