@@ -18,6 +18,13 @@ from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests, get_instance_ids
 from tracer.inspector import encode_expr_list
+from dataset.extract_ground_truths.effect.source_util import (
+    get_function_code,
+)
+from dataset.extract_ground_truths.effect.build_step2 import (
+    get_agent_patch,
+    get_simple_function_name,
+)
 
 def read_json(input_path):
     with open(input_path, "r") as f:
@@ -258,9 +265,25 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
                 continue
             # Use gold metadata that was already run
             metadata = data["gold"][instance_id]
+            pre_code, _ = get_function_code(
+                instance_id,
+                metadata['file_path'],
+                get_simple_function_name(metadata),
+                patch=get_agent_patch(agent, instance_id),
+                line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
+            )
+            metadata["function_code_before_patch"] = pre_code
             is_fallback_to_gold = True
         if metadata.get("choices"):
             fallback_reachability[instance_id] = metadata
+            pre_code, _ = get_function_code(
+                instance_id,
+                metadata['file_path'],
+                get_simple_function_name(metadata),
+                patch=get_agent_patch(agent, instance_id),
+                line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
+            )
+            metadata["function_code_before_patch"] = pre_code
             continue
         metadata = dict(metadata)
         metadata["is_fallback_to_gold"] = is_fallback_to_gold
@@ -329,8 +352,8 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.merged.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.merged.json")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
+    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
     BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
     OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
     OUTPUT_JSON = "step3.json"
@@ -343,7 +366,7 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    PARTIAL_RUN_JSON = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1_delta.json"
+    PARTIAL_RUN_JSON = ""
     # ------------------------------------------- #
     
     step2 = read_json(STEP2_PATH)
@@ -351,7 +374,7 @@ if __name__ == "__main__":
     step2["gold"] = gold["gold"]
     
     results = {}
-    if os.path.exists(PARTIAL_RUN_JSON):
+    if PARTIAL_RUN_JSON and os.path.exists(PARTIAL_RUN_JSON):
         with open(PARTIAL_RUN_JSON, "r") as f:
             instance_ids_per_agent = json.load(f)
         print("[INFO] DO PARTIAL RUN!")
