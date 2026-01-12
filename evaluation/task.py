@@ -209,7 +209,7 @@ if __name__ == "__main__":
         res = Effect.predict(model, explanation, **context)
         return agent, instance_id, res, gt
 
-    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "10"))
+    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "20"))
     futures = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for agent, instances in step4_data.items():
