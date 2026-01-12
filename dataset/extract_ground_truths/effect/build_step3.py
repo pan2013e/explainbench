@@ -233,8 +233,9 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 print("----")
                 print(all_candidates)
                 
-            valid_changed = [e for e in changed_candidates if expr_change_map.get(e) is True]
-            valid_unchanged = [e for e in unchanged_candidates if expr_change_map.get(e) is False]
+            valid_changed = [e for e, changed in expr_change_map.items() if changed is True]
+            valid_unchanged = [e for e, changed in expr_change_map.items() if changed is False]
+
 
             result["valid_changed_expressions"] = valid_changed
             result["valid_unchanged_expressions"] = valid_unchanged
