@@ -22,6 +22,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     TEMPLATE: ClassVar[str] = (
         "An AI agent fixed a bug in a code repository and provided an explanation for the patch. "
         "You will be given this patch explanation, and your task is to answer questions about the bug and patch described by the explanation. "
+        "Your answer must be grounded only in the provided explanation; do not use outside knowledge or assumptions. "
         "You should respond in JSON format, complying with the following Pydantic schema: {schema}\n\n"
         "Patch Explanation:\n*** Explanation Start ***\n{explanation}\n*** Explanation End ***\n\n"
         "{context}"
@@ -160,7 +161,7 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
+    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.intent.json"
 
     # Helpers
     def get_expl(agent, instance_id):
@@ -209,15 +210,16 @@ if __name__ == "__main__":
         res = Effect.predict(model, explanation, **context)
         return agent, instance_id, res, gt
 
-    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "20"))
+    max_workers = 40
     futures = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for agent, instances in step4_data.items():
-            for instance_id, instance_data in instances.items():
-                if instance_data:
-                    futures.append(
-                        executor.submit(infer_instance, agent, instance_id, instance_data)
-                    )
+            if agent not in ("20250805_openhands-Qwen3-Coder-480B-A35B-Instruct", "20250807_mini-v1.7.0_gpt-5-mini"):
+                for instance_id, instance_data in instances.items():
+                    if instance_data:
+                        futures.append(
+                            executor.submit(infer_instance, agent, instance_id, instance_data)
+                        )
         pbar = tqdm(
             as_completed(futures),
             total=len(futures),
@@ -265,7 +267,7 @@ if __name__ == "__main__":
             'mean_of_instance_means': mean_of_instance_means,
         }
 
-    metrics_path = os.path.join(out_dir, '../metric.json')
+    metrics_path = os.path.join(out_dir, '../local_intent_run2.json')
     with open(metrics_path, 'w') as f:
         json.dump(metrics, f, indent=2)
 
