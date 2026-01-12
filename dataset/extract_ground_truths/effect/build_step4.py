@@ -285,7 +285,7 @@ if __name__ == "__main__":
         # "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
-    OUTPUT_JSON = "step4.debug.json"
+    OUTPUT_JSON = "step4.json"
     # ------------------------------------------- #
     
     start_time = time.time()
