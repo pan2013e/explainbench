@@ -216,12 +216,11 @@ if __name__ == "__main__":
     futures = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for agent, instances in step4_data.items():
-            if agent not in ("20250805_openhands-Qwen3-Coder-480B-A35B-Instruct", "20250807_mini-v1.7.0_gpt-5-mini"):
-                for instance_id, instance_data in instances.items():
-                    if instance_data:
-                        futures.append(
-                            executor.submit(infer_instance, agent, instance_id, instance_data)
-                        )
+            for instance_id, instance_data in instances.items():
+                if instance_data:
+                    futures.append(
+                        executor.submit(infer_instance, agent, instance_id, instance_data)
+                    )
         pbar = tqdm(
             as_completed(futures),
             total=len(futures),
