@@ -161,7 +161,9 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.intent.json"
+    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/step4.json"
+    OUTPUT_FILE_INDIVIDUAL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/eval.individual.effect.json"
+    OUTPUT_FILE_ALL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/eval.all.effect.json"
 
     # Helpers
     def get_expl(agent, instance_id):
@@ -238,9 +240,7 @@ if __name__ == "__main__":
                 'individual_scores': scores,
                 'average': sum(scores) / len(scores) if scores else 0.0,
             }
-    out_dir = os.path.dirname(__file__)
-    out_path = os.path.join(out_dir, '../effect_eval_output.json')
-    with open(out_path, 'w') as f:
+    with open(OUTPUT_FILE_INDIVIDUAL, 'w') as f:
         json.dump(output, f, indent=2)
 
     # Compute per-agent metrics
@@ -267,11 +267,10 @@ if __name__ == "__main__":
             'mean_of_instance_means': mean_of_instance_means,
         }
 
-    metrics_path = os.path.join(out_dir, '../local_intent_run2.json')
-    with open(metrics_path, 'w') as f:
+    with open(OUTPUT_FILE_ALL, 'w') as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"Saved results to {out_path}")
-    print(f"Saved metrics to {metrics_path}")
+    print(f"Saved results to {OUTPUT_FILE_INDIVIDUAL}")
+    print(f"Saved metrics to {OUTPUT_FILE_ALL}")
     print("Agent metrics:")
     print(json.dumps(metrics, indent=2))
