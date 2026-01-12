@@ -243,6 +243,28 @@ EXCLUDED_IDS = [
     # Tracer/Inspector does not support async/multi-process functions
     # (Based on developer patches)
     "django__django-13810",
+    # Due to invalid expressions  OR n valid expressions is less than the required threshold(21 additional)
+    "django__django-10554",
+    "django__django-12273",
+    "django__django-12406",
+    "django__django-13033",
+    "django__django-14017",
+    "django__django-14053",
+    "django__django-14122",
+    "django__django-14155",
+    "django__django-15503",
+    "django__django-16333",
+    "matplotlib__matplotlib-23476",
+    "pydata__xarray-4966",
+    "pylint-dev__pylint-7080",
+    "scikit-learn__scikit-learn-14053",
+    "scikit-learn__scikit-learn-25102",
+    "sphinx-doc__sphinx-10466",
+    "sphinx-doc__sphinx-7462",
+    "sphinx-doc__sphinx-9230",
+    "sympy__sympy-15345",
+    "sympy__sympy-20428",
+    "sympy__sympy-21612",
 ]
 
 class _IterableReader(RawIOBase):
