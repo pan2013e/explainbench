@@ -11,11 +11,7 @@ from evaluation import schema
 from evaluation.inference import Model
 from evaluation.util import (
     EvalTimeout,
-    is_subpath,
-    simple_name_eq,
-    set_f1_score,
     mcq_score,
-    params_eq,
 )
 
 __all__ = ['Task']
@@ -77,45 +73,6 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     def eval(pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
-class RootCause:
-    class File(Task[schema.File]):
-        QUESTION = (
-            'Which files were buggy? '
-            'Please answer with the file paths, and exclude any test files or doc files from your response. '
-            'If you cannot infer from the explanation, please answer with an empty list.'
-        )
-        SCHEMA = schema.File
-
-        @staticmethod
-        def eval(pred: list[schema.File], gt: dict):
-            pred = [set(p.file) for p in pred]
-            gt = set(gt['buggy_file_names'])
-            return [set_f1_score(p, gt, is_subpath) for p in pred]
-
-    class Region(Task[schema.Region]):
-        QUESTION = (
-            'Which existing classes or functions were buggy?\n\n'
-            'Please follow these formatting rules strictly:\n'
-            '1. For methods: use `<simple_class_name>.<method_name>`.\n'
-            '  - Example: Bar.foo\n'
-            '2. For functions: use `<function_name>`.\n'
-            '  - Example: my_function\n'
-            '  - If the function is nested inside another function, use `<outer_function>.<inner_function>`.\n'
-            '3. For classes: use `<simple_class_name>`.\n'
-            '  - Only include classes if the bug affects the class itself (e.g., class variables, decorators), not methods within it.\n\n'
-            'Additional rules:\n'
-            '1. If the bug is outside any existing classes or functions (e.g., in the global scope), answer with an empty list.\n'
-            '2. If you cannot infer from the explanation, answer with an empty list.\n'
-            '3. Do not include classes or functions that were newly added in the patch.'
-        )
-        SCHEMA = schema.Region
-        
-        @staticmethod
-        def eval(pred: list[schema.Region], gt: dict):
-            pred = [set((r.identifier, r.type) for r in p.region) for p in pred]
-            gt = set((t[0], t[1]) for t in gt['buggy_function_names'])
-            return [set_f1_score(p, gt, simple_name_eq) for p in pred]
-
 class ExpressionChanges(Task[schema.Effect]):
     QUESTION = (
         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
@@ -125,7 +82,7 @@ class ExpressionChanges(Task[schema.Effect]):
         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
+        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {"answer": ["a", "b"]}'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
@@ -141,11 +98,6 @@ class ExpressionChanges(Task[schema.Effect]):
         before_or_after = kwargs.pop('before_or_after', 'before')
         choices = kwargs.pop('choices')
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
-    
-    @staticmethod
-    def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        answers = gt.get('answer', gt)
-        return [mcq_score(p.answer, answers) for p in pred]
 
 class Reachability(Task[schema.Effect]):
     QUESTION = (
@@ -154,7 +106,7 @@ class Reachability(Task[schema.Effect]):
         '{choices}\n\n'
         'Hints:\n'
         '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b").'
+        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {"answer": ["a", "b"]}'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
@@ -184,17 +136,37 @@ class Reachability(Task[schema.Effect]):
             context=cls._build_context(**kwargs),
         )
 
+class Effect(Task[schema.Effect]):
+    QUESTION = "DUMMY"
+    SCHEMA = schema.Effect
+    
+    @classmethod
+    def predict(cls, model, explanation, **kwargs):
+        qt = kwargs.pop('question_type')
+        if qt == 'expression changes':
+            ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'line', 'choices', 'before_or_after']
+            context = {k: kwargs[k] for k in ctx_keys}
+            return ExpressionChanges.predict(model, explanation, **context)
+        elif qt == 'reachability':
+            ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'choices']
+            context = {k: kwargs[k] for k in ctx_keys}
+            return Reachability.predict(model, explanation, **context)
+        else:
+            raise ValueError(f'Unknown question_type: {qt}')
+
     @staticmethod
     def eval(pred: list[schema.Effect], gt: dict, **kwargs):
         answers = gt.get('answer', gt)
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP2_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
+    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
 
     # Helpers
     def get_expl(agent, instance_id):
         from evaluation.util import load_explanation
+        if agent == 'blank':
+            return 'EMPTY'
         expl = load_explanation(agent)[instance_id]
         return expl[0] if expl else 'EMPTY'
     
@@ -205,67 +177,56 @@ if __name__ == "__main__":
         print(pre, file=output)
         contents = output.getvalue()
         output.close()
+        if len(contents) > 20000:
+            contents = contents[:20000] + " ...(truncated)"
         return contents
 
     def get_ctx_and_gt(data):
-        question_type = data.get('question_type', 'expression changes')
-        if question_type == 'expression changes':
-            ctx = {
-                'function_code_before_patch': data['function_code_before_patch'],
-                'function_parameters_before_patch': get_function_input(data),
-                'line': data['location'],
-                'choices': data['choices'],
-                'before_or_after': data['before_or_after'],
-            }
-            task_cls = ExpressionChanges
-        elif question_type == 'reachability':
-            ctx = {
-                'function_code_before_patch': data['function_code_before_patch'],
-                'function_parameters_before_patch': get_function_input(data),
-                'choices': data['choices'],
-            }
-            task_cls = Reachability
-        else:
-            raise ValueError(f'Unknown question_type: {question_type}')
+        ctx = {
+            'question_type': data['question_type'],
+            'function_code_before_patch': data['function_code_before_patch'],
+            'function_parameters_before_patch': get_function_input(data),
+            'line': data['location'],
+            'choices': data['choices'],
+            'before_or_after': data['before_or_after'],
+        }
         gt = {
             'answer': data['answer']
         }
-        return ctx, gt, task_cls
-
+        return ctx, gt
 
     model = Model('gpt-5-mini-2025-08-07', n=5)
-    with open(STEP2_PATH, 'r') as f:
-        step2_data = json.load(f)
+    with open(STEP4_PATH, 'r') as f:
+        step4_data = json.load(f)
 
     output = {}
-    for agent in step2_data:
+    for agent in step4_data:
         output[agent] = {}
 
     def infer_instance(agent, instance_id, instance_data):
         explanation = get_expl(agent, instance_id)
-        context, gt, task_cls = get_ctx_and_gt(instance_data)
-        res = task_cls.predict(model, explanation, **context)
-        return agent, instance_id, res, gt, task_cls
+        context, gt = get_ctx_and_gt(instance_data)
+        res = Effect.predict(model, explanation, **context)
+        return agent, instance_id, res, gt
 
-    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "4"))
+    max_workers = int(os.getenv("EFFECT_EVAL_MAX_WORKERS", "10"))
     futures = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for agent, instances in step2_data.items():
+        for agent, instances in step4_data.items():
             for instance_id, instance_data in instances.items():
                 if instance_data:
                     futures.append(
                         executor.submit(infer_instance, agent, instance_id, instance_data)
                     )
-
-        for future in tqdm(
+        pbar = tqdm(
             as_completed(futures),
             total=len(futures),
-            desc="Evaluating instances",
-            unit="inst",
-        ):
+        )
+        for future in pbar:
+            pbar.set_postfix(**model.tqdm_usage())
             try:
-                agent, instance_id, res, gt, task_cls = future.result()
-                scores = task_cls.eval(res, gt)
+                agent, instance_id, res, gt = future.result()
+                scores = Effect.eval(res, gt)
             except Exception as e:
                 # Log the error and continue processing other instances
                 print(f"Error during evaluation of an instance: {e}")
@@ -276,7 +237,7 @@ if __name__ == "__main__":
                 'average': sum(scores) / len(scores) if scores else 0.0,
             }
     out_dir = os.path.dirname(__file__)
-    out_path = os.path.join(out_dir, 'effect_eval_output.json')
+    out_path = os.path.join(out_dir, '../effect_eval_output.json')
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2)
 
@@ -304,7 +265,7 @@ if __name__ == "__main__":
             'mean_of_instance_means': mean_of_instance_means,
         }
 
-    metrics_path = os.path.join(out_dir, 'metric.json')
+    metrics_path = os.path.join(out_dir, '../metric.json')
     with open(metrics_path, 'w') as f:
         json.dump(metrics, f, indent=2)
 
