@@ -82,7 +82,7 @@ class _ExpressionChanges(Task[schema.Effect]):
         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {"answer": ["a", "b"]}'
+        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
@@ -106,7 +106,7 @@ class _Reachability(Task[schema.Effect]):
         '{choices}\n\n'
         'Hints:\n'
         '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {"answer": ["a", "b"]}'
+        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
     )
     SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
@@ -229,7 +229,7 @@ if __name__ == "__main__":
                 scores = Effect.eval(res, gt)
             except Exception as e:
                 # Log the error and continue processing other instances
-                print(f"Error during evaluation of an instance: {e}")
+                print(f"Error during evaluation of an instance: {type(e).__name__}: {e}")
                 continue
             output[agent][instance_id] = {
                 'all_pred': [p.answer for p in res],
