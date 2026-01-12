@@ -16,7 +16,7 @@ random.seed(42)
 def read_step3_results():
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.all.filtered.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
         ),
         "r",
     ) as f:
@@ -274,9 +274,6 @@ if __name__ == "__main__":
     results = {}
     instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
     print(f"Intersection instance_ids count: {len(instance_ids)}")
-    print("Intersection instance_ids:")
-    for instance_id in instance_ids:
-        print(instance_id)
     # Report per-agent removals relative to filtered step3 data.
     print("Per-agent removals vs filtered step3 (intersection pruning):")
     for agent in AGENTS:
