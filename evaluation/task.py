@@ -161,7 +161,7 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/step4.json"
+    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step4.json"
     OUTPUT_FILE_INDIVIDUAL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/eval.individual.effect.json"
     OUTPUT_FILE_ALL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/results/eval.all.effect.json"
 
