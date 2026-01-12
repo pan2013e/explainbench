@@ -73,7 +73,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     def eval(pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
-class ExpressionChanges(Task[schema.Effect]):
+class _ExpressionChanges(Task[schema.Effect]):
     QUESTION = (
         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
         'Choices:\n'
@@ -99,7 +99,7 @@ class ExpressionChanges(Task[schema.Effect]):
         choices = kwargs.pop('choices')
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
 
-class Reachability(Task[schema.Effect]):
+class _Reachability(Task[schema.Effect]):
     QUESTION = (
         'Within the context of the provided function and inputs, which of the following lines exhibit a change in reachability before and after the patch?'
         'Choices:\n'
@@ -146,11 +146,11 @@ class Effect(Task[schema.Effect]):
         if qt == 'expression changes':
             ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'line', 'choices', 'before_or_after']
             context = {k: kwargs[k] for k in ctx_keys}
-            return ExpressionChanges.predict(model, explanation, **context)
+            return _ExpressionChanges.predict(model, explanation, **context)
         elif qt == 'reachability':
             ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'choices']
             context = {k: kwargs[k] for k in ctx_keys}
-            return Reachability.predict(model, explanation, **context)
+            return _Reachability.predict(model, explanation, **context)
         else:
             raise ValueError(f'Unknown question_type: {qt}')
 
