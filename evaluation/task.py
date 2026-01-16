@@ -74,35 +74,9 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     def eval(pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
-# class _ExpressionChanges(Task[schema.Effect]):
-#     QUESTION = (
-#         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
-#         'Choices:\n'
-#         '{choices}\n\n'
-#         'Hints:\n'
-#         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
-#         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
-#         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-#         '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
-#     )
-#     SCHEMA = schema.Effect
-#     CTX_AGENT_SPECIFIC = True
-    
-#     @staticmethod
-#     def _format_choices(exprs: list[str], formatter='{})'):
-#         assert len(exprs) <= 26, 'Too many choices to label with single letters'
-#         labels = 'abcdefghijklmnopqrstuvwxyz'
-#         return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
-    
-#     @classmethod
-#     def _build_prompt(cls, explanation, **kwargs):
-#         before_or_after = kwargs.pop('before_or_after', 'before')
-#         choices = kwargs.pop('choices')
-#         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
-
 class _ExpressionChanges(Task[schema.Effect]):
     QUESTION = (
-        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the patch is intended to change, regardless of whether the change is observable in the patched program execution?\n\n'
+        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
         'Choices:\n'
         '{choices}\n\n'
         'Hints:\n'
@@ -125,6 +99,32 @@ class _ExpressionChanges(Task[schema.Effect]):
         before_or_after = kwargs.pop('before_or_after', 'before')
         choices = kwargs.pop('choices')
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
+
+# class _ExpressionChanges(Task[schema.Effect]):
+#     QUESTION = (
+#         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the developer-intended change is?\n\n'
+#         'Choices:\n'
+#         '{choices}\n\n'
+#         'Hints:\n'
+#         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
+#         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
+#         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
+#         '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
+#     )
+#     SCHEMA = schema.Effect
+#     CTX_AGENT_SPECIFIC = True
+    
+#     @staticmethod
+#     def _format_choices(exprs: list[str], formatter='{})'):
+#         assert len(exprs) <= 26, 'Too many choices to label with single letters'
+#         labels = 'abcdefghijklmnopqrstuvwxyz'
+#         return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
+    
+#     @classmethod
+#     def _build_prompt(cls, explanation, **kwargs):
+#         before_or_after = kwargs.pop('before_or_after', 'before')
+#         choices = kwargs.pop('choices')
+#         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
 
 
 class _Reachability(Task[schema.Effect]):
@@ -188,9 +188,9 @@ class Effect(Task[schema.Effect]):
         return [mcq_score(p.answer, answers) for p in pred]
 
 if __name__ == "__main__":
-    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step4.gold.json"
-    OUTPUT_FILE_INDIVIDUAL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results/eval.individual.intent.json"
-    OUTPUT_FILE_ALL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results/eval.all.intent.json"
+    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step4.json"
+    OUTPUT_FILE_INDIVIDUAL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results_effect_run-1/eval.individual.intent.json"
+    OUTPUT_FILE_ALL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results_effect_run-1/eval.all.intent.json"
 
     # Helpers
     def get_expl(agent, instance_id):
