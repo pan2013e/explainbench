@@ -92,8 +92,8 @@ def process_agent(
                 return None
             if metadata == {}:
                 return {} # fallback to gold
-            if metadata.get("choices"):
-                return metadata # fallback to reachability
+            # if metadata.get("choices"):
+            #     return metadata # fallback to reachability
             pre_code, post_code = get_function_code(
                 instance_id,
                 metadata['file_path'],
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     STEP1_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1.json"
     STEP2_GOLD_PATH = os.path.join(
-        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.json",
+        "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step2.reach.gold.json",
     )
     AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
@@ -173,11 +173,11 @@ if __name__ == "__main__":
         "gold",
     ]
     OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
-    OUTPUT_JSON = "step2.json"
+    OUTPUT_JSON = "step2.reach.json"
     N_CHANGED = 10
     N_UNCHANGED = 10
     DO_INFERENCE = True
-    PARTIAL_RUN_JSON = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step1_delta.json"
+    PARTIAL_RUN_JSON = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_helper/reac.json"
     # ------------------------------------------- #
     start = time.time()
     step1 = read_json(STEP1_PATH)

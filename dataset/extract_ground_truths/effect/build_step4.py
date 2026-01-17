@@ -16,7 +16,7 @@ random.seed(42)
 def read_step3_results():
     with open(
         os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/step3.json"
+            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step3.gold.json"
         ),
         "r",
     ) as f:
@@ -219,18 +219,18 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
-            if metadata.get("choices", None):
-                shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answer"], seed=42)
-                shuffled_choices.append(["None of the above", [-1, -1]])
-                if len(answer_labels) == 0:
-                    answer_labels.append(string.ascii_lowercase[len(shuffled_choices)-1])
-                metadata.update({
-                    "choices": shuffled_choices,
-                    "answer": answer_labels,
-                    "question_type": "reachability"
-                })
-                results[instance_id] = metadata
-                continue
+            # if metadata.get("choices", None):
+            #     shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answer"], seed=42)
+            #     shuffled_choices.append(["None of the above", [-1, -1]])
+            #     if len(answer_labels) == 0:
+            #         answer_labels.append(string.ascii_lowercase[len(shuffled_choices)-1])
+            #     metadata.update({
+            #         "choices": shuffled_choices,
+            #         "answer": answer_labels,
+            #         "question_type": "reachability"
+            #     })
+            #     results[instance_id] = metadata
+            #     continue
             if metadata is None:
                 results[instance_id] = None
                 continue
@@ -277,15 +277,15 @@ if __name__ == "__main__":
     N_INCORRECT = N_CHOICES - N_CORRECT
     MMR_LAMBDA = 0.7
     AGENTS = [
-        "20250603_Refact_Agent_claude-4-sonnet",
-        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250928_trae_doubao_seed_code",
-        "20250807_mini-v1.7.0_gpt-5-mini",
-        # "gold",
+        # "20250603_Refact_Agent_claude-4-sonnet",
+        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        # "20250928_trae_doubao_seed_code",
+        # "20250807_mini-v1.7.0_gpt-5-mini",
+        "gold",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/"
-    OUTPUT_JSON = "step4.json"
+    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability"
+    OUTPUT_JSON = "step4.gold.json"
     # ------------------------------------------- #
     
     start_time = time.time()
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 process_agent, step3, agent, instance_ids, N_CORRECT, N_INCORRECT
             ): agent
             for agent in AGENTS
-            if agent and agent != "gold"
+            if agent and agent
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]

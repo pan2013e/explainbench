@@ -281,17 +281,17 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             )
             metadata["function_code_before_patch"] = pre_code
             is_fallback_to_gold = True
-        if metadata.get("choices"):
-            fallback_reachability[instance_id] = metadata
-            pre_code, _ = get_function_code(
-                instance_id,
-                metadata['file_path'],
-                get_simple_function_name(metadata),
-                patch=get_agent_patch(agent, instance_id),
-                line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
-            )
-            metadata["function_code_before_patch"] = pre_code
-            continue
+        # if metadata.get("choices"):
+        #     fallback_reachability[instance_id] = metadata
+        #     pre_code, _ = get_function_code(
+        #         instance_id,
+        #         metadata['file_path'],
+        #         get_simple_function_name(metadata),
+        #         patch=get_agent_patch(agent, instance_id),
+        #         line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
+        #     )
+        #     metadata["function_code_before_patch"] = pre_code
+        #     continue
         metadata = dict(metadata)
         metadata["is_fallback_to_gold"] = is_fallback_to_gold
         jobs.append(InstanceJob(
@@ -359,10 +359,10 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.json")
-    GOLD_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", "step2.gold.json")
+    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability", "step2.patched.json")
+    GOLD_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step2.patched.gold.json"
     BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
-    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step"
+    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability"
     OUTPUT_JSON = "step3.json"
     OUTPUT_JSON_GOLD = "step3.gold.json"
     AGENTS = [
