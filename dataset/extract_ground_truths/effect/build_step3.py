@@ -141,13 +141,9 @@ def compute_expr_change_map(patched, buggy):
     return expr_change
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
-    run_id = f"inspect.{agent}.1020.{expr_id}"
-    log_dir = os.path.join(
-        BASE_OUTPUT_DIR,
-        run_id,
-        agent,
-        instance_id,
-    )
+    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+    log_dir = os.path.join(base_dir, run_id, agent, instance_id)
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
     buggy_path = os.path.join(log_dir, f"buggy_traces/{test_name}.jsonl")
     patched_path = os.path.join(log_dir, f"patched_traces/{test_name}.jsonl")
@@ -347,7 +343,7 @@ if __name__ == "__main__":
     RQ3_AGENTS = [
         "rq3_v1",
     ]
-    RUN_RQ3 = False
+    RUN_RQ3 = True
     if RUN_RQ3:
         print("Running RQ3")
         AGENTS = RQ3_AGENTS
