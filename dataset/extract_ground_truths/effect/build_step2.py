@@ -166,10 +166,12 @@ if __name__ == "__main__":
     ]
     RUN_RQ3 = False
     if RUN_RQ3:
+        print("Running RQ3")
         AGENTS = RQ3_AGENTS
         STEP1_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step1.json")
         OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step2.json")
     else:
+        print("Running RQ1")
         AGENTS = RQ1_AGENTS
         STEP1_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
         OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
