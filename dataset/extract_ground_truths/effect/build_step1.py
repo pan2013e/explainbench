@@ -40,9 +40,24 @@ ADHOC_TEST_ID = {
     "sympy__sympy-17655": 1,
 }
 
+# Only effective for RQ3 agents
+ADHOC_FALLBACK_REDIRECT = {
+    "rq3_v1": [
+        "django__django-12741",
+        "django__django-14349",
+        "django__django-15563",
+        "matplotlib__matplotlib-21568",
+        "sphinx-doc__sphinx-8269",
+        "sphinx-doc__sphinx-9320",
+    ],
+}
+
+def _timeout_handler(signum, frame):
+    raise TimeoutError()
+
 def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=600):
-    def _timeout_handler(signum, frame):
-        raise TimeoutError()
+    if instance_id in ADHOC_FALLBACK_REDIRECT.get(agent, []):
+        return {} # fallback to gold
     try:
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(EXTRA_LONG_TIMEOUT.get(instance_id, timeout))
@@ -138,7 +153,8 @@ def simplify_params(data, var_max_depth: int, param_max_depth: int) -> None:
 
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
-    AGENTS = [
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    RQ1_AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -146,7 +162,17 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    OUTPUT_DIR = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step", f"step1.json")
+    RQ3_AGENTS = [
+        "rq3_v1",
+        "gold"
+    ]
+    RUN_RQ3 = False
+    if RUN_RQ3:
+        AGENTS = RQ3_AGENTS
+        OUTPUT_DIR = os.path.join(BASE_DIR, "output_per_step_rq3", f"step1.json")
+    else:
+        AGENTS = RQ1_AGENTS
+        OUTPUT_DIR = os.path.join(BASE_DIR, "output_per_step", f"step1.json")
     TOTAL_CHOICES = 4
     DEPTH_THRESHOLD = 3
     DO_SIMPLIFICATION = True
