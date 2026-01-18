@@ -343,7 +343,7 @@ if __name__ == "__main__":
     RQ3_AGENTS = [
         "rq3_v1",
     ]
-    RUN_RQ3 = True
+    RUN_RQ3 = False
     if RUN_RQ3:
         print("Running RQ3")
         AGENTS = RQ3_AGENTS
