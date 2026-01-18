@@ -26,6 +26,7 @@ EXTRA_LONG_TIMEOUT = {
     'django__django-16667': 3000,
     'django__django-16938': 3000,
     'matplotlib__matplotlib-24637': 3000,
+    'matplotlib__matplotlib-26208': 3000,
     'pylint-dev__pylint-6386': 3000,
     'pylint-dev__pylint-7080': 3000,
     'sphinx-doc__sphinx-8551': 3000,
@@ -55,7 +56,7 @@ ADHOC_FALLBACK_REDIRECT = {
 def _timeout_handler(signum, frame):
     raise TimeoutError()
 
-def _process_instance(instance_id, agent, total_choices, depth_threshold, timeout=600):
+def _process_instance(instance_id, agent, depth_threshold, timeout=600):
     if instance_id in ADHOC_FALLBACK_REDIRECT.get(agent, []):
         return {} # fallback to gold
     try:
@@ -68,7 +69,6 @@ def _process_instance(instance_id, agent, total_choices, depth_threshold, timeou
                     instance_id,
                     agent=agent,
                     test_id=test_id,
-                    total_choices=total_choices, 
                     depth_threshold=depth_threshold
                 )
             except IndexError:
@@ -94,12 +94,12 @@ def _process_instance(instance_id, agent, total_choices, depth_threshold, timeou
     finally:
         signal.alarm(0)
 
-def process_agent(agent, instance_ids, total_choices, depth_threshold, max_workers=10):
+def process_agent(agent, instance_ids, depth_threshold, max_workers=20):
     results = {}
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(_process_instance, instance_id, agent, total_choices, depth_threshold): instance_id
+            executor.submit(_process_instance, instance_id, agent, depth_threshold): instance_id
             for instance_id in instance_ids
         }
         for future in tqdm(as_completed(futures), total=len(futures), desc=agent):
@@ -162,36 +162,47 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
+    # Assume gold has been processed in RQ1
     RQ3_AGENTS = [
         "rq3_v1",
-        "gold"
     ]
     RUN_RQ3 = False
     if RUN_RQ3:
         AGENTS = RQ3_AGENTS
-        OUTPUT_DIR = os.path.join(BASE_DIR, "output_per_step_rq3", f"step1.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step1.json")
     else:
         AGENTS = RQ1_AGENTS
-        OUTPUT_DIR = os.path.join(BASE_DIR, "output_per_step", f"step1.json")
-    TOTAL_CHOICES = 4
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
     DEPTH_THRESHOLD = 3
     DO_SIMPLIFICATION = True
     SIMPLIFY_VAR_MAX_DEPTH = 4
     SIMPLIFY_PARAM_MAX_DEPTH = 3
+    FRESH_RUN = False
     # ------------------------------------------- #
 
     results = {}
+    if os.path.exists(OUTPUT_PATH) and not FRESH_RUN:
+        with open(OUTPUT_PATH, "r") as f:
+            exist_agents = list(json.load(f).keys())
+        OUTPUT_PATH = OUTPUT_PATH.replace(".json" ,".incremental.json")
+    else:
+        exist_agents = []
+    
+    agents_to_process = AGENTS.copy()
+    agents_to_process = [agent for agent in agents_to_process if agent not in exist_agents]
+    
     instance_ids = get_instance_ids(["all"])
     with ProcessPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, agent, instance_ids, TOTAL_CHOICES, DEPTH_THRESHOLD): agent
-            for agent in AGENTS if agent
+            executor.submit(process_agent, agent, instance_ids, DEPTH_THRESHOLD): agent for agent in agents_to_process
         }
-        for future in as_completed(futures):
+        for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
+
     if DO_SIMPLIFICATION:
         simplify_params(results, SIMPLIFY_VAR_MAX_DEPTH, SIMPLIFY_PARAM_MAX_DEPTH)
-    with open(OUTPUT_DIR, "w") as f:
+    
+    with open(OUTPUT_PATH, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Saved step1 results to {OUTPUT_DIR}")
+    print(f"Saved step1 results to {OUTPUT_PATH}")
