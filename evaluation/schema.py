@@ -1,26 +1,9 @@
-from typing import List, Literal
+from typing import List
 from pydantic import BaseModel, field_validator
 
-__all__ = [
-    'Region',
-    'File',
-    'Line',
-]
+__all__ = ["MCQ"]
 
-###### Buggy Location Schemas ######
-class RegionInfo(BaseModel):
-    type: Literal['class', 'function']
-    identifier: str
-
-class Region(BaseModel):
-    region: List[RegionInfo]
-
-class File(BaseModel):
-    file: List[str]
-
-###### Effect Schemas ######
-# Multiple-choice question answers
-class Effect(BaseModel):
+class MCQ(BaseModel):
     answer: List[str]
 
     @field_validator('answer')

@@ -6,63 +6,10 @@ import warnings
 import numpy as np
 
 from functools import wraps
-from operator import eq
-from typing import Any, Callable
-from deepdiff import DeepDiff
+from typing import Callable
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(DIR, '..', 'dataset')
-
-SWEBENCH_VERIFIED_PROJECT_PREFIX = [
-    'astropy',
-    'django',
-    'lib/matplotlib',
-    'seaborn',
-    'src/flask',
-    'requests',
-    'xarray',
-    'pylint',
-    'src/_pytest',
-    'sklearn',
-    'sphinx',
-    'sympy'
-]
-
-def is_subpath(abs: str, rel: str):
-    if len(abs) < len(rel):
-        abs, rel = rel, abs
-    abs = os.path.normpath(abs)
-    rel = os.path.normpath(rel)
-    return abs == rel or (any(rel.startswith(prefix) for prefix in SWEBENCH_VERIFIED_PROJECT_PREFIX) and abs.endswith(os.path.sep + rel))
-
-def simple_name_eq(a: tuple[str, str], b: tuple[str, str]):
-    if a[1] != b[1]:
-        return False
-    a_simple = a[0].split('.')[-1]
-    b_simple = b[0].split('.')[-1]
-    return a_simple == b_simple
-
-def f1_score(tp, fp, fn):
-    p = tp / (tp + fp) if tp + fp > 0 else 0.0
-    r = tp / (tp + fn) if tp + fn > 0 else 0.0
-    return 2 * p * r / (p + r) if p + r > 0 else 0.0
-
-def set_f1_score(pred: set, gt: set, equal_fn: Callable[[Any, Any], bool] = eq):
-    matched_gt = set()
-    tp = 0
-    for p in pred:
-        for g in gt:
-            if g not in matched_gt and equal_fn(p, g):
-                tp += 1
-                matched_gt.add(g)
-                break
-    fp = len(pred) - tp
-    fn = len(gt) - tp
-    return f1_score(tp, fp, fn)
-
-def params_eq(a, b):
-    diff = DeepDiff(a, b, significant_digits=5, ignore_private_variables=False)
-    return diff == {}
 
 def mcq_score(pred: list[str], gt: list[str]):
     assert len(gt) > 0
@@ -71,6 +18,11 @@ def mcq_score(pred: list[str], gt: list[str]):
     if pred_set - gt_set:
         return 0.0
     return len(pred_set & gt_set) / len(gt_set)
+
+def format_mcq_choices(exprs: list[str], formatter='{})'):
+    assert len(exprs) <= 26, 'Too many choices to label with single letters'
+    labels = 'abcdefghijklmnopqrstuvwxyz'
+    return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
 
 def load_explanation(split: str) -> dict[str, list[str]]:
     with open(os.path.join(DATASET_DIR, 'explanations', 'dataset.json')) as f:

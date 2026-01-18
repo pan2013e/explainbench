@@ -12,6 +12,7 @@ from evaluation.inference import Model
 from evaluation.util import (
     EvalTimeout,
     mcq_score,
+    format_mcq_choices,
 )
 
 __all__ = ['Task']
@@ -52,6 +53,8 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     
     @classmethod
     def _build_prompt(cls, explanation: str, **kwargs):
+        if cls.QUESTION == "UNDEFINED":
+            raise NotImplementedError(f"Should use a subclass of {cls.__qualname__} with a specific QUESTION.")
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION, context=cls._build_context(**kwargs))
 
     @classmethod
@@ -74,7 +77,16 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     def eval(pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
-class _ExpressionChanges(Task[schema.Effect]):
+class MCQ(Task[schema.MCQ]):
+    QUESTION = "UNDEFINED"
+    SCHEMA = schema.MCQ
+    
+    @staticmethod
+    def eval(pred: list[schema.MCQ], gt: dict, **kwargs):
+        answers = gt.get('answer', gt)
+        return [mcq_score(p.answer, answers) for p in pred]
+
+class LocalEffect(MCQ):
     QUESTION = (
         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
         'Choices:\n'
@@ -85,14 +97,15 @@ class _ExpressionChanges(Task[schema.Effect]):
         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
         '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
     )
-    SCHEMA = schema.Effect
     CTX_AGENT_SPECIFIC = True
     
-    @staticmethod
-    def _format_choices(exprs: list[str], formatter='{})'):
-        assert len(exprs) <= 26, 'Too many choices to label with single letters'
-        labels = 'abcdefghijklmnopqrstuvwxyz'
-        return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
+    @classmethod
+    def _format_choices(cls, exprs: list[str]):
+        # backward compatibility with old pipeline
+        if exprs[-1] == "None of the above":
+            exprs[-1] = "The patch has no effect and none of the above expressions change in value"
+            exprs.append("Cannot be answered by the explanation alone")
+        return format_mcq_choices(exprs)
     
     @classmethod
     def _build_prompt(cls, explanation, **kwargs):
@@ -100,103 +113,41 @@ class _ExpressionChanges(Task[schema.Effect]):
         choices = kwargs.pop('choices')
         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
 
-# class _ExpressionChanges(Task[schema.Effect]):
-#     QUESTION = (
-#         'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the developer-intended change is?\n\n'
-#         'Choices:\n'
-#         '{choices}\n\n'
-#         'Hints:\n'
-#         '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
-#         '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
-#         '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-#         '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
-#     )
-#     SCHEMA = schema.Effect
-#     CTX_AGENT_SPECIFIC = True
-    
-#     @staticmethod
-#     def _format_choices(exprs: list[str], formatter='{})'):
-#         assert len(exprs) <= 26, 'Too many choices to label with single letters'
-#         labels = 'abcdefghijklmnopqrstuvwxyz'
-#         return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
-    
-#     @classmethod
-#     def _build_prompt(cls, explanation, **kwargs):
-#         before_or_after = kwargs.pop('before_or_after', 'before')
-#         choices = kwargs.pop('choices')
-#         return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
-
-
-class _Reachability(Task[schema.Effect]):
+class LocalIntent(LocalEffect):
     QUESTION = (
-        'Within the context of the provided function and inputs, which of the following lines exhibit a change in reachability before and after the patch?'
+        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the developer-intended change is?\n\n'
         'Choices:\n'
         '{choices}\n\n'
         'Hints:\n'
-        '1. The numeric range shown after each option corresponds to the line numbers in the original source code where that statement appears.'
-        '2. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
+        '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
+        '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
+        '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
+        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
     )
-    SCHEMA = schema.Effect
-    CTX_AGENT_SPECIFIC = True
-
-    @staticmethod
-    def _format_choices(choices: list):
-        assert len(choices) <= 26, 'Too many choices to label with single letters'
-        labels = 'abcdefghijklmnopqrstuvwxyz'
-        formatted = []
-        for i, choice in enumerate(choices):
-            code, lines = choice
-            code_str = str(code).strip()
-            if code_str == "None of the above":
-                formatted.append(f'{labels[i]}) {code_str}')
-            else:
-                line_start, line_end = lines
-                formatted.append(f'{labels[i]}) {code_str} [{line_start}, {line_end}]')
-        return '\n'.join(formatted)
-
-    @classmethod
-    def _build_prompt(cls, explanation, **kwargs):
-        choices = kwargs.pop('choices')
-        return cls.TEMPLATE.format(
-            schema=cls._schema_string(),
-            explanation=explanation,
-            question=cls.QUESTION.format(choices=cls._format_choices(choices)),
-            context=cls._build_context(**kwargs),
-        )
-
-class Effect(Task[schema.Effect]):
-    QUESTION = "DUMMY"
-    SCHEMA = schema.Effect
     
     @classmethod
-    def predict(cls, model, explanation, **kwargs):
-        qt = kwargs.pop('question_type')
-        if qt == 'expression changes':
-            ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'line', 'choices', 'before_or_after']
-            context = {k: kwargs[k] for k in ctx_keys}
-            return _ExpressionChanges.predict(model, explanation, **context)
-        elif qt == 'reachability':
-            ctx_keys = ['function_code_before_patch', 'function_parameters_before_patch', 'choices']
-            context = {k: kwargs[k] for k in ctx_keys}
-            return _Reachability.predict(model, explanation, **context)
-        else:
-            raise ValueError(f'Unknown question_type: {qt}')
-
-    @staticmethod
-    def eval(pred: list[schema.Effect], gt: dict, **kwargs):
-        answers = gt.get('answer', gt)
-        return [mcq_score(p.answer, answers) for p in pred]
+    def _format_choices(cls, exprs: list[str]):
+        # backward compatibility with old pipeline
+        if exprs[-1] == "None of the above":
+            exprs[-1] = "Cannot be answered by the explanation alone"
+        return format_mcq_choices(exprs)
 
 if __name__ == "__main__":
-    STEP4_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step4.json"
-    OUTPUT_FILE_INDIVIDUAL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results_effect_run-1/eval.individual.intent.json"
-    OUTPUT_FILE_ALL = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/results_effect_run-1/eval.all.intent.json"
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    TASK = LocalEffect
+    RUN_RQ3 = False
+    if RUN_RQ3:
+        STEP4_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json")
+        OUTPUT_FILE_INDIVIDUAL = os.path.join(BASE_DIR, "output_per_step_rq3", f"eval.individual.{TASK.__name__.lower()}.json")
+        OUTPUT_FILE_ALL = os.path.join(BASE_DIR, "output_per_step_rq3", f"eval.all.{TASK.__name__.lower()}.json")
+    else:
+        STEP4_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.json")
+        OUTPUT_FILE_INDIVIDUAL = os.path.join(BASE_DIR, "output_per_step", f"eval.individual.{TASK.__name__.lower()}.json")
+        OUTPUT_FILE_ALL = os.path.join(BASE_DIR, "output_per_step", f"eval.all.{TASK.__name__.lower()}.json")
 
     # Helpers
     def get_expl(agent, instance_id):
         from evaluation.util import load_explanation
-        if agent == 'blank':
-            return 'EMPTY'
         expl = load_explanation(agent)[instance_id]
         return expl[0] if expl else 'EMPTY'
     
@@ -213,7 +164,6 @@ if __name__ == "__main__":
 
     def get_ctx_and_gt(data):
         ctx = {
-            'question_type': data['question_type'],
             'function_code_before_patch': data['function_code_before_patch'],
             'function_parameters_before_patch': get_function_input(data),
             'line': data['location'],
@@ -236,7 +186,7 @@ if __name__ == "__main__":
     def infer_instance(agent, instance_id, instance_data):
         explanation = get_expl(agent, instance_id)
         context, gt = get_ctx_and_gt(instance_data)
-        res = Effect.predict(model, explanation, **context)
+        res = TASK.predict(model, explanation, **context)
         return agent, instance_id, res, gt
 
     max_workers = 40
@@ -256,7 +206,7 @@ if __name__ == "__main__":
             pbar.set_postfix(**model.tqdm_usage())
             try:
                 agent, instance_id, res, gt = future.result()
-                scores = Effect.eval(res, gt)
+                scores = TASK.eval(res, gt)
             except Exception as e:
                 # Log the error and continue processing other instances
                 print(f"Error during evaluation of an instance: {type(e).__name__}: {e}")
