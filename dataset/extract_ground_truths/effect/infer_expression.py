@@ -20,7 +20,7 @@ class Expression(BaseModel):
 class ExpressionList(BaseModel):
     expressions: list[Expression]
 
-with open(os.path.join(DIR, "prompts/template_merged.txt"), "r") as f:
+with open(os.path.join(DIR, "prompts/template.txt"), "r") as f:
     TEMPLATE = f.read()
 
 MODEL = Model("gpt-5.2-2025-12-11", n=1, reasoning_effort="medium")

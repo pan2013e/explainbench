@@ -12,5 +12,6 @@ logs*/
 dataset/extract_ground_truths/effect/ignore/*
 *.log
 *.txt
+!dataset/extract_ground_truths/effect/prompts/*.txt
 explainbench.egg-info/PKG-INFO
 helpers/*
