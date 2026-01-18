@@ -133,30 +133,3 @@ def get_diff_info_per_agent(output_dir: str, run_id: str, agent_id: str)->Dict:
             records[id] = record
 
     return records
-
-if __name__ == "__main__":
-    diff_info = get_diff_info_per_instance(
-        agent_output_dir=Path("/home/yusuf/explainbench/logs/run_evaluation/validate-gold/gold"),
-        instance_id=Path("astropy__astropy-13033")
-    )
-
-    expected = {
-        "added": {
-            "astropy/timeseries/core.py": [58, 59, 60, 61, 62, 63, 64, 86, 87, 88, 89]
-        },
-        "removed": {
-            "astropy/timeseries/core.py": [79, 80, 81]
-        }
-    }
-    assert diff_info == expected
-
-
-    diff_info_per_agent = get_diff_info_per_agent(
-        "/home/yusuf/explainbench/logs/run_evaluation",
-        "validate-gold",
-        "gold"
-    )
-
-    for key in diff_info_per_agent:
-        print(diff_info_per_agent[key])
-        print("---"*50)
