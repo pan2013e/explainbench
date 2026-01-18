@@ -85,10 +85,11 @@ def timeout(seconds=30):
 
 class EvalTimeout(type):
     def __new__(mcls, name, bases, namespace):
-        if not name.startswith('_'):
-            func = namespace.get('eval', None)
-            assert func is not None and callable(func)
-            assert isinstance(func, staticmethod)
-            wrapped = staticmethod(timeout()(func.__func__))
-            namespace['eval'] = wrapped
+        func = namespace.get('eval', None)
+        if func is None:
+            return super().__new__(mcls, name, bases, namespace)
+        assert func is not None and callable(func.__func__)
+        assert isinstance(func, classmethod)
+        wrapped = classmethod(timeout()(func.__func__))
+        namespace['eval'] = wrapped
         return super().__new__(mcls, name, bases, namespace)

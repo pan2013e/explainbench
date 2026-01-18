@@ -73,16 +73,16 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
         prompt = cls._build_prompt(explanation, **kwargs)
         return model.infer(prompt, cls.SCHEMA)
     
-    @staticmethod
-    def eval(pred: list, gt: dict, **kwargs) -> list[float]:
+    @classmethod
+    def eval(cls, pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
 class MCQ(Task[schema.MCQ]):
     QUESTION = "UNDEFINED"
     SCHEMA = schema.MCQ
     
-    @staticmethod
-    def eval(pred: list[schema.MCQ], gt: dict, **kwargs):
+    @classmethod
+    def eval(cls, pred: list[schema.MCQ], gt: dict, **kwargs):
         answers = gt.get('answer', gt)
         return [mcq_score(p.answer, answers) for p in pred]
 
@@ -133,9 +133,9 @@ class LocalIntent(LocalEffect):
         return format_mcq_choices(exprs)
 
 if __name__ == "__main__":
-    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../logs/run_evaluation")
     TASK = LocalEffect
-    RUN_RQ3 = False
+    RUN_RQ3 = True
     if RUN_RQ3:
         STEP4_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json")
         OUTPUT_FILE_INDIVIDUAL = os.path.join(BASE_DIR, "output_per_step_rq3", f"eval.individual.{TASK.__name__.lower()}.json")
