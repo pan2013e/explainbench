@@ -4,15 +4,12 @@
 import argparse
 import json
 import os
-import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from io import StringIO
 from itertools import zip_longest
 from typing import Any, Dict, Optional, Tuple
-
-from deepdiff import DeepDiff
 
 from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
@@ -66,10 +63,6 @@ def execute_candidate_expressions(
             "--bp-func", bp_func_name,
         ])
 
-def rv_equals(v1, v2):
-    diff = DeepDiff(v1, v2, significant_digits=5, ignore_private_variables=False)
-    return diff == {}
-
 def is_none_attr_inspection_failure(exc):
     if exc is None:
         return False
@@ -108,9 +101,6 @@ def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
 
     # Otherwise, treat any value difference as a change.
     return True
-def index_selected(buggy_val, buggy_exc, patched_val, patched_exc, should_change: bool):
-    changed = index_changed(buggy_val, buggy_exc, patched_val, patched_exc)
-    return changed if should_change else not changed
 
 def _ensure_list(x, length):
     if isinstance(x, list):
@@ -149,7 +139,6 @@ def compute_expr_change_map(patched, buggy):
         expr_change[expr] = changed
 
     return expr_change
-
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
     run_id = f"inspect.{agent}.1020.{expr_id}"
@@ -281,17 +270,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             )
             metadata["function_code_before_patch"] = pre_code
             is_fallback_to_gold = True
-        # if metadata.get("choices"):
-        #     fallback_reachability[instance_id] = metadata
-        #     pre_code, _ = get_function_code(
-        #         instance_id,
-        #         metadata['file_path'],
-        #         get_simple_function_name(metadata),
-        #         patch=get_agent_patch(agent, instance_id),
-        #         line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
-        #     )
-        #     metadata["function_code_before_patch"] = pre_code
-        #     continue
         metadata = dict(metadata)
         metadata["is_fallback_to_gold"] = is_fallback_to_gold
         jobs.append(InstanceJob(
@@ -332,9 +310,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
     return results
 
 if __name__ == "__main__":
-
-    start_time = time.time()
-    
     parser = argparse.ArgumentParser(
         description="Execute candidate expressions and/or validate them for effect ground truth step 3.",
     )
@@ -359,13 +334,8 @@ if __name__ == "__main__":
     )
 
     # ------------ SCRIPT PARAMETERS ------------ #
-    STEP2_PATH = os.path.join("/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability", "step2.patched.json")
-    GOLD_PATH = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step2.patched.gold.json"
-    BASE_OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation"
-    OUTPUT_DIR = f"/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability"
-    OUTPUT_JSON = "step3.json"
-    OUTPUT_JSON_GOLD = "step3.gold.json"
-    AGENTS = [
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    RQ1_AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -373,51 +343,63 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    PARTIAL_RUN_JSON = ""
+    # Assume gold has been processed in RQ1
+    RQ3_AGENTS = [
+        "rq3_v1",
+    ]
+    RUN_RQ3 = False
+    if RUN_RQ3:
+        print("Running RQ3")
+        AGENTS = RQ3_AGENTS
+        STEP2_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step2.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step3.json")
+    else:
+        print("Running RQ1")
+        AGENTS = RQ1_AGENTS
+        STEP2_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.json")
+    STEP2_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.gold.json")
+    STEP3_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.gold.json")
+    FRESH_RUN = False
     # ------------------------------------------- #
     
     step2 = read_json(STEP2_PATH)
-    gold = read_json(GOLD_PATH)
+    gold = read_json(STEP2_GOLD_PATH)
     step2["gold"] = gold["gold"]
     
     results = {}
-    if PARTIAL_RUN_JSON and os.path.exists(PARTIAL_RUN_JSON):
-        with open(PARTIAL_RUN_JSON, "r") as f:
-            instance_ids_per_agent = json.load(f)
-        print("[INFO] DO PARTIAL RUN!")
+    if os.path.exists(OUTPUT_PATH) and not FRESH_RUN:
+        with open(OUTPUT_PATH, "r") as f:
+            exist_agents = list(json.load(f).keys())
+        OUTPUT_PATH = OUTPUT_PATH.replace(".json" ,".incremental.json")
     else:
-        instance_ids_per_agent = {}
-        instance_ids = get_instance_ids(["all"])
+        exist_agents = []
+    
+    agents_to_process = AGENTS.copy()
+    agents_to_process = [agent for agent in agents_to_process if agent not in exist_agents]
+    if "gold" in agents_to_process:
+        agents_to_process.remove("gold")
 
+    instance_ids = get_instance_ids(["all"])
+    
     # Run gold patch first
-    STEP3_GOLD_PATH = os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD)
     if os.path.exists(STEP3_GOLD_PATH):
         if do_validate:
             results["gold"] = read_json(STEP3_GOLD_PATH)["gold"]
             print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries")
     else:
-        results["gold"] = process_agent(
-            step2, 
-            "gold",
-            instance_ids if not instance_ids_per_agent else instance_ids_per_agent.get("gold", []),
-            do_execute,
-            do_validate)
+        print("[INFO] Processing gold agent for step3")
+        results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
         if do_validate:
-            with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON_GOLD), "w") as f:
+            with open(os.path.join(STEP3_GOLD_PATH), "w") as f:
                 json.dump(results, f, indent=2)
-            print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON_GOLD}")
+            print(f"Saved step3 results to {STEP3_GOLD_PATH}")
     if do_validate:
         step2["gold"] = results["gold"]
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_agent, 
-                            step2, 
-                            agent, 
-                            instance_ids if not instance_ids_per_agent else instance_ids_per_agent[agent], 
-                            do_execute, 
-                            do_validate): agent
-            for agent in AGENTS if agent and agent != "gold"
+            executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent for agent in agents_to_process
         }
         for future in as_completed(futures):
             agent = futures[future]
@@ -425,11 +407,8 @@ if __name__ == "__main__":
             print(f"[INFO] Completed processing for agent={agent}")
     
     if do_validate:
-        with open(os.path.join(OUTPUT_DIR, OUTPUT_JSON), "w") as f:
+        with open(os.path.join(OUTPUT_PATH), "w") as f:
             if "gold" in results:
                 del results["gold"]
             json.dump(results, f, indent=2)
-        print(f"Saved step3 results to {OUTPUT_DIR}/{OUTPUT_JSON}")
-    
-    end_time = time.time()
-    print(f"Total execution time: {end_time - start_time:.2f} seconds")
+        print(f"Saved step3 results to {OUTPUT_PATH}")
