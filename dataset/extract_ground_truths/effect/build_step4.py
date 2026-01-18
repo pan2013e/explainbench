@@ -1,25 +1,15 @@
 import os
 import json
-import time
 import random
-import string
-import hashlib
 
 from tqdm.auto import tqdm
 from typing import Callable, List, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from execution.util import get_instance_ids
-
 random.seed(42)
 
-def read_step3_results():
-    with open(
-        os.path.join(
-            "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability/step3.gold.json"
-        ),
-        "r",
-    ) as f:
+def read_json(input_path):
+    with open(input_path, "r") as f:
         return json.load(f)
 
 def intersect_instance_ids(step3_data, agents):
@@ -120,6 +110,7 @@ def build_choices_and_answer(
     incorrect_pool: List[str],
     sampler_function: Callable,
     add_none_of_the_above: bool = True,
+    add_cannot_infer: bool = True,
     labels: str = "abcdefghijklmnopqrstuvwxyz",
     is_fallback_to_gold: bool = False,
 ) -> Tuple[List[str], List[str]]:
@@ -150,87 +141,24 @@ def build_choices_and_answer(
         choices, is_correct = [], []
 
     if add_none_of_the_above:
-        none_option: str = "None of the above"
+        none_option: str = "The patch has no effect and none of the above expressions change in value"
         has_any_correct = any(is_correct)
         choices.append(none_option)
         is_correct.append(not has_any_correct)
+    
+    if add_cannot_infer:
+        cannot_infer_option = "Cannot be answered by the explanation alone"
+        choices.append(cannot_infer_option)
+        is_correct.append(False)
 
     answer = [labels[i] for i, flag in enumerate(is_correct) if flag]
     return choices, answer
-
-def hash_list(x):
-    s = json.dumps(x, sort_keys=True).encode("utf-8")
-    return hashlib.sha256(s).hexdigest()
-
-def shuffle_choices_and_label_answer(choices, answers, seed=None):
-    rng = random.Random(seed)
-
-    shuffled = choices[:]
-    rng.shuffle(shuffled)
-
-    idx_map = {hash_list(c): i for i, c in enumerate(shuffled)}
-
-    def label_to_idx(label: str):
-        if not isinstance(label, str) or not label:
-            return None
-        idx = 0
-        for ch in label:
-            if ch not in string.ascii_lowercase:
-                return None
-            idx = idx * 26 + (ord(ch) - ord("a") + 1)
-        return idx - 1
-
-    def idx_to_label(i):
-        if i < 26:
-            return string.ascii_lowercase[i]
-        s = ""
-        i += 1
-        while i:
-            i, r = divmod(i - 1, 26)
-            s = string.ascii_lowercase[r] + s
-        return s
-
-    answer_labels = []
-    missing = []
-    for a in answers:
-        key = hash_list(a)
-        if key in idx_map:
-            answer_labels.append(idx_to_label(idx_map[key]))
-        else:
-            missing.append(a)
-
-    if missing:
-        # REMOVE NEXT ITERATION
-        label_indices = []
-        for a in answers:
-            idx = label_to_idx(a)
-            if idx is None:
-                raise KeyError(f"Answer {a!r} does not match any shuffled choice.")
-            label_indices.append(idx)
-        if any(i < 0 or i >= len(choices) for i in label_indices):
-            raise IndexError("Answer label index out of bounds for choices list.")
-        answer_labels = [
-            idx_to_label(idx_map[hash_list(choices[i])]) for i in label_indices
-        ]
-    return shuffled, answer_labels
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
     results = {}
     for instance_id in instance_ids:
         try:
             metadata = data[agent][instance_id]
-            # if metadata.get("choices", None):
-            #     shuffled_choices, answer_labels = shuffle_choices_and_label_answer(metadata["choices"], metadata["answer"], seed=42)
-            #     shuffled_choices.append(["None of the above", [-1, -1]])
-            #     if len(answer_labels) == 0:
-            #         answer_labels.append(string.ascii_lowercase[len(shuffled_choices)-1])
-            #     metadata.update({
-            #         "choices": shuffled_choices,
-            #         "answer": answer_labels,
-            #         "question_type": "reachability"
-            #     })
-            #     results[instance_id] = metadata
-            #     continue
             if metadata is None:
                 results[instance_id] = None
                 continue
@@ -257,7 +185,6 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             results[instance_id] = {
                 "choices": choices,
                 "answer": answer,
-                "question_type": "expression changes",
                 **metadata,
             }
         except KeyError:
@@ -269,27 +196,37 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
             continue
     return results
 
-
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     N_CHOICES = 4
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
     MMR_LAMBDA = 0.7
-    AGENTS = [
-        # "20250603_Refact_Agent_claude-4-sonnet",
-        # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        # "20250928_trae_doubao_seed_code",
-        # "20250807_mini-v1.7.0_gpt-5-mini",
-        "gold",
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
+    RQ1_AGENTS = [
+        "20250603_Refact_Agent_claude-4-sonnet",
+        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+        "20250928_trae_doubao_seed_code",
+        "20250807_mini-v1.7.0_gpt-5-mini",
     ]
-    OUTPUT_DIR = "/home/yusuf/explainbench/shared_logs/logs/run_evaluation/output_per_step/experiment_w_reachability"
-    OUTPUT_JSON = "step4.gold.json"
+    RQ3_AGENTS = [
+        "rq3_v1",
+    ]
+    RUN_RQ3 = False
+    if RUN_RQ3:
+        print("Running RQ3")
+        AGENTS = RQ3_AGENTS
+        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step3.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json")
+    else:
+        print("Running RQ1")
+        AGENTS = RQ1_AGENTS
+        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.json")
     # ------------------------------------------- #
     
-    start_time = time.time()
-    step3 = read_step3_results()
+    step3 = read_json(STEP3_PATH)
     results = {}
     base_instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
     removed_due_to_pool = []
@@ -324,15 +261,6 @@ if __name__ == "__main__":
             agent = futures[future]
             results[agent] = future.result()
 
-    with open(
-        os.path.join(
-            OUTPUT_DIR,
-            OUTPUT_JSON,
-        ),
-        "w",
-    ) as f:
+    with open(OUTPUT_PATH, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Saved step4 results to {OUTPUT_DIR}/{OUTPUT_JSON}")
-
-    end_time = time.time()
-    print(f"Total execution time: {end_time - start_time:.2f} seconds")
+    print(f"Saved step4 results to {OUTPUT_PATH}")
