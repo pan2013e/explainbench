@@ -1,9 +1,6 @@
-import io
 import logging
 import random
-import string
 import re
-import tokenize
 
 from tracer.protocol import Event, LineEvent
 from dataset.extract_ground_truths.effect.trace_util import (
@@ -11,7 +8,6 @@ from dataset.extract_ground_truths.effect.trace_util import (
     load_trace_pair,
     rv_equals,
     Traces,
-    FunctionBlock
 )
 from dataset.extract_ground_truths.effect.postprocessing_util import (
     get_complete_variable_views_from_diff
@@ -36,17 +32,6 @@ WRAPPER_FUNCTIONS = [
     'sympy.core.cache:__cacheit.<locals>.func_wrapper.<locals>.wrapper'
 ]
 RANDOM_SEED = 42
-
-def index_to_label(index: int) -> str:
-    letters = string.ascii_lowercase
-    base = len(letters)
-    label = ""
-    idx = index
-    while True:
-        label = letters[idx % base] + label
-        idx = idx // base - 1
-        if idx < 0:
-            return label
 
 def get_event_count(event: Event, traces: Traces):
     count = 0
@@ -76,17 +61,6 @@ def before_or_after(buggy_event: Event, patched_event: Event):
         return 'after'
     else:
         return 'before'
-
-# Helper to get the depth of the diff    
-# TO DO: We need to refactor this later by moving to another file. This file becomes too complicated.
-def collect_paths(diff_entry):
-    # case: values_changed, iterable_item_removed, etc
-    if isinstance(diff_entry, dict):
-        return [k for k in diff_entry.keys() if isinstance(k, str)]
-    # case: dictionary_item_added, dictionary_iterm_removed
-    if isinstance(diff_entry, (list, set, tuple)):
-        return [x for x in diff_entry if isinstance(x, str)]
-    return []
 
 def _strip_quotes(text):
     if len(text) >= 2 and text[0] == text[-1] and text[0] in ("'", '"'):
@@ -183,104 +157,7 @@ def state_diff(buggy_event: Event, patched_event: Event, repo_name: str, depth_t
         }
     return None
 
-def is_exception_vs_return_none(diff: dict):
-    diff_dict = diff["diff"]
-    # pattern1: buggy function ok, patched function crashes
-    pattern1 = {'dictionary_item_added': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_removed': ["root['return_value']"]}
-    # pattern2: buggy_function crashes, patched function ok
-    pattern2 = {'dictionary_item_removed': ["root['exception_type']", "root['exception_value']"], 'dictionary_item_added': ["root['return_value']"]}
-    pattern_match = False
-    if diff_dict == pattern1 or diff_dict == pattern2:
-        pattern_match = True
-    
-    patched_variables = diff["patched_variables"]
-    buggy_variables = diff["buggy_variables"]
-    if (
-        (pattern_match != -1)
-        and (("__return__" in patched_variables and patched_variables["__return__"] == None and "__exception__" in buggy_variables) or
-             ("__return__" in buggy_variables and buggy_variables["__return__"] == None and "__exception__" in patched_variables))
-        ):
-        return True
-    
-    return False
-
-def get_common_lines(function_block: FunctionBlock):
-    events = function_block._events
-    items = []
-    seen = set()
-    for current_event in events:
-        if not current_event.excluded and isinstance(current_event, LineEvent):
-            key = (current_event.statement, current_event.line_number)
-            if key in seen:
-                continue
-            seen.add(key)
-            items.append((current_event.line_number, current_event.statement))
-    items.sort(key=lambda item: item[0])
-    line_nums = [line_num for line_num, _ in items]
-    statements = [statement for _, statement in items]
-    return "\n".join(statements), line_nums
-
-def get_logical_lines(code: str, line_nums):
-    lines = code.splitlines(keepends=True)
-    if len(lines) != len(line_nums):
-        raise ValueError(f"line_nums must align with code lines: {len(lines)=} vs {len(line_nums)=}")
-
-    statements = []
-    ranges = []
-    tokbuf = []
-    cur_start_line = None
-    cur_end_line = None
-
-    def touch_span(sline: int, eline: int):
-        nonlocal cur_start_line, cur_end_line
-        if cur_start_line is None:
-            cur_start_line = sline
-            cur_end_line = eline
-        else:
-            cur_end_line = max(cur_end_line or eline, eline)
-
-    def flush():
-        nonlocal tokbuf, cur_start_line, cur_end_line
-        text = tokenize.untokenize(tokbuf).strip()
-        text = text.replace("\\\n", "")
-        if text:
-            start_idx = min(cur_start_line or 1, len(line_nums)) - 1
-            end_idx = min(cur_end_line or (cur_start_line or 1), len(line_nums)) - 1
-            statements.append(text)
-            ranges.append((line_nums[start_idx], line_nums[end_idx]))
-        tokbuf = []
-        cur_start_line = None
-        cur_end_line = None
-
-    try:
-        for tok in tokenize.generate_tokens(io.StringIO(code).readline):
-            toknum, tokval, (sline, scol), (eline, ecol), line = tok
-            if toknum in (tokenize.INDENT, tokenize.DEDENT, tokenize.ENCODING):
-                continue
-            tokbuf.append(tok)
-            touch_span(sline, eline)
-            if toknum == tokenize.NEWLINE:
-                flush()
-
-    except (tokenize.TokenError, IndentationError, SyntaxError) as exc:
-        msg = str(exc)
-        if (
-            "EOF in multi-line statement" in msg
-            or "unexpected EOF in multi-line statement" in msg
-            or "unexpected EOF while parsing" in msg
-            or "EOF in multi-line string" in msg
-        ):
-            flush()
-        else:
-            logger.debug(f">> tokenize failed in get_logical_lines: {exc}")
-            raise
-
-    if tokbuf:
-        flush()
-
-    return statements, ranges
-
-def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, depth_threshold=3):
+def main(instance_id, agent='gold', test_id=0, base_dir=None, depth_threshold=3):
     random.seed(RANDOM_SEED)
     repo_name = instance_id.split("__")[0]
     buggy_traces, patched_traces = load_trace_pair(agent, instance_id, test_id, base_dir)
@@ -400,74 +277,6 @@ def main(instance_id, agent='gold', test_id=0, base_dir=None, total_choices=5, d
                 seen_pmf=is_pmf_exist,
             )
             if diff:
-                flag_exception_vs_return_none = is_exception_vs_return_none(diff)
-                if flag_exception_vs_return_none:
-                    logger.debug(">> Exception-vs-Return-None pattern detected")
-                    buggy_statements, buggy_lines = get_common_lines(buggy_function)
-                    buggy_statements, buggy_lines = get_logical_lines(buggy_statements, buggy_lines)                    
-                    buggy_logical_statements = [(x, y) for x, y in zip(buggy_statements, buggy_lines)]
-                    
-                    patched_statements, patched_lines = get_common_lines(patched_function)
-                    patched_statements, patched_lines = get_logical_lines(patched_statements, patched_lines)
-                    patched_logical_statements = [(x, y) for x, y in zip(patched_statements, patched_lines)]
-
-                    patched_set = set(patched_logical_statements)
-                    delta = [stmt for stmt in buggy_logical_statements if stmt not in patched_set]
-                    intersection = [
-                        stmt for stmt in buggy_logical_statements if stmt in patched_set
-                    ]
-
-                    if len(delta) + len(intersection) >= total_choices:
-                        remaining = total_choices
-                        chosen_delta = []
-                        chosen_intersection = []
-
-                        def stmt_text(stmt):
-                            return stmt[0] if isinstance(stmt, tuple) else str(stmt)
-
-                        for stmt in delta:
-                            if remaining == 0:
-                                break
-                            if "assert" in stmt_text(stmt):
-                                chosen_delta.append(stmt)
-                                remaining -= 1
-                        for stmt in intersection:
-                            if remaining == 0:
-                                break
-                            if "assert" in stmt_text(stmt):
-                                chosen_intersection.append(stmt)
-                                remaining -= 1
-
-                        if remaining > 0:
-                            leftover_delta = [stmt for stmt in delta if stmt not in chosen_delta]
-                            if leftover_delta:
-                                pick = random.sample(
-                                    leftover_delta,
-                                    min(len(leftover_delta), remaining),
-                                )
-                                chosen_delta.extend(pick)
-                                remaining -= len(pick)
-                        if remaining > 0:
-                            leftover_intersection = [
-                                stmt for stmt in intersection if stmt not in chosen_intersection
-                            ]
-                            if leftover_intersection:
-                                pick = random.sample(
-                                    leftover_intersection,
-                                    min(len(leftover_intersection), remaining),
-                                )
-                                chosen_intersection.extend(pick)
-                                remaining -= len(pick)
-
-                        choices = chosen_delta + chosen_intersection
-                        random.shuffle(choices)
-                        diff["choices"] = choices
-                        chosen_delta_set = set(chosen_delta)
-                        diff["answer"] = [
-                            item for item in choices if item in chosen_delta_set
-                        ]
-                    else:
-                        logger.debug(">> Not enough choices to form the question.")
                 return diff
             else:
                 logger.debug(">> No diff found at return point")
