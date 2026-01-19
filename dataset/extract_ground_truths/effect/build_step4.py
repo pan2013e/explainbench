@@ -154,7 +154,7 @@ def build_choices_and_answer(
     answer = [labels[i] for i, flag in enumerate(is_correct) if flag]
     return choices, answer
 
-def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
+def process_agent(data, agent, instance_ids, n_correct, n_incorrect, is_prepare_intent):
     results = {}
     for instance_id in instance_ids:
         try:
@@ -179,9 +179,15 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect):
                 correct_pool=correct_pool,
                 incorrect_pool=incorrect_pool,
                 sampler_function=sampler_function,
+                add_none_of_the_above=not is_prepare_intent,
                 is_fallback_to_gold=metadata.get("is_fallback_to_gold", False),
             )
 
+            metadata.pop("valid_changed_expressions", None)
+            metadata.pop("valid_unchanged_expressions", None)
+            metadata.pop("prompt_length_chars", None)
+            metadata.pop("changed_candidates", None)
+            metadata.pop("unchanged_candidates", None)
             results[instance_id] = {
                 "choices": choices,
                 "answer": answer,
@@ -213,8 +219,14 @@ if __name__ == "__main__":
     RQ3_AGENTS = [
         "rq3_v1",
     ]
+    PREPARE_INTENT = False
     RUN_RQ3 = False
-    if RUN_RQ3:
+    if PREPARE_INTENT:
+        print("Running for gold patch")
+        AGENTS = ["gold"]
+        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.gold.json")
+        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.intent.json")
+    elif RUN_RQ3:
         print("Running RQ3")
         AGENTS = RQ3_AGENTS
         STEP3_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step3.json")
@@ -252,7 +264,7 @@ if __name__ == "__main__":
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
             executor.submit(
-                process_agent, step3, agent, instance_ids, N_CORRECT, N_INCORRECT
+                process_agent, step3, agent, instance_ids, N_CORRECT, N_INCORRECT, PREPARE_INTENT
             ): agent
             for agent in AGENTS
             if agent and agent
