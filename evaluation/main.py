@@ -22,15 +22,17 @@ def generate(task: type[Task], model: Model, agent_id: str, num_workers: int):
     explanations = load_explanation(agent_id)
     context = load_context(task, agent_id)
     pred_results = {}
-    futures = []
+    futures = {}
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         for instance_id, ctx in context.items():
             expl = explanations.get(instance_id, [])
             expl = expl[0] if expl else 'EMPTY'
-            futures.append(executor.submit(task.predict, model, expl, **ctx))    
+            future = executor.submit(task.predict, model, expl, **ctx)
+            futures[future] = instance_id
         pbar = tqdm(as_completed(futures), total=len(futures))
         for future in pbar:
             pbar.set_postfix(**model.tqdm_usage())
+            instance_id = futures[future]
             pred = future.result()
             pred_results[instance_id] = [p.model_dump() for p in pred]
     save_path = get_path(task, model, agent_id, 'generation')
