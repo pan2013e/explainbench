@@ -51,15 +51,15 @@ def load_context(task, agent_id=None) -> dict[str, dict]:
         raise ValueError(f"Context file not found: {path}")
     with open(path) as f:
         data = json.load(f)
+    data = dict(sorted(data.items()))
     return data
 
 def result_statistics(data: dict[str, list]):
-    n_runs = list(zip(*data.values(), strict=True))
-    n_runs = [np.mean(run) for run in n_runs]
+    data = np.array(list(zip(*data.values(), strict=True)))
+    per_trial_data = np.mean(data, axis=1)
     return {
-        'mean': np.mean(n_runs),
-        'metric_values': n_runs,
-        'std': np.std(n_runs),
+        'mean': np.mean(per_trial_data),
+        'sem': np.std(per_trial_data, ddof=1) / np.sqrt(len(per_trial_data)),
     }
 
 def timeout(seconds=30):
