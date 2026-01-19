@@ -37,7 +37,9 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls._registry[cls.__qualname__.lower()] = cls
+        cls_id = cls.__qualname__.lower()
+        if not cls_id.startswith('_'):
+            cls._registry[cls_id] = cls
 
     @classmethod
     @lru_cache
@@ -77,7 +79,7 @@ class Task(Generic[Schema], metaclass=EvalTimeout):
     def eval(cls, pred: list, gt: dict, **kwargs) -> list[float]:
         raise NotImplementedError()
 
-class MCQ(Task[schema.MCQ]):
+class _MCQ(Task[schema.MCQ]):
     QUESTION = "UNDEFINED"
     SCHEMA = schema.MCQ
     
@@ -86,55 +88,57 @@ class MCQ(Task[schema.MCQ]):
         answers = gt.get('answer', gt)
         return [mcq_score(p.answer, answers) for p in pred]
 
-class LocalEffect(MCQ):
-    QUESTION = (
-        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
-        'Choices:\n'
-        '{choices}\n\n'
-        'Hints:\n'
-        '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
-        '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
-        '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
-    )
-    CTX_AGENT_SPECIFIC = True
-    
-    @classmethod
-    def _format_choices(cls, exprs: list[str]):
-        # backward compatibility with old pipeline
-        if exprs[-1] == "None of the above":
-            exprs[-1] = "The patch has no effect and none of the above expressions change in value"
-            exprs.append("Cannot be answered by the explanation alone")
-        return format_mcq_choices(exprs)
-    
-    @classmethod
-    def _build_prompt(cls, explanation, **kwargs):
-        before_or_after = kwargs.pop('before_or_after', 'before')
-        choices = kwargs.pop('choices')
-        return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
+class Local:
+    class Effect(_MCQ):
+        QUESTION = (
+            'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions have different values before and after the patch?\n\n'
+            'Choices:\n'
+            '{choices}\n\n'
+            'Hints:\n'
+            '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
+            '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
+            '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
+            '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
+        )
+        CTX_AGENT_SPECIFIC = True
+        
+        @classmethod
+        def _format_choices(cls, exprs: list[str]):
+            # backward compatibility with old pipeline
+            if exprs[-1] == "None of the above":
+                exprs[-1] = "The patch has no effect and none of the above expressions change in value"
+                exprs.append("Cannot be answered by the explanation alone")
+            return format_mcq_choices(exprs)
+        
+        @classmethod
+        def _build_prompt(cls, explanation, **kwargs):
+            before_or_after = kwargs.pop('before_or_after', 'before')
+            choices = kwargs.pop('choices')
+            return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(before_or_after=before_or_after, choices=cls._format_choices(choices)), context=cls._build_context(**kwargs))
 
-class LocalIntent(LocalEffect):
-    QUESTION = (
-        'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the developer-intended change is?\n\n'
-        'Choices:\n'
-        '{choices}\n\n'
-        'Hints:\n'
-        '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
-        '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
-        '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
-        '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
-    )
-    
-    @classmethod
-    def _format_choices(cls, exprs: list[str]):
-        # backward compatibility with old pipeline
-        if exprs[-1] == "None of the above":
-            exprs[-1] = "Cannot be answered by the explanation alone"
-        return format_mcq_choices(exprs)
+    class Intent(Effect):
+        QUESTION = (
+            'Within the context of the provided function and inputs, immediately {before_or_after} the execution of the specified line, which of the following expressions best describe what the developer-intended change is?\n\n'
+            'Choices:\n'
+            '{choices}\n\n'
+            'Hints:\n'
+            '1. `__return__` may be used in an expression to refer to the function\'s return value.\n'
+            '2. `__exception__` may be used in an expression to refer to an exception caught in the function. It is a list of str with length 2. The first element is the exception type as str, and the second element is the exception message as str.\n'
+            '3. The specified line may not be reached or completely executed due to an uncaught exception. For simplicity, you may treat raising such an exception as the function returning an `__exception__` object.\n'
+            '4. Select one or more options. Please answer using only the option letter(s) (e.g., "a", "b"). For multiple selections, answer like: {{"answer": ["a", "b"]}}'
+        )
+        CTX_AGENT_SPECIFIC = False
+        
+        @classmethod
+        def _format_choices(cls, exprs: list[str]):
+            # backward compatibility with old pipeline
+            if exprs[-1] == "None of the above":
+                exprs[-1] = "Cannot be answered by the explanation alone"
+            return format_mcq_choices(exprs)
 
 if __name__ == "__main__":
     BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../logs/run_evaluation")
-    TASK = LocalEffect
+    TASK = Local.Effect
     RUN_RQ3 = True
     if RUN_RQ3:
         STEP4_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json")
