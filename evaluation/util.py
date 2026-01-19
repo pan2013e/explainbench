@@ -29,35 +29,37 @@ def load_explanation(split: str) -> dict[str, list[str]]:
         data = json.load(f)[split]
     return data
 
-def load_ground_truth() -> list[dict]:
-    with open(os.path.join(DATASET_DIR, 'extract_ground_truths', 'localization', 'ground_truth.jsonl')) as f:
-        data = [json.loads(line) for line in f]
+def load_ground_truth(task, agent_id=None) -> dict[str, dict]:
+    if not task.CTX_AGENT_SPECIFIC:
+        path = os.path.join(DATASET_DIR, f'ground_truths/{task.repr()}.json')
+    else:
+        assert agent_id is not None, "agent_id must be provided for agent-specific context"
+        path = os.path.join(DATASET_DIR, f'ground_truths/{task.repr()}__{agent_id}.json')
+    if not os.path.exists(path):
+        raise ValueError(f"Ground truth file not found: {path}")
+    with open(path) as f:
+        data = json.load(f)
     return data
 
-def load_context(task, agent_id=None) -> list[dict]:
+def load_context(task, agent_id=None) -> dict[str, dict]:
     if not task.CTX_AGENT_SPECIFIC:
         path = os.path.join(DATASET_DIR, f'context/{task.repr()}.json')
-        if not os.path.exists(path):
-            return None
     else:
         assert agent_id is not None, "agent_id must be provided for agent-specific context"
         path = os.path.join(DATASET_DIR, f'context/{task.repr()}__{agent_id}.json')
-        if not os.path.exists(path):
-            raise ValueError(f"Context file not found for agent-specific context: {path}")
+    if not os.path.exists(path):
+        raise ValueError(f"Context file not found: {path}")
     with open(path) as f:
         data = json.load(f)
-    assert isinstance(data, list) and all(isinstance(item, dict) for item in data)
     return data
 
 def result_statistics(data: dict[str, list]):
     n_runs = list(zip(*data.values(), strict=True))
     n_runs = [np.mean(run) for run in n_runs]
     return {
-        'metric_values': n_runs,
         'mean': np.mean(n_runs),
+        'metric_values': n_runs,
         'std': np.std(n_runs),
-        'max': np.max(n_runs),
-        'min': np.min(n_runs),
     }
 
 def timeout(seconds=30):

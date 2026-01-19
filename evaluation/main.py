@@ -4,6 +4,8 @@ import argparse
 import warnings
 
 from tqdm.auto import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from evaluation.inference import Model
 from evaluation.task import Task
 from evaluation.util import (
@@ -16,19 +18,21 @@ from evaluation.util import (
 def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
     return f'results/{mode}/{task.repr()}/{agent_id}__{model.model_id.replace("/", "-")}.json'
 
-def generate(task: type[Task], model: Model, agent_id: str):
+def generate(task: type[Task], model: Model, agent_id: str, num_workers: int):
     explanations = load_explanation(agent_id)
     context = load_context(task, agent_id)
-    if context is None:
-        context = [{}] * len(explanations)
-    assert len(explanations) == len(context), f'Number of context items ({len(context)}) does not match number of explanations ({len(explanations)})'
     pred_results = {}
-    pbar = tqdm(zip(explanations.items(), context), total=len(explanations))
-    for (instance_id, expl), ctx in pbar:
-        pbar.set_postfix(**model.tqdm_usage())
-        expl = expl[0] if expl else 'EMPTY'
-        pred = task.predict(model, expl, **ctx)
-        pred_results[instance_id] = [p.model_dump() for p in pred]
+    futures = []
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        for instance_id, ctx in context.items():
+            expl = explanations.get(instance_id, [])
+            expl = expl[0] if expl else 'EMPTY'
+            futures.append(executor.submit(task.predict, model, expl, **ctx))    
+        pbar = tqdm(as_completed(futures), total=len(futures))
+        for future in pbar:
+            pbar.set_postfix(**model.tqdm_usage())
+            pred = future.result()
+            pred_results[instance_id] = [p.model_dump() for p in pred]
     save_path = get_path(task, model, agent_id, 'generation')
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     if os.path.exists(save_path):
@@ -39,14 +43,14 @@ def generate(task: type[Task], model: Model, agent_id: str):
             'predictions': pred_results
         }, f, indent=2)
 
-def evaluate(task: type[Task], model: Model, agent_id: str):
+def evaluate(task: type[Task], model: Model, agent_id: str, _):
     pred_path = get_path(task, model, agent_id, 'generation')
     if not os.path.exists(pred_path):
         raise FileNotFoundError(f'Prediction file not found: {pred_path}')
     with open(pred_path, 'r') as f:
         pred_json = json.load(f)['predictions']
     pred_data = {k: [task.SCHEMA.model_validate(item) for item in v] for k, v in pred_json.items()}
-    gt_data = {item['instance_id']: item for item in load_ground_truth()}
+    gt_data = load_ground_truth(task, agent_id)
     zipped = []
     for instance_id, pred in pred_data.items():
         if instance_id not in gt_data:
@@ -76,10 +80,11 @@ if __name__ == '__main__':
     )
     argparser.add_argument('task', type=str, help='Evaluation task to run')
     argparser.add_argument('-a', '--agent', type=str, required=True, help='ID of agent producing the explanations')
-    argparser.add_argument('-m', '--model', type=str, default='gemini/gemini-2.5-flash-lite', help='LLM used for question answering')
+    argparser.add_argument('-m', '--model', type=str, default='gpt-5-mini-2025-08-07', help='LLM used for question answering')
     argparser.add_argument('-n', '--num-generations', type=int, default=5, help='Number of generations per instance')
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
+    argparser.add_argument('--gen-workers', type=int, default=50, help='Number of parallel workers for generation')
     args = argparser.parse_args()
     task = Task.get_task(args.task)
     if args.gen_only and args.eval_only:
@@ -93,4 +98,4 @@ if __name__ == '__main__':
         entry_fn = evaluate
     else:
         entry_fn = main
-    entry_fn(task, model, args.agent)
+    entry_fn(task, model, args.agent, args.gen_workers)
