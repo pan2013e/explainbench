@@ -18,8 +18,8 @@ from evaluation.util import (
 def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
     return f'results/{mode}/{task.repr()}/{agent_id}__{model.model_id.replace("/", "-")}.json'
 
-def generate(task: type[Task], model: Model, agent_id: str, num_workers: int):
-    explanations = load_explanation(agent_id)
+def generate(task: type[Task], model: Model, agent_id: str, num_workers: int, use_audit_expl: bool):
+    explanations = load_explanation(agent_id, use_audit_expl)
     context = load_context(task, agent_id)
     pred_results = {}
     futures = {}
@@ -45,7 +45,7 @@ def generate(task: type[Task], model: Model, agent_id: str, num_workers: int):
             'predictions': pred_results
         }, f, indent=2)
 
-def evaluate(task: type[Task], model: Model, agent_id: str, _):
+def evaluate(task: type[Task], model: Model, agent_id: str, *args):
     pred_path = get_path(task, model, agent_id, 'generation')
     if not os.path.exists(pred_path):
         raise FileNotFoundError(f'Prediction file not found: {pred_path}')
@@ -71,8 +71,8 @@ def evaluate(task: type[Task], model: Model, agent_id: str, _):
             'raw': eval_results,
         }, f, indent=2)
 
-def main(task: type[Task], model: Model, agent_id: str):
-    generate(task, model, agent_id)
+def main(task: type[Task], model: Model, agent_id: str, num_workers: int, use_audit_expl: bool):
+    generate(task, model, agent_id, num_workers, use_audit_expl)
     evaluate(task, model, agent_id)
 
 if __name__ == '__main__':
@@ -87,6 +87,7 @@ if __name__ == '__main__':
     argparser.add_argument('-go', '--gen-only', action='store_true', help='Only generate predictions')
     argparser.add_argument('-eo', '--eval-only', action='store_true', help='Only evaluate existing predictions')
     argparser.add_argument('--gen-workers', type=int, default=50, help='Number of parallel workers for generation')
+    argparser.add_argument('--use-audit-expl', action='store_true', help='Use explanations from audit agent', default=False)
     args = argparser.parse_args()
     task = Task.get_task(args.task)
     if args.gen_only and args.eval_only:
@@ -100,4 +101,4 @@ if __name__ == '__main__':
         entry_fn = evaluate
     else:
         entry_fn = main
-    entry_fn(task, model, args.agent, args.gen_workers)
+    entry_fn(task, model, args.agent, args.gen_workers, args.use_audit_expl)

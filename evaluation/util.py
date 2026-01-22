@@ -24,8 +24,14 @@ def format_mcq_choices(exprs: list[str], formatter='{})'):
     labels = 'abcdefghijklmnopqrstuvwxyz'
     return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
 
-def load_explanation(split: str) -> dict[str, list[str]]:
-    with open(os.path.join(DATASET_DIR, 'explanations', 'dataset.json')) as f:
+def load_explanation(split: str, use_audit_expl=False) -> dict[str, list[str]]:
+    if use_audit_expl:
+        path = os.path.join(DATASET_DIR, 'explanations', 'audit_expls.json')
+    else:
+        path = os.path.join(DATASET_DIR, 'explanations', 'dataset.json')
+    if not os.path.exists(path):
+        raise ValueError(f"Explanation file not found: {path}")
+    with open(path) as f:
         data = json.load(f)[split]
     return data
 
