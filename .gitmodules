@@ -4,3 +4,6 @@
 [submodule "py-tracer"]
 	path = py-tracer
 	url = https://github.com/imamnurby/swe-bench-tracer-py.git
+[submodule "audit_agent"]
+	path = audit_agent
+	url = https://github.com/smkang96/explanation-audit-agent.git
