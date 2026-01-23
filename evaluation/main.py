@@ -75,7 +75,7 @@ def evaluate(task: type[Task], model: Model, agent_id: str, num_workers: int, us
 
 def main(task: type[Task], model: Model, agent_id: str, num_workers: int, use_audit_expl: bool):
     generate(task, model, agent_id, num_workers, use_audit_expl)
-    evaluate(task, model, agent_id)
+    evaluate(task, model, agent_id, num_workers, use_audit_expl)
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(
