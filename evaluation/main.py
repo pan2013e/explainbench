@@ -15,7 +15,9 @@ from evaluation.util import (
     result_statistics,
 )
 
-def get_path(task: type[Task], model: Model, agent_id: str, mode: str):
+def get_path(task: type[Task], model: Model, agent_id: str, mode: str, use_audit_expl: bool):
+    if use_audit_expl:
+        agent_id = f'audit_{agent_id}'
     return f'results/{mode}/{task.repr()}/{agent_id}__{model.model_id.replace("/", "-")}.json'
 
 def generate(task: type[Task], model: Model, agent_id: str, num_workers: int, use_audit_expl: bool):
@@ -35,7 +37,7 @@ def generate(task: type[Task], model: Model, agent_id: str, num_workers: int, us
             instance_id = futures[future]
             pred = future.result()
             pred_results[instance_id] = [p.model_dump() for p in pred]
-    save_path = get_path(task, model, agent_id, 'generation')
+    save_path = get_path(task, model, agent_id, 'generation', use_audit_expl)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     if os.path.exists(save_path):
         warnings.warn(f'Overwriting existing generation file: {save_path}')
@@ -45,8 +47,8 @@ def generate(task: type[Task], model: Model, agent_id: str, num_workers: int, us
             'predictions': pred_results
         }, f, indent=2)
 
-def evaluate(task: type[Task], model: Model, agent_id: str, *args):
-    pred_path = get_path(task, model, agent_id, 'generation')
+def evaluate(task: type[Task], model: Model, agent_id: str, num_workers: int, use_audit_expl: bool):
+    pred_path = get_path(task, model, agent_id, 'generation', use_audit_expl)
     if not os.path.exists(pred_path):
         raise FileNotFoundError(f'Prediction file not found: {pred_path}')
     with open(pred_path, 'r') as f:
@@ -61,7 +63,7 @@ def evaluate(task: type[Task], model: Model, agent_id: str, *args):
     eval_results = {}
     for instance_id, pred, gt in tqdm(zipped):
         eval_results[instance_id] = task.eval(pred, gt)
-    save_path = get_path(task, model, agent_id, 'evaluation')
+    save_path = get_path(task, model, agent_id, 'evaluation', use_audit_expl)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     if os.path.exists(save_path):
         warnings.warn(f'Overwriting existing evaluation file: {save_path}')
