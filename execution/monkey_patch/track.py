@@ -23,7 +23,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 GLOBAL_ARGS = dict()
 
 def get_allowed_functions(agent, instance_id):
-    dataset_file = "../../shared_logs/allowed_qualnames.json"
+    dataset_file = os.path.join(DIR, "../allowed_qualnames.json")
     with open(dataset_file, 'r') as f:
         data = json.load(f)
     allowed_functions_agent = data.get(agent, {})
