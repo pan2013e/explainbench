@@ -11,6 +11,7 @@ from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.process_agent_patch import extract_modified_lines
 from tqdm.auto import tqdm 
 
+DIR = Path(__file__).parent.resolve()
 
 class QualnameVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
@@ -248,13 +249,12 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            # "gold",
-            # "20250603_Refact_Agent_claude-4-sonnet",
-            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            # "20250928_trae_doubao_seed_code",
-            # "20250807_mini-v1.7.0_gpt-5-mini",
-            "rq3_v1"
+            "gold",
+            "20250603_Refact_Agent_claude-4-sonnet",
+            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+            "20250928_trae_doubao_seed_code",
+            "20250807_mini-v1.7.0_gpt-5-mini",
         ],
         help="List of agent names to process (used as top-level keys in the JSON).",
     )
@@ -269,16 +269,14 @@ def main() -> None:
     parser.add_argument(
         "--repos-root",
         type=Path,
-        default=Path(
-            "../localization/swe_bench_repos"
-        ),
+        default=DIR / "../swe_bench_repos",
         help="Root directory under which all Git repos will be cloned.",
     )
 
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path("../../../shared_logs/rq3") / "allowed_qualnames.json",
+        default=DIR / "../../../execution/allowed_qualnames.json",
         help="Path to the single output JSON file.",
     )
 
@@ -305,7 +303,7 @@ def main() -> None:
         instance_ids=INSTANCE_IDS,
     )
 
-    AGENT_JSON_PATH = Path("../../explanations/agent_patches")
+    AGENT_JSON_PATH = DIR / "../../explanations/agent_patches"
 
     for agent in AGENT_NAMES:
         print(f"Processing agent: {agent}")

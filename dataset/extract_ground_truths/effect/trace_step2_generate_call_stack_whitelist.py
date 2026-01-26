@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 
@@ -7,6 +8,7 @@ from typing import Dict, Iterable, List, Set
 
 from execution.util import get_instance_ids
 
+DIR = Path(__file__).parent.resolve()
 
 def load_jsonl(path: str) -> Iterable[dict]:
     """Yield JSON objects, one per line, from a JSONL file."""
@@ -64,7 +66,7 @@ def main() -> None:
     parser.add_argument(
         "--root-path",
         type=str,
-        default="../../../shared_logs/rq3/logs/run_evaluation/track.{agent_name}.1020/openai__gpt-5-mini/{instance_id}",
+        default=f"../../../logs/run_evaluation/track.{{agent_name}}.{os.getuid()}/{{agent_name}}/{{instance_id}}",
         help="Template path to logs; must contain {agent_name} and {instance_id}.",
     )
 
@@ -72,13 +74,12 @@ def main() -> None:
         "--agents",
         nargs="+",
         default=[
-            # "gold",
-            # "20250603_Refact_Agent_claude-4-sonnet",
-            # "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            # "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            # "20250928_trae_doubao_seed_code",
-            # "20250807_mini-v1.7.0_gpt-5-mini",
-            "rq3_v1"
+            "gold",
+            "20250603_Refact_Agent_claude-4-sonnet",
+            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+            "20250928_trae_doubao_seed_code",
+            "20250807_mini-v1.7.0_gpt-5-mini",
         ],
         help="List of agent names to process.",
     )
@@ -96,7 +97,7 @@ def main() -> None:
     parser.add_argument(
         "--targets-json",
         type=Path,
-        default="../../../explainbench/shared_logs/rq3/allowed_qualnames.json",
+        default=DIR / "../../../execution/allowed_qualnames.json",
         help=(
             "Path to JSON produced by the previous step, with structure:\n"
             "  { agent_name: { instance_id: [list of target qualnames] } }"
@@ -106,7 +107,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path("../../../explainbench/shared_logs/rq3/") / "allowed_functions_all.json",
+        default=DIR / "../../../execution/allowed_functions.json",
         help="Path to the output JSON file.",
     )
 
@@ -145,9 +146,7 @@ def main() -> None:
                 print(f"  [warn] No target qualnames for {agent}/{instance_id}, skipping.")
                 continue
 
-            current_root = Path(
-                ROOT_PATH.format(agent_name=agent, instance_id=instance_id)
-            )
+            current_root = DIR / ROOT_PATH.format(agent_name=agent, instance_id=instance_id)
 
             buggy_files = collect_files(current_root, "buggy_traces")
             patched_files = collect_files(current_root, "patched_traces")
