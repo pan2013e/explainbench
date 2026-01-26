@@ -64,7 +64,7 @@ def main() -> None:
     parser.add_argument(
         "--root-path",
         type=str,
-        default="/home/yusuf/explainbench/shared_logs/rq3/logs/run_evaluation/track.{agent_name}.1020/openai__gpt-5-mini/{instance_id}",
+        default="../../../shared_logs/rq3/logs/run_evaluation/track.{agent_name}.1020/openai__gpt-5-mini/{instance_id}",
         help="Template path to logs; must contain {agent_name} and {instance_id}.",
     )
 
@@ -96,7 +96,7 @@ def main() -> None:
     parser.add_argument(
         "--targets-json",
         type=Path,
-        default="/home/yusuf/explainbench/shared_logs/rq3/allowed_qualnames.json",
+        default="../../../explainbench/shared_logs/rq3/allowed_qualnames.json",
         help=(
             "Path to JSON produced by the previous step, with structure:\n"
             "  { agent_name: { instance_id: [list of target qualnames] } }"
@@ -106,7 +106,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path("/home/yusuf/explainbench/shared_logs/rq3/") / "allowed_functions_all.json",
+        default=Path("../../../explainbench/shared_logs/rq3/") / "allowed_functions_all.json",
         help="Path to the output JSON file.",
     )
 

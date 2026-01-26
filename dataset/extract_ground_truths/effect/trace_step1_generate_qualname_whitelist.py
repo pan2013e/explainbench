@@ -270,8 +270,7 @@ def main() -> None:
         "--repos-root",
         type=Path,
         default=Path(
-            "/home/yusuf/explainbench/dataset/extract_ground_truths/"
-            "localization/swe_bench_repos"
+            "../localization/swe_bench_repos"
         ),
         help="Root directory under which all Git repos will be cloned.",
     )
@@ -279,7 +278,7 @@ def main() -> None:
     parser.add_argument(
         "--output-path",
         type=Path,
-        default=Path("/home/yusuf/explainbench/shared_logs/rq3") / "allowed_qualnames.json",
+        default=Path("../../../shared_logs/rq3") / "allowed_qualnames.json",
         help="Path to the single output JSON file.",
     )
 
@@ -306,7 +305,7 @@ def main() -> None:
         instance_ids=INSTANCE_IDS,
     )
 
-    AGENT_JSON_PATH = Path("/home/yusuf/explainbench/dataset/explanations/agent_patches")
+    AGENT_JSON_PATH = Path("../../explanations/agent_patches")
 
     for agent in AGENT_NAMES:
         print(f"Processing agent: {agent}")
