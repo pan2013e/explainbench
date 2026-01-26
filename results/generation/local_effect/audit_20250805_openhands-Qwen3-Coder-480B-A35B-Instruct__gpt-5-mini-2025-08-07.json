@@ -1,11 +1,119 @@
 {
   "token_usage": {
-    "completion_tokens": 1506666,
-    "prompt_tokens": 2871870,
-    "total_tokens": 4378536
+    "completion_tokens": 1474923,
+    "prompt_tokens": 2845810,
+    "total_tokens": 4320733
   },
   "predictions": {
-    "django__django-12713": [
+    "django__django-11433": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "astropy__astropy-14369": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "astropy__astropy-13033": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "astropy__astropy-13453": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-11138": [
       {
         "answer": [
           "e"
@@ -28,7 +136,130 @@
       },
       {
         "answer": [
-          "e"
+          "f"
+        ]
+      }
+    ],
+    "django__django-10880": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "astropy__astropy-14309": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-10914": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "django__django-11099": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
         ]
       }
     ],
@@ -56,6 +287,319 @@
       {
         "answer": [
           "e"
+        ]
+      }
+    ],
+    "astropy__astropy-13579": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-11239": [
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      }
+    ],
+    "django__django-11179": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      }
+    ],
+    "astropy__astropy-14365": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "astropy__astropy-14508": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-11820": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-11848": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-11206": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "astropy__astropy-14995": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-12713": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-11490": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
@@ -96,111 +640,30 @@
         ]
       }
     ],
-    "django__django-11532": [
+    "django__django-11119": [
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "f"
         ]
       },
       {
         "answer": [
-          "a"
+          "f"
         ]
       },
       {
         "answer": [
-          "a"
-        ]
-      }
-    ],
-    "django__django-10999": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-11880": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "astropy__astropy-14369": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
+          "f"
         ]
       }
     ],
@@ -231,297 +694,10 @@
         ]
       }
     ],
-    "django__django-11292": [
+    "astropy__astropy-7671": [
       {
         "answer": [
           "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-11490": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-11179": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      }
-    ],
-    "django__django-12193": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-12276": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "astropy__astropy-14365": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-11820": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "django__django-11239": [
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      }
-    ],
-    "django__django-11728": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-11815": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-11433": [
-      {
-        "answer": [
-          "f"
         ]
       },
       {
@@ -531,7 +707,7 @@
       },
       {
         "answer": [
-          "f"
+          "b"
         ]
       },
       {
@@ -545,223 +721,34 @@
         ]
       }
     ],
-    "astropy__astropy-13236": [
+    "django__django-11603": [
       {
         "answer": [
-          "e"
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-12262": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-11206": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "astropy__astropy-7166": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "d"
         ]
       }
     ],
     "django__django-12708": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "astropy__astropy-14995": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "astropy__astropy-7336": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-11138": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "astropy__astropy-14508": [
       {
         "answer": [
           "c"
@@ -815,226 +802,7 @@
         ]
       }
     ],
-    "django__django-11848": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "astropy__astropy-7671": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "astropy__astropy-14309": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "astropy__astropy-13033": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "astropy__astropy-14598": [
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-12774": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-10880": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-11603": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "astropy__astropy-13579": [
+    "django__django-12193": [
       {
         "answer": [
           "a"
@@ -1042,176 +810,49 @@
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       }
     ],
-    "astropy__astropy-12907": [
+    "astropy__astropy-13236": [
       {
         "answer": [
-          "a",
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "a",
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-11099": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-11119": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-10914": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "astropy__astropy-14096": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
+          "e"
         ]
       }
     ],
@@ -1223,7 +864,7 @@
       },
       {
         "answer": [
-          "b"
+          "e"
         ]
       },
       {
@@ -1242,34 +883,7 @@
         ]
       }
     ],
-    "django__django-13089": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "django__django-10973": [
+    "django__django-12304": [
       {
         "answer": [
           "e"
@@ -1296,7 +910,34 @@
         ]
       }
     ],
-    "django__django-13449": [
+    "django__django-11292": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-11815": [
       {
         "answer": [
           "e"
@@ -1355,7 +996,7 @@
         ]
       }
     ],
-    "django__django-13344": [
+    "django__django-12774": [
       {
         "answer": [
           "e"
@@ -1382,34 +1023,7 @@
         ]
       }
     ],
-    "django__django-12125": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-13346": [
+    "django__django-13121": [
       {
         "answer": [
           "e"
@@ -1422,7 +1036,7 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
@@ -1432,61 +1046,62 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       }
     ],
-    "django__django-12858": [
+    "django__django-11728": [
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "a",
+          "b"
         ]
       }
     ],
-    "django__django-13012": [
+    "django__django-10999": [
       {
         "answer": [
-          "b"
+          "e"
         ]
       },
       {
         "answer": [
-          "b"
+          "e"
         ]
       },
       {
         "answer": [
-          "b"
+          "e"
         ]
       },
       {
         "answer": [
-          "b"
+          "e"
         ]
       },
       {
         "answer": [
-          "b"
+          "e"
         ]
       }
     ],
@@ -1517,10 +1132,10 @@
         ]
       }
     ],
-    "django__django-13363": [
+    "django__django-13346": [
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
@@ -1530,7 +1145,7 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
@@ -1540,11 +1155,44 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       }
     ],
-    "astropy__astropy-13977": [
+    "astropy__astropy-12907": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "django__django-12276": [
       {
         "answer": [
           "a"
@@ -1571,62 +1219,165 @@
         ]
       }
     ],
-    "django__django-13410": [
+    "django__django-11880": [
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       }
     ],
-    "django__django-13512": [
+    "django__django-12741": [
       {
         "answer": [
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
+          "e"
+        ]
+      }
+    ],
+    "django__django-10973": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "astropy__astropy-7166": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-13012": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-12858": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
@@ -1657,6 +1408,60 @@
         ]
       }
     ],
+    "django__django-13449": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "astropy__astropy-14096": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
     "django__django-13023": [
       {
         "answer": [
@@ -1681,6 +1486,168 @@
       {
         "answer": [
           "e"
+        ]
+      }
+    ],
+    "django__django-13089": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-13363": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-13344": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "astropy__astropy-7336": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-13410": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-13516": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
@@ -1743,100 +1710,16 @@
         ]
       }
     ],
-    "astropy__astropy-13453": [
+    "astropy__astropy-14598": [
       {
         "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-13569": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-13516": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "django__django-13670": [
-      {
-        "answer": [
+          "c",
           "d"
         ]
       },
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
+          "c",
           "d"
         ]
       },
@@ -1849,34 +1732,38 @@
         "answer": [
           "d"
         ]
+      },
+      {
+        "answer": [
+          "c",
+          "d"
+        ]
       }
     ],
-    "django__django-13568": [
+    "django__django-11532": [
       {
         "answer": [
-          "f"
+          "a"
         ]
       },
       {
         "answer": [
-          "f"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "f"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "c"
+          "a"
         ]
       }
     ],
@@ -1912,47 +1799,10 @@
         ]
       }
     ],
-    "django__django-12304": [
+    "django__django-13670": [
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-13121": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "d"
         ]
       },
       {
@@ -1962,6 +1812,199 @@
       },
       {
         "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-13964": [
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      }
+    ],
+    "django__django-13741": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-13109": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-13786": [
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      }
+    ],
+    "astropy__astropy-13977": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "django__django-13809": [
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
           "d"
         ]
       }
@@ -2025,92 +2068,6 @@
         ]
       }
     ],
-    "django__django-14238": [
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      }
-    ],
-    "django__django-13741": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-13109": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
     "django__django-13807": [
       {
         "answer": [
@@ -2153,35 +2110,174 @@
         ]
       }
     ],
-    "django__django-13964": [
+    "django__django-12125": [
       {
         "answer": [
-          "a",
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-14725": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-13513": [
+      {
+        "answer": [
           "c"
         ]
       },
       {
         "answer": [
-          "a",
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
           "c"
         ]
       },
       {
         "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-14238": [
+      {
+        "answer": [
           "a",
-          "c"
+          "b"
         ]
       },
       {
         "answer": [
           "a",
-          "c"
+          "b"
         ]
       },
       {
         "answer": [
           "a",
-          "c"
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      }
+    ],
+    "django__django-13821": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-13212": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
         ]
       }
     ],
@@ -2203,7 +2299,7 @@
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
@@ -2212,7 +2308,36 @@
         ]
       }
     ],
-    "django__django-13212": [
+    "django__django-14500": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "django__django-13933": [
       {
         "answer": [
           "e"
@@ -2225,17 +2350,17 @@
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       }
     ],
@@ -2271,60 +2396,6 @@
         ]
       }
     ],
-    "django__django-14725": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-14500": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
     "django__django-14534": [
       {
         "answer": [
@@ -2352,79 +2423,10 @@
         ]
       }
     ],
-    "django__django-13809": [
+    "django__django-14376": [
       {
         "answer": [
-          "a",
-          "c",
           "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "django__django-13837": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "django__django-14434": [
-      {
-        "answer": [
-          "a",
-          "b"
         ]
       },
       {
@@ -2434,45 +2436,16 @@
       },
       {
         "answer": [
-          "f"
+          "d"
         ]
       },
       {
         "answer": [
-          "f"
+          "d"
         ]
       },
       {
         "answer": [
-          "a",
-          "b"
-        ]
-      }
-    ],
-    "django__django-13933": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "b",
           "d"
         ]
       }
@@ -2504,587 +2477,34 @@
         ]
       }
     ],
-    "django__django-14311": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
+    "django__django-13568": [
       {
         "answer": [
           "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-14349": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "django__django-14404": [
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-13786": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
         ]
       },
       {
         "answer": [
           "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      }
-    ],
-    "django__django-13513": [
-      {
-        "answer": [
           "c"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "django__django-15098": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-14765": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-15127": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15277": [
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      }
-    ],
-    "django__django-14752": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-14771": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-15161": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-15252": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15467": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "django__django-13821": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-15563": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15037": [
-      {
-        "answer": [
-          "a"
         ]
       },
       {
         "answer": [
           "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a"
+          "c"
         ]
       },
       {
         "answer": [
           "a",
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "a"
-        ]
-      }
-    ],
-    "django__django-14140": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "django__django-14376": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-14787": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15916": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "a",
+          "c"
         ]
       }
     ],
@@ -3115,7 +2535,93 @@
         ]
       }
     ],
-    "django__django-15278": [
+    "django__django-13512": [
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      }
+    ],
+    "django__django-14349": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-14631": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-15037": [
       {
         "answer": [
           "a"
@@ -3142,7 +2648,464 @@
         ]
       }
     ],
-    "django__django-14493": [
+    "django__django-14311": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "django__django-14404": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-15252": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-15127": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-13569": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-14434": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-14140": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "django__django-14915": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-15161": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-12262": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-15563": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-15368": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-14752": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-15467": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-13837": [
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-15278": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "django__django-14787": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
       {
         "answer": [
           "e"
@@ -3162,10 +3125,32 @@
         "answer": [
           "e"
         ]
+      }
+    ],
+    "django__django-14771": [
+      {
+        "answer": [
+          "d"
+        ]
       },
       {
         "answer": [
-          "b"
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
         ]
       }
     ],
@@ -3196,10 +3181,64 @@
         ]
       }
     ],
-    "django__django-12741": [
+    "django__django-14765": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-15916": [
       {
         "answer": [
           "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-15382": [
+      {
+        "answer": [
+          "f"
         ]
       },
       {
@@ -3209,12 +3248,12 @@
       },
       {
         "answer": [
-          "d"
+          "f"
         ]
       },
       {
         "answer": [
-          "d"
+          "f"
         ]
       },
       {
@@ -3250,7 +3289,88 @@
         ]
       }
     ],
-    "django__django-14631": [
+    "django__django-15098": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-15380": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-16082": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "django__django-16100": [
       {
         "answer": [
           "e"
@@ -3304,60 +3424,6 @@
         ]
       }
     ],
-    "django__django-15380": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15368": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
     "django__django-16139": [
       {
         "answer": [
@@ -3385,34 +3451,6 @@
         ]
       }
     ],
-    "django__django-15382": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      }
-    ],
     "django__django-16493": [
       {
         "answer": [
@@ -3436,92 +3474,66 @@
       },
       {
         "answer": [
-          "e"
+          "b"
         ]
       }
     ],
-    "django__django-16100": [
+    "django__django-15277": [
       {
         "answer": [
-          "e"
+          "b",
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
+          "b",
+          "c"
         ]
       },
       {
         "answer": [
-          "e"
+          "b",
+          "c"
         ]
       },
       {
         "answer": [
-          "e"
+          "b",
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
+          "b",
+          "c"
         ]
       }
     ],
-    "django__django-15525": [
+    "django__django-14493": [
       {
         "answer": [
-          "c",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "c",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "c",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "django__django-15569": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
+          "b"
         ]
       }
     ],
@@ -3549,238 +3561,15 @@
       },
       {
         "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
           "a",
           "b",
           "c",
           "d"
         ]
-      }
-    ],
-    "django__django-16560": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "django__django-14915": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-15930": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
       },
       {
         "answer": [
           "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-16454": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-16136": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      }
-    ],
-    "django__django-16662": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "django__django-9296": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "django__django-17087": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
         ]
       }
     ],
@@ -3811,6 +3600,121 @@
         ]
       }
     ],
+    "django__django-16560": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-9296": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-16136": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      }
+    ],
+    "django__django-15930": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
     "django__django-16819": [
       {
         "answer": [
@@ -3838,37 +3742,68 @@
         ]
       }
     ],
-    "django__django-16082": [
+    "django__django-17087": [
       {
         "answer": [
-          "a"
+          "c"
         ]
       },
       {
         "answer": [
-          "a"
+          "c",
+          "d"
         ]
       },
       {
         "answer": [
-          "a"
+          "c",
+          "d"
         ]
       },
       {
         "answer": [
-          "a"
+          "c",
+          "d"
         ]
       },
       {
         "answer": [
-          "a"
+          "c",
+          "d"
         ]
       }
     ],
-    "psf__requests-1142": [
+    "django__django-16901": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
       {
         "answer": [
           "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-15104": [
+      {
+        "answer": [
+          "f"
         ]
       },
       {
@@ -3888,7 +3823,7 @@
       },
       {
         "answer": [
-          "e"
+          "f"
         ]
       }
     ],
@@ -3919,7 +3854,88 @@
         ]
       }
     ],
-    "django__django-15104": [
+    "django__django-15525": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-16662": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-15268": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "matplotlib__matplotlib-24637": [
       {
         "answer": [
           "e"
@@ -3928,6 +3944,28 @@
       {
         "answer": [
           "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-15569": [
+      {
+        "answer": [
+          "c"
         ]
       },
       {
@@ -3937,70 +3975,21 @@
       },
       {
         "answer": [
-          "e"
+          "c"
         ]
       },
       {
         "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-16901": [
-      {
-        "answer": [
-          "e"
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
+          "c"
         ]
       }
     ],
     "matplotlib__matplotlib-25479": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "matplotlib__matplotlib-24637": [
       {
         "answer": [
           "e"
@@ -4054,7 +4043,39 @@
         ]
       }
     ],
-    "django__django-16642": [
+    "matplotlib__matplotlib-20676": [
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "psf__requests-1142": [
       {
         "answer": [
           "e"
@@ -4062,16 +4083,7 @@
       },
       {
         "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
+          "f"
         ]
       },
       {
@@ -4081,70 +4093,189 @@
       },
       {
         "answer": [
-          "a",
-          "c",
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "psf__requests-6028": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "matplotlib__matplotlib-22865": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-17029": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "django__django-17084": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "django__django-15987": [
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b",
           "d"
         ]
       }
     ],
-    "django__django-16502": [
+    "pydata__xarray-3095": [
       {
         "answer": [
-          "f"
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
+          "c"
         ]
       },
       {
         "answer": [
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
-          "f"
+          "c"
         ]
       }
     ],
     "django__django-15695": [
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
           "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "django__django-15863": [
-      {
-        "answer": [
-          "f"
         ]
       },
       {
@@ -4154,21 +4285,16 @@
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "f"
+          "c"
         ]
       }
     ],
-    "matplotlib__matplotlib-23299": [
+    "pydata__xarray-2905": [
       {
         "answer": [
           "e"
@@ -4205,9 +4331,7 @@
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c"
+          "f"
         ]
       },
       {
@@ -4217,47 +4341,6 @@
           "c"
         ]
       },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "pydata__xarray-3095": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "matplotlib__matplotlib-22865": [
       {
         "answer": [
           "f"
@@ -4265,168 +4348,8 @@
       },
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "pydata__xarray-2905": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "django__django-15268": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "django__django-15987": [
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      }
-    ],
-    "django__django-16595": [
-      {
-        "answer": [
           "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "matplotlib__matplotlib-24970": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "b"
         ]
       }
     ],
@@ -4457,7 +4380,7 @@
         ]
       }
     ],
-    "pydata__xarray-3993": [
+    "django__django-15863": [
       {
         "answer": [
           "e"
@@ -4468,23 +4391,6 @@
           "e"
         ]
       },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "matplotlib__matplotlib-24570": [
       {
         "answer": [
           "f"
@@ -4492,49 +4398,12 @@
       },
       {
         "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
           "f"
-        ]
-      }
-    ],
-    "matplotlib__matplotlib-20676": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
         ]
       }
     ],
@@ -4546,23 +4415,76 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "a",
           "b"
         ]
       },
       {
         "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "django__django-16454": [
+      {
+        "answer": [
           "f"
         ]
       },
       {
         "answer": [
           "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "matplotlib__matplotlib-23299": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
         ]
       }
     ],
@@ -4593,25 +4515,7 @@
         ]
       }
     ],
-    "pydata__xarray-3151": [
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
+    "matplotlib__matplotlib-24570": [
       {
         "answer": [
           "f"
@@ -4619,41 +4523,42 @@
       },
       {
         "answer": [
-          "f"
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "d"
         ]
       }
     ],
-    "django__django-17084": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "pallets__flask-5014": [
+    "pydata__xarray-4687": [
       {
         "answer": [
           "a"
+        ]
+      },
+      {
+        "answer": [
+          "e"
         ]
       },
       {
@@ -4664,38 +4569,6 @@
       {
         "answer": [
           "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "pydata__xarray-6992": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
         ]
       },
       {
@@ -4704,30 +4577,30 @@
         ]
       }
     ],
-    "pydata__xarray-7393": [
+    "matplotlib__matplotlib-24970": [
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       }
     ],
@@ -4758,64 +4631,15 @@
         ]
       }
     ],
-    "psf__requests-6028": [
+    "pydata__xarray-7393": [
       {
         "answer": [
-          "e"
+          "a"
         ]
       },
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "pytest-dev__pytest-5262": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "pydata__xarray-4687": [
-      {
-        "answer": [
-          "e"
+          "a"
         ]
       },
       {
@@ -4830,70 +4654,38 @@
       },
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "a"
         ]
       }
     ],
-    "pydata__xarray-6938": [
+    "django__django-16502": [
       {
         "answer": [
-          "e"
+          "f"
         ]
       },
       {
         "answer": [
-          "e"
+          "f"
         ]
       },
       {
         "answer": [
-          "e"
+          "f"
         ]
       },
       {
         "answer": [
-          "e"
+          "f"
         ]
       },
       {
         "answer": [
-          "e"
+          "d"
         ]
       }
     ],
-    "django__django-17029": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "pydata__xarray-4094": [
+    "pydata__xarray-7233": [
       {
         "answer": [
           "b"
@@ -4901,22 +4693,76 @@
       },
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "b"
         ]
       },
       {
         "answer": [
           "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "pydata__xarray-6599": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "pydata__xarray-6992": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
         ]
       }
     ],
@@ -4947,7 +4793,139 @@
         ]
       }
     ],
-    "pydata__xarray-4356": [
+    "pydata__xarray-6721": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "pylint-dev__pylint-4970": [
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "pydata__xarray-3993": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "django__django-16642": [
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "pallets__flask-5014": [
       {
         "answer": [
           "a"
@@ -4974,34 +4952,65 @@
         ]
       }
     ],
-    "pydata__xarray-3677": [
+    "pydata__xarray-3151": [
       {
         "answer": [
+          "a",
           "c"
         ]
       },
       {
         "answer": [
+          "a",
           "c"
         ]
       },
       {
         "answer": [
+          "a",
           "c"
         ]
       },
       {
         "answer": [
-          "c"
+          "f"
         ]
       },
       {
         "answer": [
+          "a",
           "c"
         ]
       }
     ],
-    "pytest-dev__pytest-5809": [
+    "pytest-dev__pytest-7324": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "pydata__xarray-4094": [
       {
         "answer": [
           "b"
@@ -5055,15 +5064,10 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-11310": [
+    "pydata__xarray-4356": [
       {
         "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
+          "a"
         ]
       },
       {
@@ -5073,7 +5077,12 @@
       },
       {
         "answer": [
-          "e"
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       },
       {
@@ -5082,46 +5091,7 @@
         ]
       }
     ],
-    "pydata__xarray-6721": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "pydata__xarray-7233": [
+    "pytest-dev__pytest-5809": [
       {
         "answer": [
           "b"
@@ -5148,66 +5118,7 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-14141": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "pylint-dev__pylint-4970": [
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      }
-    ],
-    "pydata__xarray-6599": [
+    "pydata__xarray-6938": [
       {
         "answer": [
           "e"
@@ -5231,60 +5142,6 @@
       {
         "answer": [
           "e"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-10844": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-13142": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
         ]
       }
     ],
@@ -5315,7 +5172,7 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-11578": [
+    "scikit-learn__scikit-learn-14141": [
       {
         "answer": [
           "c"
@@ -5338,16 +5195,38 @@
       },
       {
         "answer": [
-          "e"
+          "c"
         ]
       }
     ],
-    "pytest-dev__pytest-10051": [
+    "pytest-dev__pytest-5262": [
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "pytest-dev__pytest-7521": [
       {
         "answer": [
           "e"
@@ -5355,9 +5234,34 @@
       },
       {
         "answer": [
-          "b"
+          "a",
+          "c",
+          "d"
         ]
       },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-11310": [
       {
         "answer": [
           "e"
@@ -5365,7 +5269,22 @@
       },
       {
         "answer": [
-          "e"
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
@@ -5396,40 +5315,88 @@
         ]
       }
     ],
-    "pytest-dev__pytest-7324": [
+    "scikit-learn__scikit-learn-11578": [
       {
         "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
-          "d"
+          "f"
         ]
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
+          "e"
         ]
       },
       {
         "answer": [
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
-          "d"
+          "e"
         ]
       }
     ],
-    "scikit-learn__scikit-learn-13439": [
+    "scikit-learn__scikit-learn-13142": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "pytest-dev__pytest-10356": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "pydata__xarray-3677": [
       {
         "answer": [
           "c"
@@ -5452,7 +5419,7 @@
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       }
     ],
@@ -5480,147 +5447,6 @@
       {
         "answer": [
           "e"
-        ]
-      }
-    ],
-    "pytest-dev__pytest-7521": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "pytest-dev__pytest-10356": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-14894": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-14983": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-12973": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
         ]
       }
     ],
@@ -5656,169 +5482,7 @@
         ]
       }
     ],
-    "sphinx-doc__sphinx-7454": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-13328": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-10908": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-7748": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8638": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-10323": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8265": [
+    "scikit-learn__scikit-learn-13439": [
       {
         "answer": [
           "c"
@@ -5877,17 +5541,7 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-26323": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
+    "sphinx-doc__sphinx-7454": [
       {
         "answer": [
           "a"
@@ -5900,11 +5554,75 @@
       },
       {
         "answer": [
-          "f"
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
-    "scikit-learn__scikit-learn-14496": [
+    "scikit-learn__scikit-learn-12973": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-14983": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-10844": [
       {
         "answer": [
           "b"
@@ -5958,69 +5676,10 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-13124": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-9288": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8269": [
+    "scikit-learn__scikit-learn-14894": [
       {
         "answer": [
           "c"
-        ]
-      },
-      {
-        "answer": [
-          "f"
         ]
       },
       {
@@ -6030,7 +5689,12 @@
       },
       {
         "answer": [
-          "f"
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
         ]
       },
       {
@@ -6039,93 +5703,89 @@
         ]
       }
     ],
-    "sphinx-doc__sphinx-9367": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8548": [
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "scikit-learn__scikit-learn-14087": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
+    "scikit-learn__scikit-learn-26323": [
       {
         "answer": [
           "a",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8265": [
+      {
+        "answer": [
           "c"
         ]
       },
       {
         "answer": [
-          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
           "c"
         ]
       }
     ],
-    "sphinx-doc__sphinx-7910": [
+    "sphinx-doc__sphinx-7748": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8638": [
       {
         "answer": [
           "e"
@@ -6149,6 +5809,33 @@
       {
         "answer": [
           "e"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-14496": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
         ]
       }
     ],
@@ -6186,6 +5873,258 @@
           "a",
           "b",
           "d"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-25973": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-13124": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "django__django-16595": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "pytest-dev__pytest-10051": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8269": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-9367": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-7910": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-9673": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-9281": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ],
@@ -6229,8 +6168,7 @@
       },
       {
         "answer": [
-          "a",
-          "b"
+          "e"
         ]
       },
       {
@@ -6241,7 +6179,6 @@
       },
       {
         "answer": [
-          "a",
           "b"
         ]
       }
@@ -6300,6 +6237,33 @@
         ]
       }
     ],
+    "scikit-learn__scikit-learn-10908": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
     "sphinx-doc__sphinx-11445": [
       {
         "answer": [
@@ -6308,105 +6272,23 @@
       },
       {
         "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-11510": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-9281": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8593": [
-      {
-        "answer": [
-          "c",
+          "a",
           "d"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
+          "a"
         ]
       }
     ],
@@ -6423,23 +6305,6 @@
       },
       {
         "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-9673": [
-      {
-        "answer": [
           "e"
         ]
       },
@@ -6451,226 +6316,6 @@
       {
         "answer": [
           "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sympy__sympy-12489": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-8035": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "sympy__sympy-13372": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-9658": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "d"
-        ]
-      }
-    ],
-    "sphinx-doc__sphinx-9320": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      }
-    ],
-    "sympy__sympy-13031": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "sympy__sympy-11618": [
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
         ]
       }
     ],
@@ -6692,13 +6337,171 @@
       },
       {
         "answer": [
-          "a",
           "d"
         ]
       },
       {
         "answer": [
           "d"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8593": [
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-11510": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8551": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8548": [
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-9288": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
         ]
       }
     ],
@@ -6734,19 +6537,37 @@
         ]
       }
     ],
-    "sphinx-doc__sphinx-8551": [
+    "sympy__sympy-12489": [
       {
         "answer": [
-          "a",
-          "b",
-          "c"
+          "d"
         ]
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c"
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-8035": [
+      {
+        "answer": [
+          "b"
         ]
       },
       {
@@ -6756,116 +6577,23 @@
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-13852": [
-      {
-        "answer": [
-          "a",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "d"
-        ]
-      }
-    ],
-    "sympy__sympy-12096": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c"
+          "b"
         ]
       }
     ],
     "sympy__sympy-13877": [
       {
         "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "sympy__sympy-13974": [
-      {
-        "answer": [
           "e"
         ]
       },
@@ -6890,34 +6618,34 @@
         ]
       }
     ],
-    "sympy__sympy-15349": [
+    "sympy__sympy-13031": [
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       },
       {
         "answer": [
-          "c"
+          "e"
         ]
       }
     ],
-    "sympy__sympy-16766": [
+    "scikit-learn__scikit-learn-13328": [
       {
         "answer": [
           "c"
@@ -6962,7 +6690,7 @@
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
@@ -6971,7 +6699,7 @@
         ]
       }
     ],
-    "sympy__sympy-14976": [
+    "sympy__sympy-11618": [
       {
         "answer": [
           "b"
@@ -6995,22 +6723,68 @@
       {
         "answer": [
           "b"
+        ]
+      }
+    ],
+    "sympy__sympy-13757": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "sympy__sympy-14531": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
         ]
       }
     ],
     "sympy__sympy-13091": [
       {
         "answer": [
-          "a",
-          "c",
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "a",
-          "c",
-          "d"
+          "b",
+          "c"
         ]
       },
       {
@@ -7021,17 +6795,84 @@
       },
       {
         "answer": [
-          "b"
+          "b",
+          "c"
         ]
       },
       {
         "answer": [
           "b",
           "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c",
+          "d"
         ]
       }
     ],
-    "sympy__sympy-16886": [
+    "sympy__sympy-13974": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sympy__sympy-13852": [
+      {
+        "answer": [
+          "a",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "d"
+        ]
+      }
+    ],
+    "sympy__sympy-15349": [
       {
         "answer": [
           "c"
@@ -7085,34 +6926,7 @@
         ]
       }
     ],
-    "sympy__sympy-13878": [
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sympy__sympy-14531": [
+    "sphinx-doc__sphinx-9658": [
       {
         "answer": [
           "e"
@@ -7120,141 +6934,92 @@
       },
       {
         "answer": [
-          "e"
+          "a",
+          "b",
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
+          "a",
+          "b",
+          "d"
         ]
       },
       {
         "answer": [
-          "e"
+          "a",
+          "b",
+          "d"
         ]
       },
       {
         "answer": [
+          "a",
           "b",
           "d"
         ]
       }
     ],
-    "sympy__sympy-16597": [
+    "sympy__sympy-14976": [
       {
         "answer": [
-          "a",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "b"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "b"
         ]
       }
     ],
-    "sympy__sympy-13757": [
+    "sympy__sympy-12096": [
       {
         "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sympy__sympy-13615": [
-      {
-        "answer": [
+          "a",
           "b",
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
+          "a",
           "b",
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
+          "a",
           "b",
-          "d"
+          "c"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
+          "a",
+          "c"
         ]
       },
       {
         "answer": [
-          "b",
-          "d"
-        ]
-      }
-    ],
-    "sympy__sympy-15017": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
+          "a",
+          "c"
         ]
       }
     ],
@@ -7285,6 +7050,124 @@
         ]
       }
     ],
+    "sympy__sympy-13372": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "sympy__sympy-18189": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "scikit-learn__scikit-learn-14087": [
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-10323": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
     "sympy__sympy-13798": [
       {
         "answer": [
@@ -7312,10 +7195,10 @@
         ]
       }
     ],
-    "scikit-learn__scikit-learn-25973": [
+    "sympy__sympy-15017": [
       {
         "answer": [
-          "d"
+          "e"
         ]
       },
       {
@@ -7339,34 +7222,7 @@
         ]
       }
     ],
-    "sympy__sympy-20916": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sympy__sympy-16450": [
+    "sympy__sympy-12481": [
       {
         "answer": [
           "b"
@@ -7401,12 +7257,31 @@
       },
       {
         "answer": [
-          "e"
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "f"
         ]
       },
       {
         "answer": [
           "e"
+        ]
+      }
+    ],
+    "sympy__sympy-16886": [
+      {
+        "answer": [
+          "c"
         ]
       },
       {
@@ -7416,61 +7291,151 @@
       },
       {
         "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-17655": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
           "e"
         ]
       }
     ],
-    "sympy__sympy-21596": [
+    "sympy__sympy-13878": [
       {
         "answer": [
-          "a",
-          "d"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "d"
+          "f"
         ]
       }
     ],
-    "sympy__sympy-12481": [
+    "sympy__sympy-16766": [
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "b"
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-20916": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sympy__sympy-13615": [
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "d"
         ]
       },
       {
@@ -7479,7 +7444,34 @@
         ]
       }
     ],
-    "sympy__sympy-18211": [
+    "sympy__sympy-17630": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sympy__sympy-17139": [
       {
         "answer": [
           "b"
@@ -7514,307 +7506,7 @@
       },
       {
         "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-18698": [
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-15809": [
-      {
-        "answer": [
-          "a",
-          "b",
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-17630": [
-      {
-        "answer": [
           "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sympy__sympy-19495": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "b",
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-22080": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
-        ]
-      }
-    ],
-    "sympy__sympy-18763": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
-        ]
-      }
-    ],
-    "sympy__sympy-23413": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "f"
-        ]
-      }
-    ],
-    "sympy__sympy-22914": [
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      },
-      {
-        "answer": [
-          "d"
-        ]
-      }
-    ],
-    "sympy__sympy-17139": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "sympy__sympy-23262": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
-          "e"
-        ]
-      }
-    ],
-    "sympy__sympy-20801": [
-      {
-        "answer": [
-          "c"
-        ]
-      },
-      {
-        "answer": [
-          "c"
         ]
       },
       {
@@ -7860,7 +7552,34 @@
         ]
       }
     ],
-    "sympy__sympy-18189": [
+    "sympy__sympy-15809": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-18763": [
       {
         "answer": [
           "a"
@@ -7868,12 +7587,12 @@
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
         "answer": [
-          "a"
+          "e"
         ]
       },
       {
@@ -7887,20 +7606,47 @@
         ]
       }
     ],
-    "sympy__sympy-17655": [
+    "sympy__sympy-20801": [
       {
         "answer": [
-          "e"
+          "c"
         ]
       },
       {
         "answer": [
-          "e"
+          "c"
         ]
       },
       {
         "answer": [
-          "e"
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-19040": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "f"
         ]
       },
       {
@@ -7911,6 +7657,129 @@
       {
         "answer": [
           "f"
+        ]
+      }
+    ],
+    "sphinx-doc__sphinx-9320": [
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    ],
+    "sympy__sympy-23413": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      }
+    ],
+    "sympy__sympy-22080": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-23262": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "b"
         ]
       }
     ],
@@ -7941,7 +7810,37 @@
         ]
       }
     ],
-    "sympy__sympy-24213": [
+    "sympy__sympy-19495": [
+      {
+        "answer": [
+          "f"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "f"
+        ]
+      }
+    ],
+    "sympy__sympy-18211": [
       {
         "answer": [
           "b"
@@ -7968,57 +7867,33 @@
         ]
       }
     ],
-    "sympy__sympy-20438": [
+    "sympy__sympy-21596": [
       {
         "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      },
-      {
-        "answer": [
-          "b"
-        ]
-      }
-    ],
-    "sympy__sympy-23824": [
-      {
-        "answer": [
-          "e"
-        ]
-      },
-      {
-        "answer": [
+          "a",
           "d"
         ]
       },
       {
         "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a",
           "d"
         ]
       },
       {
         "answer": [
+          "a",
           "d"
         ]
       },
       {
         "answer": [
-          "d"
+          "a"
         ]
       }
     ],
@@ -8049,7 +7924,7 @@
         ]
       }
     ],
-    "sympy__sympy-21847": [
+    "sympy__sympy-23824": [
       {
         "answer": [
           "d"
@@ -8057,7 +7932,7 @@
       },
       {
         "answer": [
-          "d"
+          "e"
         ]
       },
       {
@@ -8076,67 +7951,88 @@
         ]
       }
     ],
-    "sympy__sympy-20590": [
+    "sympy__sympy-24443": [
       {
         "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "c"
+          "a"
         ]
       },
       {
         "answer": [
-          "a",
-          "b",
-          "c",
-          "d"
+          "a"
         ]
       }
     ],
-    "sympy__sympy-19040": [
+    "sympy__sympy-19783": [
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       },
       {
         "answer": [
-          "f"
+          "e"
         ]
       }
     ],
-    "sympy__sympy-19637": [
+    "sympy__sympy-20438": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "sympy__sympy-24213": [
       {
         "answer": [
           "b"
@@ -8190,57 +8086,114 @@
         ]
       }
     ],
-    "sympy__sympy-24443": [
+    "sympy__sympy-16597": [
       {
         "answer": [
-          "a"
+          "a",
+          "d"
         ]
       },
       {
         "answer": [
-          "a"
+          "a",
+          "d"
         ]
       },
       {
         "answer": [
-          "a"
-        ]
-      },
-      {
-        "answer": [
-          "a"
+          "a",
+          "d"
         ]
       },
       {
         "answer": [
           "e"
         ]
-      }
-    ],
-    "sympy__sympy-19783": [
+      },
       {
         "answer": [
           "f"
         ]
-      },
+      }
+    ],
+    "sympy__sympy-24562": [
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "sympy__sympy-22914": [
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      },
+      {
+        "answer": [
+          "d"
+        ]
+      }
+    ],
+    "sympy__sympy-21847": [
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "e"
+        ]
+      },
+      {
+        "answer": [
+          "d"
         ]
       }
     ],
@@ -8252,7 +8205,7 @@
       },
       {
         "answer": [
-          "e"
+          "f"
         ]
       },
       {
@@ -8274,30 +8227,84 @@
         ]
       }
     ],
-    "sympy__sympy-24539": [
+    "sympy__sympy-19637": [
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
         ]
       },
       {
         "answer": [
-          "a"
+          "b"
+        ]
+      }
+    ],
+    "sympy__sympy-16450": [
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      },
+      {
+        "answer": [
+          "b"
+        ]
+      }
+    ],
+    "sympy__sympy-20590": [
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
+        ]
+      },
+      {
+        "answer": [
+          "c"
         ]
       }
     ],
@@ -8328,30 +8335,57 @@
         ]
       }
     ],
-    "sympy__sympy-24562": [
+    "sympy__sympy-18698": [
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "b"
+          "c"
         ]
       },
       {
         "answer": [
-          "b"
+          "f"
         ]
       },
       {
         "answer": [
-          "b"
+          "f"
         ]
       },
       {
         "answer": [
-          "b"
+          "c"
+        ]
+      }
+    ],
+    "sympy__sympy-24539": [
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
+        ]
+      },
+      {
+        "answer": [
+          "a"
         ]
       }
     ]
