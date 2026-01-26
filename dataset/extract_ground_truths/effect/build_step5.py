@@ -83,25 +83,16 @@ if __name__ == "__main__":
         os.makedirs(CTX_SAVE_DIR, exist_ok=True)
     if not os.path.exists(GT_SAVE_DIR):
         os.makedirs(GT_SAVE_DIR, exist_ok=True)
-    RQ1_AGENTS = [
+    AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
     ]
-    RQ3_AGENTS = [
-        "rq3_v1",
-    ]
     dump_local_effect_ctx_and_gt(
-        RQ1_AGENTS,
+        AGENTS,
         os.path.join(BASE_DIR, "output_per_step", "step4.json"),
-        CTX_SAVE_DIR,
-        GT_SAVE_DIR,
-    )
-    dump_local_effect_ctx_and_gt(
-        RQ3_AGENTS,
-        os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json"),
         CTX_SAVE_DIR,
         GT_SAVE_DIR,
     )

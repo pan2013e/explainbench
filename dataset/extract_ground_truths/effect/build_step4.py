@@ -216,23 +216,14 @@ if __name__ == "__main__":
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
     ]
-    RQ3_AGENTS = [
-        "rq3_v1",
-    ]
     PREPARE_INTENT = False
-    RUN_RQ3 = False
     if PREPARE_INTENT:
         print("Running for gold patch")
         AGENTS = ["gold"]
         STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.gold.json")
         OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.intent.json")
-    elif RUN_RQ3:
-        print("Running RQ3")
-        AGENTS = RQ3_AGENTS
-        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step3.json")
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step4.json")
     else:
-        print("Running RQ1")
+        print("Running for RQ1 agents")
         AGENTS = RQ1_AGENTS
         STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.json")
         OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.json")

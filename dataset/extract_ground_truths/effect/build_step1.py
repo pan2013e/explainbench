@@ -1,8 +1,3 @@
-# Build ground truth for effect
-# Step 0. Run tracer with agent patches to collect execution traces.
-# This should be done outside of this script.
-# Step 1. Extract locations of divergent lines, state differences;
-# and fallback if no divergence is found.
 import os
 import json
 import signal
@@ -41,24 +36,10 @@ ADHOC_TEST_ID = {
     "sympy__sympy-17655": 1,
 }
 
-# Only effective for RQ3 agents
-ADHOC_FALLBACK_REDIRECT = {
-    "rq3_v1": [
-        "django__django-12741",
-        "django__django-14349",
-        "django__django-15563",
-        "matplotlib__matplotlib-21568",
-        "sphinx-doc__sphinx-8269",
-        "sphinx-doc__sphinx-9320",
-    ],
-}
-
 def _timeout_handler(signum, frame):
     raise TimeoutError()
 
 def _process_instance(instance_id, agent, depth_threshold, timeout=600):
-    if instance_id in ADHOC_FALLBACK_REDIRECT.get(agent, []):
-        return {} # fallback to gold
     try:
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(EXTRA_LONG_TIMEOUT.get(instance_id, timeout))
@@ -154,7 +135,7 @@ def simplify_params(data, var_max_depth: int, param_max_depth: int) -> None:
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    RQ1_AGENTS = [
+    AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -162,19 +143,7 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    # Assume gold has been processed in RQ1
-    RQ3_AGENTS = [
-        "rq3_v1",
-    ]
-    RUN_RQ3 = False
-    if RUN_RQ3:
-        print("Running RQ3")
-        AGENTS = RQ3_AGENTS
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step1.json")
-    else:
-        print("Running RQ1")
-        AGENTS = RQ1_AGENTS
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
+    OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
     DEPTH_THRESHOLD = 3
     DO_SIMPLIFICATION = True
     SIMPLIFY_VAR_MAX_DEPTH = 4

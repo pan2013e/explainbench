@@ -52,14 +52,12 @@ def load_traces(file_path):
             mm.close()
 
 def get_trace_dir(agent='gold'):
-    # return os.path.join(DIR, f'../../../logs/run_evaluation/trace.debug.{agent}.{os.getuid()}/{agent}')
-    return f"../../../shared_logs/logs/run_evaluation/trace.{agent}.1020/{agent}"
+    return os.path.join(DIR, f'../../../logs/run_evaluation/trace.{agent}.{os.getuid()}/{agent}')
 
 def load_trace_pair(agent, instance_id, test_id=0, base_dir=None):
     # test_id refers to the index of FAIL_TO_PASS tests
     if base_dir is None:
         base_dir = get_trace_dir(agent)
-    # print(base_dir)
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
     diff_lines = get_diff_info_per_instance(base_dir, instance_id)
     buggy_path = os.path.join(base_dir, instance_id, f"buggy_traces/{test_name}.jsonl")

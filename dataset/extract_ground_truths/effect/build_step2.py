@@ -1,6 +1,3 @@
-# Build ground truth for effect
-# Step 2. Provide step 1 info to an LLM to infer an expression,
-# then inspect the expr value in buggy and patched versions
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -152,7 +149,7 @@ def process_agent(
 if __name__ == "__main__":
     # ------------ SCRIPT PARAMETERS ------------ #
     BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    RQ1_AGENTS = [
+    AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",
         "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
@@ -160,21 +157,8 @@ if __name__ == "__main__":
         "20250807_mini-v1.7.0_gpt-5-mini",
         "gold",
     ]
-    # Assume gold has been processed in RQ1
-    RQ3_AGENTS = [
-        "rq3_v1",
-    ]
-    RUN_RQ3 = False
-    if RUN_RQ3:
-        print("Running RQ3")
-        AGENTS = RQ3_AGENTS
-        STEP1_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step1.json")
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step_rq3", "step2.json")
-    else:
-        print("Running RQ1")
-        AGENTS = RQ1_AGENTS
-        STEP1_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
+    STEP1_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
+    OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
     STEP2_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.gold.json")
     N_CHANGED = 10
     N_UNCHANGED = 10
