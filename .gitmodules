@@ -7,3 +7,6 @@
 [submodule "audit_agent"]
 	path = audit_agent
 	url = https://github.com/smkang96/explanation-audit-agent.git
+[submodule "pbt-generator"]
+	path = pbt-generator
+	url = git@github.com:smkang96/pbt-acr.git
