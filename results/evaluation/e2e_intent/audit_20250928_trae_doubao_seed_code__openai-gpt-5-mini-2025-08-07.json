@@ -1,0 +1,2096 @@
+{
+  "statistics": {
+    "metric_values": [
+      0.7676767676767676,
+      0.7710437710437711,
+      0.797979797979798,
+      0.7878787878787878,
+      0.7878787878787878
+    ],
+    "mean": 0.7824915824915826,
+    "std": 0.011388238737567523,
+    "max": 0.797979797979798,
+    "min": 0.7676767676767676
+  },
+  "raw": {
+    "django__django-11179": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-13033": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12262": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-14309": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12708": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-7671": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11433": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-7336": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12325": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-10880": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-12304": [
+      false,
+      true,
+      false,
+      false,
+      false
+    ],
+    "astropy__astropy-14365": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11099": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-12276": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-14096": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-13453": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-12713": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11820": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11239": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12125": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12050": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-11206": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11603": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-12741": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-13236": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-11141": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11163": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12774": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "astropy__astropy-14995": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11848": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-10973": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "astropy__astropy-14598": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12308": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-11880": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11815": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13109": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-10999": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "django__django-11728": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13807": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12193": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13121": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13449": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-11292": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-13569": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12155": [
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13089": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-13741": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-7166": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-14508": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11138": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "django__django-13363": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-14493": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13821": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13794": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-13579": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-13512": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14580": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13410": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14349": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-12907": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "django__django-13837": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14373": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13344": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "django__django-13012": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14765": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-12858": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "django__django-13670": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-13977": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13786": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13820": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "django__django-14311": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14771": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14238": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "astropy__astropy-14369": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11490": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13516": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14089": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15277": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15380": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13212": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13933": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13195": [
+      false,
+      true,
+      false,
+      true,
+      true
+    ],
+    "django__django-14631": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13346": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "django__django-14434": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "django__django-15368": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13513": [
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "django__django-15098": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13568": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-10914": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14007": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15278": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15731": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14725": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-15252": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11119": [
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16502": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15499": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13023": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15467": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14140": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-13809": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14787": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "django__django-15104": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    "django__django-15127": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15161": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15268": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14534": [
+      false,
+      false,
+      true,
+      false,
+      true
+    ],
+    "django__django-15572": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16667": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15382": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16661": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15987": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15695": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16082": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "django__django-16819": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-14500": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-11532": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "django__django-15930": [
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-17087": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15525": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-14376": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "django__django-17084": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-15916": [
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-14539": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "django__django-16595": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-20676": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16560": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "django__django-15563": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14752": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "django__django-16136": [
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "django__django-15037": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-25479": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-23299": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-22865": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14915": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16493": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16901": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16642": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-3677": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16100": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "django__django-15569": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-3095": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16139": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16662": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-24637": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-13964": [
+      false,
+      false,
+      true,
+      true,
+      false
+    ],
+    "matplotlib__matplotlib-24970": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-4695": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "psf__requests-1142": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-9296": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15103": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-6721": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "pydata__xarray-2905": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-4356": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14404": [
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    "pydata__xarray-4094": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-13989": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16950": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-16454": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-14034": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "django__django-11133": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-24570": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-4075": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pytest-dev__pytest-7521": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "django__django-15863": [
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    "django__django-17029": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-10844": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pytest-dev__pytest-5809": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-13328": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-12973": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-13142": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-21568": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-10908": [
+      false,
+      true,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-10297": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-6461": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-14894": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-3151": [
+      false,
+      false,
+      true,
+      true,
+      true
+    ],
+    "matplotlib__matplotlib-26208": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-25973": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-6992": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-4629": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pytest-dev__pytest-10051": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pytest-dev__pytest-5262": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-13439": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-7233": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-3993": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "scikit-learn__scikit-learn-9288": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-7454": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-12585": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-6599": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "pytest-dev__pytest-10356": [
+      false,
+      false,
+      true,
+      false,
+      false
+    ],
+    "pydata__xarray-4687": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9320": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8593": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8551": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-14983": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-14141": [
+      false,
+      false,
+      true,
+      true,
+      false
+    ],
+    "scikit-learn__scikit-learn-11310": [
+      false,
+      false,
+      true,
+      true,
+      false
+    ],
+    "scikit-learn__scikit-learn-15100": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pallets__flask-5014": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sphinx-doc__sphinx-11445": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-14087": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-12419": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-25232": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "django__django-15851": [
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "sphinx-doc__sphinx-11510": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "scikit-learn__scikit-learn-11578": [
+      false,
+      true,
+      true,
+      true,
+      false
+    ],
+    "scikit-learn__scikit-learn-25931": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-7889": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8035": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-26323": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-13124": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8265": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-7910": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8548": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13852": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-7393": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-14496": [
+      false,
+      true,
+      false,
+      false,
+      true
+    ],
+    "sphinx-doc__sphinx-7748": [
+      false,
+      false,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9281": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8638": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-13480": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-15349": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "psf__requests-6028": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "sympy__sympy-12096": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13091": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-15809": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9698": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scikit-learn__scikit-learn-26194": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-13031": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13615": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-12481": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9258": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-13372": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-8269": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-16886": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9673": [
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    "sympy__sympy-16450": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-11618": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "sympy__sympy-12489": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-17139": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-17318": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-14711": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13551": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-16597": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-18211": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-16766": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-18199": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-18189": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13974": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pytest-dev__pytest-7324": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "scikit-learn__scikit-learn-13496": [
+      true,
+      false,
+      true,
+      false,
+      true
+    ],
+    "sympy__sympy-14531": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13798": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-19346": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pylint-dev__pylint-4970": [
+      false,
+      true,
+      false,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9367": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-10323": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-20590": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-19040": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-15017": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-23950": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-22714": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-23534": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-24213": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13757": [
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13877": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "sympy__sympy-19637": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-23824": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-23413": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-24539": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "pydata__xarray-6744": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ],
+    "sympy__sympy-20438": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-20916": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-21847": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sphinx-doc__sphinx-9658": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sphinx-doc__sphinx-8475": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-21596": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-17630": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-24443": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-23262": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-15875": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-13878": [
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "sympy__sympy-22080": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-17655": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-16792": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-24066": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-14976": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "sympy__sympy-18763": [
+      false,
+      true,
+      false,
+      false,
+      true
+    ],
+    "sympy__sympy-22914": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sympy__sympy-19783": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "sympy__sympy-20801": [
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    "sympy__sympy-18698": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "pydata__xarray-6938": [
+      true,
+      false,
+      true,
+      false,
+      false
+    ],
+    "sympy__sympy-24562": [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "sympy__sympy-19495": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+}
