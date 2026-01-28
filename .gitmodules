@@ -9,4 +9,4 @@
 	url = https://github.com/smkang96/explanation-audit-agent.git
 [submodule "pbt-generator"]
 	path = pbt-generator
-	url = git@github.com:smkang96/pbt-acr.git
+	url = https://github.com/smkang96/pbt-acr.git
