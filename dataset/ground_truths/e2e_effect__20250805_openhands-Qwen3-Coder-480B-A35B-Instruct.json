@@ -24,8 +24,8 @@
     "after_answer": "d"
   },
   "astropy__astropy-14096": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "d",
+    "after_answer": "d"
   },
   "astropy__astropy-14309": {
     "before_answer": "b",
@@ -52,8 +52,8 @@
     "after_answer": "e"
   },
   "astropy__astropy-7166": {
-    "before_answer": "d",
-    "after_answer": "d"
+    "before_answer": "b",
+    "after_answer": "e"
   },
   "astropy__astropy-7336": {
     "before_answer": "c",
@@ -69,7 +69,7 @@
   },
   "django__django-10914": {
     "before_answer": "c",
-    "after_answer": "c"
+    "after_answer": "e"
   },
   "django__django-10973": {
     "before_answer": "d",
@@ -121,7 +121,7 @@
   },
   "django__django-11433": {
     "before_answer": "d",
-    "after_answer": "c"
+    "after_answer": "d"
   },
   "django__django-11490": {
     "before_answer": "d",
@@ -172,8 +172,8 @@
     "after_answer": "b"
   },
   "django__django-12262": {
-    "before_answer": "d",
-    "after_answer": "d"
+    "before_answer": "c",
+    "after_answer": "e"
   },
   "django__django-12276": {
     "before_answer": "d",
@@ -273,7 +273,7 @@
   },
   "django__django-13568": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-13569": {
     "before_answer": "d",
@@ -325,11 +325,11 @@
   },
   "django__django-14007": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-14034": {
-    "before_answer": "b",
-    "after_answer": "b"
+    "before_answer": "d",
+    "after_answer": "d"
   },
   "django__django-14089": {
     "before_answer": "b",
@@ -368,12 +368,12 @@
     "after_answer": "e"
   },
   "django__django-14493": {
-    "before_answer": "d",
-    "after_answer": "d"
+    "before_answer": "c",
+    "after_answer": "e"
   },
   "django__django-14500": {
-    "before_answer": "b",
-    "after_answer": "b"
+    "before_answer": "d",
+    "after_answer": "d"
   },
   "django__django-14534": {
     "before_answer": "d",
@@ -421,7 +421,7 @@
   },
   "django__django-15098": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-15103": {
     "before_answer": "b",
@@ -444,8 +444,8 @@
     "after_answer": "c"
   },
   "django__django-15268": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "b",
+    "after_answer": "e"
   },
   "django__django-15277": {
     "before_answer": "c",
@@ -469,7 +469,7 @@
   },
   "django__django-15467": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-15499": {
     "before_answer": "d",
@@ -477,11 +477,11 @@
   },
   "django__django-15525": {
     "before_answer": "c",
-    "after_answer": "c"
+    "after_answer": "e"
   },
   "django__django-15563": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "d",
+    "after_answer": "e"
   },
   "django__django-15569": {
     "before_answer": "c",
@@ -493,7 +493,7 @@
   },
   "django__django-15695": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "c"
   },
   "django__django-15731": {
     "before_answer": "d",
@@ -504,8 +504,8 @@
     "after_answer": "e"
   },
   "django__django-15863": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "d",
+    "after_answer": "e"
   },
   "django__django-15916": {
     "before_answer": "d",
@@ -529,11 +529,11 @@
   },
   "django__django-16136": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-16139": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "django__django-16454": {
     "before_answer": "d",
@@ -544,8 +544,8 @@
     "after_answer": "e"
   },
   "django__django-16502": {
-    "before_answer": "b",
-    "after_answer": "b"
+    "before_answer": "d",
+    "after_answer": "e"
   },
   "django__django-16560": {
     "before_answer": "b",
@@ -600,8 +600,8 @@
     "after_answer": "e"
   },
   "matplotlib__matplotlib-13989": {
-    "before_answer": "c",
-    "after_answer": "d"
+    "before_answer": "d",
+    "after_answer": "e"
   },
   "matplotlib__matplotlib-20676": {
     "before_answer": "d",
@@ -737,15 +737,15 @@
   },
   "pytest-dev__pytest-10356": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "pytest-dev__pytest-5262": {
     "before_answer": "c",
     "after_answer": "e"
   },
   "pytest-dev__pytest-5809": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "d",
+    "after_answer": "e"
   },
   "pytest-dev__pytest-7324": {
     "before_answer": "d",
@@ -753,7 +753,7 @@
   },
   "pytest-dev__pytest-7521": {
     "before_answer": "d",
-    "after_answer": "d"
+    "after_answer": "e"
   },
   "scikit-learn__scikit-learn-10297": {
     "before_answer": "d",
@@ -892,8 +892,8 @@
     "after_answer": "d"
   },
   "sphinx-doc__sphinx-8475": {
-    "before_answer": "c",
-    "after_answer": "c"
+    "before_answer": "b",
+    "after_answer": "e"
   },
   "sphinx-doc__sphinx-8548": {
     "before_answer": "d",
@@ -1017,7 +1017,7 @@
   },
   "sympy__sympy-14976": {
     "before_answer": "b",
-    "after_answer": "d"
+    "after_answer": "c"
   },
   "sympy__sympy-15017": {
     "before_answer": "d",
@@ -1076,8 +1076,8 @@
     "after_answer": "d"
   },
   "sympy__sympy-18199": {
-    "before_answer": "d",
-    "after_answer": "d"
+    "before_answer": "c",
+    "after_answer": "e"
   },
   "sympy__sympy-18211": {
     "before_answer": "d",
