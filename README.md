@@ -69,8 +69,36 @@ See `dataset/explanations/README.md`.
 
 #### End-to-end questions
 
+Note that PBT generation is expensive. If you would like to skip PBT generation, go to step 5.
+
 1. Setup `pbt-generator` submodule. 
-2. Run ...
+2. Setup AutoCodeRover as described in pbt-generator/README.md.
+3. In the `pbt-generator` directory, run the command below to generate PBTs. (\<SWE-bench-path\> is described in pbt-generator/README.md.)
+```bash
+PYTHONPATH=. python app/main.py swe-bench \
+    --model gpt-5.2-2025-12-11 \
+    --setup-map <SWE-bench-path>/setup_result/setup_map.json \
+    --tasks-map <SWE-bench-path>/setup_result/tasks_map.json \
+    --output-dir output \
+    --task-list-file ../instances.txt
+```
+4. In the `pbt-generator` directory, run the following in order to label the expected behavior expression of the PBTs.
+```bash
+python scripts/gather_test_data.py \
+    --output_dir output \
+    --all_bug_list ../instances.txt \
+    --save_file gathered.jsonl
+python scripts/annotate.py
+    --input_file gathered.jsonl
+    --save_file annotated.json
+```
+5. Run the following command in this directory (if you have skipped PBT generation, use `./dataset/context/raw_pbts.json` instead of `./pbt-generator/annotated.json`:
+```bash
+python -m execution.pbt.patch_runner \
+    --swebench_pred_file [PATH_TO_PATCH_FILE]
+    --pbt_file ./pbt-generator/annotated.json
+    --workers [WORKER_NUM]
+```
 
 #### Local questions
 
