@@ -4,6 +4,7 @@ dataset/**/swe_bench_repos/*
 logs*/
 *.json
 !results/**/*.json
+!supplementary_materials/**/*.json
 !execution/**/*.json
 !dataset/context/*.json
 !dataset/ground_truths/*.json
