@@ -34,6 +34,12 @@ COSTINFO = {
         'unit': 1_000_000,
         'input_price': 0.25,
         'output_price': 2.00,
+    },
+    'gpt-5-nano-2025-08-07': {
+        'currency': '$',
+        'unit': 1_000_000,
+        'input_price': 0.05,
+        'output_price': 0.40,
     }
 }
 
