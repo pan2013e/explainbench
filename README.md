@@ -11,9 +11,7 @@ This replication package is shared privately for double anonymous review.
 ├── evaluation
 ├── execution
 ├── pbt-generator
-├── pyproject.toml
 ├── py-tracer
-├── README.md
 ├── results
 └── supplementary_materials
 ```
