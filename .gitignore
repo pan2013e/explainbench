@@ -10,5 +10,6 @@ logs*/
 !dataset/ground_truths/*.json
 *.log
 *.txt
+!instances.txt
 !dataset/extract_ground_truths/effect/prompts/*.txt
 explainbench.egg-info/PKG-INFO
