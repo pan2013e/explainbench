@@ -31,7 +31,7 @@ This replication package is shared privately for double anonymous review.
 
 ### Evaluation setup
 
-Install the dependencies listed in `pyproject.toml`
+Install the dependencies listed in `pyproject.toml`.
 
 ### How to run evaluation
 
