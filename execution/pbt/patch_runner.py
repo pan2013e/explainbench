@@ -163,7 +163,7 @@ class QuestionConstructor():
             }
         else:
             if len(fixed_exception_names) == 0:
-                fixed_exception_names = ["Exception"] # something did happen
+                fixed_exception_names = ["Exception"] # when parsing fails, default to Exception
             fixed_str = QuestionConstructor.ERROR_STR_TEMPLATE.format(
                 lineno = fixed_errlines[-1],
                 exception = fixed_exception_names[-1]
@@ -300,45 +300,11 @@ if __name__ == '__main__':
     target_dict = {
         k: v for k, v in pbt_dict.items() if args.target_pattern in k
     }
-
-    if args.raw_file_output is None:
-        result = run_pbts_on_patches(
-            swebench_pred_dict,
-            target_dict,
-            workers = args.workers
-        )
-
-        args.output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = args.output_dir / "raw_pbt_outputs.jsonl"
-        with output_file.open("w") as f:
-            for instance_id, repro_result in result.items():
-                output_dict = {
-                    "instance_id": instance_id,
-                    "repro_status": f"{repro_result.failure_case!r}",
-                    "buggy_stdout": repro_result.buggy_stdout,
-                    "buggy_returncode": repro_result.buggy_returncode,
-                    "fixed_stdout": repro_result.fixed_stdout,
-                    "fixed_returncode": repro_result.fixed_returncode,
-                }
-                f.write(json.dumps(output_dict) + "\n")
-    else:
-        raw_content = args.raw_file_output.read_text()
-        result = {
-            d["instance_id"]: FullReproResult(
-                buggy_stdout=d["buggy_stdout"],
-                buggy_stderr="",
-                buggy_returncode=d["buggy_returncode"],
-                fixed_stdout=d["fixed_stdout"],
-                fixed_stderr="",
-                fixed_returncode=d["fixed_returncode"],
-            ) for d in 
-            [json.loads(l) for l in raw_content.splitlines()]
-        }
-        result = {
-            k: v for k, v in result.items() if args.target_pattern in k
-        }
-    
-    output_file = args.output_dir / "pbt_questions.jsonl"
+    result = run_pbts_on_patches(
+        swebench_pred_dict,
+        target_dict,
+        workers = args.workers
+    )
     context, ground_truth = QuestionConstructor.generate_questions(
         result,
         target_dict,
