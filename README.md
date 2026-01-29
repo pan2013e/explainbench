@@ -1,11 +1,12 @@
 # Documentation for Replication Package
 
+This replication package is shared privately for double anonymous review. 
+
 ## Directory structure
 
 ```
 .
 ├── audit_agent
-├── CONTRIBUTING.md
 ├── dataset
 ├── evaluation
 ├── execution
@@ -13,20 +14,30 @@
 ├── pyproject.toml
 ├── py-tracer
 ├── README.md
-└── results
+├── results
+└── supplementary_materials
 ```
 
-## Artifact 1: ExplainBench 
+- `audit_agent/`: Contains the code for ExplanationAuditAgent, which performs additional differential testing to validate and refine agent explanations.
+- `dataset/`: Contains benchmark data and part of the ExplainBench framework for automatically collecting explanations, questions, context, and ground truths.
+- `evaluation/`: Contains the evaluation scripts.
+- `execution/`: Contains the instrumentation and test execution framework for (1) running developer tests and tracing their behavior (2) and running PBTs.
+- `pbt-generator/`: Contains the rest part of the ExplainBench framework for automatically generating PBTs for end-to-end questions.
+- `py-tracer/`: Contains the code for execution tracing and object serialization.
+- `results/`: Contains evaluation results.
+- `supplementary_materials/`: Contains supplementary materials as mentioned in Section 8.1 of the paper.
+
+## Artifact 1: ExplainBench
 
 > ExplainBench is an evaluation framework that automatically evaluates the quality of code explanations from agents.
 
-### Setup
+### Evaluation setup
 
-1. Install dependencies listed in `pyproject.toml`
+Install the dependencies listed in `pyproject.toml`
 
 ### How to run evaluation
 
-1. Prepare API keys for LLM access. Either export to environment variables before running, or create a `.env` file in the root directory and add your API keys in `KEY=VALUE` format. Refer to litellm documentation for available `KEY` names.
+1. Prepare API keys for LLM access. Either export to environment variables before running, or create a `.env` file in the root directory and add your API keys in `KEY=VALUE` format. Refer to litellm documentation (https://docs.litellm.ai/docs/set_keys) for available `KEY` names.
 2. Run `python -m evaluation.main` with args in the root directory to execute the evaluation.
 ```
 usage: evaluation.main [-h] -a AGENT [-m MODEL] [-n NUM_GENERATIONS] [-go] [-eo] [--gen-workers GEN_WORKERS] [--use-audit-expl] task
@@ -48,7 +59,7 @@ options:
                         Number of parallel workers for generation
   --use-audit-expl      Use explanations from audit agent
 
-Available tasks: local.effect, local.intent
+Available tasks: e2e.effect, e2e.intent, local.effect, local.intent
 ```
 3. Results will be saved in the `results/` directory.
 
@@ -81,7 +92,7 @@ python -m dataset.extract_ground_truths.effect.build_step5
 
 SWE-bench docker instances will be created and run during these steps, so there is a minimum disk space requirement (please refer to https://github.com/SWE-bench/SWE-bench). In resource-limited machines, please reduce the parallelism to avoid crashes or docker timeouts.
 
-After running these scripts in order, there should be `local_intent.json` and `local_effect__AGENT_ID.json` under `dataset/context`. Extending to new agents does not produce different `local_intent.json`.
+After running these scripts in order, there should be `local_intent.json` and `local_effect__{AGENT_ID}.json` under `dataset/context`. Extending to new agents does not produce different `local_intent.json`.
 
 ### How to extend evaluation to new questions
 
@@ -95,7 +106,7 @@ class MyTask(Task[schema.MySchema]):
     #                    ^^^^^^^^ Class defined in step 1
     QUESTION = ... # The question to ask the LLM
     SCHEMA = schema.MySchema # Class defined in step 1
-    CTX_AGENT_SPECIFIC = False # If the context in the prompts is different for agents
+    CTX_AGENT_SPECIFIC = False # If the context in the prompts is agent-specific
 
     @staticmethod
     def eval(pred: list[schema.MySchema], gt: dict): # Should return list[float]
@@ -110,8 +121,9 @@ class MyTask(Task[schema.MySchema]):
         pass
 ```
 
-The task class is versatile, and the user can implement helper methods to format the question for different dataset instances. See `Task.Effect` class in `evaluation/task.py`.
-3. Prepare context and ground truth files.
+The task class is versatile, and the user can implement other helper methods to format the question for different dataset instances. See `Task.Effect` class in `evaluation/task.py`.
+
+3. Prepare context and ground truth files. If `CTX_AGENT_SPECIFIC` is set to `False`, context and ground truths will be loaded from `dataset/{context | ground_truths}/{MyTask.__qualname__.replace('.', '_')}.json`; otherwise it will be loaded from `dataset/{context | ground_truths}/{MyTask.__qualname__.replace('.', '_')}__{AGENT_ID}.json`.
 
 
 ## Artifact 2: ExplanationAuditAgent
@@ -119,7 +131,3 @@ The task class is versatile, and the user can implement helper methods to format
 > ExplanationAuditAgent is an agent that runs additional tests to validate and refine agent explanations.
 
 See `audit_agent/README.md`
-
-## Supplementary materials for the paper
-
-See `supplementary_materials/README.md`
