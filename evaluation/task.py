@@ -85,6 +85,48 @@ class _MCQ(Task[schema.MCQ]):
         answers = gt.get('answer', gt)
         return [mcq_score(p.answer, answers) for p in pred]
 
+class E2E(_MCQ):
+    class Effect(_MCQ):
+        QUESTION = (
+            'Test Content:\n'
+            '{test_content}\n\n'
+            'Choices:\n'
+            '{choices}\n\n'
+            'Your task is to assess the informational content of the provided explanation from an AI agent. '
+            'Based on the information in the explanation about the patch (code change) from the agent, what would happen when running the provided test both before and after applying the patch? '
+            'Note that the test may behave identically before and after the patch, if the test is irrelevant or the patch is ineffective. '
+            'Think carefully about both the explanation and the test itself before answering. '
+            'After consideration, choose the correct option corresponding to behavior before and after the patch from the choices, '
+            'answering with a single letter for each. '
+            'Base your answer on the explanation alone, and if the explanation lacks information, pick the "cannot be answered" option.'
+        )
+        CTX_AGENT_SPECIFIC = True
+        
+        @classmethod
+        def _build_prompt(cls, explanation, **kwargs):
+            numbered_test = kwargs.pop('test_content')
+            choices = kwargs.pop('choices')
+            return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(test_content=numbered_test, choices=format_mcq_choices(choices)), context=cls._build_context(**kwargs))
+    
+    class Intent(_MCQ):
+        QUESTION = (
+            'Masked Test:\n'
+            '{masked_test}\n\n'
+            'Choices:\n'
+            '{choices}\n\n'
+            'Your task is to assess the informational content of the provided explanation. '
+            'Based on the explanation and the explanation alone, what expression should go in [[MASKED 1]]? '
+            'Do NOT guess based on the test content or your prior knowledge; base your answer on the explanation itself, and if the explanation lacks information, choose the "cannot be answered" option. '
+            'After consideration, choose the correct option from the choices and answer with a single letter.'
+        )
+        CTX_AGENT_SPECIFIC = False
+
+        @classmethod
+        def _build_prompt(cls, explanation, **kwargs):
+            masked_test = kwargs.pop('masked_test')
+            choices = kwargs.pop('choices')
+            return cls.TEMPLATE.format(schema=cls._schema_string(), explanation=explanation, question=cls.QUESTION.format(masked_test=masked_test, choices=format_mcq_choices(choices)), context=cls._build_context(**kwargs))
+
 class Local:
     class Effect(_MCQ):
         QUESTION = (
