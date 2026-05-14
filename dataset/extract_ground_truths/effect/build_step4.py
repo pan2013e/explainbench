@@ -215,6 +215,9 @@ if __name__ == "__main__":
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
+        "20251127_openhands_claude-opus-4-5",
+        "openhands_gpt-5-mini",
+        "openhands_minimax-m2.5",
     ]
     PREPARE_INTENT = False
     if PREPARE_INTENT:

@@ -20,10 +20,12 @@ EXTRA_LONG_TIMEOUT = {
     'django__django-16333': 3000,
     'django__django-16667': 3000,
     'django__django-16938': 3000,
+    'matplotlib__matplotlib-22865': 3000,
     'matplotlib__matplotlib-24637': 3000,
     'matplotlib__matplotlib-26208': 3000,
     'pylint-dev__pylint-6386': 3000,
     'pylint-dev__pylint-7080': 3000,
+    'scikit-learn__scikit-learn-10844': 3000,
     'sphinx-doc__sphinx-8551': 3000,
     'sphinx-doc__sphinx-9230': 3000,
     'sphinx-doc__sphinx-9698': 3000,
@@ -141,6 +143,9 @@ if __name__ == "__main__":
         "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
         "20250928_trae_doubao_seed_code",
         "20250807_mini-v1.7.0_gpt-5-mini",
+        "20251127_openhands_claude-opus-4-5",
+        "openhands_gpt-5-mini",
+        "openhands_minimax-m2.5",
         "gold",
     ]
     OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
