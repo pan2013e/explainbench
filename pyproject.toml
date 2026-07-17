@@ -22,9 +22,23 @@ dependencies = [
     "joblib == 1.5.2",
 ]
 
+[project.scripts]
+explainbench = "explainbench.cli:main"
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules=[]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+explainbench = ["data/*.json"]
+
+[tool.pytest.ini_options]
+addopts = "-p no:tracer_plugin"
+pythonpath = ["src"]
+testpaths = ["tests"]
