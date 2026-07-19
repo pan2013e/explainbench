@@ -391,7 +391,7 @@ single-worker measurements with explicit limitations.
 
 #### Single-worker characterization
 
-Run the full supported instance set with one worker. Collect distributions and
+Run the full selected instance set with one worker. Collect distributions and
 maxima for memory, CPU, runtime, and trace size. This establishes the observed
 resource profile for the release, not a guaranteed minimum configuration.
 
@@ -412,7 +412,7 @@ swap becomes material, OOM occurs, or timeout rates increase.
 
 #### Optional future validation (deferred)
 
-Run the supported set using the intended recommended worker count. Repeat the
+Run the selected set using the intended recommended worker count. Repeat the
 stress set two or three times to estimate variability. Benchmark cold-cache and
 warm-cache scenarios separately. Clearing the shared Docker cache requires
 separate approval and is not part of the current release evidence.
@@ -442,10 +442,10 @@ Benchmark controls:
   trace output share this filesystem and these values must not be added.
 - Throughput: 22.894 completed instances/hour with one worker, including all
   orchestration and cleanup time.
-- Scope correction: 266 entries have non-empty gold allowed-function lists;
-  25 selected keys have empty lists and emitted warnings. Their measurements
-  are valid supplemental observations but they do not define the supported
-  workload for release guidance.
+- Allowed-function audit: 266 entries have non-empty gold allowed-function
+  lists. The other 25 entries have empty lists and emitted warnings. The
+  resource profile includes all 291 entries because every entry ran and
+  produced valid resource data.
 - Largest observed instance: `django__django-15563`, with 24,094.125 seconds
   container wall time, 22,309,703,680 bytes sampled working-set peak,
   100,390,178,816 bytes Docker lifetime raw-memory peak, and 98,126,602,039
@@ -528,7 +528,7 @@ The release guidance must state:
 | 2026-07-18 | Treat incomplete copies and scan errors as partial artifacts | Preserve any observed files without presenting a lower-bound byte count as complete |
 | 2026-07-18 | Make the patched-execution transition idempotent | Python can emit the same line-trace event twice around the multi-line call; repeated callbacks must not truncate the phase |
 | 2026-07-18 | Use `django__django-11133` for the warm-cache pilot | It is supported, not excluded, small, previously resolved, and its SWE-bench image was cached locally |
-| 2026-07-19 | Define supported benchmark entries as non-empty allowed-function lists | Empty lists trigger the `none` fallback and cannot establish the intended filtered tracing workload |
+| 2026-07-19 | Include all 291 completed entries in the resource profile | The allowed-function list changes trace semantics but does not invalidate measured resource use from a completed run |
 | 2026-07-19 | Treat the single-worker benchmark as sufficient for this release | The release will warn about observed resource demand and recommend one worker rather than promise multi-worker capacity |
 | 2026-07-19 | Publish observations rather than minimum requirements | The powerful-host run measures demand but does not validate success on a smaller constrained machine |
 | 2026-07-19 | Defer concurrency and cold-cache tests | They are unnecessary without a multi-worker promise and cold-cache setup would modify a large shared Docker cache |
@@ -545,8 +545,8 @@ The release guidance must state:
   resource results, operating guidance, timeout behavior, and test limits.
 - Rewrote the profile for users with ASD-STE100 rules and kept the README
   unchanged.
-- Recomputed the 266-instance supported-workload percentiles and total container
-  CPU consumption directly from the instance resource records before publishing.
+- Recomputed the 291-instance percentiles and total container CPU consumption
+  directly from all instance resource records before publishing.
 - Completed and audited the warm-cache single-worker characterization after
   12:42:39: all 291 harness jobs completed with zero harness errors.
 - Validated the run record and all 291 instance records against schema v1;
@@ -556,8 +556,8 @@ The release guidance must state:
   126,830,577,708-byte run total with no per-instance mismatch.
 - Compared all resolution outcomes with `track.gold.1020` and found zero
   differences, confirming that the monitored run preserved the prior behavior.
-- Identified 25 entries with empty allowed-function lists; retained their data
-  but narrowed the supported analysis set to the 266 non-empty entries.
+- Identified 25 entries with empty allowed-function lists. The resource profile
+  includes these entries and the 266 entries with non-empty lists.
 - Identified `django__django-15563` as the dominant time, memory, and storage
   outlier and retained it as the release worst-case observation.
 - Confirmed that no benchmark container remains and completed Phase 8 under the
@@ -569,8 +569,8 @@ The release guidance must state:
 ### 2026-07-18
 
 - Started Phase 8 with the warm-cache, single-worker characterization of all
-  291 selected gold keys; none overlap the configured exclusion list. The
-  later audit refined the supported subset to 266 non-empty entries.
+  291 selected gold keys. None overlap the configured exclusion list. The
+  resource profile includes all 291 entries.
 - Preflight recorded 1.1 TiB host-available memory and 5.4 TiB free disk. The
   host is shared, has one unrelated long-running container, and began with its
   2 GiB swap already consumed; retain these as host-baseline limitations and

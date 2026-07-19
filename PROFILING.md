@@ -36,8 +36,6 @@ Asia/Singapore.
 | Item | Test value |
 |---|---|
 | Workload | 291 gold instances |
-| Primary workload | 266 instances with a nonempty allowed-function list |
-| Additional workload | 25 instances with an empty allowed-function list |
 | Worker count | 1 |
 | Docker cache | Warm |
 | Sample interval | 1 second |
@@ -52,6 +50,8 @@ Asia/Singapore.
 
 All Docker images were in the cache before the test. Docker and the trace
 output used the same filesystem.
+
+All result tables use all 291 instances. No completed instance is excluded.
 
 Other work also used the test computer. The 2 GiB swap area was full before
 the test started. Thus, host values include other work.
@@ -81,14 +81,14 @@ on the computer can change these values.
 
 ## Results for One Instance
 
-The next table uses the 266 instances in the primary workload.
+The next table uses all 291 instances.
 
 | Resource | Median | 95th percentile | Maximum |
 |---|---:|---:|---:|
-| Container run time | 17.8 seconds | 3 minutes, 17 seconds | 6 hours, 41 minutes, 34 seconds |
-| Sampled working set | 151.8 MiB | 441.6 MiB | 20.8 GiB |
-| Docker raw memory | 186.9 MiB | 771.6 MiB | 93.5 GiB |
-| Stored trace files | 0.59 MiB | 457.8 MiB | 91.4 GiB |
+| Container run time | 18.0 seconds | 3 minutes, 11 seconds | 6 hours, 41 minutes, 34 seconds |
+| Sampled working set | 152.2 MiB | 371.1 MiB | 20.8 GiB |
+| Docker raw memory | 187.5 MiB | 763.2 MiB | 93.5 GiB |
+| Stored trace files | 0.83 MiB | 457.8 MiB | 91.4 GiB |
 | Container CPU time | 58.4 seconds | 3 minutes, 56 seconds | 6 hours, 43 minutes, 38 seconds |
 
 The maximum values came from `django__django-15563`. This instance made 91.4
