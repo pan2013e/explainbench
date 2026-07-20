@@ -6,9 +6,9 @@ dataset/**/swe_bench_repos/*
 logs*/
 *.json
 !examples/*.json
-examples/results/
 !src/explainbench/data/**/*.json
 !results/**/*.json
+results/lite-example.json
 !supplementary_materials/**/*.json
 !execution/**/*.json
 !dataset/context/*.json

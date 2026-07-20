@@ -16,7 +16,7 @@ max_retries = 5
 
 [paths]
 # Config paths are resolved relative to this file.
-output = "results/lite-example.json"
+output = "../results/lite-example.json"
 
 # Export provider credentials in your shell. Alternatively, uncomment this
 # section and create examples/.env before running the command.

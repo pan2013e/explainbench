@@ -73,6 +73,16 @@ explainbench evaluate examples/submission-lite.json \
     --config examples/evaluation-lite.toml
 ```
 
+Before inference begins, the command prints the resolved task selection, evaluator, generation count, and output path. Interactive terminals also show a tqdm progress bar for each task with completed/failed instance counts and cumulative token usage. Use `--no-progress` to suppress the bars.
+
+The configured output path is relative to the TOML file. This example uses `../results/lite-example.json`, so it writes `results/lite-example.json` under the repository root. An explicit CLI path overrides it and is interpreted relative to the current working directory:
+
+```bash
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml \
+    --output ./my-results.json
+```
+
 The example performs 1 generation for each of 3 instances across 2 intent tasks, for 6 evaluator requests. You can still override any setting from the command line, for example:
 
 ```bash

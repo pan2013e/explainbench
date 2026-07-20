@@ -44,6 +44,7 @@ def evaluate_submission(
     artifacts_dir: str | Path | None = None,
     env_file: str | Path | None = None,
     inference_model: InferenceModel | None = None,
+    show_progress: bool = False,
 ) -> EvaluationResult:
     """Prepare, run, score, and serialize one submission evaluation."""
 
@@ -83,7 +84,12 @@ def evaluate_submission(
             top_p=top_p,
             max_tokens=max_tokens,
         )
-    run = run_evaluation(prepared, evaluator, workers=workers)
+    run = run_evaluation(
+        prepared,
+        evaluator,
+        workers=workers,
+        show_progress=show_progress,
+    )
     return build_evaluation_result(
         prepared,
         run,

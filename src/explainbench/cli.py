@@ -109,6 +109,11 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="result JSON path; required here or in config",
     )
+    evaluate.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="disable per-task progress bars",
+    )
     return parser
 
 
@@ -155,6 +160,22 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
         submission = load_submission(arguments.submission)
         selected_mode = config.selection.mode
         selected_tasks = None if selected_mode is not None else config.selection.tasks
+        task_names = ", ".join(task.value for task in config.selection.tasks)
+        print(
+            f"Preparing {len(submission.instances)} submission instance(s) "
+            f"for: {task_names}",
+            flush=True,
+        )
+        print(
+            f"Evaluator: {config.evaluator.model} "
+            f"({config.evaluator.num_generations} generation(s) per question)",
+            flush=True,
+        )
+        print(f"Output: {config.output}", flush=True)
+        print(
+            "Validating submission and artifacts before model requests...",
+            flush=True,
+        )
         result = evaluate_submission(
             submission,
             mode=selected_mode,
@@ -169,6 +190,9 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
             max_retries=config.evaluator.max_retries,
             artifacts_dir=config.artifacts_dir,
             env_file=config.env_file,
+            show_progress=(
+                not arguments.no_progress and sys.stderr.isatty()
+            ),
         )
         output = write_evaluation_result(result, config.output)
     except EvaluationConfigError as error:

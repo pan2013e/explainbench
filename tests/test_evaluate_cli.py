@@ -121,6 +121,9 @@ def test_evaluate_lite_writes_versioned_result(tmp_path, monkeypatch, capsys):
     assert status == 0
     assert captured.err == ""
     assert "Evaluation complete" in captured.out
+    assert "Preparing 1 submission instance(s)" in captured.out
+    assert "Output:" in captured.out
+    assert "Validating submission and artifacts" in captured.out
     assert result["schema_version"] == 1
     assert result["selection"] == {
         "mode": "lite",

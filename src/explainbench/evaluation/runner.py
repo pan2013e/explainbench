@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Mapping, Protocol
 
 from pydantic import BaseModel
+from tqdm.auto import tqdm
 
 from explainbench.evaluation.predictions import Prediction
 from explainbench.evaluation.preparation import PreparedEvaluation
@@ -78,6 +79,7 @@ def run_evaluation(
     model: InferenceModel,
     *,
     workers: int = 10,
+    show_progress: bool = False,
 ) -> EvaluationRunResult:
     """Generate and score all prepared tasks while retaining per-instance failures."""
 
@@ -103,12 +105,30 @@ def run_evaluation(
                 ): instance_id
                 for instance_id in prepared_task.evaluable_instance_ids
             }
-            for future in as_completed(futures):
+            completed_futures = as_completed(futures)
+            progress_bar = None
+            if show_progress:
+                progress_bar = tqdm(
+                    completed_futures,
+                    total=len(futures),
+                    desc=f"Evaluating {task.value}",
+                    unit="instance",
+                )
+                completed_futures = progress_bar
+            for future in completed_futures:
                 instance_id = futures[future]
                 try:
                     completed[instance_id] = future.result()
                 except Exception as error:
                     failures[instance_id] = f"{type(error).__name__}: {error}"
+                if progress_bar is not None:
+                    progress_bar.set_postfix(
+                        completed=len(completed),
+                        failed=len(failures),
+                        tokens=model.token_usage.get("total_tokens", 0),
+                    )
+            if progress_bar is not None:
+                progress_bar.close()
 
         ordered_instances = {
             instance_id: completed[instance_id]

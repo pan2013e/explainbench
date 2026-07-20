@@ -88,3 +88,46 @@ def test_runner_requires_a_positive_worker_count():
         assert str(error) == "workers must be at least 1"
     else:
         raise AssertionError("run_evaluation accepted workers=0")
+
+
+def test_runner_reports_progress_for_each_selected_task(monkeypatch):
+    progress_calls = []
+
+    class FakeProgress:
+        def __init__(self, iterable, **kwargs):
+            self.iterable = iterable
+            self.kwargs = kwargs
+            self.postfixes = []
+            self.closed = False
+            progress_calls.append(self)
+
+        def __iter__(self):
+            return iter(self.iterable)
+
+        def set_postfix(self, **kwargs):
+            self.postfixes.append(kwargs)
+
+        def close(self):
+            self.closed = True
+
+    monkeypatch.setattr(
+        "explainbench.evaluation.runner.tqdm",
+        FakeProgress,
+    )
+
+    run_evaluation(
+        make_prepared_lite_evaluation(),
+        CorrectModel(),
+        workers=2,
+        show_progress=True,
+    )
+
+    assert [call.kwargs["desc"] for call in progress_calls] == [
+        "Evaluating e2e.intent",
+        "Evaluating local.intent",
+    ]
+    assert all(call.kwargs["total"] == 1 for call in progress_calls)
+    assert all(call.kwargs["unit"] == "instance" for call in progress_calls)
+    assert all(call.postfixes[-1]["completed"] == 1 for call in progress_calls)
+    assert all(call.postfixes[-1]["failed"] == 0 for call in progress_calls)
+    assert all(call.closed for call in progress_calls)

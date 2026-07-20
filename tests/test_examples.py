@@ -57,6 +57,7 @@ def test_lite_examples_validate_and_run_with_mocked_inference():
 
     assert len(submission.instances) == 3
     assert config.evaluator.num_generations == 1
+    assert config.output == ROOT / "results/lite-example.json"
     assert [task.value for task in result.selection.tasks] == [
         "e2e.intent",
         "local.intent",
