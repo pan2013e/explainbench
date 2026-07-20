@@ -244,38 +244,64 @@ The checksum binds the generated questions to the exact submitted patches. Inter
 
 ### Phase 4: Refactor the local-effect pipeline
 
-Convert the current script sequence into parameterized Python functions. The existing process consists of:
+Convert the current script sequence into parameterized Python stages. Users can run each stage independently for debugging and recovery, or use one command that orchestrates the complete dependency graph. Both interfaces call the same canonical implementation.
 
-1. Generate a qualified-name whitelist.
-2. Run tracked executions.
-3. Generate a call-stack whitelist.
-4. Run traced executions.
-5. Identify divergent execution state.
-6. Infer candidate expressions.
-7. Execute and validate candidate expressions.
-8. Select question choices.
-9. Export context and ground truth.
+The public stages use meaningful action-based names:
+
+1. `identify-patched-functions`
+2. `track-test-calls`
+3. `select-trace-functions`
+4. `trace-program-state`
+5. `find-first-divergence`
+6. `generate-candidate-expressions`
+7. `execute-candidate-expressions`
+8. `validate-candidate-expressions`
+9. `build-answer-choices`
+10. `export-question-artifacts`
+
+Example complete and individual-stage commands:
+
+```bash
+explainbench question-builder local run submission.json \
+  --workspace .explainbench/builds/my-agent \
+  --output question-artifacts \
+  --resume
+
+explainbench question-builder local stage find-first-divergence \
+  submission.json \
+  --workspace .explainbench/builds/my-agent \
+  --resume
+```
+
+Checkpointing is per stage and per instance. Durable results are written atomically, and semantic fingerprints determine whether completed work is compatible. Operational changes such as worker count do not invalidate results; patch, upstream artifact, model, or other semantic changes invalidate only the affected stage and its downstream dependencies. Paid model responses and Docker execution evidence are saved immediately.
 
 Replace hard-coded agent lists, paths, instance selections, worker counts, and output destinations with an explicit configuration object. For example:
 
 ```python
 @dataclass
 class LocalBuilderConfig:
-    submission_path: Path
-    output_dir: Path
-    instance_ids: list[str]
-    workers: int
-    inference_model: str
+    workspace: Path
+    artifact_output: Path
+    selected_instance_ids: tuple[str, ...]
+    max_workers: int
+    candidate_generation_model: str
 ```
 
 The resulting API should conceptually be:
 
 ```python
-def build_local_questions(config: LocalBuilderConfig) -> QuestionBundle:
+def build_local_effect_questions(
+    submission: Submission,
+    config: LocalBuilderConfig,
+    *,
+    resume: bool = False,
+) -> QuestionBundle:
     ...
 ```
 
 Existing scripts may temporarily become compatibility wrappers around these functions.
+
+See `LOCAL_EFFECT_QUESTION_BUILDER_PLAN.md` for the complete command, stage, workspace, checkpoint, fallback, migration, and testing design.
 
 ### Phase 5: Remove multi-agent research assumptions
 
@@ -355,17 +381,17 @@ Only the local implementation will be built initially. A future end-to-end imple
 
 ## Recommended next milestone
 
-Proceed with Phase 2 and produce the first complete evaluation workflow:
+Proceed with the local-effect orchestration foundation in Phase 4:
 
-1. Package the two shared intent context/ground-truth pairs.
-2. Define the task registry and mode/fine-grained selection.
-3. Implement shared-intent and model-specific-effect artifact resolution.
-4. Refactor inference, prompts, and scoring behind the package API.
-5. Implement `explainbench evaluate` and its unified result document.
-6. Add focused evaluator and CLI tests.
-7. Build and install a wheel in a clean environment and run an intent-only smoke test.
+1. Define the local stage registry and dependency resolver.
+2. Add the versioned workspace and per-instance status schemas.
+3. Add semantic fingerprints, atomic checkpoint writes, and workspace locking.
+4. Expose `local run`, `local stage`, `local stages`, and `local status`.
+5. Test orchestration, interruption, resume, retry, and invalidation with lightweight fake stages before migrating Docker or model-backed work.
 
-The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
+The completed evaluator design and progress are recorded in `EVALUATION_PLAN.md`.
+
+The local-effect question-builder design and migration status are recorded in `LOCAL_EFFECT_QUESTION_BUILDER_PLAN.md`.
 
 ## Current status
 
@@ -378,6 +404,11 @@ The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
 - [x] Implement task selection and intent/effect artifact preparation.
 - [x] Implement the lite evaluation engine for shared local and end-to-end intent questions.
 - [x] Define the temporary and future effect-artifact directory contract.
+- [x] Inspect and map the legacy local-effect question-building pipeline.
+- [x] Define the local builder's individual-stage and complete-run interfaces.
+- [x] Define instance-level checkpointing, resume compatibility, and gold fallback rules.
+- [x] Implement the local-effect question-builder orchestration foundation.
+- [ ] Migrate local-effect stage implementations into the package.
 - [x] Expose fine-grained task selection through the evaluation CLI.
 - [x] Add versioned TOML evaluation configuration with CLI overrides.
 - [x] Add validated lite submission and default-config examples using real explanations.

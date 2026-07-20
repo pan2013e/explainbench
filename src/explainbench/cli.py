@@ -20,7 +20,26 @@ from explainbench.evaluation.preparation import EvaluationPreparationError
 from explainbench.evaluation.registry import EvaluationMode, TaskName
 from explainbench.evaluation.results import write_evaluation_result
 from explainbench.evaluation.service import evaluate_submission
+from explainbench.question_builders.common.locking import WorkspaceLockedError
+from explainbench.question_builders.common.orchestration import (
+    MissingPrerequisiteError,
+    QuestionBuilderError,
+    StageRunSummary,
+)
+from explainbench.question_builders.local.config import (
+    LocalBuilderConfigError,
+    load_local_builder_config,
+    resolve_local_builder_config,
+)
+from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
+from explainbench.question_builders.local.service import (
+    inspect_local_workspace,
+    run_local_pipeline,
+    run_local_stage,
+)
+from explainbench.question_builders.local.workspace import LocalWorkspaceError
 from explainbench.submission import SubmissionValidationError, load_submission
+from explainbench.submission import ValidationProfile
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -33,6 +52,56 @@ def _build_parser() -> argparse.ArgumentParser:
         help="validate an ExplainBench submission file",
     )
     checker.add_argument("submission", type=Path, help="path to submission JSON")
+
+    question_builder = subcommands.add_parser(
+        "question-builder",
+        help="construct submission-specific effect questions",
+    )
+    builder_targets = question_builder.add_subparsers(
+        dest="question_builder_target",
+        required=True,
+    )
+    local_builder = builder_targets.add_parser(
+        "local",
+        help="construct local-effect questions",
+    )
+    local_actions = local_builder.add_subparsers(
+        dest="local_builder_action",
+        required=True,
+    )
+
+    local_run = local_actions.add_parser(
+        "run",
+        help="run every local-effect construction stage",
+    )
+    _add_local_builder_run_options(local_run, require_output=True)
+
+    local_stage = local_actions.add_parser(
+        "stage",
+        help="run one local-effect construction stage",
+    )
+    local_stage.add_argument(
+        "stage_name",
+        choices=LOCAL_STAGE_REGISTRY.names,
+        help="meaningful name of the stage to run",
+    )
+    _add_local_builder_run_options(local_stage, require_output=False)
+
+    local_actions.add_parser(
+        "stages",
+        help="list local-effect stages in dependency order",
+    )
+
+    local_status = local_actions.add_parser(
+        "status",
+        help="inspect a local-effect build workspace",
+    )
+    local_status.add_argument(
+        "--workspace",
+        type=Path,
+        required=True,
+        help="builder workspace to inspect",
+    )
 
     evaluate = subcommands.add_parser(
         "evaluate",
@@ -121,6 +190,52 @@ def _build_parser() -> argparse.ArgumentParser:
         help="reuse compatible task-instance results from an interrupted run",
     )
     return parser
+
+
+def _add_local_builder_run_options(
+    parser: argparse.ArgumentParser,
+    *,
+    require_output: bool,
+) -> None:
+    parser.add_argument("submission", type=Path, help="path to submission JSON")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="path to a versioned local-builder TOML config",
+    )
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        help="directory for checkpoints, traces, and logs",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        required=False,
+        help=(
+            "final evaluator artifact directory"
+            + (" (required here or in config)" if require_output else "")
+        ),
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        help="maximum concurrent instances; overrides config",
+    )
+    parser.add_argument(
+        "--max-attempts",
+        type=int,
+        help="maximum attempts for a retryable instance-stage failure",
+    )
+    parser.add_argument(
+        "--candidate-model",
+        help="candidate-expression model identifier; overrides config",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="reuse compatible completed instance-stage checkpoints",
+    )
 
 
 def _run_checker(submission: Path) -> int:
@@ -242,12 +357,148 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _format_stage_summary(summary: StageRunSummary) -> str:
+    return (
+        f"{summary.stage}: completed={summary.completed}, "
+        f"skipped={summary.skipped}, reused={summary.reused}, "
+        f"failed={summary.failed}, blocked={summary.blocked}"
+    )
+
+
+def _resolved_local_builder_config(
+    arguments: argparse.Namespace,
+    *,
+    require_output: bool,
+):
+    file_config = None
+    source = None
+    if arguments.config is not None:
+        file_config, source = load_local_builder_config(arguments.config)
+    return resolve_local_builder_config(
+        file_config,
+        source=source,
+        workspace=arguments.workspace,
+        output=arguments.output,
+        workers=arguments.workers,
+        max_attempts=arguments.max_attempts,
+        candidate_generation_model=arguments.candidate_model,
+        require_output=require_output,
+    )
+
+
+def _run_local_question_builder(arguments: argparse.Namespace) -> int:
+    action = arguments.local_builder_action
+    if action == "stages":
+        for index, definition in enumerate(
+            LOCAL_STAGE_REGISTRY.definitions,
+            start=1,
+        ):
+            print(f"{index}. {definition.name}: {definition.description}")
+        return 0
+
+    if action == "status":
+        try:
+            status = inspect_local_workspace(arguments.workspace)
+        except LocalWorkspaceError as error:
+            print(f"Question-builder status failed: {error}", file=sys.stderr)
+            return 1
+        print(f"Submission ID: {status.submission_id}")
+        print(f"Instances: {status.instance_count}")
+        print(f"Submission fingerprint: {status.submission_fingerprint}")
+        for stage_name, counts in status.stages:
+            visible = ", ".join(
+                f"{name}={count}" for name, count in counts.items() if count
+            )
+            print(f"{stage_name}: {visible or 'pending=0'}")
+        if status.failures:
+            print("Failures:")
+            for stage_name, instance_id, message in status.failures:
+                print(f"- {stage_name} / {instance_id}: {message}")
+        print(
+            f"Artifacts: {status.artifact_output or 'not exported'}"
+        )
+        return 0
+
+    require_output = action == "run" or (
+        action == "stage"
+        and arguments.stage_name == "export-question-artifacts"
+    )
+    try:
+        config = _resolved_local_builder_config(
+            arguments,
+            require_output=require_output,
+        )
+        submission = load_submission(
+            arguments.submission,
+            profile=ValidationProfile.QUESTION_BUILDER_LOCAL,
+        )
+        print(
+            f"Preparing local-effect build for "
+            f"{len(submission.instances)} instance(s)",
+            flush=True,
+        )
+        print(f"Workspace: {config.workspace}", flush=True)
+        if config.artifact_output is not None:
+            print(f"Artifact output: {config.artifact_output}", flush=True)
+        if action == "run":
+            summaries = run_local_pipeline(
+                submission,
+                config,
+                resume=arguments.resume,
+            )
+        else:
+            summaries = (
+                run_local_stage(
+                    arguments.stage_name,
+                    submission,
+                    config,
+                    resume=arguments.resume,
+                ),
+            )
+    except LocalBuilderConfigError as error:
+        print(f"Local question-builder configuration is invalid: {error}", file=sys.stderr)
+        return 1
+    except SubmissionValidationError as error:
+        print("Submission is invalid", file=sys.stderr)
+        for issue in error.issues:
+            print(f"- {issue}", file=sys.stderr)
+        return 1
+    except (
+        LocalWorkspaceError,
+        WorkspaceLockedError,
+        MissingPrerequisiteError,
+        QuestionBuilderError,
+        OSError,
+        ValueError,
+    ) as error:
+        print(f"Local question builder failed: {error}", file=sys.stderr)
+        return 1
+
+    for summary in summaries:
+        print(_format_stage_summary(summary))
+    if any(summary.has_failures for summary in summaries):
+        print(
+            "Local question builder did not complete; checkpoints and logs were retained",
+            file=sys.stderr,
+        )
+        return 1
+    print("Local question building complete")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the ExplainBench CLI and return a process exit status."""
 
     arguments = _build_parser().parse_args(argv)
     if arguments.command == "checker":
         return _run_checker(arguments.submission)
+    if arguments.command == "question-builder":
+        if arguments.question_builder_target == "local":
+            return _run_local_question_builder(arguments)
+        raise AssertionError(
+            f"unhandled question-builder target: "
+            f"{arguments.question_builder_target}"
+        )
     if arguments.command == "evaluate":
         return _run_evaluate(arguments)
 
