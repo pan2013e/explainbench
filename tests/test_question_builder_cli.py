@@ -2,9 +2,6 @@ import json
 
 from explainbench import cli
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
-from explainbench.question_builders.local.stages.identify_patched_functions import (
-    RepositoryCheckout,
-)
 
 
 INSTANCE_ID = "astropy__astropy-12907"
@@ -52,25 +49,11 @@ def test_stages_lists_meaningful_names_in_dependency_order(capsys):
 
 def test_pending_stage_fails_explicitly_and_status_is_inspectable(
     tmp_path,
-    monkeypatch,
     capsys,
 ):
     submission = write_submission(tmp_path)
     workspace = tmp_path / "workspace"
     artifacts = tmp_path / "artifacts"
-
-    class RepositoryProvider:
-        def prepare(self, context):
-            root = context.work_directory / "repository"
-            root.mkdir(parents=True)
-            (root / "example.py").write_text("old\n", encoding="utf-8")
-            return RepositoryCheckout(root, "owner/project", "abc123")
-
-        def apply_patch(self, checkout, patch):
-            (checkout.root / "example.py").write_text("new\n", encoding="utf-8")
-
-    identify_runner = LOCAL_STAGE_REGISTRY["identify-patched-functions"].runner
-    monkeypatch.setattr(identify_runner, "provider", RepositoryProvider())
 
     status = cli.main(
         [
@@ -105,7 +88,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'track-test-calls' has not yet been migrated" in (
+    assert "stage 'identify-patched-functions' has not yet been migrated" in (
         status_output.out
     )
     assert "Artifacts: not exported" in status_output.out
@@ -182,3 +165,4 @@ def test_local_registry_has_the_documented_stage_names():
         "build-answer-choices",
         "export-question-artifacts",
     )
+

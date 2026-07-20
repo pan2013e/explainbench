@@ -408,7 +408,6 @@ The local-effect question-builder design and migration status are recorded in `L
 - [x] Define the local builder's individual-stage and complete-run interfaces.
 - [x] Define instance-level checkpointing, resume compatibility, and gold fallback rules.
 - [x] Implement the local-effect question-builder orchestration foundation.
-- [x] Migrate deterministic local-effect transformation stages into the package.
 - [ ] Migrate local-effect stage implementations into the package.
 - [x] Expose fine-grained task selection through the evaluation CLI.
 - [x] Add versioned TOML evaluation configuration with CLI overrides.

@@ -5,12 +5,8 @@ import random
 from tqdm.auto import tqdm
 from typing import Callable, List, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from explainbench.question_builders.local.stages.build_answer_choices import (
-    build_choices as _build_choices,
-)
 
 random.seed(42)
-MMR_LAMBDA = 0.7
 
 def read_json(input_path):
     with open(input_path, "r") as f:
@@ -118,17 +114,45 @@ def build_choices_and_answer(
     labels: str = "abcdefghijklmnopqrstuvwxyz",
     is_fallback_to_gold: bool = False,
 ) -> Tuple[List[str], List[str]]:
-    return _build_choices(
-        correct_pool=correct_pool,
-        incorrect_pool=incorrect_pool,
-        correct_count=n_correct,
-        incorrect_count=n_incorrect,
-        mmr_weight=MMR_LAMBDA,
-        randomizer=random,
-        fallback_to_gold=is_fallback_to_gold,
-        add_no_effect_choice=add_none_of_the_above,
-        add_cannot_infer_choice=add_cannot_infer,
+    if is_fallback_to_gold:
+        incorrect_pool = incorrect_pool + correct_pool
+    
+    sampled_correct = select_hard_anchors(correct_pool, incorrect_pool, n_correct)
+    sampled_incorrect = select_distractors_mmr(
+        incorrect_pool, sampled_correct, n_incorrect, lambda_weight=MMR_LAMBDA
     )
+    if len(sampled_correct) < n_correct:
+        remaining = [c for c in correct_pool if c not in sampled_correct]
+        sampled_correct += sampler_function(remaining, n_correct - len(sampled_correct))
+    if len(sampled_incorrect) < n_incorrect:
+        remaining = [i for i in incorrect_pool if i not in sampled_incorrect]
+        sampled_incorrect += sampler_function(remaining, n_incorrect - len(sampled_incorrect))
+
+    choices: List[str] = list(sampled_correct) + list(sampled_incorrect)
+    is_correct: List[bool] = [True] * len(sampled_correct) + [False] * len(
+        sampled_incorrect
+    )
+
+    combined = list(zip(choices, is_correct))
+    random.shuffle(combined)
+    if combined:
+        choices, is_correct = map(list, zip(*combined))
+    else:
+        choices, is_correct = [], []
+
+    if add_none_of_the_above:
+        none_option: str = "The patch has no effect and none of the above expressions change in value"
+        has_any_correct = any(is_correct)
+        choices.append(none_option)
+        is_correct.append(not has_any_correct)
+    
+    if add_cannot_infer:
+        cannot_infer_option = "Cannot be answered by the explanation alone"
+        choices.append(cannot_infer_option)
+        is_correct.append(False)
+
+    answer = [labels[i] for i, flag in enumerate(is_correct) if flag]
+    return choices, answer
 
 def process_agent(data, agent, instance_ids, n_correct, n_incorrect, is_prepare_intent):
     results = {}
@@ -138,14 +162,20 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect, is_prepare_
             if metadata is None:
                 results[instance_id] = None
                 continue
-            metadata = dict(metadata)
 
             correct_pool = metadata["valid_changed_expressions"]
             incorrect_pool = metadata["valid_unchanged_expressions"]
 
+            use_n_correct = n_correct
+            use_n_incorrect = n_incorrect
+            if metadata.get("is_fallback_to_gold"):
+                # Gold fallback instances should only surface incorrect options.
+                use_n_incorrect = n_correct + n_incorrect
+                use_n_correct = 0
+
             choices, answer = build_choices_and_answer(
-                n_correct=n_correct,
-                n_incorrect=n_incorrect,
+                n_correct=use_n_correct,
+                n_incorrect=use_n_incorrect,
                 correct_pool=correct_pool,
                 incorrect_pool=incorrect_pool,
                 sampler_function=sampler_function,
@@ -177,6 +207,7 @@ if __name__ == "__main__":
     N_CHOICES = 4
     N_CORRECT = 1
     N_INCORRECT = N_CHOICES - N_CORRECT
+    MMR_LAMBDA = 0.7
     BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
     RQ1_AGENTS = [
         "20250603_Refact_Agent_claude-4-sonnet",

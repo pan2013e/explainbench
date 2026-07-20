@@ -1,17 +1,21 @@
 import os
+import io
 import json
 import warnings
-
-from explainbench.question_builders.local.stages.export_question_artifacts import (
-    format_function_parameters,
-)
 
 def read_json(path):
     with open(path, 'r') as f:
         return json.load(f)
 
 def get_function_input(metadata):
-    return format_function_parameters(metadata['buggy_function_param'])
+    output = io.StringIO()
+    pre = metadata['buggy_function_param']
+    print(pre, file=output)
+    contents = output.getvalue()
+    output.close()
+    if len(contents) > 20000:
+        contents = contents[:20000] + " ...(truncated)"
+    return contents
 
 def get_ctx_and_gt(data):
     ctx = {

@@ -7,16 +7,17 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set
 
 from execution.util import get_instance_ids
-from explainbench.question_builders.local.stages.select_trace_functions import (
-    collect_trace_functions,
-    load_json_lines,
-)
 
 DIR = Path(__file__).parent.resolve()
 
 def load_jsonl(path: str) -> Iterable[dict]:
-    """Compatibility alias for the canonical JSONL loader."""
-    yield from load_json_lines(path)
+    """Yield JSON objects, one per line, from a JSONL file."""
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            yield json.loads(line)
 
 
 def collect_functions_by_target(
@@ -158,11 +159,26 @@ def main() -> None:
                 agent_mapping[instance_id] = []
                 continue
 
-            all_functions = collect_trace_functions(
-                [*buggy_files, *patched_files],
-                target_qualnames,
-            )
-            agent_mapping[instance_id] = all_functions
+            all_functions: Set[str] = set()
+
+            # Use the same target_qualnames for both buggy and patched traces
+            for jsonl_path in buggy_files:
+                per_target = collect_functions_by_target(
+                    jsonl_path=str(jsonl_path),
+                    target_qualnames=target_qualnames,
+                )
+                for funcs in per_target.values():
+                    all_functions.update(funcs)
+
+            for jsonl_path in patched_files:
+                per_target = collect_functions_by_target(
+                    jsonl_path=str(jsonl_path),
+                    target_qualnames=target_qualnames,
+                )
+                for funcs in per_target.values():
+                    all_functions.update(funcs)
+
+            agent_mapping[instance_id] = sorted(all_functions)
             print(f"  {instance_id}: {len(all_functions)} functions")
 
         results[agent] = agent_mapping

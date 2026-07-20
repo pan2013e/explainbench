@@ -5,12 +5,10 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_compl
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from io import StringIO
+from itertools import zip_longest
 from typing import Any, Dict, Optional, Tuple
 
-from explainbench.question_builders.local.stages.validate_candidate_expressions import (
-    compute_expression_changes,
-    expression_value_changed,
-)
+from dataset.extract_ground_truths.effect.trace_util import rv_equals
 from execution.inspect import main as inspect_main
 from execution.util import get_fail_to_pass_tests, get_instance_ids
 from tracer.inspector import encode_expr_list
@@ -85,12 +83,21 @@ def is_name_error(exc):
     )
 
 def index_changed(buggy_val, buggy_exc, patched_val, patched_exc):
-    return expression_value_changed(
-        buggy_val,
-        buggy_exc,
-        patched_val,
-        patched_exc,
-    )
+    # values are equal, no change.
+    if rv_equals(buggy_val, patched_val):
+        return False
+
+    # Values differ.
+    # That is: one value is None, the other is not, and the side with None has
+    # an AttributeError on NoneType during evaluation.
+    if (buggy_val is None) != (patched_val is None):
+        exc = buggy_exc if buggy_val is None else patched_exc
+        if is_none_attr_inspection_failure(exc) or is_name_error(exc):
+            return True
+        return False
+
+    # Otherwise, treat any value difference as a change.
+    return True
 
 def _ensure_list(x, length):
     if isinstance(x, list):
@@ -104,7 +111,31 @@ def _max_len(*items):
     return max(len(x) for x in items if isinstance(x, list))
 
 def compute_expr_change_map(patched, buggy):
-    return compute_expression_changes(patched, buggy)
+    n = _max_len(
+        patched.get("expr"),
+        patched.get("value"),
+        patched.get("exception"),
+        buggy.get("expr"),
+        buggy.get("value"),
+        buggy.get("exception"),
+    )
+
+    p_expr = _ensure_list(patched.get("expr"), n)
+    p_vals = _ensure_list(patched.get("value"), n)
+    p_excs = _ensure_list(patched.get("exception"), n)
+
+    b_expr = _ensure_list(buggy.get("expr"), n)
+    b_vals = _ensure_list(buggy.get("value"), n)
+    b_excs = _ensure_list(buggy.get("exception"), n)
+
+    expr_change = {}
+    for i, (expr, pv, pe, bv, be) in enumerate(
+        zip_longest(p_expr, p_vals, p_excs, b_vals, b_excs, fillvalue=None)
+    ):
+        changed = index_changed(bv, be, pv, pe)
+        expr_change[expr] = changed
+
+    return expr_change
 
 def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
     base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
