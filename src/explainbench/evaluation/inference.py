@@ -48,6 +48,8 @@ class Model:
         model_id: str,
         *,
         env_file: str | Path | None = None,
+        max_retries: int = 5,
+        generation_workers: int = 10,
         **sampling_params,
     ) -> None:
         if env_file is None:
@@ -55,6 +57,12 @@ class Model:
         else:
             load_dotenv(dotenv_path=env_file)
         self.model_id = model_id
+        if max_retries < 1:
+            raise ValueError("max_retries must be at least 1")
+        if generation_workers < 1:
+            raise ValueError("generation_workers must be at least 1")
+        self.max_retries = max_retries
+        self.generation_workers = generation_workers
         self.write_lock = Lock()
         self.token_usage = self._empty_usage()
         self.sampling_params = {
@@ -66,6 +74,11 @@ class Model:
         self.sampling_params.update(sampling_params)
         if self.sampling_params["n"] < 1:
             raise ValueError("n must be at least 1")
+        self._infer_once_with_retry = backoff.on_exception(
+            backoff.expo,
+            Exception,
+            max_tries=self.max_retries,
+        )(self._infer_once)
 
     @staticmethod
     def _empty_usage() -> dict[str, int]:
@@ -75,8 +88,7 @@ class Model:
             "total_tokens": 0,
         }
 
-    @backoff.on_exception(backoff.expo, Exception, max_tries=5)
-    def infer_once(
+    def _infer_once(
         self,
         messages: str | list[dict[str, str]],
         schema: type[PredictionModel],
@@ -101,6 +113,13 @@ class Model:
             raise ValueError("model returned an empty structured response")
         return schema.model_validate_json(content)
 
+    def infer_once(
+        self,
+        messages: str | list[dict[str, str]],
+        schema: type[PredictionModel],
+    ) -> PredictionModel:
+        return self._infer_once_with_retry(messages, schema)
+
     def infer(
         self,
         messages: str | list[dict[str, str]],
@@ -111,7 +130,9 @@ class Model:
             return [self.infer_once(messages, schema)]
 
         generations: list[PredictionModel] = []
-        with ThreadPoolExecutor(max_workers=min(10, num_generations)) as executor:
+        with ThreadPoolExecutor(
+            max_workers=min(self.generation_workers, num_generations)
+        ) as executor:
             futures = [
                 executor.submit(self.infer_once, messages, schema)
                 for _ in range(num_generations)

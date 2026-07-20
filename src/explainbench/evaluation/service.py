@@ -5,15 +5,27 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
+from explainbench.evaluation.config import (
+    DEFAULT_EVALUATOR_MODEL,
+    DEFAULT_GENERATION_WORKERS,
+    DEFAULT_INSTANCE_WORKERS,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_NUM_GENERATIONS,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TOP_P,
+    EvaluatorSettings,
+)
 from explainbench.evaluation.inference import Model
 from explainbench.evaluation.preparation import prepare_evaluation
-from explainbench.evaluation.registry import EvaluationMode, TaskName, resolve_task_selection
+from explainbench.evaluation.registry import (
+    EvaluationMode,
+    TaskName,
+    resolve_task_selection,
+)
 from explainbench.evaluation.results import EvaluationResult, build_evaluation_result
 from explainbench.evaluation.runner import InferenceModel, run_evaluation
 from explainbench.schemas import Submission
-
-
-DEFAULT_EVALUATOR_MODEL = "gpt-5-mini-2025-08-07"
 
 
 def evaluate_submission(
@@ -22,9 +34,15 @@ def evaluate_submission(
     mode: str | EvaluationMode | None = None,
     tasks: Sequence[str | TaskName] | None = None,
     model_id: str = DEFAULT_EVALUATOR_MODEL,
-    num_generations: int = 5,
-    workers: int = 10,
+    num_generations: int = DEFAULT_NUM_GENERATIONS,
+    workers: int = DEFAULT_INSTANCE_WORKERS,
+    generation_workers: int = DEFAULT_GENERATION_WORKERS,
+    temperature: float = DEFAULT_TEMPERATURE,
+    top_p: float = DEFAULT_TOP_P,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+    max_retries: int = DEFAULT_MAX_RETRIES,
     artifacts_dir: str | Path | None = None,
+    env_file: str | Path | None = None,
     inference_model: InferenceModel | None = None,
 ) -> EvaluationResult:
     """Prepare, run, score, and serialize one submission evaluation."""
@@ -35,6 +53,16 @@ def evaluate_submission(
         raise ValueError("num_generations must be at least 1")
     if workers < 1:
         raise ValueError("workers must be at least 1")
+    settings = EvaluatorSettings(
+        model=model_id,
+        num_generations=num_generations,
+        instance_workers=workers,
+        generation_workers=generation_workers,
+        temperature=temperature,
+        top_p=top_p,
+        max_tokens=max_tokens,
+        max_retries=max_retries,
+    )
 
     selection = resolve_task_selection(mode=mode, tasks=tasks)
     prepared = prepare_evaluation(
@@ -45,11 +73,19 @@ def evaluate_submission(
 
     evaluator = inference_model
     if evaluator is None:
-        evaluator = Model(model_id, n=num_generations)
+        evaluator = Model(
+            model_id,
+            env_file=env_file,
+            max_retries=max_retries,
+            generation_workers=generation_workers,
+            n=num_generations,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+        )
     run = run_evaluation(prepared, evaluator, workers=workers)
     return build_evaluation_result(
         prepared,
         run,
-        model_id=model_id,
-        num_generations=num_generations,
+        settings=settings,
     )

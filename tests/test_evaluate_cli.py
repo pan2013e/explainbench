@@ -18,9 +18,12 @@ diff --git a/example.py b/example.py
 
 
 class FakeEvaluator:
+    last_sampling_params = None
+
     def __init__(self, model_id, **sampling_params):
         self.model_id = model_id
         self.num_generations = sampling_params["n"]
+        type(self).last_sampling_params = sampling_params
         self.token_usage = {
             "completion_tokens": 2,
             "prompt_tokens": 10,
@@ -126,6 +129,12 @@ def test_evaluate_lite_writes_versioned_result(tmp_path, monkeypatch, capsys):
     assert result["evaluator"] == {
         "model": "test-model",
         "num_generations": 2,
+        "instance_workers": 2,
+        "generation_workers": 10,
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 8192,
+        "max_retries": 5,
         "token_usage": {
             "completion_tokens": 2,
             "prompt_tokens": 10,
@@ -273,3 +282,76 @@ def test_evaluate_rejects_mode_and_task_together(tmp_path):
                 str(tmp_path / "result.json"),
             ]
         )
+
+
+def test_evaluate_can_be_fully_configured_by_toml(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(service, "Model", FakeEvaluator)
+    submission = write_submission(tmp_path)
+    config = tmp_path / "evaluation.toml"
+    config.write_text(
+        """\
+schema_version = 1
+
+[selection]
+mode = "lite"
+
+[evaluator]
+model = "configured-model"
+num_generations = 3
+instance_workers = 4
+generation_workers = 2
+temperature = 0.3
+top_p = 0.7
+max_tokens = 512
+max_retries = 2
+
+[paths]
+output = "configured-results.json"
+""",
+        encoding="utf-8",
+    )
+
+    status = cli.main(
+        [
+            "evaluate",
+            str(submission),
+            "--config",
+            str(config),
+            "--num-generations",
+            "1",
+            "--temperature",
+            "0.6",
+        ]
+    )
+
+    output = tmp_path / "configured-results.json"
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert status == 0
+    assert result["selection"]["mode"] == "lite"
+    assert result["evaluator"] == {
+        "model": "configured-model",
+        "num_generations": 1,
+        "instance_workers": 4,
+        "generation_workers": 2,
+        "temperature": 0.6,
+        "top_p": 0.7,
+        "max_tokens": 512,
+        "max_retries": 2,
+        "token_usage": {
+            "completion_tokens": 2,
+            "prompt_tokens": 10,
+            "total_tokens": 12,
+        },
+    }
+    assert FakeEvaluator.last_sampling_params == {
+        "env_file": None,
+        "max_retries": 2,
+        "generation_workers": 2,
+        "n": 1,
+        "temperature": 0.6,
+        "top_p": 0.7,
+        "max_tokens": 512,
+    }

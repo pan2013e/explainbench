@@ -10,13 +10,15 @@ from typing import Sequence
 from explainbench import __version__
 from explainbench.checker import check_submission
 from explainbench.evaluation.artifacts import ArtifactError
+from explainbench.evaluation.config import (
+    EvaluationConfigError,
+    load_evaluation_config,
+    resolve_evaluation_config,
+)
 from explainbench.evaluation.preparation import EvaluationPreparationError
 from explainbench.evaluation.registry import EvaluationMode, TaskName
 from explainbench.evaluation.results import write_evaluation_result
-from explainbench.evaluation.service import (
-    DEFAULT_EVALUATOR_MODEL,
-    evaluate_submission,
-)
+from explainbench.evaluation.service import evaluate_submission
 from explainbench.submission import SubmissionValidationError, load_submission
 
 
@@ -36,7 +38,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="evaluate explanations in an ExplainBench submission",
     )
     evaluate.add_argument("submission", type=Path, help="path to submission JSON")
-    selection = evaluate.add_mutually_exclusive_group(required=True)
+    evaluate.add_argument(
+        "--config",
+        type=Path,
+        help="path to a versioned evaluation TOML config",
+    )
+    selection = evaluate.add_mutually_exclusive_group()
     selection.add_argument(
         "--mode",
         choices=[mode.value for mode in EvaluationMode],
@@ -50,31 +57,57 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     evaluate.add_argument(
         "--model",
-        default=DEFAULT_EVALUATOR_MODEL,
-        help="evaluator model identifier",
+        help="evaluator model identifier; overrides config",
     )
     evaluate.add_argument(
         "--num-generations",
         type=int,
-        default=5,
-        help="model answers requested per task instance (default: 5)",
+        help="model answers requested per task instance; overrides config",
     )
     evaluate.add_argument(
         "--workers",
         type=int,
-        default=10,
-        help="maximum concurrent instance evaluations (default: 10)",
+        help="maximum concurrent instances; overrides config",
+    )
+    evaluate.add_argument(
+        "--generation-workers",
+        type=int,
+        help="maximum concurrent generations per instance; overrides config",
+    )
+    evaluate.add_argument(
+        "--temperature",
+        type=float,
+        help="evaluator sampling temperature; overrides config",
+    )
+    evaluate.add_argument(
+        "--top-p",
+        type=float,
+        help="evaluator nucleus-sampling probability; overrides config",
+    )
+    evaluate.add_argument(
+        "--max-tokens",
+        type=int,
+        help="maximum evaluator response tokens; overrides config",
+    )
+    evaluate.add_argument(
+        "--max-retries",
+        type=int,
+        help="maximum attempts for each model request; overrides config",
     )
     evaluate.add_argument(
         "--artifacts-dir",
         type=Path,
-        help="question-artifact root required by effect tasks",
+        help="question-artifact root required by effect tasks; overrides config",
+    )
+    evaluate.add_argument(
+        "--env-file",
+        type=Path,
+        help="dotenv credentials file; overrides config",
     )
     evaluate.add_argument(
         "--output",
         type=Path,
-        required=True,
-        help="path for the versioned evaluation result JSON",
+        help="result JSON path; required here or in config",
     )
     return parser
 
@@ -98,17 +131,49 @@ def _run_checker(submission: Path) -> int:
 
 def _run_evaluate(arguments: argparse.Namespace) -> int:
     try:
-        submission = load_submission(arguments.submission)
-        result = evaluate_submission(
-            submission,
+        file_config = None
+        config_source = None
+        if arguments.config is not None:
+            file_config, config_source = load_evaluation_config(arguments.config)
+        config = resolve_evaluation_config(
+            file_config,
+            source=config_source,
             mode=arguments.mode,
             tasks=arguments.task,
-            model_id=arguments.model,
+            model=arguments.model,
             num_generations=arguments.num_generations,
-            workers=arguments.workers,
+            instance_workers=arguments.workers,
+            generation_workers=arguments.generation_workers,
+            temperature=arguments.temperature,
+            top_p=arguments.top_p,
+            max_tokens=arguments.max_tokens,
+            max_retries=arguments.max_retries,
+            output=arguments.output,
             artifacts_dir=arguments.artifacts_dir,
+            env_file=arguments.env_file,
         )
-        output = write_evaluation_result(result, arguments.output)
+        submission = load_submission(arguments.submission)
+        selected_mode = config.selection.mode
+        selected_tasks = None if selected_mode is not None else config.selection.tasks
+        result = evaluate_submission(
+            submission,
+            mode=selected_mode,
+            tasks=selected_tasks,
+            model_id=config.evaluator.model,
+            num_generations=config.evaluator.num_generations,
+            workers=config.evaluator.instance_workers,
+            generation_workers=config.evaluator.generation_workers,
+            temperature=config.evaluator.temperature,
+            top_p=config.evaluator.top_p,
+            max_tokens=config.evaluator.max_tokens,
+            max_retries=config.evaluator.max_retries,
+            artifacts_dir=config.artifacts_dir,
+            env_file=config.env_file,
+        )
+        output = write_evaluation_result(result, config.output)
+    except EvaluationConfigError as error:
+        print(f"Evaluation configuration is invalid: {error}", file=sys.stderr)
+        return 1
     except SubmissionValidationError as error:
         print("Submission is invalid", file=sys.stderr)
         for issue in error.issues:

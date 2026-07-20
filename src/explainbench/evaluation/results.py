@@ -10,6 +10,7 @@ from typing import Literal, Mapping
 
 from pydantic import Field
 
+from explainbench.evaluation.config import EvaluatorSettings
 from explainbench.evaluation.predictions import Prediction
 from explainbench.evaluation.preparation import PreparedEvaluation
 from explainbench.evaluation.registry import EvaluationMode, TaskName
@@ -25,6 +26,12 @@ class EvaluationSelectionResult(StrictModel):
 class EvaluatorResult(StrictModel):
     model: str
     num_generations: int = Field(ge=1)
+    instance_workers: int = Field(ge=1)
+    generation_workers: int = Field(ge=1)
+    temperature: float = Field(ge=0)
+    top_p: float = Field(gt=0, le=1)
+    max_tokens: int = Field(ge=1)
+    max_retries: int = Field(ge=1)
     token_usage: dict[str, int]
 
 
@@ -86,8 +93,7 @@ def build_evaluation_result(
     prepared: PreparedEvaluation,
     run: EvaluationRunResult,
     *,
-    model_id: str,
-    num_generations: int,
+    settings: EvaluatorSettings,
 ) -> EvaluationResult:
     """Convert a completed evaluation run into schema version 1."""
 
@@ -122,8 +128,7 @@ def build_evaluation_result(
             tasks=list(prepared.selection.tasks),
         ),
         evaluator=EvaluatorResult(
-            model=model_id,
-            num_generations=num_generations,
+            **settings.model_dump(),
             token_usage=dict(run.token_usage),
         ),
         tasks=task_results,

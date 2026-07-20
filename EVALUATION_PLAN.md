@@ -158,19 +158,33 @@ Rules:
 - `--task` is repeatable.
 - Supported values are `e2e.intent`, `e2e.effect`, `local.intent`, and `local.effect`.
 - `--mode` and `--task` are mutually exclusive.
-- The user must select exactly one mode or at least one explicit task.
-- `--artifacts-dir` is required whenever an effect task is selected.
+- The resolved CLI/config values must select exactly one mode or at least one explicit task.
+- An artifact directory is required through the CLI or config whenever an effect task is selected.
+- An output path is required through the CLI or config.
 - Selecting any effect task requires nonempty `model_patch` values in the submission.
 
-Planned evaluator options:
+Evaluator options:
 
 ```text
+--config PATH
 --model MODEL
 --num-generations N
 --workers N
+--generation-workers N
+--temperature FLOAT
+--top-p FLOAT
+--max-tokens N
+--max-retries N
+--env-file PATH
 --output PATH
 --artifacts-dir PATH
 ```
+
+### Versioned evaluation configuration
+
+Evaluation options can be supplied in a strict TOML document with `schema_version = 1`. Explicit CLI options override config values, and config values override package defaults. Paths in the TOML document are resolved relative to the config file. Unknown fields, invalid types, unsupported versions, conflicting selections, and missing dotenv files fail during preflight.
+
+The config controls task selection, evaluator sampling, retry and concurrency behavior, output, artifact location, and an optional dotenv path. It does not make benchmark prompts, questions, ground truths, or scoring rules configurable, because changing those would make results incomparable.
 
 ## Internal task registry
 
@@ -342,6 +356,12 @@ The output is one versioned JSON document containing selection metadata and per-
   "evaluator": {
     "model": "configured-model",
     "num_generations": 5,
+    "instance_workers": 10,
+    "generation_workers": 5,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 8192,
+    "max_retries": 5,
     "token_usage": {
       "completion_tokens": 100,
       "prompt_tokens": 1000,
@@ -452,6 +472,9 @@ Last updated: 2026-07-20
 - [x] Keep the repository's legacy evaluation imports as wrappers around the package implementation.
 - [x] Implement the versioned result schema.
 - [x] Implement the `explainbench evaluate` CLI.
+- [x] Add strict versioned TOML configuration with CLI overrides.
+- [x] Expose evaluator sampling, retry, dotenv, and concurrency controls.
+- [x] Record resolved non-secret evaluator settings in result documents.
 - [x] Add deterministic unit and CLI tests for lite, full, and fine-grained evaluation.
 - [x] Verify lite evaluation through the CLI from an installed wheel.
 - [x] Verify shared intent artifact loading from an installed wheel.

@@ -1,4 +1,5 @@
 from explainbench.evaluation.predictions import AnswerPrediction
+from explainbench.evaluation.config import EvaluatorSettings
 from explainbench.evaluation.preparation import prepare_evaluation
 from explainbench.evaluation.registry import TaskName, resolve_task_selection
 from explainbench.evaluation.results import build_evaluation_result
@@ -59,8 +60,16 @@ def test_result_statistics_use_per_instance_generation_means():
     result = build_evaluation_result(
         prepared,
         run,
-        model_id="test-model",
-        num_generations=2,
+        settings=EvaluatorSettings(
+            model="test-model",
+            num_generations=2,
+            instance_workers=2,
+            generation_workers=2,
+            temperature=0.5,
+            top_p=0.9,
+            max_tokens=1024,
+            max_retries=3,
+        ),
     )
 
     task = result.tasks[TaskName.LOCAL_INTENT]

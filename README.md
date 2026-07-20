@@ -2,6 +2,62 @@
 
 This replication package is shared privately for double anonymous review. 
 
+## ExplainBench package CLI
+
+After installing the package from the repository or a built wheel, validate a submission with:
+
+```bash
+explainbench checker submission.json
+```
+
+Run the two shared intent evaluations with:
+
+```bash
+explainbench evaluate submission.json \
+    --mode lite \
+    --model gpt-5-mini-2025-08-07 \
+    --num-generations 5 \
+    --workers 10 \
+    --output results.json
+```
+
+Evaluation can instead be controlled by a versioned TOML file:
+
+```toml
+schema_version = 1
+
+[selection]
+mode = "lite"
+# Alternatively: tasks = ["local.intent", "e2e.effect"]
+
+[evaluator]
+model = "gpt-5-mini-2025-08-07"
+num_generations = 5
+instance_workers = 10
+generation_workers = 5
+temperature = 1.0
+top_p = 1.0
+max_tokens = 8192
+max_retries = 5
+
+[paths]
+output = "results.json"
+# artifacts_dir = "question-artifacts"
+
+[environment]
+env_file = ".env"
+```
+
+Use it with:
+
+```bash
+explainbench evaluate submission.json --config evaluation.toml
+```
+
+Explicit CLI options override values from the config, and omitted values use package defaults. Paths written in the config are resolved relative to the config file. Effect tasks additionally require `paths.artifacts_dir` or `--artifacts-dir` containing the model-specific question artifacts.
+
+API credentials should be exported as provider environment variables or placed in the configured dotenv file. Do not put credentials directly in the TOML file.
+
 ## Directory structure
 
 ```
