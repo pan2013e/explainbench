@@ -8,21 +8,13 @@ import numpy as np
 from functools import wraps
 from typing import Callable
 
+from explainbench.evaluation.choices import (
+    format_choices as format_mcq_choices,
+    mcq_score,
+)
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(DIR, '..', 'dataset')
-
-def mcq_score(pred: list[str], gt: list[str]):
-    assert len(gt) > 0
-    pred_set = set(pred)
-    gt_set = set(gt)
-    if pred_set - gt_set:
-        return 0.0
-    return len(pred_set & gt_set) / len(gt_set)
-
-def format_mcq_choices(exprs: list[str], formatter='{})'):
-    assert len(exprs) <= 26, 'Too many choices to label with single letters'
-    labels = 'abcdefghijklmnopqrstuvwxyz'
-    return '\n'.join(f'{formatter.format(labels[i])} {expr}' for i, expr in enumerate(exprs))
 
 def load_explanation(split: str, use_audit_expl=False) -> dict[str, list[str]]:
     if use_audit_expl:

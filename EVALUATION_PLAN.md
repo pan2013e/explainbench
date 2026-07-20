@@ -320,7 +320,7 @@ For each task and instance, the runner will:
 
 1. Build the existing ExplainBench prompt.
 2. Insert the submitted explanation and task context.
-3. Request structured MCQ output from the evaluator model.
+3. Request structured task-specific output from the evaluator model (an answer list for three tasks, or before/after selections for end-to-end effect).
 4. Repeat according to `--num-generations`.
 5. Score normalized predictions against normalized ground truth.
 6. Record usage, predictions, scores, skips, and failures.
@@ -439,14 +439,15 @@ Last updated: 2026-07-20
 - [x] Normalize and validate ground-truth answer representations.
 - [x] Implement selection-dependent patch validation and instance preparation.
 - [x] Verify task and artifact loading from an installed wheel.
-- [ ] Refactor prompts, inference, and scoring behind the package API.
-- [ ] Implement the evaluation runner.
+- [x] Refactor prompts, inference, and scoring behind the package API.
+- [x] Implement the evaluation runner.
+- [x] Keep the repository's legacy evaluation imports as wrappers around the package implementation.
 - [ ] Implement the versioned result schema.
 - [ ] Implement the `explainbench evaluate` CLI.
-- [ ] Add unit and CLI tests.
-- [ ] Verify lite evaluation from an installed wheel.
+- [ ] Add unit and CLI tests. (Stage 3 unit tests complete; CLI tests remain.)
+- [x] Verify lite evaluation from an installed wheel through the package API.
 - [x] Verify shared intent artifact loading from an installed wheel.
-- [ ] Verify effect evaluation with temporarily staged historical artifacts.
+- [x] Verify local and end-to-end effect evaluation from an installed wheel with temporarily staged historical artifacts.
 
 ### Question builders
 

@@ -376,10 +376,11 @@ The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
 - [x] Implement the submission schema and checker.
 - [x] Package and verify the four shared intent artifact files.
 - [x] Implement task selection and intent/effect artifact preparation.
-- [ ] Implement lite evaluation for shared local and end-to-end intent questions.
+- [x] Implement the lite evaluation engine for shared local and end-to-end intent questions.
 - [x] Define the temporary and future effect-artifact directory contract.
 - [ ] Expose fine-grained task selection through the evaluation CLI.
 - [ ] Refactor and expose the local question builder.
 - [ ] Implement full local evaluation.
 - [ ] Add clean-install and integration tests.
 - [ ] Add end-to-end intent and effect support.
+- [x] Preserve the legacy evaluator as compatibility wrappers over the package engine.

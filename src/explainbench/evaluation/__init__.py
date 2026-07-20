@@ -13,6 +13,12 @@ from explainbench.evaluation.preparation import (
     PreparedTask,
     prepare_evaluation,
 )
+from explainbench.evaluation.runner import (
+    EvaluationRunResult,
+    InstanceRunResult,
+    TaskRunResult,
+    run_evaluation,
+)
 from explainbench.evaluation.registry import (
     EvaluationMode,
     TaskName,
@@ -27,13 +33,17 @@ __all__ = [
     "ArtifactValidationError",
     "EvaluationMode",
     "EvaluationPreparationError",
+    "EvaluationRunResult",
+    "InstanceRunResult",
     "PreparedEvaluation",
     "PreparedTask",
     "TaskArtifacts",
     "TaskName",
     "TaskSelection",
     "TaskSpec",
+    "TaskRunResult",
     "load_task_artifacts",
     "prepare_evaluation",
     "resolve_task_selection",
+    "run_evaluation",
 ]

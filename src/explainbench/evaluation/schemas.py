@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from string import ascii_lowercase
 from typing import Any, Literal
 
 from pydantic import Field, field_validator
 
+from explainbench.evaluation.choices import normalize_choice
 from explainbench.schemas import StrictModel
 
 
@@ -14,15 +14,6 @@ def _validate_nonempty_text(value: str) -> str:
     if not value.strip():
         raise ValueError("must be a nonempty string")
     return value
-
-
-def _normalize_choice(value: Any) -> Any:
-    if not isinstance(value, str):
-        return value
-    normalized = value.strip().lower()
-    if normalized not in ascii_lowercase:
-        raise ValueError("must be a single ASCII letter")
-    return normalized
 
 
 class ChoicesContext(StrictModel):
@@ -89,7 +80,7 @@ class AnswerGroundTruth(StrictModel):
     @field_validator("answer")
     @classmethod
     def normalize_answers(cls, answers: list[str]) -> list[str]:
-        normalized = [_normalize_choice(answer) for answer in answers]
+        normalized = [normalize_choice(answer) for answer in answers]
         if len(normalized) != len(set(normalized)):
             raise ValueError("answer must not contain duplicate choices")
         return normalized
@@ -102,7 +93,7 @@ class E2EEffectGroundTruth(StrictModel):
     @field_validator("before_answer", "after_answer", mode="before")
     @classmethod
     def normalize_answers(cls, value: Any) -> Any:
-        return _normalize_choice(value)
+        return normalize_choice(value)
 
 
 ContextArtifact = (
