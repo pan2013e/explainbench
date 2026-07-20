@@ -58,19 +58,19 @@ Explicit CLI options override values from the config, and omitted values use pac
 
 API credentials should be exported as provider environment variables or placed in the configured dotenv file. Do not put credentials directly in the TOML file.
 
-### Runnable intent example
+### Runnable lite example
 
 The repository includes a three-instance submission containing real explanations from `dataset/explanations/dataset.json` under the `openhands_gpt-5-mini` entry, together with a starter config. It uses the package defaults except for one generation instead of five, to limit API cost:
 
-- [`examples/submission-intent.json`](examples/submission-intent.json)
-- [`examples/evaluation-intent.toml`](examples/evaluation-intent.toml)
+- [`examples/submission-lite.json`](examples/submission-lite.json)
+- [`examples/evaluation-lite.toml`](examples/evaluation-lite.toml)
 
 Validate and evaluate them with:
 
 ```bash
-explainbench checker examples/submission-intent.json
-explainbench evaluate examples/submission-intent.json \
-    --config examples/evaluation-intent.toml
+explainbench checker examples/submission-lite.json
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml
 ```
 
 Before inference begins, the command prints the resolved task selection, evaluator, generation count, and output path. Interactive terminals also show a tqdm progress bar for each task with completed/failed instance counts and cumulative token usage. Use `--no-progress` to suppress the bars.
@@ -78,46 +78,46 @@ Before inference begins, the command prints the resolved task selection, evaluat
 The configured output path is relative to the TOML file. This example uses `../results/lite-example.json`, so it writes `results/lite-example.json` under the repository root. An explicit CLI path overrides it and is interpreted relative to the current working directory:
 
 ```bash
-explainbench evaluate examples/submission-intent.json \
-    --config examples/evaluation-intent.toml \
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml \
     --output ./my-results.json
 ```
 
 The example performs 1 generation for each of 3 instances across 2 intent tasks, for 6 evaluator requests. You can still override any setting from the command line, for example:
 
 ```bash
-explainbench evaluate examples/submission-intent.json \
-    --config examples/evaluation-intent.toml \
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml \
     --num-generations 5 \
     --workers 2 \
     --generation-workers 5
 ```
 
-### Runnable effect example
+### Runnable full example
 
 The repository also includes a one-instance full-mode example derived from the existing `20250807_mini-v1.7.0_gpt-5-mini` artifacts. It demonstrates the exact directory contract that `question-builder` will eventually produce:
 
-- [`examples/submission-effect.json`](examples/submission-effect.json)
-- [`examples/evaluation-effect.toml`](examples/evaluation-effect.toml)
+- [`examples/submission-full.json`](examples/submission-full.json)
+- [`examples/evaluation-full.toml`](examples/evaluation-full.toml)
 - [`examples/question-artifacts`](examples/question-artifacts)
 
 Run all four question types—local/end-to-end intent and effect—with:
 
 ```bash
-explainbench checker examples/submission-effect.json
-explainbench evaluate examples/submission-effect.json \
-    --config examples/evaluation-effect.toml
+explainbench checker examples/submission-full.json
+explainbench evaluate examples/submission-full.json \
+    --config examples/evaluation-full.toml
 ```
 
-The example performs one evaluator request for each of the four tasks and writes `results/effect-example.json`. To try only one effect task, override the full-mode selection:
+The example performs one evaluator request for each of the four tasks and writes `results/full-example.json`. To try only one effect task, override the full-mode selection:
 
 ```bash
-explainbench evaluate examples/submission-effect.json \
-    --config examples/evaluation-effect.toml \
+explainbench evaluate examples/submission-full.json \
+    --config examples/evaluation-full.toml \
     --task local.effect
 
-explainbench evaluate examples/submission-effect.json \
-    --config examples/evaluation-effect.toml \
+explainbench evaluate examples/submission-full.json \
+    --config examples/evaluation-full.toml \
     --task e2e.effect
 ```
 

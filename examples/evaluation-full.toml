@@ -17,7 +17,7 @@ max_retries = 5
 [paths]
 # Config paths are resolved relative to this file.
 artifacts_dir = "question-artifacts"
-output = "../results/effect-example.json"
+output = "../results/full-example.json"
 
 # Export provider credentials in your shell. Alternatively, uncomment this
 # section and create examples/.env before running the command.

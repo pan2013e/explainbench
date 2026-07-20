@@ -1,5 +1,5 @@
-include examples/evaluation-intent.toml
-include examples/submission-intent.json
-include examples/evaluation-effect.toml
-include examples/submission-effect.json
+include examples/evaluation-lite.toml
+include examples/submission-lite.json
+include examples/evaluation-full.toml
+include examples/submission-full.json
 recursive-include examples/question-artifacts *.json

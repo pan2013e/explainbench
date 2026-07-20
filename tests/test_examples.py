@@ -11,10 +11,10 @@ from explainbench.submission import ValidationProfile, load_submission
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INTENT_SUBMISSION_PATH = ROOT / "examples/submission-intent.json"
-INTENT_CONFIG_PATH = ROOT / "examples/evaluation-intent.toml"
-EFFECT_SUBMISSION_PATH = ROOT / "examples/submission-effect.json"
-EFFECT_CONFIG_PATH = ROOT / "examples/evaluation-effect.toml"
+LITE_SUBMISSION_PATH = ROOT / "examples/submission-lite.json"
+LITE_CONFIG_PATH = ROOT / "examples/evaluation-lite.toml"
+FULL_SUBMISSION_PATH = ROOT / "examples/submission-full.json"
+FULL_CONFIG_PATH = ROOT / "examples/evaluation-full.toml"
 
 
 class FakeEvaluator:
@@ -45,9 +45,9 @@ class FakeEvaluator:
         ]
 
 
-def test_intent_examples_validate_and_run_lite_mode_with_mocked_inference():
-    submission = load_submission(INTENT_SUBMISSION_PATH)
-    file_config, source = load_evaluation_config(INTENT_CONFIG_PATH)
+def test_lite_examples_validate_and_run_with_mocked_inference():
+    submission = load_submission(LITE_SUBMISSION_PATH)
+    file_config, source = load_evaluation_config(LITE_CONFIG_PATH)
     config = resolve_evaluation_config(file_config, source=source)
 
     result = evaluate_submission(
@@ -75,12 +75,12 @@ def test_intent_examples_validate_and_run_lite_mode_with_mocked_inference():
     assert all(not task.failures for task in result.tasks.values())
 
 
-def test_effect_examples_validate_and_run_full_mode_with_mocked_inference():
+def test_full_examples_validate_and_run_with_mocked_inference():
     submission = load_submission(
-        EFFECT_SUBMISSION_PATH,
+        FULL_SUBMISSION_PATH,
         profile=ValidationProfile.FULL,
     )
-    file_config, source = load_evaluation_config(EFFECT_CONFIG_PATH)
+    file_config, source = load_evaluation_config(FULL_CONFIG_PATH)
     config = resolve_evaluation_config(file_config, source=source)
 
     result = evaluate_submission(
@@ -99,7 +99,7 @@ def test_effect_examples_validate_and_run_full_mode_with_mocked_inference():
     )
 
     assert config.artifacts_dir == ROOT / "examples/question-artifacts"
-    assert config.output == ROOT / "results/effect-example.json"
+    assert config.output == ROOT / "results/full-example.json"
     assert [task.value for task in result.selection.tasks] == [
         "e2e.intent",
         "e2e.effect",
