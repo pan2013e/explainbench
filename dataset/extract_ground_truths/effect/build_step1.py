@@ -9,6 +9,9 @@ from tqdm.auto import tqdm
 from dataset.extract_ground_truths.effect import get_divergent_lines
 from execution.util import get_instance_ids
 from tracer.serializer import serialize
+from explainbench.question_builders.local.stages.find_first_divergence import (
+    simplify_value,
+)
 
 EXTRA_LONG_TIMEOUT = {
     'django__django-11999': 3000,
@@ -108,15 +111,7 @@ def _type_stub(value):
     raise ValueError(f"Unexpected type {type(value)}")
 
 def _simplify(value, max_depth: int, depth: int):
-    if isinstance(value, dict):
-        if depth > max_depth:
-            return _type_stub(value)
-        return {k: _simplify(v, max_depth, depth + 1) for k, v in value.items()}
-    if isinstance(value, list):
-        if depth > max_depth:
-            return _type_stub(value)
-        return [_simplify(v, max_depth, depth + 1) for v in value]
-    return value
+    return simplify_value(value, max_depth, depth)
 
 def simplify_params(data, var_max_depth: int, param_max_depth: int) -> None:
     for agent_data in data.values():

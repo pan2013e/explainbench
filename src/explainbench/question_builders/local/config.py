@@ -15,6 +15,16 @@ from explainbench.schemas import StrictModel
 DEFAULT_WORKERS = 1
 DEFAULT_MAX_ATTEMPTS = 3
 DEFAULT_CANDIDATE_GENERATION_MODEL = "gpt-5.2-2025-12-11"
+DEFAULT_BENCHMARK_DATASET = "SWE-bench/SWE-bench_Verified"
+DEFAULT_BENCHMARK_SPLIT = "test"
+DEFAULT_REPOSITORY_REMOTE = "https://github.com"
+DEFAULT_DIVERGENCE_DEPTH = 3
+DEFAULT_VARIABLE_MAX_DEPTH = 4
+DEFAULT_PARAMETER_MAX_DEPTH = 3
+DEFAULT_CORRECT_CHOICES = 1
+DEFAULT_INCORRECT_CHOICES = 3
+DEFAULT_MMR_WEIGHT = 0.7
+DEFAULT_RANDOM_SEED = 42
 
 
 class LocalBuilderConfigError(ValueError):
@@ -49,11 +59,42 @@ class PathsFileConfig(StrictModel):
         return value
 
 
+class BenchmarkFileConfig(StrictModel):
+    dataset: str | None = None
+    split: str | None = None
+    repository_remote: str | None = None
+
+    @field_validator("dataset", "split", "repository_remote")
+    @classmethod
+    def reject_blank_value(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("must be a nonempty string")
+        return value
+
+
+class DivergenceFileConfig(StrictModel):
+    depth: int | None = Field(default=None, ge=0)
+    variable_max_depth: int | None = Field(default=None, ge=0)
+    parameter_max_depth: int | None = Field(default=None, ge=0)
+
+
+class ChoicesFileConfig(StrictModel):
+    correct: int | None = Field(default=None, ge=0)
+    incorrect: int | None = Field(default=None, ge=0)
+    mmr_weight: float | None = Field(default=None, ge=0, le=1)
+    random_seed: int | None = None
+
+
 class LocalBuilderFileConfig(StrictModel):
     schema_version: Literal[1]
     execution: ExecutionFileConfig = Field(default_factory=ExecutionFileConfig)
     models: ModelsFileConfig = Field(default_factory=ModelsFileConfig)
     paths: PathsFileConfig = Field(default_factory=PathsFileConfig)
+    benchmark: BenchmarkFileConfig = Field(default_factory=BenchmarkFileConfig)
+    divergence: DivergenceFileConfig = Field(
+        default_factory=DivergenceFileConfig
+    )
+    choices: ChoicesFileConfig = Field(default_factory=ChoicesFileConfig)
 
 
 @dataclass(frozen=True)
@@ -65,6 +106,16 @@ class LocalBuilderConfig:
     max_workers: int
     max_attempts: int
     candidate_generation_model: str
+    benchmark_dataset: str = DEFAULT_BENCHMARK_DATASET
+    benchmark_split: str = DEFAULT_BENCHMARK_SPLIT
+    repository_remote: str = DEFAULT_REPOSITORY_REMOTE
+    divergence_depth: int = DEFAULT_DIVERGENCE_DEPTH
+    variable_max_depth: int = DEFAULT_VARIABLE_MAX_DEPTH
+    parameter_max_depth: int = DEFAULT_PARAMETER_MAX_DEPTH
+    correct_choices: int = DEFAULT_CORRECT_CHOICES
+    incorrect_choices: int = DEFAULT_INCORRECT_CHOICES
+    mmr_weight: float = DEFAULT_MMR_WEIGHT
+    random_seed: int = DEFAULT_RANDOM_SEED
     source: Path | None = None
 
 
@@ -169,6 +220,56 @@ def resolve_local_builder_config(
             file_config.models.candidate_generation,
             DEFAULT_CANDIDATE_GENERATION_MODEL,
         )
+        benchmark_dataset = _pick(
+            None,
+            file_config.benchmark.dataset,
+            DEFAULT_BENCHMARK_DATASET,
+        )
+        benchmark_split = _pick(
+            None,
+            file_config.benchmark.split,
+            DEFAULT_BENCHMARK_SPLIT,
+        )
+        repository_remote = _pick(
+            None,
+            file_config.benchmark.repository_remote,
+            DEFAULT_REPOSITORY_REMOTE,
+        )
+        divergence_depth = _pick(
+            None,
+            file_config.divergence.depth,
+            DEFAULT_DIVERGENCE_DEPTH,
+        )
+        variable_max_depth = _pick(
+            None,
+            file_config.divergence.variable_max_depth,
+            DEFAULT_VARIABLE_MAX_DEPTH,
+        )
+        parameter_max_depth = _pick(
+            None,
+            file_config.divergence.parameter_max_depth,
+            DEFAULT_PARAMETER_MAX_DEPTH,
+        )
+        correct_choices = _pick(
+            None,
+            file_config.choices.correct,
+            DEFAULT_CORRECT_CHOICES,
+        )
+        incorrect_choices = _pick(
+            None,
+            file_config.choices.incorrect,
+            DEFAULT_INCORRECT_CHOICES,
+        )
+        mmr_weight = _pick(
+            None,
+            file_config.choices.mmr_weight,
+            DEFAULT_MMR_WEIGHT,
+        )
+        random_seed = _pick(
+            None,
+            file_config.choices.random_seed,
+            DEFAULT_RANDOM_SEED,
+        )
     except (TypeError, ValueError) as error:
         raise LocalBuilderConfigError(str(error)) from error
     if resolved_workers < 1:
@@ -186,6 +287,15 @@ def resolve_local_builder_config(
         max_workers=resolved_workers,
         max_attempts=resolved_attempts,
         candidate_generation_model=model,
+        benchmark_dataset=benchmark_dataset,
+        benchmark_split=benchmark_split,
+        repository_remote=repository_remote,
+        divergence_depth=divergence_depth,
+        variable_max_depth=variable_max_depth,
+        parameter_max_depth=parameter_max_depth,
+        correct_choices=correct_choices,
+        incorrect_choices=incorrect_choices,
+        mmr_weight=mmr_weight,
+        random_seed=random_seed,
         source=source,
     )
-

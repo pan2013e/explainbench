@@ -393,15 +393,17 @@ Status: completed. The production registry currently uses explicit `stage_not_mi
 
 ### Milestone 2: Pure transformation stages
 
-- Migrate `identify-patched-functions`.
-- Migrate `select-trace-functions` using stored tracking fixtures.
-- Migrate `find-first-divergence` using stored trace fixtures.
-- Migrate `validate-candidate-expressions`.
-- Migrate `build-answer-choices`.
-- Migrate and validate `export-question-artifacts`.
-- Turn the corresponding legacy scripts into wrappers as each migration completes.
+- [x] Migrate `identify-patched-functions`.
+- [x] Migrate `select-trace-functions` using stored tracking fixtures.
+- [x] Migrate `find-first-divergence` using stored trace fixtures.
+- [x] Migrate `validate-candidate-expressions`.
+- [x] Migrate `build-answer-choices`.
+- [x] Migrate and validate `export-question-artifacts`.
+- [x] Turn the corresponding legacy scripts into wrappers as each migration completes.
 
 Expected outcome: deterministic and non-service-backed processing can be run and resumed through the package, and fixture inputs can produce evaluator-compatible artifacts.
+
+Status: completed. The stage contracts now make tracked-call files, detailed trace pairs, expression-inspection payloads, validated pools, and final question records explicit. Missing or corrupt traces are failures and cannot silently activate gold fallback. Gold fallback is emitted only after at least one valid trace pair has been exhaustively compared without finding a usable agent divergence. Choice randomization uses a stable per-instance seed so checkpoint reuse and worker scheduling cannot change a question. Export is tested by loading the generated artifact bundle through the evaluator's typed `local.effect` artifact loader.
 
 ### Milestone 3: Docker execution stages
 
@@ -462,11 +464,11 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Define meaningful public stage names and map them to legacy operations.
 - [x] Detail the workspace, command, artifact, and migration contracts.
 - [x] Implement Milestone 1: orchestration foundation.
-- [ ] Implement Milestone 2: pure transformation stages.
+- [x] Implement Milestone 2: pure transformation stages.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
 - [ ] Implement Milestone 5: compatibility, packaging, and documentation.
 
 ## Next step
 
-Implement Milestone 2 next, beginning with `identify-patched-functions`. Migrate one pure stage at a time into the existing registry, add equivalence fixtures, and convert its legacy entry point into a thin wrapper over the package implementation before moving to the next stage.
+Implement Milestone 3 next, beginning with `track-test-calls`. Each Docker stage should emit the explicit per-instance file contract already consumed by its downstream deterministic stage, retain its container logs in the workspace, and use the existing retry/checkpoint boundary rather than introducing another resume mechanism.

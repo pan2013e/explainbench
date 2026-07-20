@@ -80,6 +80,16 @@ class StageContext:
     log_directory: Path
     upstream_results: Mapping[str, StoredStageResult]
     config: Any
+    submission_id: str | None = None
+
+
+@dataclass(frozen=True)
+class StageFinalizationContext:
+    """Aggregate inputs available after instance results are durable."""
+
+    workspace: Any
+    instances: Sequence[SubmissionInstance]
+    config: Any
 
 
 class StageRunner(Protocol):
@@ -364,7 +374,7 @@ class BuilderOrchestrator:
             dict(definition.semantic_inputs(self.config))
         )
         self.workspace.write_stage_summary(definition, config_fingerprint)
-        return StageRunSummary(
+        summary = StageRunSummary(
             stage=stage_name,
             requested=len(self.instances),
             completed=completed,
@@ -373,6 +383,24 @@ class BuilderOrchestrator:
             failed=failed,
             blocked=blocked,
         )
+        finalizer = getattr(definition.runner, "finalize_stage", None)
+        if callable(finalizer) and completed + reused > 0:
+            try:
+                finalizer(
+                    StageFinalizationContext(
+                        workspace=self.workspace,
+                        instances=self.instances,
+                        config=self.config,
+                    )
+                )
+            except StageExecutionError:
+                raise
+            except Exception as error:
+                raise QuestionBuilderError(
+                    f"could not finalize stage {stage_name!r}: "
+                    f"{type(error).__name__}: {error}"
+                ) from error
+        return summary
 
     def _resolve_dependencies(
         self,
@@ -480,6 +508,7 @@ class BuilderOrchestrator:
                 ),
                 upstream_results=dict(upstream),
                 config=self.config,
+                submission_id=self.submission_id,
             )
             try:
                 result = definition.runner.run_instance(context).to_stored()

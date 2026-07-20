@@ -341,6 +341,11 @@ class LocalBuilderWorkspace:
                     failures.append(status)
         return failures
 
+    def record_artifact_output(self, output: str | Path) -> None:
+        self.manifest.artifact_output = str(Path(output))
+        self.manifest.updated_at = _now()
+        self._write_manifest()
+
     def _write_manifest(self) -> None:
         atomic_write_json(
             self.root / "manifest.json",
