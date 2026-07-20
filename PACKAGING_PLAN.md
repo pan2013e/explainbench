@@ -16,7 +16,7 @@ explainbench question-builder ...
 explainbench evaluate ...
 ```
 
-The initial implementation focuses on local evaluation. The internal design must allow end-to-end evaluation to be added without redesigning the submission format, CLI, result format, or evaluation registry.
+The initial evaluation implementation supports both local and end-to-end intent, plus model-specific effect evaluation when the corresponding effect artifacts are available. Initial question-builder development still focuses on local effect. The internal design must allow end-to-end question building to be added without redesigning the submission format, CLI, result format, or evaluation registry.
 
 Environment diagnostics and automatic checking of Docker/system dependencies are intentionally out of scope for the initial implementation.
 
@@ -51,8 +51,8 @@ The new format keeps the existing SWE-bench-compatible field names `instance_id`
 - `instances` is required and must be a nonempty list.
 - Every instance must have a unique, nonempty `instance_id`.
 - Every instance must contain a nonempty string `explanation`.
-- `model_patch` is optional for lite evaluation.
-- `model_patch` is required and must be nonempty for `question-builder local` and full evaluation.
+- `model_patch` is optional for intent-only evaluation.
+- `model_patch` is required and must be nonempty for question building or any evaluation selection containing an effect task.
 - Supported instance IDs must belong to the ExplainBench benchmark set.
 - Unknown fields will initially be rejected so misspelled fields do not pass silently.
 - Version 1 supports one explanation per instance.
@@ -78,7 +78,7 @@ explainbench question-builder local submission.json \
 
 Question building is an explicit operation. Full evaluation will not automatically invoke it.
 
-### Run local-intent evaluation
+### Run intent evaluation
 
 ```bash
 explainbench evaluate submission.json \
@@ -86,36 +86,46 @@ explainbench evaluate submission.json \
   --output ./results.json
 ```
 
-For the local-only release, lite mode evaluates:
+Lite mode evaluates:
 
+- `e2e.intent`
 - `local.intent`
 
-It requires only the submitted explanations and the submission-independent local-intent questions bundled with ExplainBench.
+It requires only the submitted explanations and the submission-independent intent questions bundled with ExplainBench.
 
-### Run local intent and effect evaluation
+### Run all intent and effect tasks
 
 ```bash
 explainbench evaluate submission.json \
   --mode full \
-  --questions ./question-artifacts \
+  --artifacts-dir ./question-artifacts \
   --output ./results.json
 ```
 
-For the local-only release, full mode evaluates:
+Full mode evaluates:
 
+- `e2e.intent`
+- `e2e.effect`
 - `local.intent`
 - `local.effect`
 
-Full evaluation must fail clearly if question artifacts are missing, incomplete, or were generated from different patches.
+Full evaluation must fail clearly if required model-specific effect artifacts are missing or incomplete.
 
-### Future mode expansion
+### Run selected tasks
 
-When end-to-end support is ready, mode resolution will expand to:
+Fine-grained selection uses repeatable task options:
 
-```text
-lite = local.intent + end2end.intent
-full = local.intent + local.effect + end2end.intent + end2end.effect
+```bash
+explainbench evaluate submission.json \
+  --task local.intent \
+  --task e2e.effect \
+  --artifacts-dir ./question-artifacts \
+  --output ./results.json
 ```
+
+Supported task names are `e2e.intent`, `e2e.effect`, `local.intent`, and `local.effect`. `--mode` and `--task` are mutually exclusive.
+
+See `EVALUATION_PLAN.md` for the detailed evaluation and artifact design.
 
 ## Proposed package structure
 
@@ -183,7 +193,7 @@ Implement the first complete user workflow:
 ```text
 submission.json
   -> validate
-  -> load bundled local-intent questions
+  -> load bundled local-intent and end-to-end-intent questions
   -> ask the evaluator model using each explanation
   -> score predictions
   -> write results.json
@@ -200,13 +210,17 @@ The result document should include configuration, token usage, summary statistic
 
 ### Phase 3: Versioned question-artifact bundle
 
-Define the output of `question-builder local`:
+Define the output contract shared by temporary manually staged effect artifacts and the future question builders:
 
 ```text
 question-artifacts/
 ├── manifest.json
-├── context.json
-├── ground_truth.json
+├── context/
+│   ├── local_effect__{submission_id}.json
+│   └── e2e_effect__{submission_id}.json
+├── ground_truths/
+│   ├── local_effect__{submission_id}.json
+│   └── e2e_effect__{submission_id}.json
 ├── failures.json
 ├── intermediate/
 │   ├── divergences.json
@@ -283,25 +297,24 @@ Skipped: 5
 Failed: 2
 ```
 
-### Phase 6: Full local evaluation
+### Phase 6: Full and fine-grained evaluation
 
-Connect the local-effect question bundle to the evaluator. For the initial release, resolve modes through a registry:
+Connect shared intent resources and model-specific effect artifacts to the evaluator. Resolve modes through a registry:
 
 ```python
-LOCAL_MODES = {
-    "lite": ["local.intent"],
-    "full": ["local.intent", "local.effect"],
+MODES = {
+    "lite": ["e2e.intent", "local.intent"],
+    "full": ["e2e.intent", "e2e.effect", "local.intent", "local.effect"],
 }
 ```
 
-Full evaluation will:
+Evaluation will:
 
-1. Validate the submission with the full profile.
-2. Load the specified question-artifact directory.
-3. Verify its schema version and submission checksum.
-4. Run local-intent evaluation.
-5. Run local-effect evaluation for instances with generated questions.
-6. Report task-level, combined, skipped, and failed results.
+1. Resolve either a mode preset or one or more explicit tasks.
+2. Validate the submission according to the selected tasks.
+3. Load packaged shared intent artifacts and selected model-specific effect artifacts.
+4. Run generation and scoring for each selected task.
+5. Report task-level, combined, skipped, and failed results.
 
 ### Phase 7: Packaging, testing, and documentation
 
@@ -342,17 +355,17 @@ Only the local implementation will be built initially. A future end-to-end imple
 
 ## Recommended next milestone
 
-Start with Phase 1 and produce a small, testable vertical slice:
+Proceed with Phase 2 and produce the first complete evaluation workflow:
 
-1. Add the `src/explainbench` package skeleton.
-2. Define `Submission` and `SubmissionInstance` Pydantic models.
-3. Implement JSON loading and validation.
-4. Add the CLI entry point.
-5. Implement `explainbench checker`.
-6. Add focused schema and CLI tests.
-7. Build and install a wheel in a clean environment to verify the command is exposed correctly.
+1. Package the two shared intent context/ground-truth pairs.
+2. Define the task registry and mode/fine-grained selection.
+3. Implement shared-intent and model-specific-effect artifact resolution.
+4. Refactor inference, prompts, and scoring behind the package API.
+5. Implement `explainbench evaluate` and its unified result document.
+6. Add focused evaluator and CLI tests.
+7. Build and install a wheel in a clean environment and run an intent-only smoke test.
 
-This milestone fixes the public input contract before any evaluation or execution code is reorganized. After it is accepted, proceed to Phase 2 and make lite local-intent evaluation the first complete evaluation workflow.
+The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
 
 ## Current status
 
@@ -361,8 +374,11 @@ This milestone fixes the public input contract before any evaluation or executio
 - [x] Inspect the repository's current explanation and patch formats.
 - [x] Agree on a unified JSON submission document.
 - [x] Implement the submission schema and checker.
-- [ ] Implement installable CLI packaging and lite local-intent evaluation.
-- [ ] Define the question-artifact bundle.
+- [x] Package and verify the four shared intent artifact files.
+- [x] Implement task selection and intent/effect artifact preparation.
+- [ ] Implement lite evaluation for shared local and end-to-end intent questions.
+- [x] Define the temporary and future effect-artifact directory contract.
+- [ ] Expose fine-grained task selection through the evaluation CLI.
 - [ ] Refactor and expose the local question builder.
 - [ ] Implement full local evaluation.
 - [ ] Add clean-install and integration tests.

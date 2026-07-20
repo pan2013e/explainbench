@@ -21,12 +21,13 @@ class ValidationProfile(StrEnum):
 
     BASE = "base"
     LITE = "lite"
+    EFFECT = "effect"
     QUESTION_BUILDER_LOCAL = "question-builder-local"
     FULL = "full"
 
     @property
     def requires_patches(self) -> bool:
-        return self in {self.QUESTION_BUILDER_LOCAL, self.FULL}
+        return self in {self.EFFECT, self.QUESTION_BUILDER_LOCAL, self.FULL}
 
 
 @dataclass(frozen=True)

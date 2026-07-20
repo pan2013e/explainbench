@@ -4,6 +4,7 @@ __pycache__/
 dataset/**/swe_bench_repos/*
 logs*/
 *.json
+!src/explainbench/data/**/*.json
 !results/**/*.json
 !supplementary_materials/**/*.json
 !execution/**/*.json
@@ -13,4 +14,4 @@ logs*/
 *.txt
 !instances.txt
 !dataset/extract_ground_truths/effect/prompts/*.txt
-explainbench.egg-info/PKG-INFO
+*.egg-info/

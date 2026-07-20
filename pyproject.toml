@@ -36,7 +36,11 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-explainbench = ["data/*.json"]
+explainbench = [
+    "data/*.json",
+    "data/context/*.json",
+    "data/ground_truths/*.json",
+]
 
 [tool.pytest.ini_options]
 addopts = "-p no:tracer_plugin"
