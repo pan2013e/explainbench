@@ -13,7 +13,6 @@ from tracer_plugin.django_plugin import FAIL_TO_PASS_TESTS as DJANGO_FAIL_TO_PAS
 
 datasets.disable_progress_bars()
 
-SWEBENCH = load_dataset("SWE-bench/SWE-bench_Verified", split="test")
 DIR = os.path.dirname(os.path.abspath(__file__))
 AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
 
@@ -323,18 +322,27 @@ def copy_directory_from_docker(container: Container, src_path: PurePosixPath, ds
         tar.extractall(path=target_path)
 
 @lru_cache
+def get_swebench_dataset():
+    """Load benchmark records only when a command needs dataset contents."""
+
+    return load_dataset("SWE-bench/SWE-bench_Verified", split="test")
+
+
+@lru_cache
 def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
     # Patch the errors in SWE-bench dataset
     if instance_id == "sphinx-doc__sphinx-8265":
         return ["tests/test_pycode_ast.py::test_unparse[(1, 2, 3)-(1, 2, 3)]"]
     if 'django__django' in instance_id:
         return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
-    instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
+    swebench = get_swebench_dataset()
+    instance = swebench.filter(lambda x: x['instance_id'] == instance_id)[0]
     return json.loads(instance['FAIL_TO_PASS'])
 
 @lru_cache
 def get_test_patch(instance_id: str) -> str:
-    instance = SWEBENCH.filter(lambda x: x['instance_id'] == instance_id)[0]
+    swebench = get_swebench_dataset()
+    instance = swebench.filter(lambda x: x['instance_id'] == instance_id)[0]
     return instance['test_patch'] or ""
 
 def get_instance_ids(value: list[str], apply_exclusions=True) -> list[str]:
@@ -346,7 +354,11 @@ def get_instance_ids(value: list[str], apply_exclusions=True) -> list[str]:
 
 def all_instances(apply_exclusions=True):
     exclusion = EXCLUDED_IDS if apply_exclusions else []
-    return [data['instance_id'] for data in SWEBENCH if data['instance_id'] not in exclusion]
+    return [
+        data['instance_id']
+        for data in get_swebench_dataset()
+        if data['instance_id'] not in exclusion
+    ]
 
 def instances_by_repo(repo_name: str | list[str], apply_exclusions=True):
     if isinstance(repo_name, str):
@@ -354,7 +366,7 @@ def instances_by_repo(repo_name: str | list[str], apply_exclusions=True):
     exclusion = EXCLUDED_IDS if apply_exclusions else []
     return [
         data['instance_id']
-        for data in SWEBENCH
+        for data in get_swebench_dataset()
         if any(rn in data['repo'] for rn in repo_name)
         and data['instance_id'] not in exclusion
     ]

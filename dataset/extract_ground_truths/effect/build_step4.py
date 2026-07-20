@@ -1,12 +1,27 @@
 import os
 import json
 import random
+import argparse
 
 from tqdm.auto import tqdm
 from typing import Callable, List, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 random.seed(42)
+MMR_LAMBDA = 0.7
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_BASE_DIR = os.path.join(DIR, "../../../logs/run_evaluation")
+DEFAULT_AGENTS = [
+    "20250603_Refact_Agent_claude-4-sonnet",
+    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    "20250928_trae_doubao_seed_code",
+    "20250807_mini-v1.7.0_gpt-5-mini",
+    "20251127_openhands_claude-opus-4-5",
+    "openhands_gpt-5-mini",
+    "openhands_minimax-m2.5",
+]
 
 def read_json(input_path):
     with open(input_path, "r") as f:
@@ -202,46 +217,90 @@ def process_agent(data, agent, instance_ids, n_correct, n_incorrect, is_prepare_
             continue
     return results
 
-if __name__ == "__main__":
-    # ------------ SCRIPT PARAMETERS ------------ #
-    N_CHOICES = 4
-    N_CORRECT = 1
-    N_INCORRECT = N_CHOICES - N_CORRECT
-    MMR_LAMBDA = 0.7
-    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    RQ1_AGENTS = [
-        "20250603_Refact_Agent_claude-4-sonnet",
-        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250928_trae_doubao_seed_code",
-        "20250807_mini-v1.7.0_gpt-5-mini",
-        "20251127_openhands_claude-opus-4-5",
-        "openhands_gpt-5-mini",
-        "openhands_minimax-m2.5",
-    ]
-    PREPARE_INTENT = False
-    if PREPARE_INTENT:
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Build local-effect answer choices from validated expressions."
+    )
+    agents = parser.add_mutually_exclusive_group()
+    agents.add_argument(
+        "--agent",
+        action="append",
+        help="Agent to process; repeat to process multiple agents.",
+    )
+    agents.add_argument("--agents", nargs="+", help="Agents to process.")
+    parser.add_argument(
+        "--instance-ids",
+        "--instance_ids",
+        nargs="+",
+        help="Explicit instances; defaults to the valid intersection.",
+    )
+    parser.add_argument("--step3-path")
+    parser.add_argument("--output-path")
+    parser.add_argument(
+        "--prepare-intent",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--correct-choices", type=int, default=1)
+    parser.add_argument("--incorrect-choices", type=int, default=3)
+    parser.add_argument("--minimum-changed", type=int, default=1)
+    parser.add_argument("--minimum-unchanged", type=int, default=3)
+    parser.add_argument("--mmr-weight", type=float, default=0.7)
+    parser.add_argument("--random-seed", type=int, default=42)
+    parser.add_argument("--agent-workers", type=int, default=10)
+    return parser
+
+
+def main(argv=None):
+    global MMR_LAMBDA
+    args = build_parser().parse_args(argv)
+    MMR_LAMBDA = args.mmr_weight
+    random.seed(args.random_seed)
+
+    if args.prepare_intent:
         print("Running for gold patch")
-        AGENTS = ["gold"]
-        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.gold.json")
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.intent.json")
+        selected_agents = args.agent or args.agents or ["gold"]
+        step3_path = args.step3_path or os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step3.gold.json"
+        )
+        output_path = args.output_path or os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step4.intent.json"
+        )
     else:
         print("Running for RQ1 agents")
-        AGENTS = RQ1_AGENTS
-        STEP3_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.json")
-        OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step4.json")
-    # ------------------------------------------- #
-    
-    step3 = read_json(STEP3_PATH)
+        selected_agents = args.agent or args.agents or DEFAULT_AGENTS
+        step3_path = args.step3_path or os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step3.json"
+        )
+        output_path = args.output_path or os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step4.json"
+        )
+
+    step3 = read_json(step3_path)
     results = {}
-    base_instance_ids = sorted(intersect_instance_ids(step3, AGENTS))
+    available_instance_ids = sorted(
+        intersect_instance_ids(step3, selected_agents)
+    )
+    if args.instance_ids is None or args.instance_ids == ["all"]:
+        base_instance_ids = available_instance_ids
+    else:
+        available = set(available_instance_ids)
+        base_instance_ids = [
+            instance_id
+            for instance_id in args.instance_ids
+            if instance_id in available
+        ]
     removed_due_to_pool = []
     instance_ids = []
     for instance_id in base_instance_ids:
         failed_agents = [
             agent
-            for agent in AGENTS
-            if not meets_min_pool(step3.get(agent, {}).get(instance_id))
+            for agent in selected_agents
+            if not meets_min_pool(
+                step3.get(agent, {}).get(instance_id),
+                min_changed=args.minimum_changed,
+                min_unchanged=args.minimum_unchanged,
+            )
         ]
         if failed_agents:
             removed_due_to_pool.append(instance_id)
@@ -251,22 +310,33 @@ if __name__ == "__main__":
     print(f"After min-pool filter count: {len(instance_ids)}")
     # Report per-agent removals relative to filtered step3 data.
     print("Per-agent removals vs filtered step3 (intersection pruning):")
-    for agent in AGENTS:
+    for agent in selected_agents:
         total_filtered = len(step3.get(agent, {}) or {})
         removed = total_filtered - len(instance_ids)
         print(f"- {agent}: filtered_total={total_filtered}, removed_by_intersection={removed}")
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=args.agent_workers) as executor:
         futures = {
             executor.submit(
-                process_agent, step3, agent, instance_ids, N_CORRECT, N_INCORRECT, PREPARE_INTENT
+                process_agent,
+                step3,
+                agent,
+                instance_ids,
+                args.correct_choices,
+                args.incorrect_choices,
+                args.prepare_intent,
             ): agent
-            for agent in AGENTS
+            for agent in selected_agents
             if agent and agent
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
 
-    with open(OUTPUT_PATH, "w") as f:
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+    with open(output_path, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Saved step4 results to {OUTPUT_PATH}")
+    print(f"Saved step4 results to {output_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -14,7 +14,17 @@ The local-effect builder runs a submitted patch, records its execution behavior,
 explainbench evaluate submission.json --task local.effect ...
 ```
 
-The existing research pipeline under `dataset/extract_ground_truths/effect/` remains the behavioral reference. The package implementation will provide one canonical implementation of each operation. Existing research scripts may remain as thin compatibility wrappers, but the processing logic must not be maintained in two places.
+The existing pipeline under `dataset/extract_ground_truths/effect/` and `execution/` is the canonical implementation. Its scientific logic must remain there. The package layer under `src/explainbench` only prepares submission-specific inputs, invokes the canonical command-line entry points, validates their declared outputs, and records orchestration checkpoints.
+
+The ownership direction is therefore:
+
+```text
+explainbench CLI/orchestrator
+  -> canonical dataset/execution CLI
+  -> existing pipeline functions
+```
+
+It must never point in the opposite direction. In particular, modules under `dataset/` and `execution/` must not import question-builder stage implementations from `src/explainbench`, and scientific functions must not be copied into `src/explainbench`.
 
 The initial scope is local effect. The orchestration and workspace abstractions should be reusable by a future end-to-end effect builder without forcing its stages to be identical to the local pipeline.
 
@@ -39,7 +49,7 @@ explainbench question-builder local run submission.json \
   --resume
 ```
 
-Both interfaces call the same stage implementations. The `run` command resolves dependencies, invokes stages in order, and reports progress; it does not contain a second copy of the pipeline logic.
+Both interfaces resolve to the same canonical legacy CLI commands. The `run` command resolves dependencies, invokes those commands in order, and reports progress; it does not contain a second copy of the pipeline logic.
 
 An individual stage command checks that its required upstream outputs are present and compatible. It reports the missing prerequisite and the command needed to produce it. It does not silently run earlier stages.
 
@@ -47,18 +57,20 @@ An individual stage command checks that its required upstream outputs are presen
 
 CLI names, Python names, logs, and workspace directories should use the same plain-language terminology. Legacy names such as `build_step1` are recorded only as migration references.
 
-| Order | Public stage name | Purpose | Current implementation reference |
+| Order | Public stage name | Purpose | Canonical CLI module |
 |---:|---|---|---|
-| 1 | `identify-patched-functions` | Find Python functions changed by the submitted patch in the before- and after-patch source. | `trace_step1_generate_qualname_whitelist.py` |
-| 2 | `track-test-calls` | Run relevant tests with lightweight call tracking for the patched functions. | `execution.track` |
-| 3 | `select-trace-functions` | Expand the patched-function set using the observed call paths and choose functions for detailed tracing. | `trace_step2_generate_call_stack_whitelist.py` |
-| 4 | `trace-program-state` | Run the tests on buggy and patched code while recording detailed state for the selected functions. | `execution.trace` |
-| 5 | `find-first-divergence` | Compare the two traces and locate the first useful state or control-flow difference. | `build_step1.py` |
-| 6 | `generate-candidate-expressions` | Retrieve the relevant source and ask the configured model for expressions that may or may not change. | `build_step2.py` and `infer_expression.py` |
-| 7 | `execute-candidate-expressions` | Evaluate every candidate at the divergence point in buggy and patched executions. | `build_step3.py --execute` |
-| 8 | `validate-candidate-expressions` | Classify candidates from their recorded values as changed, unchanged, or unusable. | `build_step3.py --validate` |
-| 9 | `build-answer-choices` | Select and shuffle one correct expression and suitable distractors, then add the special choices. | `build_step4.py` |
-| 10 | `export-question-artifacts` | Write the context, ground truth, manifest, and failure report expected by the evaluator. | `build_step5.py` |
+| 1 | `identify-patched-functions` | Find Python functions changed by the submitted patch in the before- and after-patch source. | `python -m dataset.extract_ground_truths.effect.trace_step1_generate_qualname_whitelist` |
+| 2 | `track-test-calls` | Run relevant tests with lightweight call tracking for the patched functions. | `python -m execution.track` |
+| 3 | `select-trace-functions` | Expand the patched-function set using the observed call paths and choose functions for detailed tracing. | `python -m dataset.extract_ground_truths.effect.trace_step2_generate_call_stack_whitelist` |
+| 4 | `trace-program-state` | Run the tests on buggy and patched code while recording detailed state for the selected functions. | `python -m execution.trace` |
+| 5 | `find-first-divergence` | Compare the two traces and locate the first useful state or control-flow difference. | `python -m dataset.extract_ground_truths.effect.build_step1` |
+| 6 | `generate-candidate-expressions` | Retrieve the relevant source and ask the configured model for expressions that may or may not change. | `python -m dataset.extract_ground_truths.effect.build_step2` |
+| 7 | `execute-candidate-expressions` | Evaluate every candidate at the divergence point in buggy and patched executions. | `python -m dataset.extract_ground_truths.effect.build_step3 --execute` |
+| 8 | `validate-candidate-expressions` | Classify candidates from their recorded values as changed, unchanged, or unusable. | `python -m dataset.extract_ground_truths.effect.build_step3 --validate` |
+| 9 | `build-answer-choices` | Select and shuffle one correct expression and suitable distractors, then add the special choices. | `python -m dataset.extract_ground_truths.effect.build_step4` |
+| 10 | `export-question-artifacts` | Write the context and ground truth expected by the evaluator. | `python -m dataset.extract_ground_truths.effect.build_step5` |
+
+The canonical CLIs receive explicit agent/submission ID, instance IDs, input paths, output paths, worker limits, and stage-specific settings. Defaults may preserve the research reproduction workflow, but package wrappers always pass explicit paths and never depend on hard-coded historical agents.
 
 The command will list these names in order:
 
@@ -158,7 +170,7 @@ class StageDefinition:
     runner: StageRunner
 ```
 
-Each runner operates on one submission instance where practical:
+Each package runner operates on one submission instance where practical by invoking the corresponding canonical CLI with that instance ID:
 
 ```python
 class StageRunner(Protocol):
@@ -170,6 +182,8 @@ class StageRunner(Protocol):
     ) -> StageResult:
         ...
 ```
+
+The runner implementation contains command construction and output validation only. Parsing traces, identifying divergences, generating candidates, validating expressions, and assembling questions remain functions of the canonical modules.
 
 Stages that need an aggregate view, such as final export, may additionally implement a finalization operation after their instance results are durable.
 
@@ -326,7 +340,7 @@ Export validates that context and ground-truth instance sets match and that ever
 
 ## Package structure
 
-Use explicit modules rather than one large pipeline file:
+Use explicit wrapper modules rather than duplicating the pipeline:
 
 ```text
 src/explainbench/question_builders/
@@ -340,41 +354,35 @@ src/explainbench/question_builders/
 └── local/
     ├── __init__.py
     ├── config.py
+    ├── legacy_commands.py
     ├── registry.py
+    ├── runners.py
     ├── workspace.py
-    └── stages/
-        ├── identify_patched_functions.py
-        ├── track_test_calls.py
-        ├── select_trace_functions.py
-        ├── trace_program_state.py
-        ├── find_first_divergence.py
-        ├── generate_candidate_expressions.py
-        ├── execute_candidate_expressions.py
-        ├── validate_candidate_expressions.py
-        ├── build_answer_choices.py
-        └── export_question_artifacts.py
+    └── submission_adapter.py
 ```
 
-The `common` layer contains only genuinely reusable orchestration mechanisms. Local-effect concepts remain under `local`; a future end-to-end builder may define its own stage registry and stage implementations.
+The `common` layer contains only genuinely reusable orchestration mechanisms. `legacy_commands.py` declares the module, arguments, and expected outputs for each local stage. `runners.py` invokes those commands; it contains no scientific transformations. A future end-to-end builder may define its own command registry and wrappers.
 
-## Migration from the research pipeline
+## Canonical CLI modernization
 
-The migration creates one source of truth:
+The work creates one source of scientific truth without moving it:
 
-1. Extract a small piece of legacy logic into the corresponding package stage.
-2. Add unit or fixture-based equivalence tests for its inputs and outputs.
-3. Change the legacy script into a thin argument-translation wrapper over the package API, if the script still needs to be supported.
-4. Remove unused hard-coded agent lists, global output paths, and duplicated processing logic from that wrapper.
+1. Preserve each existing processing function in `dataset/` or `execution/`.
+2. Give its module a parameterized `main(argv=None)` CLI that accepts one submission and explicit workspace paths.
+3. Keep historical defaults only for direct reproduction use; package calls pass every important value explicitly.
+4. Add package runners that call `python -m <canonical-module> ...` and validate its output file.
+5. Test command construction separately from scientific behavior, and retain existing scientific regression tests beside the canonical modules.
 
-Important corrections made during migration:
+CLI-only corrections required for package use:
 
-- Process one submitted model independently; do not intersect valid instances across historical agents.
-- Replace shared global `allowed_qualnames.json` and `allowed_functions.json` with per-instance stage results.
-- Replace UID-derived log locations with workspace-owned paths.
-- Require the explicit execute or validate operation currently missing from the legacy `build_step3.py` README command.
-- Define answer-choice selection configuration inside the package instead of relying on a module global initialized only by `__main__`.
-- Avoid mutating upstream metadata while building choices.
-- Defer dataset loading until it is needed instead of performing it at module import time.
+- Allow one submitted model to be processed independently instead of requiring a hard-coded agent list.
+- Accept a submission-specific predictions JSON path instead of requiring `dataset/explanations/agent_patches/{agent}.json`.
+- Accept explicit whitelist, trace-log, intermediate-output, and final-artifact paths.
+- Accept explicit run IDs instead of deriving all state from the process UID.
+- Accept explicit instance IDs and worker limits at every expensive stage.
+- Make `build_step3` require exactly one of `--execute` or `--validate`.
+- Make `build_step4` operate on the selected submission without intersecting historical agents.
+- Preserve gold fallback behavior in the existing pipeline functions; wrappers only transport its outputs.
 
 ## Implementation sequence
 
@@ -387,37 +395,64 @@ Important corrections made during migration:
 - [x] Exercise the runner with small fake stages; do not require Docker or a model API.
 - [x] Test interruption, corrupt checkpoints, partial completion, retry, stale downstream work, and concurrent writer rejection.
 
-Expected outcome: the CLI and resume machinery are real and thoroughly testable, while stage bodies may still report that the legacy operation has not yet been migrated.
+Expected outcome: the CLI and resume machinery are real and thoroughly testable, while stage bodies may still report that their canonical command has not yet been connected.
 
-Status: completed. The production registry currently uses explicit `stage_not_migrated` runners, so it cannot accidentally emit dummy scientific artifacts. The orchestration tests use injected lightweight runners and cover compatible reuse, per-instance interruption, retryable failure, corrupted results, semantic invalidation, operational-setting changes, missing prerequisites, dependency cycles, and workspace locking. The full fast test suite passes.
+Status: completed. The production registry currently uses explicit `stage_not_migrated` runners (the existing internal identifier), so it cannot accidentally emit dummy scientific artifacts. The orchestration tests use injected lightweight runners and cover compatible reuse, per-instance interruption, retryable failure, corrupted results, semantic invalidation, operational-setting changes, missing prerequisites, dependency cycles, and workspace locking. The full fast test suite passes.
 
-### Milestone 2: Pure transformation stages
+### Milestone 2: Canonical command interfaces and package wrappers
 
-- Migrate `identify-patched-functions`.
-- Migrate `select-trace-functions` using stored tracking fixtures.
-- Migrate `find-first-divergence` using stored trace fixtures.
-- Migrate `validate-candidate-expressions`.
-- Migrate `build-answer-choices`.
-- Migrate and validate `export-question-artifacts`.
-- Turn the corresponding legacy scripts into wrappers as each migration completes.
+- [x] Add explicit CLIs to both whitelist-generation scripts.
+- [x] Parameterize the existing `execution.track` and `execution.trace` CLIs for predictions, whitelist, run ID, instances, and workers.
+- [x] Add explicit CLIs to `build_step1.py` through `build_step5.py`, including separate step-3 execute and validate invocations.
+- Add a submission adapter that writes the legacy predictions shape inside the workspace.
+- Replace pending package runners with thin subprocess wrappers over those modules.
+- Validate each declared output before marking the instance-stage checkpoint complete.
+- [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
+- Test wrapper command construction without Docker or model calls.
 
-Expected outcome: deterministic and non-service-backed processing can be run and resumed through the package, and fixture inputs can produce evaluator-compatible artifacts.
+Expected outcome: every existing local-question step can be invoked directly and through `explainbench question-builder local`, while scientific logic remains canonical under `dataset/` and `execution/`.
+
+#### CLI hard-code audit
+
+The canonical command-interface phase exposes the following values:
+
+| Area | Exposed options |
+|---|---|
+| Submission selection | `--agent`, `--agents`, `--instance-ids`, `--predictions-path`, `--predictions-dir` |
+| Workspace paths | repository cache, whitelist inputs/outputs, tracking root, trace root, inspection root/run ID, every step input/output, context directory, and ground-truth directory |
+| SWE-bench harness | dataset name, split, run ID, timeout, workers, rebuild/clean behavior, cache level, file limit, namespace, image tags, and report directory |
+| Divergence | depth threshold, default timeout, agent/instance workers, simplification toggle, variable depth, and parameter depth |
+| Candidate generation | changed/unchanged candidate counts, inference toggle, model, reasoning effort, dotenv path, retries, and workers |
+| Expression inspection | execute versus validate, gold-processing toggle, expression-set ID, inspection run ID, log root, predictions, and workers |
+| Choice building | selected agents/instances, correct/incorrect counts, minimum pools, MMR weight, random seed, intent/effect mode, and workers |
+| Export | intent/effect selection, selected agents/instances, step-4 inputs, output directories, and parameter truncation limit |
+
+The following values intentionally remain canonical defaults rather than general CLI knobs for now:
+
+- The benchmark-specific exclusion list and Django FAIL_TO_PASS corrections in `execution.util`.
+- Per-instance exceptional divergence timeouts and alternate starting test IDs in `build_step1.py`.
+- Randomized/wrapper function exception lists used by divergence detection.
+- The tracer's in-container installation path and project-specific injected test-command rewrites.
+- SWE-bench Docker platform/image naming and the source-extraction joblib cache implementation.
+- The scientific prompt template and special answer text.
+
+These values affect benchmark compatibility or internal implementation rather than ordinary submission/workspace selection. They can be revisited individually if a concrete use case requires an override.
+
+Status of the CLI-only phase: completed. Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access. Package subprocess wrappers and resume behavior remain deliberately unimplemented until the command contracts are reviewed.
 
 ### Milestone 3: Docker execution stages
 
-- Migrate `track-test-calls`.
-- Migrate `trace-program-state`.
-- Migrate `execute-candidate-expressions`.
-- Parameterize repository cache, image, timeout, worker, and log locations.
+- Connect the package runners to the canonical `execution.track`, `execution.trace`, and `execution.inspect` commands.
+- Pass repository cache, image, timeout, worker, whitelist, prediction, run-ID, and log locations explicitly.
 - Keep Docker containers and subprocesses scoped to one instance attempt.
 - Add an opt-in slow integration test for one small SWE-bench instance.
 
-Expected outcome: execution evidence is generated directly in the versioned workspace and can resume at instance granularity after interruption.
+Expected outcome: the existing canonical execution code writes evidence into the versioned workspace through thin package wrappers and can later resume at instance granularity after interruption.
 
 ### Milestone 4: Model-backed candidate generation
 
-- Migrate source retrieval and `generate-candidate-expressions`.
-- Move model, reasoning, sampling, retry, and concurrency settings into typed builder configuration.
+- Connect source retrieval and candidate generation to the canonical `build_step2.py` command.
+- Pass model, reasoning, sampling, retry, and concurrency settings from typed builder configuration to that command.
 - Persist each raw response before parsing and persist each validated result immediately.
 - Distinguish API/transient failures from semantic inability to produce valid candidates.
 
@@ -425,7 +460,7 @@ Expected outcome: paid model work is durable and independently retryable, comple
 
 ### Milestone 5: Compatibility, packaging, and documentation
 
-- Complete any remaining legacy wrappers and remove duplicated logic.
+- Complete the remaining thin wrappers and verify that scientific logic is not duplicated in `src/`.
 - Verify the required runtime resources are included in the wheel.
 - Test a clean wheel installation outside the repository.
 - Document disk, Docker, network/model, and expected runtime requirements.
@@ -436,7 +471,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 ## Testing strategy
 
 - Unit tests for schemas, fingerprints, dependency resolution, and status transitions.
-- Golden tests comparing migrated pure stages with known legacy outputs.
+- Golden tests comparing parameterized canonical stages with known historical outputs.
 - CLI tests for valid commands, missing prerequisites, invalid stage names, and status output.
 - Failure-injection tests that interrupt after selected instances and confirm `--resume` reruns only incomplete units.
 - Tests proving semantic config changes invalidate the correct stage and downstream stages only.
@@ -451,7 +486,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - Automatic local question building inside `explainbench evaluate`.
 - End-to-end effect question construction.
 - Automatic deletion of large traces or Docker artifacts.
-- Redesigning the scientific question-generation method while migrating it.
+- Redesigning the scientific question-generation method while exposing and wrapping it.
 
 ## Current status
 
@@ -460,13 +495,14 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Agree on separate per-stage and complete-run commands.
 - [x] Agree on instance-level checkpointing and semantic resume validation.
 - [x] Define meaningful public stage names and map them to legacy operations.
-- [x] Detail the workspace, command, artifact, and migration contracts.
+- [x] Detail the workspace, command, artifact, and canonical-wrapper contracts.
 - [x] Implement Milestone 1: orchestration foundation.
-- [ ] Implement Milestone 2: pure transformation stages.
+- [x] Implement the CLI-interface portion of Milestone 2.
+- [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
 - [ ] Implement Milestone 5: compatibility, packaging, and documentation.
 
 ## Next step
 
-Implement Milestone 2 next, beginning with `identify-patched-functions`. Migrate one pure stage at a time into the existing registry, add equivalence fixtures, and convert its legacy entry point into a thin wrapper over the package implementation before moving to the next stage.
+Review the new canonical command contracts, then complete Milestone 2 by adding the submission adapter and connecting the existing package orchestration to those commands with thin subprocess runners. Resume-policy changes remain deferred until that integration is working.

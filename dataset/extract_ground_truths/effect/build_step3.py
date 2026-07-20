@@ -16,6 +16,9 @@ from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
 )
 from dataset.extract_ground_truths.effect.build_step2 import (
+    DEFAULT_AGENTS,
+    DEFAULT_BASE_DIR,
+    DEFAULT_PREDICTIONS_DIR,
     get_agent_patch,
     get_simple_function_name,
 )
@@ -42,11 +45,14 @@ def execute_candidate_expressions(
             before_or_after: str,
             bp_func_name: str,
             expr_id=0,
+            predictions_path=None,
+            run_id=None,
+            inspection_cli_args=(),
         ):
     stdout = StringIO()
     stderr = StringIO()
     with redirect_stdout(stdout), redirect_stderr(stderr):
-        inspect_main([
+        command = [
             "--instance_id", instance_id,
             "--agent", agent,
             "--bp-file", file_path,
@@ -58,7 +64,13 @@ def execute_candidate_expressions(
             "--post-count", str(patched_line_count),
             "--inspector-mode", before_or_after,
             "--bp-func", bp_func_name,
-        ])
+        ]
+        if predictions_path is not None:
+            command.extend(["--predictions-path", str(predictions_path)])
+        if run_id is not None:
+            command.extend(["--run-id", run_id])
+        command.extend(inspection_cli_args)
+        inspect_main(command)
 
 def is_none_attr_inspection_failure(exc):
     if exc is None:
@@ -137,9 +149,19 @@ def compute_expr_change_map(patched, buggy):
 
     return expr_change
 
-def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
-    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    run_id = f"inspect.{agent}.{os.getuid()}.{expr_id}"
+def load_inspect_results(
+    agent,
+    instance_id,
+    test_id=0,
+    expr_id=0,
+    logs_root=None,
+    run_id=None,
+):
+    base_dir = logs_root or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "../../../logs/run_evaluation",
+    )
+    run_id = run_id or f"inspect.{agent}.{os.getuid()}.{expr_id}"
     log_dir = os.path.join(base_dir, run_id, agent, instance_id)
     test_name = get_fail_to_pass_tests(instance_id)[test_id]
     buggy_path = os.path.join(log_dir, f"buggy_traces/{test_name}.jsonl")
@@ -154,8 +176,22 @@ def load_inspect_results(agent, instance_id, test_id=0, expr_id=0):
         patched_inspect = json.load(f)
     return patched_inspect, buggy_inspect
 
-def validate_expressions(agent, instance_id, test_id=0, expr_id=0):
-    patched_inspect, buggy_inspect = load_inspect_results(agent, instance_id, test_id, expr_id)
+def validate_expressions(
+    agent,
+    instance_id,
+    test_id=0,
+    expr_id=0,
+    logs_root=None,
+    run_id=None,
+):
+    patched_inspect, buggy_inspect = load_inspect_results(
+        agent,
+        instance_id,
+        test_id,
+        expr_id,
+        logs_root,
+        run_id,
+    )
     if patched_inspect is None:
         return {}
     return compute_expr_change_map(patched_inspect, buggy_inspect)
@@ -169,6 +205,10 @@ class InstanceJob:
     do_validate: bool
     expr_id: int = 0
     test_id: int = 0
+    predictions_path: str | None = None
+    inspection_run_id: str | None = None
+    logs_root: str | None = None
+    inspection_cli_args: tuple[str, ...] = ()
 
 def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
     """
@@ -199,6 +239,9 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 metadata["before_or_after"],
                 extract_qualname(metadata["function_name"]),
                 expr_id=job.expr_id,
+                predictions_path=job.predictions_path,
+                run_id=job.inspection_run_id,
+                inspection_cli_args=job.inspection_cli_args,
             )
 
         if job.do_validate and all_candidates:
@@ -207,6 +250,8 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
                 job.instance_id,
                 test_id=job.test_id,
                 expr_id=job.expr_id,
+                logs_root=job.logs_root,
+                run_id=job.inspection_run_id,
             )
 
             if not all(k in all_candidates for k in expr_change_map.keys()):
@@ -229,7 +274,19 @@ def run_instance_job(job: InstanceJob) -> Tuple[str, Optional[Dict[str, Any]]]:
         print(f"[ERROR] run_instance_job crashed for agent={job.agent} | {job.instance_id}: {type(e).__name__} {e}")
         return job.instance_id, None
 
-def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
+def process_agent(
+    data,
+    agent,
+    instance_ids,
+    do_execute=True,
+    do_validate=True,
+    predictions_path=None,
+    inspection_run_id=None,
+    logs_root=None,
+    max_workers=20,
+    expression_set_id=0,
+    inspection_cli_args=(),
+):
     results = {}
     fallback_reachability = {}
     print(
@@ -258,7 +315,7 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
                 instance_id,
                 metadata['file_path'],
                 get_simple_function_name(metadata),
-                patch=get_agent_patch(agent, instance_id),
+                patch=get_agent_patch(agent, instance_id, predictions_path),
                 line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
             )
             metadata["function_code_before_patch"] = pre_code
@@ -271,8 +328,12 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
             metadata=metadata,
             do_execute=False if is_fallback_to_gold else do_execute,
             do_validate=False if is_fallback_to_gold else do_validate,
-            expr_id=0,
+            expr_id=expression_set_id,
             test_id=metadata["test_id"],
+            predictions_path=predictions_path,
+            inspection_run_id=inspection_run_id,
+            logs_root=logs_root,
+            inspection_cli_args=tuple(inspection_cli_args),
         ))
 
     if not jobs:
@@ -280,8 +341,6 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
         return results
 
     Executor = ProcessPoolExecutor if do_execute else ThreadPoolExecutor
-    max_workers = 20
-
     with Executor(max_workers=max_workers) as executor:
         futures = {executor.submit(run_instance_job, job): job.instance_id for job in jobs}
         for future in as_completed(futures):
@@ -302,87 +361,228 @@ def process_agent(data, agent, instance_ids, do_execute=True, do_validate=True):
 
     return results
 
-if __name__ == "__main__":
+def build_parser():
     parser = argparse.ArgumentParser(
         description="Execute candidate expressions and/or validate them for effect ground truth step 3.",
     )
-    parser.add_argument(
+    operation = parser.add_mutually_exclusive_group(required=True)
+    operation.add_argument(
         "--execute",
         action="store_true",
         help="Run execute_candidate_expressions (expression inspection).",
     )
-    parser.add_argument(
+    operation.add_argument(
         "--validate",
         action="store_true",
-        help="Run validate_expressions and write tmp/step3.json.",
+        help="Validate existing expression-inspection logs and write step 3.",
     )
-    args = parser.parse_args()
+    agents = parser.add_mutually_exclusive_group()
+    agents.add_argument(
+        "--agent",
+        action="append",
+        help="Agent to process; repeat to process multiple agents.",
+    )
+    agents.add_argument("--agents", nargs="+", help="Agents to process.")
+    parser.add_argument(
+        "--instance-ids",
+        "--instance_ids",
+        nargs="+",
+        default=["all"],
+    )
+    parser.add_argument(
+        "--step2-path",
+        default=os.path.join(DEFAULT_BASE_DIR, "output_per_step", "step2.json"),
+    )
+    parser.add_argument(
+        "--gold-step2-path",
+        default=os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step2.gold.json"
+        ),
+    )
+    parser.add_argument(
+        "--output-path",
+        default=os.path.join(DEFAULT_BASE_DIR, "output_per_step", "step3.json"),
+    )
+    parser.add_argument(
+        "--gold-output-path",
+        default=os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step3.gold.json"
+        ),
+    )
+    parser.add_argument(
+        "--predictions-path",
+        help="Predictions JSON for exactly one selected non-gold agent.",
+    )
+    parser.add_argument(
+        "--predictions-dir",
+        default=DEFAULT_PREDICTIONS_DIR,
+        help="Directory containing historical {agent}.json prediction files.",
+    )
+    parser.add_argument(
+        "--inspection-run-id-template",
+        help=(
+            "Inspection run ID, optionally containing {agent} and {expr_id}. "
+            "Defaults to the historical agent/UID form."
+        ),
+    )
+    parser.add_argument(
+        "--logs-root",
+        default=DEFAULT_BASE_DIR,
+        help="Root containing SWE-bench run-evaluation log directories.",
+    )
+    parser.add_argument("--expression-set-id", type=int, default=0)
+    parser.add_argument("--instance-workers", type=int, default=20)
+    parser.add_argument("--agent-workers", type=int, default=10)
+    parser.add_argument("--inspection-timeout", type=int, default=3600)
+    parser.add_argument(
+        "--inspection-dataset-name",
+        default="SWE-bench/SWE-bench_Verified",
+    )
+    parser.add_argument("--inspection-split", default="test")
+    parser.add_argument("--inspection-namespace", default="swebench")
+    parser.add_argument("--inspection-max-workers", type=int, default=0)
+    parser.add_argument(
+        "--inspection-force-rebuild",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--inspection-cache-level", default="env")
+    parser.add_argument(
+        "--inspection-clean",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--inspection-open-file-limit", type=int, default=4096)
+    parser.add_argument(
+        "--inspection-rewrite-reports",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--inspection-modal",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--inspection-instance-image-tag", default="latest")
+    parser.add_argument("--inspection-env-image-tag", default="latest")
+    parser.add_argument("--inspection-report-dir", default=".")
+    parser.add_argument(
+        "--process-gold",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Execute gold metadata when a reusable gold step-3 file is absent.",
+    )
+    return parser
 
+
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
     do_execute = args.execute
     do_validate = args.validate
+    selected_agents = args.agent or args.agents or DEFAULT_AGENTS
+    if args.predictions_path and (
+        len(selected_agents) != 1 or selected_agents[0] == "gold"
+    ):
+        parser.error(
+            "--predictions-path requires exactly one non-gold --agent"
+        )
 
     print(
         f"[INFO] Step3 main starting "
         f"(execute={do_execute}, validate={do_validate})",
     )
 
-    # ------------ SCRIPT PARAMETERS ------------ #
-    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    AGENTS = [
-        "20250603_Refact_Agent_claude-4-sonnet",
-        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250928_trae_doubao_seed_code",
-        "20250807_mini-v1.7.0_gpt-5-mini",
-        "20251127_openhands_claude-opus-4-5",
-        "openhands_gpt-5-mini",
-        "openhands_minimax-m2.5",
-        "gold",
-    ]
-    STEP2_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
-    OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.json")
-    STEP2_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.gold.json")
-    STEP3_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step3.gold.json")
-    FRESH_RUN = False
-    # ------------------------------------------- #
-    
-    step2 = read_json(STEP2_PATH)
-    gold = read_json(STEP2_GOLD_PATH)
+    step2 = read_json(args.step2_path)
+    gold = read_json(args.gold_step2_path)
     step2["gold"] = gold["gold"]
-    
     results = {}
-    if os.path.exists(OUTPUT_PATH) and not FRESH_RUN:
-        with open(OUTPUT_PATH, "r") as f:
-            exist_agents = list(json.load(f).keys())
-        OUTPUT_PATH = OUTPUT_PATH.replace(".json" ,".incremental.json")
-    else:
-        exist_agents = []
-    
-    agents_to_process = AGENTS.copy()
-    agents_to_process = [agent for agent in agents_to_process if agent not in exist_agents]
-    if "gold" in agents_to_process:
-        agents_to_process.remove("gold")
+    agents_to_process = [agent for agent in selected_agents if agent != "gold"]
+    instance_ids = get_instance_ids(args.instance_ids)
 
-    instance_ids = get_instance_ids(["all"])
-    
+    def predictions_path(agent):
+        if agent == "gold":
+            return None
+        return args.predictions_path or os.path.join(
+            args.predictions_dir, f"{agent}.json"
+        )
+
+    def inspection_run_id(agent):
+        if args.inspection_run_id_template is None:
+            return None
+        return args.inspection_run_id_template.format(
+            agent=agent,
+            expr_id=args.expression_set_id,
+        )
+
+    inspection_cli_args = (
+        "--timeout", str(args.inspection_timeout),
+        "--dataset-name", args.inspection_dataset_name,
+        "--split", args.inspection_split,
+        "--namespace", args.inspection_namespace,
+        "--max-workers", str(args.inspection_max_workers),
+        "--cache-level", args.inspection_cache_level,
+        "--open-file-limit", str(args.inspection_open_file_limit),
+        "--instance-image-tag", args.inspection_instance_image_tag,
+        "--env-image-tag", args.inspection_env_image_tag,
+        "--report-dir", args.inspection_report_dir,
+        "--force-rebuild" if args.inspection_force_rebuild else "--no-force-rebuild",
+        "--clean" if args.inspection_clean else "--no-clean",
+        "--rewrite-reports" if args.inspection_rewrite_reports else "--no-rewrite-reports",
+        "--modal" if args.inspection_modal else "--no-modal",
+    )
+
     # Run gold patch first
-    if os.path.exists(STEP3_GOLD_PATH):
+    if os.path.exists(args.gold_output_path):
         if do_validate:
-            results["gold"] = read_json(STEP3_GOLD_PATH)["gold"]
+            results["gold"] = read_json(args.gold_output_path)["gold"]
             print(f"[INFO] Loaded existing step3.gold.json with {len(results['gold'])} entries")
-    else:
+    elif args.process_gold:
         print("[INFO] Processing gold agent for step3")
-        results["gold"] = process_agent(step2, "gold", instance_ids, do_execute, do_validate)
+        results["gold"] = process_agent(
+            step2,
+            "gold",
+            instance_ids,
+            do_execute,
+            do_validate,
+            inspection_run_id=inspection_run_id("gold"),
+            logs_root=args.logs_root,
+            max_workers=args.instance_workers,
+            expression_set_id=args.expression_set_id,
+            inspection_cli_args=inspection_cli_args,
+        )
         if do_validate:
-            with open(os.path.join(STEP3_GOLD_PATH), "w") as f:
+            os.makedirs(
+                os.path.dirname(os.path.abspath(args.gold_output_path)),
+                exist_ok=True,
+            )
+            with open(args.gold_output_path, "w") as f:
                 json.dump(results, f, indent=2)
-            print(f"Saved step3 results to {STEP3_GOLD_PATH}")
+            print(f"Saved step3 results to {args.gold_output_path}")
+    elif do_validate:
+        parser.error(
+            "validation requires --gold-output-path to exist or --process-gold"
+        )
     if do_validate:
         step2["gold"] = results["gold"]
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=args.agent_workers) as executor:
         futures = {
-            executor.submit(process_agent, step2, agent, instance_ids, do_execute, do_validate): agent for agent in agents_to_process
+            executor.submit(
+                process_agent,
+                step2,
+                agent,
+                instance_ids,
+                do_execute,
+                do_validate,
+                predictions_path(agent),
+                inspection_run_id(agent),
+                args.logs_root,
+                args.instance_workers,
+                args.expression_set_id,
+                inspection_cli_args,
+            ): agent
+            for agent in agents_to_process
         }
         for future in as_completed(futures):
             agent = futures[future]
@@ -390,8 +590,16 @@ if __name__ == "__main__":
             print(f"[INFO] Completed processing for agent={agent}")
     
     if do_validate:
-        with open(os.path.join(OUTPUT_PATH), "w") as f:
+        os.makedirs(
+            os.path.dirname(os.path.abspath(args.output_path)),
+            exist_ok=True,
+        )
+        with open(args.output_path, "w") as f:
             if "gold" in results:
                 del results["gold"]
             json.dump(results, f, indent=2)
-        print(f"Saved step3 results to {OUTPUT_PATH}")
+        print(f"Saved step3 results to {args.output_path}")
+
+
+if __name__ == "__main__":
+    main()

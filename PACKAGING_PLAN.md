@@ -244,7 +244,7 @@ The checksum binds the generated questions to the exact submitted patches. Inter
 
 ### Phase 4: Refactor the local-effect pipeline
 
-Convert the current script sequence into parameterized Python stages. Users can run each stage independently for debugging and recovery, or use one command that orchestrates the complete dependency graph. Both interfaces call the same canonical implementation.
+Keep the current script sequence under `dataset/` and `execution/` as the canonical scientific implementation, and give each module a parameterized CLI. Users can run each stage independently for debugging and recovery, or use one package command that orchestrates the complete dependency graph. The `src/explainbench` layer is a thin wrapper that invokes those canonical commands; pipeline logic must not be copied into `src/`, and canonical modules must not import package-stage implementations.
 
 The public stages use meaningful action-based names:
 

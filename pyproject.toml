@@ -44,5 +44,5 @@ explainbench = [
 
 [tool.pytest.ini_options]
 addopts = "-p no:tracer_plugin"
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]

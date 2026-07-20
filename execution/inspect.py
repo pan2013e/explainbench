@@ -1,6 +1,11 @@
 import os
+from pathlib import Path
 
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import (
+    ArgumentDefaultsHelpFormatter,
+    ArgumentParser,
+    BooleanOptionalAction,
+)
 from swebench.harness.run_evaluation import main as run_evaluation_main
 
 from execution.monkey_patch.inspect import monkey_patch_execution
@@ -9,24 +14,30 @@ from execution.util import prepare_tracer, get_predictions_path
 def inspect(**kwargs):
     monkey_patch_execution(**kwargs)
     prepare_tracer()
+    predictions_path = kwargs.get("predictions_path")
+    if predictions_path is None:
+        predictions_path = get_predictions_path(kwargs["agent"])
+    run_id = kwargs.get("run_id") or (
+        f"inspect.{kwargs['agent']}.{os.getuid()}.{kwargs['expr_id']}"
+    )
     run_evaluation_main(
-        dataset_name="SWE-bench/SWE-bench_Verified",
-        split="test",
+        dataset_name=kwargs["dataset_name"],
+        split=kwargs["split"],
         instance_ids=[kwargs["instance_id"]],
-        predictions_path=get_predictions_path(kwargs["agent"]),
-        max_workers=0,
-        force_rebuild=False,
-        cache_level="env",
-        clean=False,
-        open_file_limit=4096,
-        run_id=f"inspect.{kwargs["agent"]}.{os.getuid()}.{kwargs["expr_id"]}",
-        timeout=3600,
-        namespace="swebench",
-        rewrite_reports=False,
-        modal=False,
-        instance_image_tag="latest",
-        env_image_tag="latest",
-        report_dir=".",
+        predictions_path=str(predictions_path),
+        max_workers=kwargs["max_workers"],
+        force_rebuild=kwargs["force_rebuild"],
+        cache_level=kwargs["cache_level"],
+        clean=kwargs["clean"],
+        open_file_limit=kwargs["open_file_limit"],
+        run_id=run_id,
+        timeout=kwargs["timeout"],
+        namespace=kwargs["namespace"],
+        rewrite_reports=kwargs["rewrite_reports"],
+        modal=kwargs["modal"],
+        instance_image_tag=kwargs["instance_image_tag"],
+        env_image_tag=kwargs["env_image_tag"],
+        report_dir=str(kwargs["report_dir"]),
     )
     
 def main(args=None):
@@ -36,6 +47,7 @@ def main(args=None):
     )
     parser.add_argument(
         "-i",
+        "--instance-id",
         "--instance_id",
         type=str,
         help="Instance ID to run",
@@ -74,6 +86,48 @@ def main(args=None):
     parser.add_argument(
         "--bp-func", type=str, default=None, help="Function name where breakpoint is set",
     )
+    parser.add_argument(
+        "--predictions-path",
+        type=Path,
+        help="Explicit SWE-bench predictions JSON for this agent.",
+    )
+    parser.add_argument(
+        "--run-id",
+        help="Explicit SWE-bench inspection run ID.",
+    )
+    parser.add_argument("--timeout", type=int, default=3600)
+    parser.add_argument(
+        "--dataset-name",
+        default="SWE-bench/SWE-bench_Verified",
+    )
+    parser.add_argument("--split", default="test")
+    parser.add_argument("--namespace", default="swebench")
+    parser.add_argument("--max-workers", type=int, default=0)
+    parser.add_argument(
+        "--force-rebuild",
+        action=BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--cache-level", default="env")
+    parser.add_argument(
+        "--clean",
+        action=BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--open-file-limit", type=int, default=4096)
+    parser.add_argument(
+        "--rewrite-reports",
+        action=BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--modal",
+        action=BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--instance-image-tag", default="latest")
+    parser.add_argument("--env-image-tag", default="latest")
+    parser.add_argument("--report-dir", type=Path, default=Path("."))
     args = parser.parse_args(args)
     inspect(**vars(args))
 

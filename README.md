@@ -232,18 +232,88 @@ python -m execution.pbt.patch_runner \
 #### Local questions
 
 1. Run `pip install -e py-tracer[all]`
-2. Run the following Python commands in order (make sure parameters in each script are correct).
+2. Run the canonical commands in order. Every command now accepts explicit submission, instance, input, output, worker, and run-path options; the example below shows one agent and one instance.
 ```bash
-python -m dataset.extract_ground_truths.effect.trace_step1_generate_qualname_whitelist
-python -m execution.track -i all --agent AGENT_ID --max_workers WORKER_NUM
-python -m dataset.extract_ground_truths.effect.trace_step2_generate_call_stack_whitelist
-python -m execution.trace -i all --agent AGENT_ID --max_workers WORKER_NUM # slow
-python -m dataset.extract_ground_truths.effect.build_step1
-python -m dataset.extract_ground_truths.effect.build_step2
-python -m dataset.extract_ground_truths.effect.build_step3
-python -m dataset.extract_ground_truths.effect.build_step4
-python -m dataset.extract_ground_truths.effect.build_step5
+python -m dataset.extract_ground_truths.effect.trace_step1_generate_qualname_whitelist \
+    --agent AGENT_ID \
+    --predictions-path PATH_TO_PATCH_FILE \
+    --instance-ids INSTANCE_ID \
+    --repos-root PATH_TO_REPOSITORY_CACHE \
+    --output-path WORK_DIR/allowed_qualnames.json
+
+python -m execution.track \
+    --agent AGENT_ID \
+    --predictions-path PATH_TO_PATCH_FILE \
+    --allowed-qualnames-path WORK_DIR/allowed_qualnames.json \
+    --instance-ids INSTANCE_ID \
+    --run-id track.AGENT_ID \
+    --max-workers WORKER_NUM
+
+python -m dataset.extract_ground_truths.effect.trace_step2_generate_call_stack_whitelist \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --targets-json WORK_DIR/allowed_qualnames.json \
+    --root-path 'ABSOLUTE_REPO_PATH/logs/run_evaluation/track.AGENT_ID/{agent_name}/{instance_id}' \
+    --output-path WORK_DIR/allowed_functions.json
+
+python -m execution.trace \
+    --agent AGENT_ID \
+    --predictions-path PATH_TO_PATCH_FILE \
+    --allowed-functions-path WORK_DIR/allowed_functions.json \
+    --instance-ids INSTANCE_ID \
+    --run-id trace.AGENT_ID \
+    --max-workers WORKER_NUM
+
+python -m dataset.extract_ground_truths.effect.build_step1 \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --trace-root-template ABSOLUTE_REPO_PATH/logs/run_evaluation/trace.AGENT_ID/AGENT_ID \
+    --output-path WORK_DIR/step1.json
+
+python -m dataset.extract_ground_truths.effect.build_step2 \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --step1-path WORK_DIR/step1.json \
+    --predictions-path PATH_TO_PATCH_FILE \
+    --output-path WORK_DIR/step2.json
+
+python -m dataset.extract_ground_truths.effect.build_step3 \
+    --execute \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --step2-path WORK_DIR/step2.json \
+    --gold-step2-path PATH_TO_STEP2_GOLD_JSON \
+    --gold-output-path PATH_TO_STEP3_GOLD_JSON \
+    --predictions-path PATH_TO_PATCH_FILE \
+    --inspection-run-id-template 'inspect.{agent}.{expr_id}'
+
+python -m dataset.extract_ground_truths.effect.build_step3 \
+    --validate \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --step2-path WORK_DIR/step2.json \
+    --gold-step2-path PATH_TO_STEP2_GOLD_JSON \
+    --gold-output-path PATH_TO_STEP3_GOLD_JSON \
+    --inspection-run-id-template 'inspect.{agent}.{expr_id}' \
+    --logs-root ABSOLUTE_REPO_PATH/logs/run_evaluation \
+    --output-path WORK_DIR/step3.json
+
+python -m dataset.extract_ground_truths.effect.build_step4 \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --step3-path WORK_DIR/step3.json \
+    --output-path WORK_DIR/step4.json
+
+python -m dataset.extract_ground_truths.effect.build_step5 \
+    --kind effect \
+    --agent AGENT_ID \
+    --instance-ids INSTANCE_ID \
+    --effect-step4-path WORK_DIR/step4.json \
+    --context-dir WORK_DIR/question-artifacts/context \
+    --ground-truth-dir WORK_DIR/question-artifacts/ground_truths
 ```
+
+Use `python -m MODULE --help` to see the complete interface for any stage. In particular, model selection and candidate counts are configured by `build_step2`, while timeouts, concurrency, MMR selection, random seed, and parameter truncation are exposed by their respective commands.
 
 SWE-bench docker instances will be created and run during these steps, so there is a minimum disk space requirement (please refer to https://github.com/SWE-bench/SWE-bench). In resource-limited machines, please reduce the parallelism to avoid crashes or docker timeouts.
 

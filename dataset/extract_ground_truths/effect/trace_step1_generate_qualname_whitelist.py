@@ -13,6 +13,18 @@ from tqdm.auto import tqdm
 
 DIR = Path(__file__).parent.resolve()
 
+DEFAULT_AGENTS = [
+    "gold",
+    "20250603_Refact_Agent_claude-4-sonnet",
+    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    "20250928_trae_doubao_seed_code",
+    "20250807_mini-v1.7.0_gpt-5-mini",
+    "20251127_openhands_claude-opus-4-5",
+    "openhands_gpt-5-mini",
+    "openhands_minimax-m2.5",
+]
+
 class QualnameVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         super().__init__()
@@ -239,31 +251,27 @@ def apply_patch_to_repo(repo_dir: Path, patch_content: str) -> None:
     )
 
 
-def main() -> None:
+def main(argv: List[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Extract modified qualnames (old+new) per agent/instance "
                     "and save to a single JSON file, updating incrementally."
     )
 
-    parser.add_argument(
+    agents = parser.add_mutually_exclusive_group()
+    agents.add_argument(
+        "--agent",
+        action="append",
+        help="Agent to process; repeat to process multiple agents.",
+    )
+    agents.add_argument(
         "--agents",
         nargs="+",
-        default=[
-            "gold",
-            "20250603_Refact_Agent_claude-4-sonnet",
-            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            "20250928_trae_doubao_seed_code",
-            "20250807_mini-v1.7.0_gpt-5-mini",
-            "20251127_openhands_claude-opus-4-5",
-            "openhands_gpt-5-mini",
-            "openhands_minimax-m2.5",
-        ],
-        help="List of agent names to process (used as top-level keys in the JSON).",
+        help="Agents to process (used as top-level keys in the output JSON).",
     )
 
     parser.add_argument(
         "--instance-ids",
+        "--instance_ids",
         nargs="+",
         default=["all"],
         help="List of instance_ids to load from the dataset.",
@@ -277,15 +285,49 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--predictions-path",
+        type=Path,
+        help=(
+            "Explicit predictions JSON for a single non-gold agent. If omitted, "
+            "the file is resolved below --predictions-dir."
+        ),
+    )
+
+    parser.add_argument(
+        "--predictions-dir",
+        type=Path,
+        default=DIR / "../../explanations/agent_patches",
+        help="Directory containing one {agent}.json predictions file per agent.",
+    )
+
+    parser.add_argument(
+        "--dataset-name",
+        default="SWE-bench/SWE-bench_Verified",
+        help="SWE-bench dataset used to resolve repositories and base commits.",
+    )
+
+    parser.add_argument(
+        "--repository-remote",
+        default="https://github.com",
+        help="Base URL used when cloning benchmark repositories.",
+    )
+
+    parser.add_argument(
         "--output-path",
         type=Path,
         default=DIR / "../../../execution/allowed_qualnames.json",
         help="Path to the single output JSON file.",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    AGENT_NAMES = args.agents
+    AGENT_NAMES = args.agent or args.agents or DEFAULT_AGENTS
+    if args.predictions_path is not None and (
+        len(AGENT_NAMES) != 1 or AGENT_NAMES[0] == "gold"
+    ):
+        parser.error(
+            "--predictions-path requires exactly one non-gold --agent"
+        )
     INSTANCE_IDS = get_instance_ids(args.instance_ids)
     REPOS_ROOT = args.repos_root
     OUTPUT_PATH = args.output_path
@@ -302,11 +344,11 @@ def main() -> None:
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     ds = load_swebench_dataset(
-        name="SWE-bench/SWE-bench_Verified",
+        name=args.dataset_name,
         instance_ids=INSTANCE_IDS,
     )
 
-    AGENT_JSON_PATH = DIR / "../../explanations/agent_patches"
+    AGENT_JSON_PATH = args.predictions_dir
 
     for agent in AGENT_NAMES:
         print(f"Processing agent: {agent}")
@@ -316,7 +358,12 @@ def main() -> None:
 
         # Load patch reference for this agent once.
         if agent != "gold":
-            with open(AGENT_JSON_PATH / f"{agent}.json", "r", encoding="utf-8") as f:
+            predictions_path = (
+                args.predictions_path
+                if args.predictions_path is not None
+                else AGENT_JSON_PATH / f"{agent}.json"
+            )
+            with predictions_path.open("r", encoding="utf-8") as f:
                 patch_reference = json.load(f)
             patch_key = "model_patch"
         else:
@@ -350,6 +397,7 @@ def main() -> None:
                     repos_root=REPOS_ROOT,
                     repo_slug=repo_slug,
                     commit=base_commit,
+                    remote_base=args.repository_remote,
                 )
 
                 # Qualnames for old version.

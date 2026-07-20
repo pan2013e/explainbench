@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 
@@ -9,6 +10,8 @@ from pydantic import ValidationError
 
 from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.infer_expression import (
+    DEFAULT_MODEL,
+    DEFAULT_REASONING_EFFORT,
     main as infer_main,
     build_prompt,
 )
@@ -17,13 +20,33 @@ from dataset.extract_ground_truths.effect.source_util import (
     remove_docstrings,
 )
 
+DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_BASE_DIR = os.path.join(DIR, "../../../logs/run_evaluation")
+DEFAULT_PREDICTIONS_DIR = os.path.join(
+    DIR, "../../explanations/agent_patches"
+)
+DEFAULT_AGENTS = [
+    "20250603_Refact_Agent_claude-4-sonnet",
+    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    "20250928_trae_doubao_seed_code",
+    "20250807_mini-v1.7.0_gpt-5-mini",
+    "20251127_openhands_claude-opus-4-5",
+    "openhands_gpt-5-mini",
+    "openhands_minimax-m2.5",
+    "gold",
+]
+
 def read_json(path):
     with open(os.path.join(path), "r") as f:
         return json.load(f)
 
 @lru_cache
-def read_agent_patch_data(agent):
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), f"../../explanations/agent_patches/{agent}.json"), "r") as f:
+def read_agent_patch_data(agent, predictions_path=None):
+    path = predictions_path or os.path.join(
+        DEFAULT_PREDICTIONS_DIR, f"{agent}.json"
+    )
+    with open(path, "r") as f:
         return json.load(f)
 
 def build_fn_code(pre_code, post_code):
@@ -43,8 +66,8 @@ def build_statement(pre_stmt, post_stmt, pre_type, post_type):
     else:
         return f"# Before Patch:\n{pre_stmt}{exc_tag(pre_type)}\n\n# After Patch:\n{post_stmt}{exc_tag(post_type)}"
 
-def get_agent_patch(agent, instance_id):
-    data = read_agent_patch_data(agent)
+def get_agent_patch(agent, instance_id, predictions_path=None):
+    data = read_agent_patch_data(agent, predictions_path)
     patch = data[instance_id]['model_patch'] or None
     return patch
 
@@ -56,10 +79,28 @@ def get_simple_function_name(metadata):
         name = name.split(".")[-1]
     return name
 
-@backoff.on_exception(backoff.expo, ValidationError, max_tries=5)
-def infer_expressions(prompt):
-    expr = infer_main(prompt)
-    return expr
+def infer_expressions(
+    prompt,
+    model_id=DEFAULT_MODEL,
+    reasoning_effort=DEFAULT_REASONING_EFFORT,
+    env_file=None,
+    max_retries=5,
+):
+    @backoff.on_exception(
+        backoff.expo,
+        ValidationError,
+        max_tries=max_retries,
+    )
+    def infer_once():
+        return infer_main(
+            prompt,
+            model_id=model_id,
+            reasoning_effort=reasoning_effort,
+            env_file=env_file,
+            max_retries=max_retries,
+        )
+
+    return infer_once()
 
 def process_agent(
     agent_data,
@@ -68,6 +109,12 @@ def process_agent(
     n_changed,
     n_unchanged,
     do_inference,
+    predictions_path=None,
+    max_workers=20,
+    model_id=DEFAULT_MODEL,
+    reasoning_effort=DEFAULT_REASONING_EFFORT,
+    env_file=None,
+    max_retries=5,
 ):
     results = {}
         
@@ -88,7 +135,7 @@ def process_agent(
                 instance_id,
                 metadata['file_path'],
                 get_simple_function_name(metadata),
-                patch=get_agent_patch(agent, instance_id),
+                patch=get_agent_patch(agent, instance_id, predictions_path),
                 line_hint=(metadata['buggy_lineno'], metadata['patched_lineno']),
             )
 
@@ -112,7 +159,13 @@ def process_agent(
             instance_result = {"prompt_length_chars": len(prompt)}
             
             if do_inference:
-                expr_list = infer_expressions(prompt)
+                expr_list = infer_expressions(
+                    prompt,
+                    model_id,
+                    reasoning_effort,
+                    env_file,
+                    max_retries,
+                )
                 if expr_list is not None:
                     expr_strings = [x.expr for x in expr_list.expressions]
                     instance_result["changed_candidates"] = expr_strings[:n_changed]
@@ -134,7 +187,7 @@ def process_agent(
                 traceback.print_exc(file=sys.stdout)
             return None
     
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(process_instance, instance_id): instance_id
             for instance_id in instance_ids
@@ -146,67 +199,122 @@ def process_agent(
                 results[instance_id] = result
     return results
 
-if __name__ == "__main__":
-    # ------------ SCRIPT PARAMETERS ------------ #
-    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../logs/run_evaluation")
-    AGENTS = [
-        "20250603_Refact_Agent_claude-4-sonnet",
-        "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-        "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-        "20250928_trae_doubao_seed_code",
-        "20250807_mini-v1.7.0_gpt-5-mini",
-        "20251127_openhands_claude-opus-4-5",
-        "openhands_gpt-5-mini",
-        "openhands_minimax-m2.5",
-        "gold",
-    ]
-    STEP1_PATH = os.path.join(BASE_DIR, "output_per_step", "step1.json")
-    OUTPUT_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.json")
-    STEP2_GOLD_PATH = os.path.join(BASE_DIR, "output_per_step", "step2.gold.json")
-    N_CHANGED = 10
-    N_UNCHANGED = 10
-    DO_INFERENCE = True
-    FRESH_RUN = False
-    # ------------------------------------------- #
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Generate candidate expressions from step-1 divergences."
+    )
+    agents = parser.add_mutually_exclusive_group()
+    agents.add_argument(
+        "--agent",
+        action="append",
+        help="Agent to process; repeat to process multiple agents.",
+    )
+    agents.add_argument("--agents", nargs="+", help="Agents to process.")
+    parser.add_argument(
+        "--instance-ids",
+        "--instance_ids",
+        nargs="+",
+        default=["all"],
+    )
+    parser.add_argument(
+        "--step1-path",
+        default=os.path.join(DEFAULT_BASE_DIR, "output_per_step", "step1.json"),
+    )
+    parser.add_argument(
+        "--output-path",
+        default=os.path.join(DEFAULT_BASE_DIR, "output_per_step", "step2.json"),
+    )
+    parser.add_argument(
+        "--gold-output-path",
+        default=os.path.join(
+            DEFAULT_BASE_DIR, "output_per_step", "step2.gold.json"
+        ),
+    )
+    parser.add_argument(
+        "--predictions-path",
+        help="Predictions JSON for exactly one selected non-gold agent.",
+    )
+    parser.add_argument(
+        "--predictions-dir",
+        default=DEFAULT_PREDICTIONS_DIR,
+        help="Directory containing historical {agent}.json prediction files.",
+    )
+    parser.add_argument("--changed-candidates", type=int, default=10)
+    parser.add_argument("--unchanged-candidates", type=int, default=10)
+    parser.add_argument(
+        "--inference",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument("--instance-workers", type=int, default=20)
+    parser.add_argument("--agent-workers", type=int, default=10)
+    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("minimal", "low", "medium", "high"),
+        default=DEFAULT_REASONING_EFFORT,
+    )
+    parser.add_argument("--env-file")
+    parser.add_argument("--max-retries", type=int, default=5)
+    return parser
 
-    step1 = read_json(STEP1_PATH)
+
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    selected_agents = args.agent or args.agents or DEFAULT_AGENTS
+    if args.predictions_path and (
+        len(selected_agents) != 1 or selected_agents[0] == "gold"
+    ):
+        parser.error(
+            "--predictions-path requires exactly one non-gold --agent"
+        )
+    step1 = read_json(args.step1_path)
     results = {}
-    if os.path.exists(OUTPUT_PATH) and not FRESH_RUN:
-        with open(OUTPUT_PATH, "r") as f:
-            exist_agents = list(json.load(f).keys())
-        OUTPUT_PATH = OUTPUT_PATH.replace(".json" ,".incremental.json")
-    else:
-        exist_agents = []
+    instance_ids = get_instance_ids(args.instance_ids)
 
-    agents_to_process = AGENTS.copy()
-    agents_to_process = [agent for agent in agents_to_process if agent not in exist_agents]
-    
-    if os.path.exists(STEP2_GOLD_PATH) and "gold" in agents_to_process:
-        agents_to_process.remove("gold")
+    def predictions_path(agent):
+        if agent == "gold":
+            return None
+        return args.predictions_path or os.path.join(
+            args.predictions_dir, f"{agent}.json"
+        )
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=args.agent_workers) as executor:
         futures = {
             executor.submit(
                 process_agent,
                 step1,
                 agent,
-                get_instance_ids(["all"]),
-                N_CHANGED,
-                N_UNCHANGED,
-                DO_INFERENCE
+                instance_ids,
+                args.changed_candidates,
+                args.unchanged_candidates,
+                args.inference,
+                predictions_path(agent),
+                args.instance_workers,
+                args.model,
+                args.reasoning_effort,
+                args.env_file,
+                args.max_retries,
             ): agent
-            for agent in agents_to_process
+            for agent in selected_agents
         }
         for future in tqdm(as_completed(futures), total=len(futures)):
             agent = futures[future]
             results[agent] = future.result()
     
     if "gold" in results:
-        with open(STEP2_GOLD_PATH, "w") as f:
+        os.makedirs(os.path.dirname(os.path.abspath(args.gold_output_path)), exist_ok=True)
+        with open(args.gold_output_path, "w") as f:
             json.dump({"gold": results["gold"]}, f, indent=2)
-        print(f"Saved step2 gold results to {STEP2_GOLD_PATH}")
+        print(f"Saved step2 gold results to {args.gold_output_path}")
         del results["gold"]
-    
-    with open(OUTPUT_PATH, "w") as f:
+
+    os.makedirs(os.path.dirname(os.path.abspath(args.output_path)), exist_ok=True)
+    with open(args.output_path, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Saved step2 results to {OUTPUT_PATH}")
+    print(f"Saved step2 results to {args.output_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -10,6 +10,18 @@ from execution.util import get_instance_ids
 
 DIR = Path(__file__).parent.resolve()
 
+DEFAULT_AGENTS = [
+    "gold",
+    "20250603_Refact_Agent_claude-4-sonnet",
+    "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
+    "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
+    "20250928_trae_doubao_seed_code",
+    "20250807_mini-v1.7.0_gpt-5-mini",
+    "20251127_openhands_claude-opus-4-5",
+    "openhands_gpt-5-mini",
+    "openhands_minimax-m2.5",
+]
+
 def load_jsonl(path: str) -> Iterable[dict]:
     """Yield JSON objects, one per line, from a JSONL file."""
     with open(path, "r", encoding="utf-8") as f:
@@ -55,7 +67,7 @@ def collect_files(root_path: Path, keyword_filter: str = "") -> List[Path]:
     return list(jsonl_files)
 
 
-def main() -> None:
+def main(argv: List[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Use precomputed target qualnames (from a JSON file) to "
@@ -70,25 +82,21 @@ def main() -> None:
         help="Template path to logs; must contain {agent_name} and {instance_id}.",
     )
 
-    parser.add_argument(
+    agents = parser.add_mutually_exclusive_group()
+    agents.add_argument(
+        "--agent",
+        action="append",
+        help="Agent to process; repeat to process multiple agents.",
+    )
+    agents.add_argument(
         "--agents",
         nargs="+",
-        default=[
-            "gold",
-            "20250603_Refact_Agent_claude-4-sonnet",
-            "20250720_Lingxi-v1.5_claude-4-sonnet-20250514",
-            "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct",
-            "20250928_trae_doubao_seed_code",
-            "20250807_mini-v1.7.0_gpt-5-mini",
-            "20251127_openhands_claude-opus-4-5",
-            "openhands_gpt-5-mini",
-            "openhands_minimax-m2.5",
-        ],
         help="List of agent names to process.",
     )
 
     parser.add_argument(
         "--instance-ids",
+        "--instance_ids",
         nargs="+",
         default=["all"],
         help=(
@@ -114,10 +122,10 @@ def main() -> None:
         help="Path to the output JSON file.",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     ROOT_PATH = args.root_path
-    AGENT_NAMES = args.agents
+    AGENT_NAMES = args.agent or args.agents or DEFAULT_AGENTS
     INSTANCE_IDS_ARG = get_instance_ids(args.instance_ids)
     TARGETS_JSON = args.targets_json
     OUTPUT_PATH = args.output_path
