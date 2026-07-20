@@ -16,6 +16,7 @@ from explainbench.evaluation.config import (
     DEFAULT_TOP_P,
     EvaluatorSettings,
 )
+from explainbench.evaluation.checkpoints import EvaluationCheckpoint
 from explainbench.evaluation.inference import Model
 from explainbench.evaluation.preparation import prepare_evaluation
 from explainbench.evaluation.registry import (
@@ -45,6 +46,8 @@ def evaluate_submission(
     env_file: str | Path | None = None,
     inference_model: InferenceModel | None = None,
     show_progress: bool = False,
+    checkpoint_path: str | Path | None = None,
+    resume: bool = False,
 ) -> EvaluationResult:
     """Prepare, run, score, and serialize one submission evaluation."""
 
@@ -72,6 +75,17 @@ def evaluate_submission(
         artifacts_dir=artifacts_dir,
     )
 
+    checkpoint = None
+    if resume and checkpoint_path is None:
+        raise ValueError("checkpoint_path is required when resume=True")
+    if checkpoint_path is not None:
+        checkpoint = EvaluationCheckpoint.open(
+            checkpoint_path,
+            prepared=prepared,
+            settings=settings,
+            resume=resume,
+        )
+
     evaluator = inference_model
     if evaluator is None:
         evaluator = Model(
@@ -89,6 +103,10 @@ def evaluate_submission(
         evaluator,
         workers=workers,
         show_progress=show_progress,
+        completed_instances=(checkpoint.completed if checkpoint else None),
+        prior_token_usage=(checkpoint.token_usage if checkpoint else None),
+        on_instance_completed=(checkpoint.record_instance if checkpoint else None),
+        on_token_usage=(checkpoint.record_usage if checkpoint else None),
     )
     return build_evaluation_result(
         prepared,

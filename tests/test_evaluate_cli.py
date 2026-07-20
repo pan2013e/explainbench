@@ -4,6 +4,7 @@ import pytest
 
 from explainbench import cli
 from explainbench.evaluation import service
+from explainbench.evaluation.checkpoints import checkpoint_path_for_output
 
 
 INSTANCE_ID = "astropy__astropy-12907"
@@ -38,6 +39,24 @@ class FakeEvaluator:
         return [
             schema.model_validate(payload) for _ in range(self.num_generations)
         ]
+
+
+class InterruptingEvaluator(FakeEvaluator):
+    calls = 0
+
+    def infer(self, messages, schema):
+        type(self).calls += 1
+        if type(self).calls == 2:
+            raise KeyboardInterrupt
+        return super().infer(messages, schema)
+
+
+class CountingEvaluator(FakeEvaluator):
+    calls = 0
+
+    def infer(self, messages, schema):
+        type(self).calls += 1
+        return super().infer(messages, schema)
 
 
 def write_submission(tmp_path, *, submission_id="test-agent", with_patch=False):
@@ -120,6 +139,7 @@ def test_evaluate_lite_writes_versioned_result(tmp_path, monkeypatch, capsys):
     result = json.loads(output.read_text(encoding="utf-8"))
     assert status == 0
     assert captured.err == ""
+    assert not checkpoint_path_for_output(output).exists()
     assert "Evaluation complete" in captured.out
     assert "Preparing 1 submission instance(s)" in captured.out
     assert "Output:" in captured.out
@@ -358,3 +378,139 @@ output = "configured-results.json"
         "top_p": 0.7,
         "max_tokens": 512,
     }
+
+
+def test_evaluate_resumes_completed_task_instances_after_interruption(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    InterruptingEvaluator.calls = 0
+    CountingEvaluator.calls = 0
+    monkeypatch.setattr(service, "Model", InterruptingEvaluator)
+    submission = write_submission(tmp_path)
+    output = tmp_path / "resumed.json"
+    arguments = [
+        "evaluate",
+        str(submission),
+        "--mode",
+        "lite",
+        "--num-generations",
+        "1",
+        "--workers",
+        "1",
+        "--output",
+        str(output),
+    ]
+
+    with pytest.raises(KeyboardInterrupt):
+        cli.main(arguments)
+
+    checkpoint = checkpoint_path_for_output(output)
+    assert checkpoint.is_file()
+    assert not output.exists()
+
+    monkeypatch.setattr(service, "Model", CountingEvaluator)
+    status = cli.main([*arguments, "--resume"])
+
+    captured = capsys.readouterr()
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert status == 0
+    assert CountingEvaluator.calls == 1
+    assert "Resuming from checkpoint" in captured.out
+    assert set(result["tasks"]) == {"e2e.intent", "local.intent"}
+    assert all(task["counts"]["evaluated"] == 1 for task in result["tasks"].values())
+    assert not checkpoint.exists()
+
+
+def test_evaluate_rejects_incompatible_resume_before_model_construction(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    InterruptingEvaluator.calls = 0
+    monkeypatch.setattr(service, "Model", InterruptingEvaluator)
+    submission = write_submission(tmp_path)
+    output = tmp_path / "incompatible.json"
+    arguments = [
+        "evaluate",
+        str(submission),
+        "--mode",
+        "lite",
+        "--num-generations",
+        "1",
+        "--workers",
+        "1",
+        "--output",
+        str(output),
+    ]
+
+    with pytest.raises(KeyboardInterrupt):
+        cli.main(arguments)
+
+    payload = json.loads(submission.read_text(encoding="utf-8"))
+    payload["instances"][0]["explanation"] = "A changed explanation."
+    submission.write_text(json.dumps(payload), encoding="utf-8")
+
+    class ForbiddenEvaluator:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("model must not be constructed")
+
+    monkeypatch.setattr(service, "Model", ForbiddenEvaluator)
+    status = cli.main([*arguments, "--resume"])
+
+    captured = capsys.readouterr()
+    assert status == 1
+    assert "checkpoint does not match" in captured.err
+    assert checkpoint_path_for_output(output).is_file()
+    assert not output.exists()
+
+
+def test_evaluate_retains_checkpoint_for_failed_instances_and_retries_them(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    class PartiallyFailingEvaluator(FakeEvaluator):
+        def infer(self, messages, schema):
+            if isinstance(messages, str) and "Masked Test:" in messages:
+                raise RuntimeError("simulated provider failure")
+            return super().infer(messages, schema)
+
+    CountingEvaluator.calls = 0
+    monkeypatch.setattr(service, "Model", PartiallyFailingEvaluator)
+    submission = write_submission(tmp_path)
+    output = tmp_path / "retry.json"
+    arguments = [
+        "evaluate",
+        str(submission),
+        "--mode",
+        "lite",
+        "--num-generations",
+        "1",
+        "--workers",
+        "1",
+        "--output",
+        str(output),
+    ]
+
+    status = cli.main(arguments)
+
+    checkpoint = checkpoint_path_for_output(output)
+    first_result = json.loads(output.read_text(encoding="utf-8"))
+    assert status == 0
+    assert first_result["tasks"]["e2e.intent"]["counts"]["failed"] == 1
+    assert checkpoint.is_file()
+    assert "Checkpoint retained for retry" in capsys.readouterr().out
+
+    monkeypatch.setattr(service, "Model", CountingEvaluator)
+    status = cli.main([*arguments, "--resume"])
+
+    resumed_result = json.loads(output.read_text(encoding="utf-8"))
+    assert status == 0
+    assert CountingEvaluator.calls == 1
+    assert all(
+        task["counts"]["failed"] == 0
+        for task in resumed_result["tasks"].values()
+    )
+    assert not checkpoint.exists()

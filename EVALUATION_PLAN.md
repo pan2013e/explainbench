@@ -476,6 +476,7 @@ Last updated: 2026-07-20
 - [x] Expose evaluator sampling, retry, dotenv, and concurrency controls.
 - [x] Record resolved non-secret evaluator settings in result documents.
 - [x] Report resolved run settings and per-task tqdm progress in the CLI.
+- [x] Add validated task-instance checkpoints and `--resume` support.
 - [x] Add deterministic unit and CLI tests for lite, full, and fine-grained evaluation.
 - [x] Verify lite evaluation through the CLI from an installed wheel.
 - [x] Verify shared intent artifact loading from an installed wheel.

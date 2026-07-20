@@ -382,6 +382,7 @@ The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
 - [x] Add versioned TOML evaluation configuration with CLI overrides.
 - [x] Add validated lite submission and default-config examples using real explanations.
 - [x] Add visible evaluation startup messages and per-task progress reporting.
+- [x] Add automatic evaluation checkpoints and compatible-run resume support.
 - [ ] Refactor and expose the local question builder.
 - [x] Implement full local evaluation using staged model-specific artifacts.
 - [ ] Add clean-install and integration tests.

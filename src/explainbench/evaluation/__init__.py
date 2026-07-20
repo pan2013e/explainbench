@@ -15,6 +15,13 @@ from explainbench.evaluation.config import (
     load_evaluation_config,
     resolve_evaluation_config,
 )
+from explainbench.evaluation.checkpoints import (
+    CHECKPOINT_SCHEMA_VERSION,
+    EvaluationCheckpoint,
+    EvaluationCheckpointError,
+    checkpoint_path_for_output,
+    evaluation_fingerprint,
+)
 from explainbench.evaluation.preparation import (
     EvaluationPreparationError,
     PreparedEvaluation,
@@ -53,8 +60,11 @@ __all__ = [
     "ArtifactError",
     "ArtifactResolutionError",
     "ArtifactValidationError",
+    "CHECKPOINT_SCHEMA_VERSION",
     "EvaluationMode",
     "EvaluationConfigError",
+    "EvaluationCheckpoint",
+    "EvaluationCheckpointError",
     "EvaluationFileConfig",
     "EvaluationPreparationError",
     "EvaluationResult",
@@ -77,6 +87,8 @@ __all__ = [
     "TaskStatistics",
     "DEFAULT_EVALUATOR_MODEL",
     "evaluate_submission",
+    "checkpoint_path_for_output",
+    "evaluation_fingerprint",
     "load_task_artifacts",
     "load_evaluation_config",
     "prepare_evaluation",

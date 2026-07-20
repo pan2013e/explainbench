@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Mapping, Protocol
+from typing import Callable, Mapping, Protocol
 
 from pydantic import BaseModel
 from tqdm.auto import tqdm
@@ -80,6 +80,14 @@ def run_evaluation(
     *,
     workers: int = 10,
     show_progress: bool = False,
+    completed_instances: Mapping[
+        TaskName, Mapping[str, InstanceRunResult]
+    ] | None = None,
+    prior_token_usage: Mapping[str, int] | None = None,
+    on_instance_completed: Callable[
+        [TaskName, str, InstanceRunResult, Mapping[str, int]], None
+    ] | None = None,
+    on_token_usage: Callable[[Mapping[str, int]], None] | None = None,
 ) -> EvaluationRunResult:
     """Generate and score all prepared tasks while retaining per-instance failures."""
 
@@ -89,9 +97,25 @@ def run_evaluation(
         instance.instance_id: instance for instance in prepared.submission.instances
     }
     task_results: dict[TaskName, TaskRunResult] = {}
+    resumed = completed_instances or {}
+    base_token_usage = dict(prior_token_usage or {})
+
+    def combined_token_usage() -> dict[str, int]:
+        current = model.token_usage
+        return {
+            key: base_token_usage.get(key, 0) + current.get(key, 0)
+            for key in base_token_usage.keys() | current.keys()
+        }
 
     for task, prepared_task in prepared.tasks.items():
-        completed: dict[str, InstanceRunResult] = {}
+        evaluable_ids = set(prepared_task.evaluable_instance_ids)
+        completed = dict(resumed.get(task, {}))
+        unexpected_ids = sorted(set(completed) - evaluable_ids)
+        if unexpected_ids:
+            raise ValueError(
+                f"resumed task {task.value} contains unexpected instances: "
+                f"{unexpected_ids[:3]!r}"
+            )
         failures: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
@@ -104,13 +128,15 @@ def run_evaluation(
                     model=model,
                 ): instance_id
                 for instance_id in prepared_task.evaluable_instance_ids
+                if instance_id not in completed
             }
             completed_futures = as_completed(futures)
             progress_bar = None
             if show_progress:
                 progress_bar = tqdm(
                     completed_futures,
-                    total=len(futures),
+                    total=len(prepared_task.evaluable_instance_ids),
+                    initial=len(completed),
                     desc=f"Evaluating {task.value}",
                     unit="instance",
                 )
@@ -118,14 +144,26 @@ def run_evaluation(
             for future in completed_futures:
                 instance_id = futures[future]
                 try:
-                    completed[instance_id] = future.result()
+                    instance_result = future.result()
                 except Exception as error:
                     failures[instance_id] = f"{type(error).__name__}: {error}"
+                    if on_token_usage is not None:
+                        on_token_usage(combined_token_usage())
+                else:
+                    usage = combined_token_usage()
+                    if on_instance_completed is not None:
+                        on_instance_completed(
+                            task,
+                            instance_id,
+                            instance_result,
+                            usage,
+                        )
+                    completed[instance_id] = instance_result
                 if progress_bar is not None:
                     progress_bar.set_postfix(
                         completed=len(completed),
                         failed=len(failures),
-                        tokens=model.token_usage.get("total_tokens", 0),
+                        tokens=combined_token_usage().get("total_tokens", 0),
                     )
             if progress_bar is not None:
                 progress_bar.close()
@@ -149,5 +187,5 @@ def run_evaluation(
 
     return EvaluationRunResult(
         tasks=task_results,
-        token_usage=dict(model.token_usage),
+        token_usage=combined_token_usage(),
     )

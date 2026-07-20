@@ -10,6 +10,7 @@ from typing import Sequence
 from explainbench import __version__
 from explainbench.checker import check_submission
 from explainbench.evaluation.artifacts import ArtifactError
+from explainbench.evaluation.checkpoints import checkpoint_path_for_output
 from explainbench.evaluation.config import (
     EvaluationConfigError,
     load_evaluation_config,
@@ -114,6 +115,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="disable per-task progress bars",
     )
+    evaluate.add_argument(
+        "--resume",
+        action="store_true",
+        help="reuse compatible task-instance results from an interrupted run",
+    )
     return parser
 
 
@@ -160,6 +166,8 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
         submission = load_submission(arguments.submission)
         selected_mode = config.selection.mode
         selected_tasks = None if selected_mode is not None else config.selection.tasks
+        checkpoint_path = checkpoint_path_for_output(config.output)
+        checkpoint_exists = checkpoint_path.is_file()
         task_names = ", ".join(task.value for task in config.selection.tasks)
         print(
             f"Preparing {len(submission.instances)} submission instance(s) "
@@ -172,6 +180,15 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
             flush=True,
         )
         print(f"Output: {config.output}", flush=True)
+        if arguments.resume and checkpoint_exists:
+            print(f"Resuming from checkpoint: {checkpoint_path}", flush=True)
+        elif arguments.resume:
+            print(
+                f"No checkpoint found; starting a resumable run: {checkpoint_path}",
+                flush=True,
+            )
+        else:
+            print(f"Checkpoint: {checkpoint_path}", flush=True)
         print(
             "Validating submission and artifacts before model requests...",
             flush=True,
@@ -193,8 +210,13 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
             show_progress=(
                 not arguments.no_progress and sys.stderr.isatty()
             ),
+            checkpoint_path=checkpoint_path,
+            resume=arguments.resume,
         )
         output = write_evaluation_result(result, config.output)
+        failed = sum(task.counts.failed for task in result.tasks.values())
+        if failed == 0:
+            checkpoint_path.unlink(missing_ok=True)
     except EvaluationConfigError as error:
         print(f"Evaluation configuration is invalid: {error}", file=sys.stderr)
         return 1
@@ -215,6 +237,8 @@ def _run_evaluate(arguments: argparse.Namespace) -> int:
     print(f"Evaluated task instances: {evaluated}")
     print(f"Failed task instances: {failed}")
     print(f"Results: {output}")
+    if failed:
+        print(f"Checkpoint retained for retry: {checkpoint_path}")
     return 0
 
 

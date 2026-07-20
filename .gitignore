@@ -19,6 +19,7 @@ results/full-example.json
 !dataset/context/*.json
 !dataset/ground_truths/*.json
 *.log
+*.checkpoint.jsonl
 *.txt
 !instances.txt
 !dataset/extract_ground_truths/effect/prompts/*.txt

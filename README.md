@@ -75,6 +75,16 @@ explainbench evaluate examples/submission-lite.json \
 
 Before inference begins, the command prints the resolved task selection, evaluator, generation count, and output path. Interactive terminals also show a tqdm progress bar for each task with completed/failed instance counts and cumulative token usage. Use `--no-progress` to suppress the bars.
 
+Every CLI evaluation automatically writes completed task-instances to a sidecar checkpoint next to the requested output. For example, `results/lite-example.json` uses `results/lite-example.json.checkpoint.jsonl`. If the process is interrupted, rerun the same evaluation with `--resume`:
+
+```bash
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml \
+    --resume
+```
+
+Resume validates the submission, task selection, question artifacts, model, generation count, sampling settings, and token limit before reusing work. Concurrency and retry counts may be changed. Completed task-instances are skipped, while failed and interrupted instances run again. A clean completion removes the checkpoint; a run with failures retains it for another retry. Running without `--resume` starts fresh and replaces any checkpoint for that output path.
+
 The configured output path is relative to the TOML file. This example uses `../results/lite-example.json`, so it writes `results/lite-example.json` under the repository root. An explicit CLI path overrides it and is interpreted relative to the current working directory:
 
 ```bash

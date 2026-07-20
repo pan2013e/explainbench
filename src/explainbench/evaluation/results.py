@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import statistics
 from pathlib import Path
 from typing import Literal, Mapping
@@ -146,5 +147,10 @@ def write_evaluation_result(result: EvaluationResult, path: str | Path) -> Path:
         ensure_ascii=False,
         allow_nan=False,
     )
-    output_path.write_text(f"{payload}\n", encoding="utf-8")
+    temporary = output_path.with_name(f".{output_path.name}.tmp")
+    try:
+        temporary.write_text(f"{payload}\n", encoding="utf-8")
+        os.replace(temporary, output_path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return output_path
