@@ -380,6 +380,7 @@ The detailed design and current progress are recorded in `EVALUATION_PLAN.md`.
 - [x] Define the temporary and future effect-artifact directory contract.
 - [x] Expose fine-grained task selection through the evaluation CLI.
 - [x] Add versioned TOML evaluation configuration with CLI overrides.
+- [x] Add validated lite submission and default-config examples using real explanations.
 - [ ] Refactor and expose the local question builder.
 - [x] Implement full local evaluation using staged model-specific artifacts.
 - [ ] Add clean-install and integration tests.

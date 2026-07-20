@@ -58,6 +58,31 @@ Explicit CLI options override values from the config, and omitted values use pac
 
 API credentials should be exported as provider environment variables or placed in the configured dotenv file. Do not put credentials directly in the TOML file.
 
+### Runnable lite example
+
+The repository includes a three-instance submission containing real explanations from `dataset/explanations/dataset.json` under the `openhands_gpt-5-mini` entry, together with a starter config. It uses the package defaults except for one generation instead of five, to limit API cost:
+
+- [`examples/submission-lite.json`](examples/submission-lite.json)
+- [`examples/evaluation-lite.toml`](examples/evaluation-lite.toml)
+
+Validate and evaluate them with:
+
+```bash
+explainbench checker examples/submission-lite.json
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml
+```
+
+The example performs 1 generation for each of 3 instances across 2 intent tasks, for 6 evaluator requests. You can still override any setting from the command line, for example:
+
+```bash
+explainbench evaluate examples/submission-lite.json \
+    --config examples/evaluation-lite.toml \
+    --num-generations 5 \
+    --workers 2 \
+    --generation-workers 5
+```
+
 ## Directory structure
 
 ```

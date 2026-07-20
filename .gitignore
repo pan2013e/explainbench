@@ -1,9 +1,12 @@
 __pycache__/
+build/
 .env
 .codex
 dataset/**/swe_bench_repos/*
 logs*/
 *.json
+!examples/*.json
+examples/results/
 !src/explainbench/data/**/*.json
 !results/**/*.json
 !supplementary_materials/**/*.json
