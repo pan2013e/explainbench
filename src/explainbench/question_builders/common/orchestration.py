@@ -10,6 +10,7 @@ from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from explainbench.question_builders.common.fingerprints import fingerprint_value
 from explainbench.question_builders.common.status import (
+    InstanceStageAttempt,
     InstanceStageStatus,
     StageFailure,
     StoredStageResult,
@@ -77,7 +78,11 @@ class StageContext:
     instance: SubmissionInstance
     workspace: Path
     work_directory: Path
+    attempt_directory: Path
     log_directory: Path
+    retry_cycle: int
+    cycle_attempt: int
+    total_attempt: int
     upstream_results: Mapping[str, StoredStageResult]
     config: Any
 
@@ -111,6 +116,7 @@ class StageDefinition:
     runner: StageRunner
     semantic_inputs: SemanticInputs = _no_semantic_inputs
     resource_inputs: ResourceInputs = _no_semantic_inputs
+    execution_inputs: ResourceInputs = _no_semantic_inputs
 
 
 class StageRegistry:
@@ -227,7 +233,23 @@ class BuilderWorkspace(Protocol):
     def work_directory(self, stage_name: str, instance_id: str) -> Path:
         ...
 
-    def log_directory(self, stage_name: str, instance_id: str) -> Path:
+    def attempt_directory(
+        self,
+        stage_name: str,
+        instance_id: str,
+        total_attempt: int,
+    ) -> Path:
+        ...
+
+    def log_directory(
+        self,
+        stage_name: str,
+        instance_id: str,
+        total_attempt: int,
+    ) -> Path:
+        ...
+
+    def write_attempt(self, attempt: InstanceStageAttempt) -> None:
         ...
 
     def mark_stale(
@@ -398,11 +420,11 @@ class BuilderOrchestrator:
         upstream = self._resolve_dependencies(definition, instance)
         if upstream is None:
             return None
-        expected = self._stage_fingerprint(definition, instance, upstream)
+        expected = self._semantic_fingerprint(definition, instance, upstream)
         status = self.workspace.read_status(stage_name, instance.instance_id)
         if status is None or status.state not in {"completed", "skipped"}:
             return None
-        if status.fingerprint != expected:
+        if status.semantic_fingerprint != expected:
             self._invalidate(
                 stage_name,
                 instance.instance_id,
@@ -436,38 +458,68 @@ class BuilderOrchestrator:
         if compatible is not None:
             return "reused"
 
-        fingerprint = self._stage_fingerprint(definition, instance, upstream)
+        semantic_fingerprint = self._semantic_fingerprint(
+            definition,
+            instance,
+            upstream,
+        )
+        execution_fingerprint = self._execution_fingerprint(definition)
         previous = self.workspace.read_status(
             definition.name, instance.instance_id
-        )
-        attempts = (
-            previous.attempts
-            if previous is not None and previous.fingerprint == fingerprint
-            else 0
         )
         if (
             previous is not None
             and previous.state == "failed"
-            and previous.fingerprint == fingerprint
+            and previous.semantic_fingerprint == semantic_fingerprint
             and previous.failure is not None
-            and (
-                not previous.failure.retryable or attempts >= self.max_attempts
-            )
+            and not previous.failure.retryable
         ):
             return "failed"
 
-        while attempts < self.max_attempts:
-            attempts += 1
+        if previous is not None and previous.state == "running":
+            self._record_interruption(previous)
+
+        total_attempts = previous.total_attempts if previous is not None else 0
+        retry_cycle = (
+            previous.retry_cycle + 1
+            if previous is not None and previous.retry_cycle > 0
+            else 1
+        )
+        cycle_attempt = 0
+
+        while cycle_attempt < self.max_attempts:
+            cycle_attempt += 1
+            total_attempts += 1
             started_at = _now()
+            attempt = InstanceStageAttempt(
+                stage=definition.name,
+                instance_id=instance.instance_id,
+                state="running",
+                semantic_fingerprint=semantic_fingerprint,
+                execution_fingerprint=execution_fingerprint,
+                retry_cycle=retry_cycle,
+                cycle_attempt=cycle_attempt,
+                total_attempt=total_attempts,
+                started_at=started_at,
+            )
             self.workspace.write_status(
                 InstanceStageStatus(
                     stage=definition.name,
                     instance_id=instance.instance_id,
                     state="running",
-                    fingerprint=fingerprint,
-                    attempts=attempts,
+                    semantic_fingerprint=semantic_fingerprint,
+                    execution_fingerprint=execution_fingerprint,
+                    retry_cycle=retry_cycle,
+                    cycle_attempt=cycle_attempt,
+                    total_attempts=total_attempts,
                     started_at=started_at,
                 )
+            )
+            self.workspace.write_attempt(attempt)
+            attempt_directory = self.workspace.attempt_directory(
+                definition.name,
+                instance.instance_id,
+                total_attempts,
             )
             context = StageContext(
                 instance=instance,
@@ -475,9 +527,15 @@ class BuilderOrchestrator:
                 work_directory=self.workspace.work_directory(
                     definition.name, instance.instance_id
                 ),
+                attempt_directory=attempt_directory,
                 log_directory=self.workspace.log_directory(
-                    definition.name, instance.instance_id
+                    definition.name,
+                    instance.instance_id,
+                    total_attempts,
                 ),
+                retry_cycle=retry_cycle,
+                cycle_attempt=cycle_attempt,
+                total_attempt=total_attempts,
                 upstream_results=dict(upstream),
                 config=self.config,
             )
@@ -490,13 +548,25 @@ class BuilderOrchestrator:
                     result,
                 )
                 finished_at = _now()
+                self.workspace.write_attempt(
+                    InstanceStageAttempt.model_validate(
+                        {
+                            **attempt.model_dump(mode="python"),
+                            "state": result.outcome,
+                            "finished_at": finished_at,
+                        }
+                    )
+                )
                 self.workspace.write_status(
                     InstanceStageStatus(
                         stage=definition.name,
                         instance_id=instance.instance_id,
                         state=result.outcome,
-                        fingerprint=fingerprint,
-                        attempts=attempts,
+                        semantic_fingerprint=semantic_fingerprint,
+                        execution_fingerprint=execution_fingerprint,
+                        retry_cycle=retry_cycle,
+                        cycle_attempt=cycle_attempt,
+                        total_attempts=total_attempts,
                         started_at=started_at,
                         finished_at=finished_at,
                         result_file=result_file,
@@ -508,8 +578,11 @@ class BuilderOrchestrator:
                 self._record_failure(
                     definition,
                     instance,
-                    fingerprint,
-                    attempts,
+                    semantic_fingerprint,
+                    execution_fingerprint,
+                    retry_cycle,
+                    cycle_attempt,
+                    total_attempts,
                     started_at,
                     error.category,
                     str(error),
@@ -521,8 +594,11 @@ class BuilderOrchestrator:
                 self._record_failure(
                     definition,
                     instance,
-                    fingerprint,
-                    attempts,
+                    semantic_fingerprint,
+                    execution_fingerprint,
+                    retry_cycle,
+                    cycle_attempt,
+                    total_attempts,
                     started_at,
                     "unexpected_error",
                     f"{type(error).__name__}: {error}",
@@ -535,31 +611,89 @@ class BuilderOrchestrator:
         self,
         definition: StageDefinition,
         instance: SubmissionInstance,
-        fingerprint: str,
-        attempts: int,
+        semantic_fingerprint: str,
+        execution_fingerprint: str,
+        retry_cycle: int,
+        cycle_attempt: int,
+        total_attempts: int,
         started_at: str,
         category: str,
         message: str,
         retryable: bool,
     ) -> None:
+        finished_at = _now()
+        failure = StageFailure(
+            category=category,
+            message=message,
+            retryable=retryable,
+        )
+        self.workspace.write_attempt(
+            InstanceStageAttempt(
+                stage=definition.name,
+                instance_id=instance.instance_id,
+                state="failed",
+                semantic_fingerprint=semantic_fingerprint,
+                execution_fingerprint=execution_fingerprint,
+                retry_cycle=retry_cycle,
+                cycle_attempt=cycle_attempt,
+                total_attempt=total_attempts,
+                started_at=started_at,
+                finished_at=finished_at,
+                failure=failure,
+            )
+        )
         self.workspace.write_status(
             InstanceStageStatus(
                 stage=definition.name,
                 instance_id=instance.instance_id,
                 state="failed",
-                fingerprint=fingerprint,
-                attempts=attempts,
+                semantic_fingerprint=semantic_fingerprint,
+                execution_fingerprint=execution_fingerprint,
+                retry_cycle=retry_cycle,
+                cycle_attempt=cycle_attempt,
+                total_attempts=total_attempts,
                 started_at=started_at,
-                finished_at=_now(),
-                failure=StageFailure(
-                    category=category,
-                    message=message,
-                    retryable=retryable,
-                ),
+                finished_at=finished_at,
+                failure=failure,
             )
         )
 
-    def _stage_fingerprint(
+    def _record_interruption(self, previous: InstanceStageStatus) -> None:
+        if previous.total_attempts < 1:
+            return
+        finished_at = _now()
+        failure = StageFailure(
+            category="interrupted",
+            message="the previous process ended before the attempt completed",
+            retryable=True,
+        )
+        self.workspace.write_attempt(
+            InstanceStageAttempt(
+                stage=previous.stage,
+                instance_id=previous.instance_id,
+                state="interrupted",
+                semantic_fingerprint=previous.semantic_fingerprint or "unknown",
+                execution_fingerprint=previous.execution_fingerprint or "unknown",
+                retry_cycle=max(previous.retry_cycle, 1),
+                cycle_attempt=max(previous.cycle_attempt, 1),
+                total_attempt=previous.total_attempts,
+                started_at=previous.started_at or finished_at,
+                finished_at=finished_at,
+                failure=failure,
+            )
+        )
+        self.workspace.write_status(
+            InstanceStageStatus.model_validate(
+                {
+                    **previous.model_dump(mode="python"),
+                    "state": "failed",
+                    "finished_at": finished_at,
+                    "failure": failure,
+                }
+            )
+        )
+
+    def _semantic_fingerprint(
         self,
         definition: StageDefinition,
         instance: SubmissionInstance,
@@ -578,6 +712,18 @@ class BuilderOrchestrator:
                     name: fingerprint_value(result.model_dump(mode="json"))
                     for name, result in sorted(upstream.items())
                 },
+            }
+        )
+
+    def _execution_fingerprint(self, definition: StageDefinition) -> str:
+        return fingerprint_value(
+            {
+                "stage": definition.name,
+                "implementation_version": definition.implementation_version,
+                "max_attempts": self.max_attempts,
+                "execution_config": dict(
+                    definition.execution_inputs(self.config)
+                ),
             }
         )
 

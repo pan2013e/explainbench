@@ -24,7 +24,7 @@ class LocalWorkspaceStatus:
     submission_fingerprint: str
     instance_count: int
     stages: tuple[tuple[str, dict[str, int]], ...]
-    failures: tuple[tuple[str, str, str], ...]
+    failures: tuple[tuple[str, str, str, bool, int, int, int], ...]
     artifact_output: str | None
 
 
@@ -110,7 +110,17 @@ def inspect_local_workspace(
     failures = []
     for status in workspace.failures():
         message = status.failure.message if status.failure is not None else "unknown"
-        failures.append((status.stage, status.instance_id, message))
+        failures.append(
+            (
+                status.stage,
+                status.instance_id,
+                message,
+                status.failure.retryable if status.failure is not None else False,
+                status.retry_cycle,
+                status.cycle_attempt,
+                status.total_attempts,
+            )
+        )
     return LocalWorkspaceStatus(
         submission_id=workspace.manifest.submission_id,
         submission_fingerprint=workspace.manifest.submission_fingerprint,

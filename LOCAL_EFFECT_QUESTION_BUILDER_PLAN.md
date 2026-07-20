@@ -104,11 +104,13 @@ Expected behavior:
 2. Create or validate the workspace manifest.
 3. Resolve the local-stage dependency graph.
 4. Skip compatible completed instance work when `--resume` is used.
-5. Execute missing, interrupted, or explicitly retried work.
-6. Publish a complete evaluator artifact bundle.
-7. Print counts for requested, completed, skipped, and failed instances.
+5. Execute missing or interrupted work.
+6. Give every retryable failure a fresh retry cycle for each new `--resume` invocation.
+7. Publish a complete evaluator artifact bundle.
+8. Print counts for requested, completed, skipped, and failed instances.
 
-The command returns a nonzero exit status if required infrastructure fails, a stage cannot complete, or no questions can be exported. Instance-level semantic skips do not by themselves make the entire run fail, but they are always reported.
+The command returns a nonzero exit status if required infrastructure fails, a stage cannot complete, or no questions can be exported.
+Instance-level semantic skips do not by themselves make the entire run fail, but they are always reported.
 
 ### Run one stage
 
@@ -137,6 +139,7 @@ It should show:
 - Stage completion counts.
 - Currently running or previously interrupted work.
 - Failed instances and concise failure reasons.
+- Retry cycle, current cycle attempt, and cumulative attempt count for incomplete work.
 - Stale stages that need recomputation.
 - Whether final artifacts have been exported.
 
@@ -195,14 +198,21 @@ The workspace is private builder state with a versioned, inspectable layout:
 .explainbench/builds/my-agent/
 ├── manifest.json
 ├── input/
-│   └── submission.json
+│   ├── submission.json
+│   └── predictions.json
 ├── stages/
 │   ├── identify-patched-functions/
 │   │   ├── stage.json
 │   │   └── instances/
 │   │       └── astropy__astropy-12907/
 │   │           ├── status.json
-│   │           └── result.json
+│   │           ├── result.json
+│   │           └── work/
+│   │               ├── attempt-1/
+│   │               │   ├── attempt.json
+│   │               │   ├── stdout.log
+│   │               │   └── stderr.log
+│   │               └── attempt-2/
 │   ├── track-test-calls/
 │   │   └── ...
 │   └── export-question-artifacts/
@@ -212,7 +222,9 @@ The workspace is private builder state with a versioned, inspectable layout:
 └── workspace.lock
 ```
 
-Large native tracer outputs may live below the relevant instance directory instead of being copied into JSON. Their paths and checksums are recorded in that instance's result.
+Large native tracer outputs may live below the relevant instance directory instead of being copied into JSON.
+Their paths, sizes, and checksums are recorded in that instance's artifact manifest.
+Each attempt writes to its own directory, so a partial output from an interrupted attempt cannot replace a completed result.
 
 `manifest.json` records:
 
@@ -240,18 +252,36 @@ Every unit has a `status.json` with one of:
 - `running`: an attempt started but has not produced a durable result.
 - `completed`: a validated result was written successfully.
 - `skipped`: processing completed with an intentional semantic reason.
-- `failed`: the attempt ended with a retryable or terminal error.
-- `stale`: the result exists but its semantic fingerprint no longer matches.
+- `failed`: the attempt ended with a retryable or non-retryable error.
+- `stale`: the saved result or artifact is no longer compatible or trustworthy.
 
-`completed` and `skipped` statuses include the input fingerprint and point to a validated result. `failed` includes a structured failure category, message, attempt count, and log location.
+`completed` and `skipped` statuses include the semantic input fingerprint and point to a validated result.
+`failed` includes a structured failure category, message, retryability, retry-cycle counters, and log location.
+
+Each status records these attempt counters:
+
+- `retry_cycle`: the command invocation that performed the attempts.
+- `cycle_attempt`: the attempt number inside the current command invocation.
+- `total_attempts`: the cumulative number of attempts retained for audit and debugging.
+
+`cycle_attempt` starts from zero when a new `--resume` command begins and becomes one when the first new attempt starts.
+`total_attempts` never resets.
+The attempt directory number uses `total_attempts`, so attempt history is never overwritten when a cycle resets.
+
+Adding these fields requires instance checkpoint status schema version 2.
+The workspace loader will upgrade version 1 development checkpoints under the workspace lock.
+It will map the old `attempts` value to `total_attempts`, preserve the old fingerprint as the semantic fingerprint, and start the next eligible resume as a new retry cycle.
 
 ### Durable writes
 
 - Results are written to a temporary file, flushed, and atomically renamed.
 - `completed` is written only after the result has passed that stage's schema validation.
+- Every subprocess attempt writes to `work/attempt-N/` and has separate stdout and stderr logs.
+- A wrapper publishes `result.json` only after the canonical command exits successfully and all declared outputs pass validation.
 - Stage summaries are derived from instance statuses and may be rebuilt; they are not the only checkpoint.
 - Model responses are saved immediately per instance so paid inference is not lost.
 - Docker logs and expression-inspection outputs are retained per instance.
+- Large outputs use an artifact manifest that records every downstream input file and its checksum.
 - A final artifact directory is assembled in a temporary sibling directory and atomically published only after validation.
 
 ### Resume rules
@@ -259,17 +289,47 @@ Every unit has a `status.json` with one of:
 With `--resume`:
 
 - Compatible `completed` and `skipped` units are not rerun.
-- A previous `running` unit is treated as interrupted and rerun safely.
-- Retryable failures are retried according to the configured attempt limit.
+- A previous `running` unit is treated as interrupted after the new process acquires the workspace lock.
+- The interrupted unit starts a new retry cycle and writes to a new attempt directory.
+- A retryable failure receives a fresh retry cycle with up to `max_attempts` attempts on every new `--resume` invocation.
+- No separate `--retry-failed` option is required.
+- A non-retryable failure remains failed until its patch, semantic configuration, upstream result, or stage implementation changes.
 - Terminal semantic skips remain skipped unless their semantic inputs change.
 - Missing or corrupt result files make the unit stale even if `status.json` says `completed`.
+- Missing, modified, or corrupt external artifacts also make the unit stale.
+- When a unit becomes stale, that unit and its downstream dependents become stale for the affected instance only.
 - A stage is complete only when every requested instance has a durable terminal status and its aggregate output has been validated.
 
-Without `--resume`, an existing nonempty workspace causes a clear error. Replacing work must require an explicit future `--restart` or `--force-stage` option; the first implementation must never silently delete expensive state.
+Without `--resume`, an existing nonempty workspace causes a clear error.
+Replacing work must require an explicit future `--restart` or `--force-stage` option.
+The first implementation must never silently delete expensive state.
+
+### Retry-cycle policy
+
+`max_attempts` limits one command invocation, not the complete lifetime of the workspace.
+For example, `max_attempts = 3` permits three attempts during the initial run.
+If all three attempts have retryable failures, the command stops and preserves the failure.
+A later `--resume` command automatically starts a new cycle with another budget of three attempts.
+
+This policy keeps every command invocation bounded while making manual recovery simple.
+The user does not need an additional retry option.
+Repeated retries require repeated user invocations, so the system cannot enter an unlimited automatic loop.
+
+The resume behavior by state is:
+
+| Previous state | Action during `--resume` |
+|---|---|
+| Compatible `completed` or `skipped` | Reuse the durable result. |
+| `running` with no active workspace writer | Record an interruption and start a new retry cycle. |
+| Retryable `failed` | Start a new retry cycle with `cycle_attempt = 0`. |
+| Non-retryable `failed` | Preserve and report the failure. |
+| Missing or corrupt result or artifact | Mark the stage and downstream stages stale, then rerun them. |
+| Changed patch or semantic setting | Mark the affected stage and downstream stages stale for that instance. |
+| Changed worker or concurrency setting | Reuse compatible completed results and apply the new setting only to new work. |
 
 ### Compatibility fingerprints
 
-Each instance-stage fingerprint includes only inputs that can change that stage's meaning:
+Each instance-stage completed-result fingerprint includes only inputs that can change that stage's meaning:
 
 - Instance ID and exact patch checksum.
 - Stage name and implementation version.
@@ -280,6 +340,10 @@ Each instance-stage fingerprint includes only inputs that can change that stage'
 - Model and semantic sampling settings for model-backed stages.
 
 Operational settings such as worker count, retry count, and progress display do not invalidate semantic results. Changing a semantic input marks that stage and its downstream dependents stale for the affected instance; unrelated instances and upstream stages remain reusable.
+
+Attempt execution also has a separate execution fingerprint.
+It contains settings such as timeout, retry policy, and other controls that can affect whether an incomplete attempt can finish.
+Changing the execution fingerprint can make a failed or interrupted unit eligible for a new attempt, but it does not invalidate a compatible completed result.
 
 ### Concurrency safety
 
@@ -337,6 +401,11 @@ The export manifest includes:
 - ExplainBench and builder implementation versions.
 
 Export validates that context and ground-truth instance sets match and that every question satisfies the evaluator's typed local-effect schema.
+
+Instance workers do not write the shared context and ground-truth files directly.
+Each instance first produces a durable context and answer record in its checkpoint.
+After instance processing finishes, one deterministic finalizer merges the compatible records and atomically publishes the shared files.
+The finalizer can run again from existing checkpoints without repeating Docker execution or model inference.
 
 ## Package structure
 
@@ -404,11 +473,22 @@ Status: completed. The production registry currently uses explicit `stage_not_mi
 - [x] Add explicit CLIs to both whitelist-generation scripts.
 - [x] Parameterize the existing `execution.track` and `execution.trace` CLIs for predictions, whitelist, run ID, instances, and workers.
 - [x] Add explicit CLIs to `build_step1.py` through `build_step5.py`, including separate step-3 execute and validate invocations.
+- [x] Add instance checkpoint status schema version 2 with `retry_cycle`, `cycle_attempt`, `total_attempts`, and a separate execution fingerprint.
+- [x] Add an atomic version 1 to version 2 workspace migration under the workspace lock.
+- [x] Reset the retryable-failure budget for every new `--resume` invocation while retaining cumulative attempt history.
+- [x] Convert abandoned `running` states into explicit interrupted attempts after the workspace lock is acquired.
+- [x] Add isolated attempt directories and durable per-attempt records.
+- Add stage-specific external-artifact manifests.
 - Add a submission adapter that writes the legacy predictions shape inside the workspace.
 - Replace pending package runners with thin subprocess wrappers over those modules.
 - Validate each declared output before marking the instance-stage checkpoint complete.
+- Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
 - Test wrapper command construction without Docker or model calls.
+- [x] Test retry-budget reset across separate resume invocations.
+- [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
+- [x] Test interruption recovery and attempt isolation.
+- Test external-artifact corruption.
 
 Expected outcome: every existing local-question step can be invoked directly and through `explainbench question-builder local`, while scientific logic remains canonical under `dataset/` and `execution/`.
 
@@ -438,7 +518,10 @@ The following values intentionally remain canonical defaults rather than general
 
 These values affect benchmark compatibility or internal implementation rather than ordinary submission/workspace selection. They can be revisited individually if a concrete use case requires an override.
 
-Status of the CLI-only phase: completed. Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access. Package subprocess wrappers and resume behavior remain deliberately unimplemented until the command contracts are reviewed.
+Status of the CLI-only phase: completed.
+Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
+The generic resume foundation and revised retry-cycle behavior are implemented.
+Canonical subprocess wrappers, external-artifact validation, and production stage integration are not yet implemented.
 
 ### Milestone 3: Docker execution stages
 
@@ -474,8 +557,13 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - Golden tests comparing parameterized canonical stages with known historical outputs.
 - CLI tests for valid commands, missing prerequisites, invalid stage names, and status output.
 - Failure-injection tests that interrupt after selected instances and confirm `--resume` reruns only incomplete units.
+- Tests proving that each new resume invocation resets `cycle_attempt` while preserving `total_attempts`.
+- Tests proving that an exhausted retryable failure receives a new attempt budget on the next resume invocation.
+- Tests proving that a non-retryable failure remains blocked across resume invocations.
 - Tests proving semantic config changes invalidate the correct stage and downstream stages only.
 - Tests proving worker/retry changes preserve completed semantic results.
+- Tests proving timeout changes can affect new attempts without invalidating completed results.
+- Tests proving missing or corrupt external trace artifacts invalidate the owning stage and downstream stages only.
 - Tests distinguishing gold fallback from infrastructure failure.
 - Atomic-publication tests ensuring the evaluator never observes a half-written artifact bundle.
 - Optional Docker and model-backed integration tests, excluded from the default fast suite.
@@ -498,6 +586,9 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Detail the workspace, command, artifact, and canonical-wrapper contracts.
 - [x] Implement Milestone 1: orchestration foundation.
 - [x] Implement the CLI-interface portion of Milestone 2.
+- [x] Agree that each new resume invocation gives retryable failures a fresh retry budget by default.
+- [x] Agree that no separate retry-failed CLI option is needed.
+- [x] Implement instance status schema version 2, version 1 migration, per-invocation retry cycles, and durable attempt history.
 - [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
@@ -505,4 +596,6 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 
 ## Next step
 
-Review the new canonical command contracts, then complete Milestone 2 by adding the submission adapter and connecting the existing package orchestration to those commands with thin subprocess runners. Resume-policy changes remain deferred until that integration is working.
+Add the submission adapter and the shared canonical subprocess-runner utility.
+Then connect and test `identify-patched-functions` as the first real instance-stage wrapper.
+Use that integration to verify command construction, attempt logs, output validation, and resume behavior before connecting the remaining stages.

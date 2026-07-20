@@ -91,6 +91,10 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
     assert "stage 'identify-patched-functions' has not yet been migrated" in (
         status_output.out
     )
+    assert "retryable=no" in status_output.out
+    assert "retry_cycle=1" in status_output.out
+    assert "cycle_attempt=1" in status_output.out
+    assert "total_attempts=1" in status_output.out
     assert "Artifacts: not exported" in status_output.out
 
 
@@ -165,4 +169,3 @@ def test_local_registry_has_the_documented_stage_names():
         "build-answer-choices",
         "export-question-artifacts",
     )
-

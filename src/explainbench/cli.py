@@ -412,8 +412,22 @@ def _run_local_question_builder(arguments: argparse.Namespace) -> int:
             print(f"{stage_name}: {visible or 'pending=0'}")
         if status.failures:
             print("Failures:")
-            for stage_name, instance_id, message in status.failures:
-                print(f"- {stage_name} / {instance_id}: {message}")
+            for (
+                stage_name,
+                instance_id,
+                message,
+                retryable,
+                retry_cycle,
+                cycle_attempt,
+                total_attempts,
+            ) in status.failures:
+                print(
+                    f"- {stage_name} / {instance_id}: {message} "
+                    f"(retryable={'yes' if retryable else 'no'}, "
+                    f"retry_cycle={retry_cycle}, "
+                    f"cycle_attempt={cycle_attempt}, "
+                    f"total_attempts={total_attempts})"
+                )
         print(
             f"Artifacts: {status.artifact_output or 'not exported'}"
         )

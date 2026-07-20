@@ -69,6 +69,20 @@ class FlakyRunner(RecordingRunner):
         return super().run_instance(context)
 
 
+class FailingRunner(RecordingRunner):
+    def __init__(self, *, retryable):
+        super().__init__()
+        self.retryable = retryable
+
+    def run_instance(self, context):
+        self.calls.append(context.instance.instance_id)
+        raise StageExecutionError(
+            "stage failure",
+            category="test_failure",
+            retryable=self.retryable,
+        )
+
+
 def make_submission(instance_count=2):
     return Submission.model_validate(
         {
@@ -168,7 +182,24 @@ def test_interrupted_instance_is_resumed_without_rerunning_completed_one(tmp_pat
     assert summaries[0].completed == 1
     assert finishing.calls == ["repo__project-1"]
     workspace = LocalBuilderWorkspace.inspect(config.workspace)
-    assert workspace.read_status("work", "repo__project-1").attempts == 2
+    status = workspace.read_status("work", "repo__project-1")
+    assert status.retry_cycle == 2
+    assert status.cycle_attempt == 1
+    assert status.total_attempts == 2
+    first_attempt = json.loads(
+        (
+            config.workspace
+            / "stages/work/instances/repo__project-1/work/attempt-1/attempt.json"
+        ).read_text(encoding="utf-8")
+    )
+    second_attempt = json.loads(
+        (
+            config.workspace
+            / "stages/work/instances/repo__project-1/work/attempt-2/attempt.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert first_attempt["state"] == "interrupted"
+    assert second_attempt["state"] == "completed"
 
 
 def test_retryable_failure_is_checkpointed_and_retried(tmp_path):
@@ -184,7 +215,133 @@ def test_retryable_failure_is_checkpointed_and_retried(tmp_path):
     workspace = LocalBuilderWorkspace.inspect(config.workspace)
     status = workspace.read_status("flaky", "repo__project-0")
     assert status.state == "completed"
-    assert status.attempts == 2
+    assert status.retry_cycle == 1
+    assert status.cycle_attempt == 2
+    assert status.total_attempts == 2
+
+
+def test_resume_starts_fresh_cycle_after_retry_budget_is_exhausted(tmp_path):
+    failing = FailingRunner(retryable=True)
+    registry = StageRegistry([make_definition("work", failing)])
+    submission = make_submission(instance_count=1)
+    config = make_config(tmp_path, max_attempts=2)
+
+    first = run_local_pipeline(submission, config, registry=registry)[0]
+
+    assert first.failed == 1
+    assert len(failing.calls) == 2
+    workspace = LocalBuilderWorkspace.inspect(config.workspace)
+    status = workspace.read_status("work", "repo__project-0")
+    assert status.retry_cycle == 1
+    assert status.cycle_attempt == 2
+    assert status.total_attempts == 2
+
+    finishing = RecordingRunner()
+    resumed_registry = StageRegistry([make_definition("work", finishing)])
+    resumed = run_local_pipeline(
+        submission,
+        config,
+        registry=resumed_registry,
+        resume=True,
+    )[0]
+
+    assert resumed.completed == 1
+    assert finishing.calls == ["repo__project-0"]
+    workspace = LocalBuilderWorkspace.inspect(config.workspace)
+    status = workspace.read_status("work", "repo__project-0")
+    assert status.retry_cycle == 2
+    assert status.cycle_attempt == 1
+    assert status.total_attempts == 3
+    attempts = [
+        json.loads(path.read_text(encoding="utf-8"))["state"]
+        for path in sorted(
+            (
+                config.workspace
+                / "stages/work/instances/repo__project-0/work"
+            ).glob("attempt-*/attempt.json")
+        )
+    ]
+    assert attempts == ["failed", "failed", "completed"]
+
+
+def test_resume_preserves_non_retryable_failure(tmp_path):
+    failing = FailingRunner(retryable=False)
+    registry = StageRegistry([make_definition("work", failing)])
+    submission = make_submission(instance_count=1)
+    config = make_config(tmp_path, max_attempts=3)
+
+    first = run_local_pipeline(submission, config, registry=registry)[0]
+    resumed = run_local_pipeline(
+        submission,
+        config,
+        registry=registry,
+        resume=True,
+    )[0]
+
+    assert first.failed == 1
+    assert resumed.failed == 1
+    assert failing.calls == ["repo__project-0"]
+    workspace = LocalBuilderWorkspace.inspect(config.workspace)
+    status = workspace.read_status("work", "repo__project-0")
+    assert status.retry_cycle == 1
+    assert status.cycle_attempt == 1
+    assert status.total_attempts == 1
+
+
+def test_resume_migrates_version_one_status_without_rerunning(tmp_path):
+    runner = RecordingRunner()
+    registry = StageRegistry([make_definition("work", runner)])
+    submission = make_submission(instance_count=1)
+    config = make_config(tmp_path)
+    run_local_pipeline(submission, config, registry=registry)
+    status_path = (
+        config.workspace
+        / "stages/work/instances/repo__project-0/status.json"
+    )
+    current = json.loads(status_path.read_text(encoding="utf-8"))
+    version_one = {
+        key: value
+        for key, value in current.items()
+        if key
+        not in {
+            "schema_version",
+            "semantic_fingerprint",
+            "execution_fingerprint",
+            "retry_cycle",
+            "cycle_attempt",
+            "total_attempts",
+        }
+    }
+    version_one.update(
+        {
+            "schema_version": 1,
+            "fingerprint": current["semantic_fingerprint"],
+            "attempts": current["total_attempts"],
+        }
+    )
+    status_path.write_text(
+        f"{json.dumps(version_one, indent=2, sort_keys=True)}\n",
+        encoding="utf-8",
+    )
+
+    inspected = LocalBuilderWorkspace.inspect(config.workspace)
+    assert inspected.read_status("work", "repo__project-0").schema_version == 2
+    assert json.loads(status_path.read_text(encoding="utf-8"))["schema_version"] == 1
+
+    summary = run_local_pipeline(
+        submission,
+        config,
+        registry=registry,
+        resume=True,
+    )[0]
+
+    assert summary.reused == 1
+    assert runner.calls == ["repo__project-0"]
+    migrated = json.loads(status_path.read_text(encoding="utf-8"))
+    assert migrated["schema_version"] == 2
+    assert migrated["retry_cycle"] == 1
+    assert migrated["cycle_attempt"] == 1
+    assert migrated["total_attempts"] == 1
 
 
 def test_corrupt_result_reruns_affected_stage_and_downstream(tmp_path):
@@ -254,6 +411,11 @@ def test_semantic_change_invalidates_only_affected_stage_and_downstream(tmp_path
     assert summaries[1].completed == 1
     assert first.calls == ["repo__project-0"]
     assert second.calls == ["repo__project-0", "repo__project-0"]
+    workspace = LocalBuilderWorkspace.inspect(make_config(tmp_path).workspace)
+    status = workspace.read_status("second", "repo__project-0")
+    assert status.retry_cycle == 2
+    assert status.cycle_attempt == 1
+    assert status.total_attempts == 2
 
 
 def test_operational_changes_do_not_invalidate_results(tmp_path):
@@ -320,4 +482,3 @@ def test_registry_rejects_cycles():
                 make_definition("second", runner, dependencies=("first",)),
             ]
         )
-

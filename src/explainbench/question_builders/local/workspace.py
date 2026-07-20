@@ -17,6 +17,7 @@ from explainbench.question_builders.common.fingerprints import (
 )
 from explainbench.question_builders.common.orchestration import StageDefinition
 from explainbench.question_builders.common.status import (
+    InstanceStageAttempt,
     InstanceStageStatus,
     StageCheckpointSummary,
     StoredStageResult,
@@ -65,6 +66,32 @@ def _patch_fingerprints(submission: Submission) -> dict[str, str]:
         instance.instance_id: fingerprint_value(instance.model_patch)
         for instance in submission.instances
     }
+
+
+def _upgrade_status_payload(payload: object) -> object:
+    """Convert a version 1 instance status to the version 2 schema."""
+
+    if not isinstance(payload, dict) or payload.get("schema_version") != 1:
+        return payload
+    attempts = payload.get("attempts", 0)
+    if not isinstance(attempts, int) or isinstance(attempts, bool):
+        return payload
+    upgraded = {
+        key: value
+        for key, value in payload.items()
+        if key not in {"schema_version", "fingerprint", "attempts"}
+    }
+    upgraded.update(
+        {
+            "schema_version": 2,
+            "semantic_fingerprint": payload.get("fingerprint"),
+            "execution_fingerprint": None,
+            "retry_cycle": 1 if attempts > 0 else 0,
+            "cycle_attempt": attempts,
+            "total_attempts": attempts,
+        }
+    )
+    return upgraded
 
 
 class LocalBuilderWorkspace:
@@ -157,6 +184,8 @@ class LocalBuilderWorkspace:
             )
             workspace._write_manifest()
 
+        workspace._migrate_statuses(stage_names)
+
         atomic_write_json(
             workspace_root / "input" / "submission.json",
             submission.model_dump(mode="json"),
@@ -207,7 +236,9 @@ class LocalBuilderWorkspace:
         if not path.is_file():
             return None
         try:
-            return InstanceStageStatus.model_validate(_read_json(path))
+            return InstanceStageStatus.model_validate(
+                _upgrade_status_payload(_read_json(path))
+            )
         except (ValidationError, LocalWorkspaceError) as error:
             return InstanceStageStatus(
                 stage=stage_name,
@@ -251,10 +282,45 @@ class LocalBuilderWorkspace:
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-    def log_directory(self, stage_name: str, instance_id: str) -> Path:
-        path = self.root / "logs" / stage_name / instance_id
+    def attempt_directory(
+        self,
+        stage_name: str,
+        instance_id: str,
+        total_attempt: int,
+    ) -> Path:
+        path = (
+            self.work_directory(stage_name, instance_id)
+            / f"attempt-{total_attempt}"
+        )
         path.mkdir(parents=True, exist_ok=True)
         return path
+
+    def log_directory(
+        self,
+        stage_name: str,
+        instance_id: str,
+        total_attempt: int,
+    ) -> Path:
+        path = (
+            self.root
+            / "logs"
+            / stage_name
+            / instance_id
+            / f"attempt-{total_attempt}"
+        )
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def write_attempt(self, attempt: InstanceStageAttempt) -> None:
+        atomic_write_json(
+            self.attempt_directory(
+                attempt.stage,
+                attempt.instance_id,
+                attempt.total_attempt,
+            )
+            / "attempt.json",
+            attempt.model_dump(mode="json"),
+        )
 
     def mark_stale(
         self,
@@ -271,8 +337,11 @@ class LocalBuilderWorkspace:
                     stage=stage_name,
                     instance_id=instance_id,
                     state="stale",
-                    fingerprint=current.fingerprint,
-                    attempts=current.attempts,
+                    semantic_fingerprint=current.semantic_fingerprint,
+                    execution_fingerprint=current.execution_fingerprint,
+                    retry_cycle=current.retry_cycle,
+                    cycle_attempt=current.cycle_attempt,
+                    total_attempts=current.total_attempts,
                     started_at=current.started_at,
                     finished_at=current.finished_at,
                     result_file=current.result_file,
@@ -280,6 +349,27 @@ class LocalBuilderWorkspace:
                     stale_reason=reason,
                 )
             )
+
+    def _migrate_statuses(self, stage_names: Sequence[str]) -> None:
+        for stage_name in stage_names:
+            instances = self.root / "stages" / stage_name / "instances"
+            if not instances.is_dir():
+                continue
+            for status_path in instances.glob("*/status.json"):
+                try:
+                    payload = _read_json(status_path)
+                except LocalWorkspaceError:
+                    continue
+                upgraded = _upgrade_status_payload(payload)
+                if upgraded != payload:
+                    try:
+                        status = InstanceStageStatus.model_validate(upgraded)
+                    except ValidationError:
+                        continue
+                    atomic_write_json(
+                        status_path,
+                        status.model_dump(mode="json"),
+                    )
 
     def write_stage_summary(
         self,
