@@ -6,9 +6,14 @@ dataset/**/swe_bench_repos/*
 logs*/
 *.json
 !examples/*.json
+!examples/question-artifacts/
+!examples/question-artifacts/context/
+!examples/question-artifacts/ground_truths/
+!examples/question-artifacts/*/*.json
 !src/explainbench/data/**/*.json
 !results/**/*.json
 results/lite-example.json
+results/effect-example.json
 !supplementary_materials/**/*.json
 !execution/**/*.json
 !dataset/context/*.json

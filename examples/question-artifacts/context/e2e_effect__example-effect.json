@@ -1,0 +1,12 @@
+{
+  "sympy__sympy-15349": {
+    "test_content": "1: import sys\n2: from sympy import symbols, cos, sin, Matrix\n3: from sympy.algebras.quaternion import Quaternion\n4: from hypothesis import given, strategies as st\n5: import traceback\n6: \n7: @given(st.floats(allow_infinity=False, allow_nan=False))\n8: def test_0916077a(x_val):\n9:     x = symbols('x')\n10:     q = Quaternion(cos(x / 2), sin(x / 2), 0, 0)\n11:     expected_matrix = Matrix([[1, 0, 0], [0, cos(x), -sin(x)], [0, sin(x), cos(x)]])\n12:     actual_matrix = q.to_rotation_matrix()\n13:     try:\n14:         assert actual_matrix.equals(expected_matrix)\n15:     except AssertionError as e:\n16:         None\n17:         raise\n18: test_0916077a()",
+    "choices": [
+      "The question cannot be answered based on the explanation alone.",
+      "The test failed at line 10 with exception: ImportError.",
+      "The test failed at line 14 with exception: AssertionError.",
+      "The test failed at line 14 with exception: IndexError.",
+      "The test passed."
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+schema_version = 1
+
+[selection]
+mode = "full"
+
+[evaluator]
+model = "gpt-5-mini-2025-08-07"
+# One instance across four tasks produces four evaluator requests.
+num_generations = 1
+instance_workers = 4
+generation_workers = 1
+temperature = 1.0
+top_p = 1.0
+max_tokens = 8192
+max_retries = 5
+
+[paths]
+# Config paths are resolved relative to this file.
+artifacts_dir = "question-artifacts"
+output = "../results/effect-example.json"
+
+# Export provider credentials in your shell. Alternatively, uncomment this
+# section and create examples/.env before running the command.
+# [environment]
+# env_file = ".env"

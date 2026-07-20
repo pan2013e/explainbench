@@ -1,0 +1,16 @@
+{
+  "sympy__sympy-15349": {
+    "function_code_before_patch": "def to_rotation_matrix(self, v=None):\n    q = self\n    s = q.norm() ** (-2)\n    m00 = 1 - 2 * s * (q.c ** 2 + q.d ** 2)\n    m01 = 2 * s * (q.b * q.c - q.d * q.a)\n    m02 = 2 * s * (q.b * q.d + q.c * q.a)\n    m10 = 2 * s * (q.b * q.c + q.d * q.a)\n    m11 = 1 - 2 * s * (q.b ** 2 + q.d ** 2)\n    m12 = 2 * s * (q.c * q.d + q.b * q.a)\n    m20 = 2 * s * (q.b * q.d - q.c * q.a)\n    m21 = 2 * s * (q.c * q.d + q.b * q.a)\n    m22 = 1 - 2 * s * (q.b ** 2 + q.c ** 2)\n    if not v:\n        return Matrix([[m00, m01, m02], [m10, m11, m12], [m20, m21, m22]])\n    else:\n        x, y, z = v\n        m03 = x - x * m00 - y * m01 - z * m02\n        m13 = y - x * m10 - y * m11 - z * m12\n        m23 = z - x * m20 - y * m21 - z * m22\n        m30 = m31 = m32 = 0\n        m33 = 1\n        return Matrix([[m00, m01, m02, m03], [m10, m11, m12, m13], [m20, m21, m22, m23], [m30, m31, m32, m33]])",
+    "function_parameters_before_patch": "{'self': {'py/object': 'sympy.algebras.quaternion.Quaternion'}, 'v': None}\n",
+    "line": "The return statement in the provided function",
+    "choices": [
+      "float(__return__[1, 0] + __return__[2, 0])",
+      "float(m12 - m21)",
+      "bool(m02 > m01)",
+      "float(m21)",
+      "The patch has no effect and none of the above expressions change in value",
+      "Cannot be answered by the explanation alone"
+    ],
+    "before_or_after": "after"
+  }
+}
