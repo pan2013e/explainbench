@@ -341,7 +341,12 @@ The output is one versioned JSON document containing selection metadata and per-
   },
   "evaluator": {
     "model": "configured-model",
-    "num_generations": 5
+    "num_generations": 5,
+    "token_usage": {
+      "completion_tokens": 100,
+      "prompt_tokens": 1000,
+      "total_tokens": 1100
+    }
   },
   "tasks": {
     "e2e.intent": {
@@ -360,13 +365,16 @@ The output is one versioned JSON document containing selection metadata and per-
           "predictions": [{"answer": ["d"]}],
           "scores": [1.0]
         }
-      }
+      },
+      "skipped_instance_ids": [],
+      "failures": {}
     }
   }
 }
 ```
 
 Statistics will be reported separately for each task. Any overall score will be explicitly defined as a macro-average rather than implicitly mixing task results.
+Each task mean is computed across instance-level mean generation scores. SEM is computed across those instance-level means and is `null` when fewer than two instances complete successfully.
 
 ## Implementation sequence
 
@@ -442,10 +450,10 @@ Last updated: 2026-07-20
 - [x] Refactor prompts, inference, and scoring behind the package API.
 - [x] Implement the evaluation runner.
 - [x] Keep the repository's legacy evaluation imports as wrappers around the package implementation.
-- [ ] Implement the versioned result schema.
-- [ ] Implement the `explainbench evaluate` CLI.
-- [ ] Add unit and CLI tests. (Stage 3 unit tests complete; CLI tests remain.)
-- [x] Verify lite evaluation from an installed wheel through the package API.
+- [x] Implement the versioned result schema.
+- [x] Implement the `explainbench evaluate` CLI.
+- [x] Add deterministic unit and CLI tests for lite, full, and fine-grained evaluation.
+- [x] Verify lite evaluation through the CLI from an installed wheel.
 - [x] Verify shared intent artifact loading from an installed wheel.
 - [x] Verify local and end-to-end effect evaluation from an installed wheel with temporarily staged historical artifacts.
 
