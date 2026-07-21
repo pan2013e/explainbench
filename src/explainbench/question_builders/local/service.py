@@ -12,6 +12,9 @@ from explainbench.question_builders.common.orchestration import (
 )
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
+from explainbench.question_builders.local.submission_adapter import (
+    write_predictions_file,
+)
 from explainbench.question_builders.local.workspace import LocalBuilderWorkspace
 from explainbench.schemas import Submission
 
@@ -41,6 +44,7 @@ def _prepare_orchestrator(
         resume=resume,
         stage_names=registry.names,
     )
+    write_predictions_file(workspace.root, submission)
     orchestrator = BuilderOrchestrator(
         registry=registry,
         workspace=workspace,

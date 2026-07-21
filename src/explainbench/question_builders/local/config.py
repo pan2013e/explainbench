@@ -15,6 +15,11 @@ from explainbench.schemas import StrictModel
 DEFAULT_WORKERS = 1
 DEFAULT_MAX_ATTEMPTS = 3
 DEFAULT_CANDIDATE_GENERATION_MODEL = "gpt-5.2-2025-12-11"
+DEFAULT_DATASET_NAME = "SWE-bench/SWE-bench_Verified"
+DEFAULT_REPOSITORY_REMOTE = "https://github.com"
+DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
+DEFAULT_TRACK_TEST_TIMEOUT_SECONDS = 1800
+DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS = 4500
 
 
 class LocalBuilderConfigError(ValueError):
@@ -24,6 +29,9 @@ class LocalBuilderConfigError(ValueError):
 class ExecutionFileConfig(StrictModel):
     workers: int | None = Field(default=None, ge=1)
     max_attempts: int | None = Field(default=None, ge=1)
+    identify_timeout_seconds: int | None = Field(default=None, ge=1)
+    track_test_timeout_seconds: int | None = Field(default=None, ge=1)
+    track_command_timeout_seconds: int | None = Field(default=None, ge=1)
 
 
 class ModelsFileConfig(StrictModel):
@@ -40,12 +48,25 @@ class ModelsFileConfig(StrictModel):
 class PathsFileConfig(StrictModel):
     workspace: str | None = None
     output: str | None = None
+    repository_cache: str | None = None
 
-    @field_validator("workspace", "output")
+    @field_validator("workspace", "output", "repository_cache")
     @classmethod
     def reject_blank_path(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
             raise ValueError("must be a nonempty path")
+        return value
+
+
+class BenchmarkFileConfig(StrictModel):
+    dataset_name: str | None = None
+    repository_remote: str | None = None
+
+    @field_validator("dataset_name", "repository_remote")
+    @classmethod
+    def reject_blank_value(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("must be a nonempty string")
         return value
 
 
@@ -54,6 +75,7 @@ class LocalBuilderFileConfig(StrictModel):
     execution: ExecutionFileConfig = Field(default_factory=ExecutionFileConfig)
     models: ModelsFileConfig = Field(default_factory=ModelsFileConfig)
     paths: PathsFileConfig = Field(default_factory=PathsFileConfig)
+    benchmark: BenchmarkFileConfig = Field(default_factory=BenchmarkFileConfig)
 
 
 @dataclass(frozen=True)
@@ -65,6 +87,12 @@ class LocalBuilderConfig:
     max_workers: int
     max_attempts: int
     candidate_generation_model: str
+    repository_cache: Path | None = None
+    dataset_name: str = DEFAULT_DATASET_NAME
+    repository_remote: str = DEFAULT_REPOSITORY_REMOTE
+    identify_timeout_seconds: int = DEFAULT_IDENTIFY_TIMEOUT_SECONDS
+    track_test_timeout_seconds: int = DEFAULT_TRACK_TEST_TIMEOUT_SECONDS
+    track_command_timeout_seconds: int = DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS
     source: Path | None = None
 
 
@@ -130,6 +158,12 @@ def resolve_local_builder_config(
     workers: int | None = None,
     max_attempts: int | None = None,
     candidate_generation_model: str | None = None,
+    repository_cache: str | Path | None = None,
+    dataset_name: str | None = None,
+    repository_remote: str | None = None,
+    identify_timeout_seconds: int | None = None,
+    track_test_timeout_seconds: int | None = None,
+    track_command_timeout_seconds: int | None = None,
     require_output: bool = False,
 ) -> LocalBuilderConfig:
     """Merge command-line overrides over config values and safe defaults."""
@@ -153,6 +187,16 @@ def resolve_local_builder_config(
             "an artifact output directory is required via --output or paths.output"
         )
 
+    if repository_cache is not None:
+        repository_cache_path = Path(repository_cache).expanduser()
+    else:
+        repository_cache_path = _config_path(
+            file_config.paths.repository_cache,
+            source,
+        )
+    if repository_cache_path is None:
+        repository_cache_path = workspace_path / "repositories"
+
     try:
         resolved_workers = int(
             _pick(workers, file_config.execution.workers, DEFAULT_WORKERS)
@@ -169,6 +213,37 @@ def resolve_local_builder_config(
             file_config.models.candidate_generation,
             DEFAULT_CANDIDATE_GENERATION_MODEL,
         )
+        resolved_dataset_name = _pick(
+            dataset_name,
+            file_config.benchmark.dataset_name,
+            DEFAULT_DATASET_NAME,
+        )
+        resolved_repository_remote = _pick(
+            repository_remote,
+            file_config.benchmark.repository_remote,
+            DEFAULT_REPOSITORY_REMOTE,
+        )
+        resolved_identify_timeout = int(
+            _pick(
+                identify_timeout_seconds,
+                file_config.execution.identify_timeout_seconds,
+                DEFAULT_IDENTIFY_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_track_test_timeout = int(
+            _pick(
+                track_test_timeout_seconds,
+                file_config.execution.track_test_timeout_seconds,
+                DEFAULT_TRACK_TEST_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_track_command_timeout = int(
+            _pick(
+                track_command_timeout_seconds,
+                file_config.execution.track_command_timeout_seconds,
+                DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS,
+            )
+        )
     except (TypeError, ValueError) as error:
         raise LocalBuilderConfigError(str(error)) from error
     if resolved_workers < 1:
@@ -179,6 +254,30 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "candidate generation model must be a nonempty string"
         )
+    if (
+        not isinstance(resolved_dataset_name, str)
+        or not resolved_dataset_name.strip()
+    ):
+        raise LocalBuilderConfigError("dataset name must be a nonempty string")
+    if (
+        not isinstance(resolved_repository_remote, str)
+        or not resolved_repository_remote.strip()
+    ):
+        raise LocalBuilderConfigError(
+            "repository remote must be a nonempty string"
+        )
+    if resolved_identify_timeout < 1:
+        raise LocalBuilderConfigError(
+            "identify timeout must be at least 1 second"
+        )
+    if resolved_track_test_timeout < 1:
+        raise LocalBuilderConfigError(
+            "track test timeout must be at least 1 second"
+        )
+    if resolved_track_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "track command timeout must be at least 1 second"
+        )
 
     return LocalBuilderConfig(
         workspace=workspace_path,
@@ -186,6 +285,11 @@ def resolve_local_builder_config(
         max_workers=resolved_workers,
         max_attempts=resolved_attempts,
         candidate_generation_model=model,
+        repository_cache=repository_cache_path,
+        dataset_name=resolved_dataset_name,
+        repository_remote=resolved_repository_remote,
+        identify_timeout_seconds=resolved_identify_timeout,
+        track_test_timeout_seconds=resolved_track_test_timeout,
+        track_command_timeout_seconds=resolved_track_command_timeout,
         source=source,
     )
-

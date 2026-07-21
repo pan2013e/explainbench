@@ -10,19 +10,23 @@ from explainbench.question_builders.common.orchestration import (
 )
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
+from explainbench.question_builders.local.runners import (
+    IdentifyPatchedFunctionsRunner,
+    TrackTestCallsRunner,
+)
 
 
-class PendingMigrationRunner:
-    """Explicit placeholder until a scientific stage is migrated."""
+class UnconnectedStageRunner:
+    """Explicit placeholder until a canonical stage command is connected."""
 
     def __init__(self, stage_name: str) -> None:
         self.stage_name = stage_name
 
     def run_instance(self, context: StageContext):
         raise StageExecutionError(
-            f"stage {self.stage_name!r} has not yet been migrated from the "
-            "research pipeline",
-            category="stage_not_migrated",
+            f"stage {self.stage_name!r} is not yet connected to its "
+            "canonical command",
+            category="stage_not_connected",
             retryable=False,
         )
 
@@ -33,6 +37,35 @@ class PendingMigrationRunner:
 
 def _candidate_model(config: LocalBuilderConfig) -> dict[str, str]:
     return {"candidate_generation_model": config.candidate_generation_model}
+
+
+def _identify_resources(config: LocalBuilderConfig) -> dict[str, str]:
+    return {"dataset_name": config.dataset_name}
+
+
+def _identify_execution(config: LocalBuilderConfig) -> dict[str, str | int]:
+    return {
+        "repository_cache": str(
+            config.repository_cache or config.workspace / "repositories"
+        ),
+        "repository_remote": config.repository_remote,
+        "timeout_seconds": config.identify_timeout_seconds,
+    }
+
+
+def _track_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
+    return {
+        "test_timeout_seconds": config.track_test_timeout_seconds,
+        "command_timeout_seconds": config.track_command_timeout_seconds,
+        "harness_workers": 1,
+        "cache_level": "env",
+        "force_rebuild": False,
+        "clean": False,
+        "open_file_limit": 4096,
+        "namespace": "swebench",
+        "instance_image_tag": "latest",
+        "env_image_tag": "latest",
+    }
 
 
 def _stage(
@@ -47,22 +80,30 @@ def _stage(
         description=description,
         dependencies=() if dependency is None else (dependency,),
         implementation_version="0-pending-migration",
-        runner=PendingMigrationRunner(name),
+        runner=UnconnectedStageRunner(name),
         **({} if semantic_inputs is None else {"semantic_inputs": semantic_inputs}),
     )
 
 
 LOCAL_STAGE_REGISTRY = StageRegistry(
     [
-        _stage(
-            "identify-patched-functions",
-            "find Python functions changed by the submitted patch",
-            None,
+        StageDefinition(
+            name="identify-patched-functions",
+            description="find Python functions changed by the submitted patch",
+            dependencies=(),
+            implementation_version="1-canonical-cli",
+            runner=IdentifyPatchedFunctionsRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_identify_execution,
         ),
-        _stage(
-            "track-test-calls",
-            "run relevant tests with lightweight call tracking",
-            "identify-patched-functions",
+        StageDefinition(
+            name="track-test-calls",
+            description="run relevant tests with lightweight call tracking",
+            dependencies=("identify-patched-functions",),
+            implementation_version="1-canonical-cli",
+            runner=TrackTestCallsRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_track_execution,
         ),
         _stage(
             "select-trace-functions",
@@ -107,4 +148,3 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
         ),
     ]
 )
-

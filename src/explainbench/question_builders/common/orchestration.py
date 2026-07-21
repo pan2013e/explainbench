@@ -75,6 +75,7 @@ class StageResult:
 class StageContext:
     """All explicit inputs available to one instance-stage execution."""
 
+    submission_id: str
     instance: SubmissionInstance
     workspace: Path
     work_directory: Path
@@ -228,6 +229,14 @@ class BuilderWorkspace(Protocol):
         ...
 
     def result_checksum(self, stage_name: str, instance_id: str) -> str:
+        ...
+
+    def validate_result_artifacts(
+        self,
+        stage_name: str,
+        instance_id: str,
+        result: StoredStageResult,
+    ) -> None:
         ...
 
     def work_directory(self, stage_name: str, instance_id: str) -> Path:
@@ -439,6 +448,11 @@ class BuilderOrchestrator:
             if checksum != status.result_checksum:
                 raise ValueError("result checksum does not match checkpoint")
             definition.runner.validate_result(result)
+            self.workspace.validate_result_artifacts(
+                stage_name,
+                instance.instance_id,
+                result,
+            )
         except (OSError, RuntimeError, ValueError, TypeError) as error:
             self._invalidate(
                 stage_name,
@@ -522,6 +536,7 @@ class BuilderOrchestrator:
                 total_attempts,
             )
             context = StageContext(
+                submission_id=self.submission_id,
                 instance=instance,
                 workspace=self.workspace.root,
                 work_directory=self.workspace.work_directory(
@@ -542,6 +557,11 @@ class BuilderOrchestrator:
             try:
                 result = definition.runner.run_instance(context).to_stored()
                 definition.runner.validate_result(result)
+                self.workspace.validate_result_artifacts(
+                    definition.name,
+                    instance.instance_id,
+                    result,
+                )
                 result_file, result_checksum = self.workspace.write_result(
                     definition.name,
                     instance.instance_id,

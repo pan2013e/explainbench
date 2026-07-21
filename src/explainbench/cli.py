@@ -232,6 +232,34 @@ def _add_local_builder_run_options(
         help="candidate-expression model identifier; overrides config",
     )
     parser.add_argument(
+        "--repository-cache",
+        type=Path,
+        help="repository cache used by canonical local-effect stages",
+    )
+    parser.add_argument(
+        "--dataset-name",
+        help="SWE-bench dataset identifier; overrides config",
+    )
+    parser.add_argument(
+        "--repository-remote",
+        help="base Git remote used to clone benchmark repositories",
+    )
+    parser.add_argument(
+        "--identify-timeout",
+        type=int,
+        help="timeout in seconds for one patched-function identification attempt",
+    )
+    parser.add_argument(
+        "--track-test-timeout",
+        type=int,
+        help="timeout in seconds for each in-container tracked test run",
+    )
+    parser.add_argument(
+        "--track-command-timeout",
+        type=int,
+        help="timeout in seconds for the complete tracking command",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="reuse compatible completed instance-stage checkpoints",
@@ -382,6 +410,12 @@ def _resolved_local_builder_config(
         workers=arguments.workers,
         max_attempts=arguments.max_attempts,
         candidate_generation_model=arguments.candidate_model,
+        repository_cache=arguments.repository_cache,
+        dataset_name=arguments.dataset_name,
+        repository_remote=arguments.repository_remote,
+        identify_timeout_seconds=arguments.identify_timeout,
+        track_test_timeout_seconds=arguments.track_test_timeout,
+        track_command_timeout_seconds=arguments.track_command_timeout,
         require_output=require_output,
     )
 

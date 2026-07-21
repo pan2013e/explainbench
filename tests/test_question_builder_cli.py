@@ -1,7 +1,10 @@
 import json
 
+from pathlib import Path
+
 from explainbench import cli
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
+from explainbench.question_builders.local import runners
 
 
 INSTANCE_ID = "astropy__astropy-12907"
@@ -35,6 +38,39 @@ def write_submission(tmp_path):
     return path
 
 
+def install_fake_identify(monkeypatch):
+    def option(arguments, name):
+        return arguments[arguments.index(name) + 1]
+
+    def fake_identify(module, arguments, context, **kwargs):
+        arguments = tuple(arguments)
+        if module == runners.IDENTIFY_PATCHED_FUNCTIONS_MODULE:
+            Path(option(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: ["example:changed"]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+        tracking_root = (
+            Path(option(arguments, "--work-dir"))
+            / "logs/run_evaluation"
+            / option(arguments, "--run-id")
+            / context.submission_id
+            / context.instance.instance_id
+        )
+        for name in ("buggy_traces", "patched_traces"):
+            directory = tracking_root / name
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / "test.jsonl").write_text("{}\n", encoding="utf-8")
+
+    monkeypatch.setattr(runners, "run_canonical_module", fake_identify)
+
+
 def test_stages_lists_meaningful_names_in_dependency_order(capsys):
     status = cli.main(["question-builder", "local", "stages"])
 
@@ -50,7 +86,9 @@ def test_stages_lists_meaningful_names_in_dependency_order(capsys):
 def test_pending_stage_fails_explicitly_and_status_is_inspectable(
     tmp_path,
     capsys,
+    monkeypatch,
 ):
+    install_fake_identify(monkeypatch)
     submission = write_submission(tmp_path)
     workspace = tmp_path / "workspace"
     artifacts = tmp_path / "artifacts"
@@ -70,7 +108,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
     run_output = capsys.readouterr()
 
     assert status == 1
-    assert "stage_not_migrated" not in run_output.err
+    assert "stage_not_connected" not in run_output.err
     assert "checkpoints and logs were retained" in run_output.err
     assert "identify-patched-functions" in run_output.out
     assert (workspace / "manifest.json").is_file()
@@ -88,7 +126,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'identify-patched-functions' has not yet been migrated" in (
+    assert "stage 'select-trace-functions' is not yet connected" in (
         status_output.out
     )
     assert "retryable=no" in status_output.out
@@ -119,7 +157,12 @@ def test_individual_later_stage_reports_missing_prerequisite(tmp_path, capsys):
     assert "question-builder local run" in captured.err
 
 
-def test_local_builder_config_paths_are_relative_to_config(tmp_path, capsys):
+def test_local_builder_config_paths_are_relative_to_config(
+    tmp_path,
+    capsys,
+    monkeypatch,
+):
+    install_fake_identify(monkeypatch)
     submission = write_submission(tmp_path)
     config = tmp_path / "builder.toml"
     config.write_text(
@@ -129,6 +172,9 @@ schema_version = 1
 [execution]
 workers = 2
 max_attempts = 4
+identify_timeout_seconds = 123
+track_test_timeout_seconds = 456
+track_command_timeout_seconds = 789
 
 [models]
 candidate_generation = "test-model"
@@ -136,6 +182,11 @@ candidate_generation = "test-model"
 [paths]
 workspace = "configured-workspace"
 output = "configured-artifacts"
+repository_cache = "configured-repositories"
+
+[benchmark]
+dataset_name = "example/dataset"
+repository_remote = "https://example.invalid"
 """,
         encoding="utf-8",
     )
@@ -154,6 +205,7 @@ output = "configured-artifacts"
     capsys.readouterr()
     assert status == 1
     assert (tmp_path / "configured-workspace" / "manifest.json").is_file()
+    assert (tmp_path / "configured-workspace" / "input/predictions.json").is_file()
 
 
 def test_local_registry_has_the_documented_stage_names():

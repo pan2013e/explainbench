@@ -16,11 +16,18 @@ from execution.util import prepare_tracer, get_instance_ids, get_predictions_pat
 def run_tracking(**kwargs):
     """Run the existing lightweight tracking workflow with explicit inputs."""
 
+    work_dir = Path(kwargs["work_dir"]).expanduser().resolve()
+    work_dir.mkdir(parents=True, exist_ok=True)
+    report_dir = Path(kwargs["report_dir"]).expanduser().resolve()
+    report_dir.mkdir(parents=True, exist_ok=True)
+    allowed_qualnames_path = kwargs["allowed_qualnames_path"]
+    if allowed_qualnames_path is not None:
+        allowed_qualnames_path = Path(allowed_qualnames_path).expanduser().resolve()
     monkey_patch_execution(
         agent=kwargs["agent"],
         allowed_qualnames_path=(
-            str(kwargs["allowed_qualnames_path"])
-            if kwargs["allowed_qualnames_path"] is not None
+            str(allowed_qualnames_path)
+            if allowed_qualnames_path is not None
             else None
         ),
     )
@@ -28,26 +35,32 @@ def run_tracking(**kwargs):
     predictions_path = kwargs["predictions_path"]
     if predictions_path is None:
         predictions_path = get_predictions_path(kwargs["agent"])
+    predictions_path = Path(predictions_path).expanduser().resolve()
     run_id = kwargs["run_id"] or f"track.{kwargs['agent']}.{os.getuid()}"
-    run_evaluation_main(
-        dataset_name=kwargs["dataset_name"],
-        split=kwargs["split"],
-        instance_ids=get_instance_ids(kwargs["instance_ids"]),
-        predictions_path=str(predictions_path),
-        max_workers=kwargs["max_workers"],
-        force_rebuild=kwargs["force_rebuild"],
-        cache_level=kwargs["cache_level"],
-        clean=kwargs["clean"],
-        open_file_limit=kwargs["open_file_limit"],
-        run_id=run_id,
-        timeout=kwargs["timeout"],
-        namespace=kwargs["namespace"],
-        rewrite_reports=kwargs["rewrite_reports"],
-        modal=kwargs["modal"],
-        instance_image_tag=kwargs["instance_image_tag"],
-        env_image_tag=kwargs["env_image_tag"],
-        report_dir=str(kwargs["report_dir"]),
-    )
+    original_work_dir = Path.cwd()
+    try:
+        os.chdir(work_dir)
+        run_evaluation_main(
+            dataset_name=kwargs["dataset_name"],
+            split=kwargs["split"],
+            instance_ids=get_instance_ids(kwargs["instance_ids"]),
+            predictions_path=str(predictions_path),
+            max_workers=kwargs["max_workers"],
+            force_rebuild=kwargs["force_rebuild"],
+            cache_level=kwargs["cache_level"],
+            clean=kwargs["clean"],
+            open_file_limit=kwargs["open_file_limit"],
+            run_id=run_id,
+            timeout=kwargs["timeout"],
+            namespace=kwargs["namespace"],
+            rewrite_reports=kwargs["rewrite_reports"],
+            modal=kwargs["modal"],
+            instance_image_tag=kwargs["instance_image_tag"],
+            env_image_tag=kwargs["env_image_tag"],
+            report_dir=str(report_dir),
+        )
+    finally:
+        os.chdir(original_work_dir)
 
 
 def build_parser() -> ArgumentParser:
@@ -130,6 +143,12 @@ def build_parser() -> ArgumentParser:
     parser.add_argument("--instance-image-tag", default="latest")
     parser.add_argument("--env-image-tag", default="latest")
     parser.add_argument("--report-dir", type=Path, default=Path("."))
+    parser.add_argument(
+        "--work-dir",
+        type=Path,
+        default=Path("."),
+        help="Working directory that contains SWE-bench logs for this run.",
+    )
     return parser
 
 

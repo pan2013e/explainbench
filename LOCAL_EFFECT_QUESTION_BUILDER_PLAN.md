@@ -419,18 +419,22 @@ src/explainbench/question_builders/
 │   ├── fingerprints.py
 │   ├── locking.py
 │   ├── orchestration.py
+│   ├── subprocess_runner.py
 │   └── status.py
 └── local/
     ├── __init__.py
     ├── config.py
-    ├── legacy_commands.py
     ├── registry.py
     ├── runners.py
     ├── workspace.py
     └── submission_adapter.py
 ```
 
-The `common` layer contains only genuinely reusable orchestration mechanisms. `legacy_commands.py` declares the module, arguments, and expected outputs for each local stage. `runners.py` invokes those commands; it contains no scientific transformations. A future end-to-end builder may define its own command registry and wrappers.
+The `common` layer contains only genuinely reusable orchestration mechanisms.
+`subprocess_runner.py` runs canonical commands with isolated process groups, durable command records, and per-attempt logs.
+`runners.py` declares each canonical module, its arguments, and its output validation.
+It contains no scientific transformations.
+A future end-to-end builder may define its own command registry and wrappers.
 
 ## Canonical CLI modernization
 
@@ -466,7 +470,10 @@ CLI-only corrections required for package use:
 
 Expected outcome: the CLI and resume machinery are real and thoroughly testable, while stage bodies may still report that their canonical command has not yet been connected.
 
-Status: completed. The production registry currently uses explicit `stage_not_migrated` runners (the existing internal identifier), so it cannot accidentally emit dummy scientific artifacts. The orchestration tests use injected lightweight runners and cover compatible reuse, per-instance interruption, retryable failure, corrupted results, semantic invalidation, operational-setting changes, missing prerequisites, dependency cycles, and workspace locking. The full fast test suite passes.
+Status: completed.
+Unconnected production stages use an explicit `stage_not_connected` runner, so they cannot emit dummy scientific artifacts.
+The orchestration tests use injected lightweight runners and cover compatible reuse, per-instance interruption, retryable failure, corrupted results, semantic invalidation, operational-setting changes, missing prerequisites, dependency cycles, and workspace locking.
+The full fast test suite passes.
 
 ### Milestone 2: Canonical command interfaces and package wrappers
 
@@ -478,17 +485,21 @@ Status: completed. The production registry currently uses explicit `stage_not_mi
 - [x] Reset the retryable-failure budget for every new `--resume` invocation while retaining cumulative attempt history.
 - [x] Convert abandoned `running` states into explicit interrupted attempts after the workspace lock is acquired.
 - [x] Add isolated attempt directories and durable per-attempt records.
-- Add stage-specific external-artifact manifests.
-- Add a submission adapter that writes the legacy predictions shape inside the workspace.
-- Replace pending package runners with thin subprocess wrappers over those modules.
-- Validate each declared output before marking the instance-stage checkpoint complete.
+- [x] Add a shared checksummed external-artifact manifest for stage outputs that remain outside `result.json`.
+- [x] Add a submission adapter that writes the canonical predictions shape inside the workspace.
+- [x] Add the shared canonical subprocess runner with command records, stdout and stderr logs, timeout handling, and process-group cleanup.
+- [x] Connect `identify-patched-functions` to its canonical CLI as the first real stage runner.
+- Replace each remaining pending package runner with a thin subprocess wrapper over its canonical module.
+- [x] Validate the `identify-patched-functions` output before marking its instance-stage checkpoint complete.
+- Add output validation for every remaining stage as each wrapper is connected.
 - Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
-- Test wrapper command construction without Docker or model calls.
+- [x] Test the first wrapper's command construction without Docker or model calls.
+- Test each remaining wrapper's command construction without Docker or model calls.
 - [x] Test retry-budget reset across separate resume invocations.
 - [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
 - [x] Test interruption recovery and attempt isolation.
-- Test external-artifact corruption.
+- [x] Test that external-artifact corruption invalidates and reruns the owning stage.
 
 Expected outcome: every existing local-question step can be invoked directly and through `explainbench question-builder local`, while scientific logic remains canonical under `dataset/` and `execution/`.
 
@@ -520,13 +531,17 @@ These values affect benchmark compatibility or internal implementation rather th
 
 Status of the CLI-only phase: completed.
 Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
-The generic resume foundation and revised retry-cycle behavior are implemented.
-Canonical subprocess wrappers, external-artifact validation, and production stage integration are not yet implemented.
+The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first two canonical stage integrations are implemented.
+The shared artifact manifest records relative paths, sizes, and SHA-256 checksums.
+Resume validates the full recorded file set before it reuses a checkpoint.
+The remaining canonical stage wrappers are not yet implemented.
 
 ### Milestone 3: Docker execution stages
 
-- Connect the package runners to the canonical `execution.track`, `execution.trace`, and `execution.inspect` commands.
-- Pass repository cache, image, timeout, worker, whitelist, prediction, run-ID, and log locations explicitly.
+- [x] Connect `track-test-calls` to the canonical `execution.track` command.
+- Connect the remaining Docker package runners to the canonical `execution.trace` and `execution.inspect` commands.
+- [x] Pass tracking timeouts, worker count, whitelist, prediction, run-ID, report, and log locations explicitly.
+- Pass the corresponding values explicitly for tracing and inspection.
 - Keep Docker containers and subprocesses scoped to one instance attempt.
 - Add an opt-in slow integration test for one small SWE-bench instance.
 
@@ -589,6 +604,11 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Agree that each new resume invocation gives retryable failures a fresh retry budget by default.
 - [x] Agree that no separate retry-failed CLI option is needed.
 - [x] Implement instance status schema version 2, version 1 migration, per-invocation retry cycles, and durable attempt history.
+- [x] Implement the submission adapter and shared canonical subprocess runner.
+- [x] Connect and validate `identify-patched-functions` as the first real stage.
+- [x] Connect `track-test-calls` to `execution.track` with attempt-scoped SWE-bench logs.
+- [x] Add checksummed trace-artifact manifests and validate them during resume.
+- [x] Separate the in-container test timeout from the complete tracking-command timeout.
 - [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
@@ -596,6 +616,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 
 ## Next step
 
-Add the submission adapter and the shared canonical subprocess-runner utility.
-Then connect and test `identify-patched-functions` as the first real instance-stage wrapper.
-Use that integration to verify command construction, attempt logs, output validation, and resume behavior before connecting the remaining stages.
+Connect `select-trace-functions` to the canonical `trace_step2_generate_call_stack_whitelist` command next.
+The wrapper will consume the validated tracking manifest and the identified patched functions.
+It will produce and validate a per-instance function whitelist for `trace-program-state`.
+Keep the real SWE-bench and Docker smoke test opt-in because the default suite must remain fast and offline.

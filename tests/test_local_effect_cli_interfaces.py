@@ -179,6 +179,52 @@ def test_execution_cli_dispatches_explicit_harness_options(
     assert captured["clean"] is True
 
 
+def test_tracking_runs_harness_in_explicit_work_directory(
+    tmp_path,
+    monkeypatch,
+):
+    captured = {}
+    predictions = tmp_path / "predictions.json"
+    predictions.write_text("{}\n", encoding="utf-8")
+    qualnames = tmp_path / "qualnames.json"
+    qualnames.write_text("{}\n", encoding="utf-8")
+    work_dir = tmp_path / "tracking"
+    report_dir = tmp_path / "reports"
+    original_work_dir = Path.cwd()
+
+    monkeypatch.setattr(track_cli, "monkey_patch_execution", lambda **kwargs: None)
+    monkeypatch.setattr(track_cli, "prepare_tracer", lambda: None)
+    monkeypatch.setattr(
+        track_cli,
+        "run_evaluation_main",
+        lambda **kwargs: captured.update(
+            {"cwd": Path.cwd(), "report_dir": kwargs["report_dir"]}
+        ),
+    )
+    arguments = track_cli.build_parser().parse_args(
+        [
+            "--instance-ids",
+            INSTANCE_ID,
+            "--agent",
+            AGENT,
+            "--predictions-path",
+            str(predictions),
+            "--allowed-qualnames-path",
+            str(qualnames),
+            "--work-dir",
+            str(work_dir),
+            "--report-dir",
+            str(report_dir),
+        ]
+    )
+
+    track_cli.run_tracking(**vars(arguments))
+
+    assert captured["cwd"] == work_dir.resolve()
+    assert captured["report_dir"] == str(report_dir.resolve())
+    assert Path.cwd() == original_work_dir
+
+
 def test_inspection_cli_dispatches_predictions_run_id_and_timeout(monkeypatch):
     captured = {}
     monkeypatch.setattr(

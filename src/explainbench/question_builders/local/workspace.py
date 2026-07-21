@@ -10,6 +10,9 @@ from typing import Literal, Sequence
 from pydantic import Field, ValidationError
 
 from explainbench import __version__
+from explainbench.question_builders.common.artifacts import (
+    validate_artifact_manifest,
+)
 from explainbench.question_builders.common.atomic_files import atomic_write_json
 from explainbench.question_builders.common.fingerprints import (
     fingerprint_file,
@@ -58,7 +61,9 @@ def _read_json(path: Path) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise LocalWorkspaceError(f"cannot read workspace file {path}: {error}") from error
+        raise LocalWorkspaceError(
+            f"cannot read workspace file {path}: {error}"
+        ) from error
 
 
 def _patch_fingerprints(submission: Submission) -> dict[str, str]:
@@ -276,6 +281,20 @@ class LocalBuilderWorkspace:
 
     def result_checksum(self, stage_name: str, instance_id: str) -> str:
         return fingerprint_file(self._result_path(stage_name, instance_id))
+
+    def validate_result_artifacts(
+        self,
+        stage_name: str,
+        instance_id: str,
+        result: StoredStageResult,
+    ) -> None:
+        manifest = result.data.get("artifact_manifest")
+        if manifest is None:
+            return
+        validate_artifact_manifest(
+            manifest,
+            relative_to=self._instance_directory(stage_name, instance_id),
+        )
 
     def work_directory(self, stage_name: str, instance_id: str) -> Path:
         path = self._instance_directory(stage_name, instance_id) / "work"
