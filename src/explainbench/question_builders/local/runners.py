@@ -10,6 +10,7 @@ from pathlib import Path
 from explainbench.question_builders.common.artifacts import (
     ArtifactManifest,
     build_artifact_manifest,
+    resolve_artifact_root,
 )
 from explainbench.question_builders.common.atomic_files import atomic_write_json
 from explainbench.question_builders.common.orchestration import (
@@ -28,6 +29,10 @@ IDENTIFY_PATCHED_FUNCTIONS_MODULE = (
     "trace_step1_generate_qualname_whitelist"
 )
 TRACK_TEST_CALLS_MODULE = "execution.track"
+SELECT_TRACE_FUNCTIONS_MODULE = (
+    "dataset.extract_ground_truths.effect."
+    "trace_step2_generate_call_stack_whitelist"
+)
 
 
 def _read_json(path: Path) -> object:
@@ -254,3 +259,116 @@ class TrackTestCallsRunner:
             raise ValueError("tracking manifest requires buggy trace files")
         if not any(path.startswith("patched_traces/") for path in paths):
             raise ValueError("tracking manifest requires patched trace files")
+
+
+class SelectTraceFunctionsRunner:
+    """Select detailed-trace functions from lightweight call-stack traces."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        identify_result = context.upstream_results.get(
+            "identify-patched-functions"
+        )
+        track_result = context.upstream_results.get("track-test-calls")
+        if identify_result is None or track_result is None:
+            raise StageExecutionError(
+                "select-trace-functions requires identification and tracking output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+
+        targets_path = context.attempt_directory / "allowed_qualnames.json"
+        atomic_write_json(
+            targets_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: identify_result.data.get(
+                        "qualnames"
+                    ),
+                }
+            },
+        )
+        track_instance_directory = (
+            context.workspace
+            / "stages"
+            / "track-test-calls"
+            / "instances"
+            / context.instance.instance_id
+        )
+        _, tracking_root = resolve_artifact_root(
+            track_result.data.get("artifact_manifest"),
+            relative_to=track_instance_directory,
+        )
+        if not tracking_root.is_dir():
+            raise StageExecutionError(
+                f"tracking artifact root is missing: {tracking_root}",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+
+        output_path = context.attempt_directory / "allowed_functions.json"
+        run_canonical_module(
+            SELECT_TRACE_FUNCTIONS_MODULE,
+            (
+                "--agent",
+                context.submission_id,
+                "--instance-ids",
+                context.instance.instance_id,
+                "--root-path",
+                str(tracking_root),
+                "--targets-json",
+                str(targets_path),
+                "--output-path",
+                str(output_path),
+            ),
+            context,
+            timeout=context.config.select_trace_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        payload = _read_json(output_path)
+        if not isinstance(payload, dict):
+            raise StageExecutionError(
+                "trace-function output must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        submission_results = payload.get(context.submission_id)
+        if not isinstance(submission_results, dict):
+            raise StageExecutionError(
+                "trace-function output does not contain the submission ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        functions = submission_results.get(context.instance.instance_id)
+        if functions is None:
+            raise StageExecutionError(
+                "trace-function output does not contain the instance ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        result = StageResult.completed(
+            {
+                "instance_id": context.instance.instance_id,
+                "functions": functions,
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        functions = result.data.get("functions")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError(
+                "trace-function result requires a nonempty instance_id"
+            )
+        if not isinstance(functions, list) or not all(
+            isinstance(item, str) and item for item in functions
+        ):
+            raise ValueError(
+                "trace-function result functions must be nonempty strings"
+            )
+        if functions != sorted(set(functions)):
+            raise ValueError(
+                "trace-function result functions must be sorted and unique"
+            )

@@ -86,12 +86,12 @@ def build_artifact_manifest(
     return ArtifactManifest(root=relative_root, files=files)
 
 
-def validate_artifact_manifest(
+def resolve_artifact_root(
     value: object,
     *,
     relative_to: Path,
-) -> ArtifactManifest:
-    """Validate a manifest and verify every recorded file on disk."""
+) -> tuple[ArtifactManifest, Path]:
+    """Resolve a validated manifest root below its stage-instance directory."""
 
     manifest = ArtifactManifest.model_validate(value)
     base = relative_to.resolve()
@@ -102,6 +102,17 @@ def validate_artifact_manifest(
         raise ValueError(
             "artifact root resolves outside stage instance directory"
         ) from error
+    return manifest, root
+
+
+def validate_artifact_manifest(
+    value: object,
+    *,
+    relative_to: Path,
+) -> ArtifactManifest:
+    """Validate a manifest and verify every recorded file on disk."""
+
+    manifest, root = resolve_artifact_root(value, relative_to=relative_to)
     if not root.is_dir() or root.is_symlink():
         raise ValueError(f"artifact root is missing or invalid: {root}")
 

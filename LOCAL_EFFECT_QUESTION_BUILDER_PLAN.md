@@ -489,12 +489,15 @@ The full fast test suite passes.
 - [x] Add a submission adapter that writes the canonical predictions shape inside the workspace.
 - [x] Add the shared canonical subprocess runner with command records, stdout and stderr logs, timeout handling, and process-group cleanup.
 - [x] Connect `identify-patched-functions` to its canonical CLI as the first real stage runner.
+- [x] Connect `select-trace-functions` to the canonical call-stack whitelist CLI.
 - Replace each remaining pending package runner with a thin subprocess wrapper over its canonical module.
 - [x] Validate the `identify-patched-functions` output before marking its instance-stage checkpoint complete.
+- [x] Validate the per-instance function whitelist produced by `select-trace-functions`.
 - Add output validation for every remaining stage as each wrapper is connected.
 - Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
 - [x] Test the first wrapper's command construction without Docker or model calls.
+- [x] Test the tracking and trace-function wrapper command construction without Docker or model calls.
 - Test each remaining wrapper's command construction without Docker or model calls.
 - [x] Test retry-budget reset across separate resume invocations.
 - [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
@@ -531,7 +534,7 @@ These values affect benchmark compatibility or internal implementation rather th
 
 Status of the CLI-only phase: completed.
 Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
-The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first two canonical stage integrations are implemented.
+The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first three canonical stage integrations are implemented.
 The shared artifact manifest records relative paths, sizes, and SHA-256 checksums.
 Resume validates the full recorded file set before it reuses a checkpoint.
 The remaining canonical stage wrappers are not yet implemented.
@@ -609,6 +612,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Connect `track-test-calls` to `execution.track` with attempt-scoped SWE-bench logs.
 - [x] Add checksummed trace-artifact manifests and validate them during resume.
 - [x] Separate the in-container test timeout from the complete tracking-command timeout.
+- [x] Connect and validate `select-trace-functions` as the third canonical stage.
 - [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
@@ -616,7 +620,8 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 
 ## Next step
 
-Connect `select-trace-functions` to the canonical `trace_step2_generate_call_stack_whitelist` command next.
-The wrapper will consume the validated tracking manifest and the identified patched functions.
-It will produce and validate a per-instance function whitelist for `trace-program-state`.
+Connect `trace-program-state` to the canonical `execution.trace` command next.
+The wrapper will consume the validated function whitelist from `select-trace-functions`.
+It will run detailed buggy and patched state tracing in an attempt-scoped SWE-bench workspace.
+It will record the detailed trace files in a checksummed artifact manifest for `find-first-divergence`.
 Keep the real SWE-bench and Docker smoke test opt-in because the default suite must remain fast and offline.

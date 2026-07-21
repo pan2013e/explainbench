@@ -260,6 +260,11 @@ def _add_local_builder_run_options(
         help="timeout in seconds for the complete tracking command",
     )
     parser.add_argument(
+        "--select-trace-timeout",
+        type=int,
+        help="timeout in seconds for call-stack function selection",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="reuse compatible completed instance-stage checkpoints",
@@ -416,6 +421,7 @@ def _resolved_local_builder_config(
         identify_timeout_seconds=arguments.identify_timeout,
         track_test_timeout_seconds=arguments.track_test_timeout,
         track_command_timeout_seconds=arguments.track_command_timeout,
+        select_trace_timeout_seconds=arguments.select_trace_timeout,
         require_output=require_output,
     )
 
@@ -504,7 +510,10 @@ def _run_local_question_builder(arguments: argparse.Namespace) -> int:
                 ),
             )
     except LocalBuilderConfigError as error:
-        print(f"Local question-builder configuration is invalid: {error}", file=sys.stderr)
+        print(
+            f"Local question-builder configuration is invalid: {error}",
+            file=sys.stderr,
+        )
         return 1
     except SubmissionValidationError as error:
         print("Submission is invalid", file=sys.stderr)
@@ -526,7 +535,8 @@ def _run_local_question_builder(arguments: argparse.Namespace) -> int:
         print(_format_stage_summary(summary))
     if any(summary.has_failures for summary in summaries):
         print(
-            "Local question builder did not complete; checkpoints and logs were retained",
+            "Local question builder did not complete; "
+            "checkpoints and logs were retained",
             file=sys.stderr,
         )
         return 1

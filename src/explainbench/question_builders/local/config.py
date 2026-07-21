@@ -20,6 +20,7 @@ DEFAULT_REPOSITORY_REMOTE = "https://github.com"
 DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
 DEFAULT_TRACK_TEST_TIMEOUT_SECONDS = 1800
 DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS = 4500
+DEFAULT_SELECT_TRACE_TIMEOUT_SECONDS = 1800
 
 
 class LocalBuilderConfigError(ValueError):
@@ -32,6 +33,7 @@ class ExecutionFileConfig(StrictModel):
     identify_timeout_seconds: int | None = Field(default=None, ge=1)
     track_test_timeout_seconds: int | None = Field(default=None, ge=1)
     track_command_timeout_seconds: int | None = Field(default=None, ge=1)
+    select_trace_timeout_seconds: int | None = Field(default=None, ge=1)
 
 
 class ModelsFileConfig(StrictModel):
@@ -93,6 +95,7 @@ class LocalBuilderConfig:
     identify_timeout_seconds: int = DEFAULT_IDENTIFY_TIMEOUT_SECONDS
     track_test_timeout_seconds: int = DEFAULT_TRACK_TEST_TIMEOUT_SECONDS
     track_command_timeout_seconds: int = DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS
+    select_trace_timeout_seconds: int = DEFAULT_SELECT_TRACE_TIMEOUT_SECONDS
     source: Path | None = None
 
 
@@ -164,6 +167,7 @@ def resolve_local_builder_config(
     identify_timeout_seconds: int | None = None,
     track_test_timeout_seconds: int | None = None,
     track_command_timeout_seconds: int | None = None,
+    select_trace_timeout_seconds: int | None = None,
     require_output: bool = False,
 ) -> LocalBuilderConfig:
     """Merge command-line overrides over config values and safe defaults."""
@@ -244,6 +248,13 @@ def resolve_local_builder_config(
                 DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS,
             )
         )
+        resolved_select_trace_timeout = int(
+            _pick(
+                select_trace_timeout_seconds,
+                file_config.execution.select_trace_timeout_seconds,
+                DEFAULT_SELECT_TRACE_TIMEOUT_SECONDS,
+            )
+        )
     except (TypeError, ValueError) as error:
         raise LocalBuilderConfigError(str(error)) from error
     if resolved_workers < 1:
@@ -278,6 +289,10 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "track command timeout must be at least 1 second"
         )
+    if resolved_select_trace_timeout < 1:
+        raise LocalBuilderConfigError(
+            "select trace timeout must be at least 1 second"
+        )
 
     return LocalBuilderConfig(
         workspace=workspace_path,
@@ -291,5 +306,6 @@ def resolve_local_builder_config(
         identify_timeout_seconds=resolved_identify_timeout,
         track_test_timeout_seconds=resolved_track_test_timeout,
         track_command_timeout_seconds=resolved_track_command_timeout,
+        select_trace_timeout_seconds=resolved_select_trace_timeout,
         source=source,
     )

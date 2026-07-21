@@ -397,3 +397,114 @@ def test_track_stage_reruns_when_a_manifest_artifact_changes(
     assert len(track_calls) == 2
     status = workspace.read_status("track-test-calls", INSTANCE_ID)
     assert status.total_attempts == 2
+
+
+def test_select_trace_functions_uses_tracking_artifacts_and_reuses_result(
+    tmp_path,
+    monkeypatch,
+):
+    calls = []
+
+    def fake_command(module, arguments, context, **kwargs):
+        arguments = tuple(arguments)
+        calls.append((module, arguments, kwargs))
+        if module == runners.IDENTIFY_PATCHED_FUNCTIONS_MODULE:
+            Path(_argument_value(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: [
+                                "example:Changed.function"
+                            ]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+        if module == runners.TRACK_TEST_CALLS_MODULE:
+            tracking_root = (
+                Path(_argument_value(arguments, "--work-dir"))
+                / "logs/run_evaluation"
+                / _argument_value(arguments, "--run-id")
+                / context.submission_id
+                / context.instance.instance_id
+            )
+            record = {
+                "target": "example:Changed.function",
+                "stack": [["example", "caller"], ["example", "callee"]],
+            }
+            for name in ("buggy_traces", "patched_traces"):
+                directory = tracking_root / name
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / "test.jsonl").write_text(
+                    f"{json.dumps(record)}\n",
+                    encoding="utf-8",
+                )
+            return
+
+        assert module == runners.SELECT_TRACE_FUNCTIONS_MODULE
+        targets = json.loads(
+            Path(_argument_value(arguments, "--targets-json")).read_text(
+                encoding="utf-8"
+            )
+        )
+        assert targets == {
+            context.submission_id: {
+                context.instance.instance_id: ["example:Changed.function"]
+            }
+        }
+        root = Path(_argument_value(arguments, "--root-path"))
+        assert (root / "buggy_traces/test.jsonl").is_file()
+        assert (root / "patched_traces/test.jsonl").is_file()
+        Path(_argument_value(arguments, "--output-path")).write_text(
+            json.dumps(
+                {
+                    context.submission_id: {
+                        context.instance.instance_id: ["callee", "caller"]
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    monkeypatch.setattr(runners, "run_canonical_module", fake_command)
+    config = LocalBuilderConfig(
+        workspace=tmp_path / "workspace",
+        artifact_output=None,
+        max_workers=1,
+        max_attempts=1,
+        candidate_generation_model="candidate-model",
+        select_trace_timeout_seconds=654,
+    )
+    submission = make_submission()
+    run_local_stage("identify-patched-functions", submission, config)
+    run_local_stage("track-test-calls", submission, config, resume=True)
+
+    selected = run_local_stage(
+        "select-trace-functions",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed = run_local_stage(
+        "select-trace-functions",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert selected.completed == 1
+    assert resumed.reused == 1
+    assert [item[0] for item in calls] == [
+        runners.IDENTIFY_PATCHED_FUNCTIONS_MODULE,
+        runners.TRACK_TEST_CALLS_MODULE,
+        runners.SELECT_TRACE_FUNCTIONS_MODULE,
+    ]
+    assert calls[-1][2]["timeout"] == 654
+    workspace = LocalBuilderWorkspace.inspect(config.workspace)
+    result = workspace.read_result("select-trace-functions", INSTANCE_ID)
+    assert result.data == {
+        "instance_id": INSTANCE_ID,
+        "functions": ["callee", "caller"],
+    }

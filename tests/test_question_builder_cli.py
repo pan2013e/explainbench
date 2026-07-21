@@ -56,17 +56,33 @@ def install_fake_identify(monkeypatch):
                 encoding="utf-8",
             )
             return
-        tracking_root = (
-            Path(option(arguments, "--work-dir"))
-            / "logs/run_evaluation"
-            / option(arguments, "--run-id")
-            / context.submission_id
-            / context.instance.instance_id
+        if module == runners.TRACK_TEST_CALLS_MODULE:
+            tracking_root = (
+                Path(option(arguments, "--work-dir"))
+                / "logs/run_evaluation"
+                / option(arguments, "--run-id")
+                / context.submission_id
+                / context.instance.instance_id
+            )
+            for name in ("buggy_traces", "patched_traces"):
+                directory = tracking_root / name
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / "test.jsonl").write_text(
+                    "{}\n",
+                    encoding="utf-8",
+                )
+            return
+        assert module == runners.SELECT_TRACE_FUNCTIONS_MODULE
+        Path(option(arguments, "--output-path")).write_text(
+            json.dumps(
+                {
+                    context.submission_id: {
+                        context.instance.instance_id: ["example:called"]
+                    }
+                }
+            ),
+            encoding="utf-8",
         )
-        for name in ("buggy_traces", "patched_traces"):
-            directory = tracking_root / name
-            directory.mkdir(parents=True, exist_ok=True)
-            (directory / "test.jsonl").write_text("{}\n", encoding="utf-8")
 
     monkeypatch.setattr(runners, "run_canonical_module", fake_identify)
 
@@ -126,7 +142,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'select-trace-functions' is not yet connected" in (
+    assert "stage 'trace-program-state' is not yet connected" in (
         status_output.out
     )
     assert "retryable=no" in status_output.out
@@ -175,6 +191,7 @@ max_attempts = 4
 identify_timeout_seconds = 123
 track_test_timeout_seconds = 456
 track_command_timeout_seconds = 789
+select_trace_timeout_seconds = 234
 
 [models]
 candidate_generation = "test-model"

@@ -12,6 +12,7 @@ from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
     IdentifyPatchedFunctionsRunner,
+    SelectTraceFunctionsRunner,
     TrackTestCallsRunner,
 )
 
@@ -68,6 +69,10 @@ def _track_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
     }
 
 
+def _select_trace_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"timeout_seconds": config.select_trace_timeout_seconds}
+
+
 def _stage(
     name: str,
     description: str,
@@ -105,10 +110,18 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             resource_inputs=_identify_resources,
             execution_inputs=_track_execution,
         ),
-        _stage(
-            "select-trace-functions",
-            "select functions for detailed tracing from observed call paths",
-            "track-test-calls",
+        StageDefinition(
+            name="select-trace-functions",
+            description=(
+                "select functions for detailed tracing from observed call paths"
+            ),
+            dependencies=(
+                "identify-patched-functions",
+                "track-test-calls",
+            ),
+            implementation_version="1-canonical-cli",
+            runner=SelectTraceFunctionsRunner(),
+            execution_inputs=_select_trace_execution,
         ),
         _stage(
             "trace-program-state",
