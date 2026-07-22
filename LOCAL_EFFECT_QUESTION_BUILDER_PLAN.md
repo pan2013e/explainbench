@@ -492,11 +492,13 @@ The full fast test suite passes.
 - [x] Connect `select-trace-functions` to the canonical call-stack whitelist CLI.
 - [x] Connect `trace-program-state` to the canonical detailed tracing CLI.
 - [x] Connect `find-first-divergence` to the canonical `build_step1.py` CLI.
+- [x] Connect `generate-candidate-expressions` to the canonical `build_step2.py` CLI.
 - Replace each remaining pending package runner with a thin subprocess wrapper over its canonical module.
 - [x] Validate the `identify-patched-functions` output before marking its instance-stage checkpoint complete.
 - [x] Validate the per-instance function whitelist produced by `select-trace-functions`.
 - [x] Validate detailed buggy and patched trace artifacts before checkpoint completion and reuse.
 - [x] Validate divergence metadata and preserve explicit gold-fallback state for empty results.
+- [x] Validate candidate metadata, candidate lists, prompt-only mode, and fallback state.
 - Add output validation for every remaining stage as each wrapper is connected.
 - Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
@@ -504,6 +506,7 @@ The full fast test suite passes.
 - [x] Test the tracking and trace-function wrapper command construction without Docker or model calls.
 - [x] Test detailed tracing command construction, checkpoint reuse, and artifact corruption without Docker.
 - [x] Test divergence command construction and checkpoint reuse without Docker or model calls.
+- [x] Test candidate-generation command construction and checkpoint reuse without model calls.
 - Test each remaining wrapper's command construction without Docker or model calls.
 - [x] Test retry-budget reset across separate resume invocations.
 - [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
@@ -540,7 +543,7 @@ These values affect benchmark compatibility or internal implementation rather th
 
 Status of the CLI-only phase: completed.
 Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
-The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first five canonical stage integrations are implemented.
+The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first six canonical stage integrations are implemented.
 The shared artifact manifest records relative paths, sizes, and SHA-256 checksums.
 Resume validates the full recorded file set before it reuses a checkpoint.
 The remaining canonical stage wrappers are not yet implemented.
@@ -623,6 +626,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Connect and validate `select-trace-functions` as the third canonical stage.
 - [x] Connect and validate `trace-program-state` as the fourth canonical stage.
 - [x] Connect and validate `find-first-divergence` as the fifth canonical stage.
+- [x] Connect and validate `generate-candidate-expressions` as the sixth canonical stage.
 - [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
@@ -630,7 +634,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 
 ## Next step
 
-Connect `generate-candidate-expressions` to the canonical `build_step2.py` command next.
-The wrapper will consume the validated divergence result from `find-first-divergence` and the submission patch from the workspace.
-It will pass model and inference settings explicitly, persist the candidate-generation output, and distinguish model failures from a valid gold fallback.
+Connect `execute-candidate-expressions` to canonical `build_step3.py --execute` next.
+The wrapper will consume the validated candidate expressions and divergence metadata from the previous stage.
+It will run expression inspection with attempt-scoped logs and validate the resulting buggy and patched inspection artifacts.
 Keep the real SWE-bench and model smoke tests opt-in because the default suite must remain fast and offline.

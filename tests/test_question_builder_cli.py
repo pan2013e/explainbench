@@ -100,6 +100,34 @@ def install_fake_identify(monkeypatch):
                 encoding="utf-8",
             )
             return
+        if module == runners.BUILD_STEP2_MODULE:
+            Path(option(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: {
+                                "instance_id": context.instance.instance_id,
+                                "agent": context.submission_id,
+                                "file_path": "example.py",
+                                "function_name": "example:changed",
+                                "buggy_lineno": 10,
+                                "patched_lineno": 11,
+                                "buggy_line_count": 4,
+                                "patched_line_count": 4,
+                                "before_or_after": "before",
+                                "prompt_length_chars": 123,
+                                "function_code_before_patch": (
+                                    "def changed():\\n    return old"
+                                ),
+                                "changed_candidates": ["value"],
+                                "unchanged_candidates": ["other"],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
         if module == runners.SELECT_TRACE_FUNCTIONS_MODULE:
             Path(option(arguments, "--output-path")).write_text(
                 json.dumps(
@@ -172,7 +200,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'generate-candidate-expressions' is not yet connected" in (
+    assert "stage 'execute-candidate-expressions' is not yet connected" in (
         status_output.out
     )
     assert "retryable=no" in status_output.out
@@ -232,6 +260,14 @@ divergence_agent_workers = 1
 divergence_simplify = false
 divergence_variable_max_depth = 5
 divergence_parameter_max_depth = 4
+candidate_generation_changed_candidates = 4
+candidate_generation_unchanged_candidates = 5
+candidate_generation_inference = false
+candidate_generation_instance_workers = 2
+candidate_generation_agent_workers = 3
+candidate_generation_reasoning_effort = "high"
+candidate_generation_model_retries = 6
+candidate_generation_command_timeout_seconds = 765
 
 [models]
 candidate_generation = "test-model"

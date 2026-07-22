@@ -232,6 +232,52 @@ def _add_local_builder_run_options(
         help="candidate-expression model identifier; overrides config",
     )
     parser.add_argument(
+        "--candidate-changed-candidates",
+        type=int,
+        help="number of changed candidate expressions to request",
+    )
+    parser.add_argument(
+        "--candidate-unchanged-candidates",
+        type=int,
+        help="number of unchanged candidate expressions to request",
+    )
+    parser.add_argument(
+        "--candidate-inference",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="enable candidate-expression model inference",
+    )
+    parser.add_argument(
+        "--candidate-instance-workers",
+        type=int,
+        help="worker threads used for candidate instances",
+    )
+    parser.add_argument(
+        "--candidate-agent-workers",
+        type=int,
+        help="worker threads used for candidate agents",
+    )
+    parser.add_argument(
+        "--candidate-reasoning-effort",
+        choices=("minimal", "low", "medium", "high"),
+        help="reasoning effort for candidate-expression inference",
+    )
+    parser.add_argument(
+        "--candidate-max-retries",
+        type=int,
+        help="model retries inside candidate-expression generation",
+    )
+    parser.add_argument(
+        "--candidate-command-timeout",
+        type=int,
+        help="timeout in seconds for the complete candidate command",
+    )
+    parser.add_argument(
+        "--candidate-env-file",
+        type=Path,
+        help="dotenv credentials file for candidate-expression inference",
+    )
+    parser.add_argument(
         "--repository-cache",
         type=Path,
         help="repository cache used by canonical local-effect stages",
@@ -466,6 +512,25 @@ def _resolved_local_builder_config(
         workers=arguments.workers,
         max_attempts=arguments.max_attempts,
         candidate_generation_model=arguments.candidate_model,
+        candidate_generation_changed_candidates=(
+            arguments.candidate_changed_candidates
+        ),
+        candidate_generation_unchanged_candidates=(
+            arguments.candidate_unchanged_candidates
+        ),
+        candidate_generation_inference=arguments.candidate_inference,
+        candidate_generation_instance_workers=(
+            arguments.candidate_instance_workers
+        ),
+        candidate_generation_agent_workers=arguments.candidate_agent_workers,
+        candidate_generation_reasoning_effort=(
+            arguments.candidate_reasoning_effort
+        ),
+        candidate_generation_model_retries=arguments.candidate_max_retries,
+        candidate_generation_command_timeout_seconds=(
+            arguments.candidate_command_timeout
+        ),
+        candidate_generation_env_file=arguments.candidate_env_file,
         repository_cache=arguments.repository_cache,
         dataset_name=arguments.dataset_name,
         repository_remote=arguments.repository_remote,

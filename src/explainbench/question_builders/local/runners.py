@@ -35,6 +35,7 @@ SELECT_TRACE_FUNCTIONS_MODULE = (
 )
 TRACE_PROGRAM_STATE_MODULE = "execution.trace"
 BUILD_STEP1_MODULE = "dataset.extract_ground_truths.effect.build_step1"
+BUILD_STEP2_MODULE = "dataset.extract_ground_truths.effect.build_step2"
 
 
 DIVERGENCE_REQUIRED_FIELDS = frozenset(
@@ -51,6 +52,23 @@ DIVERGENCE_REQUIRED_FIELDS = frozenset(
         "diff",
         "buggy_variables",
         "patched_variables",
+    }
+)
+
+
+CANDIDATE_REQUIRED_METADATA = frozenset(
+    {
+        "instance_id",
+        "agent",
+        "file_path",
+        "function_name",
+        "buggy_lineno",
+        "patched_lineno",
+        "buggy_line_count",
+        "patched_line_count",
+        "before_or_after",
+        "prompt_length_chars",
+        "function_code_before_patch",
     }
 )
 
@@ -647,3 +665,192 @@ class FindFirstDivergenceRunner:
                 "divergence result is missing required fields: "
                 + ", ".join(missing)
             )
+
+
+class GenerateCandidateExpressionsRunner:
+    """Invoke canonical step 2 to generate model candidate expressions."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        divergence_result = context.upstream_results.get(
+            "find-first-divergence"
+        )
+        if divergence_result is None:
+            raise StageExecutionError(
+                "generate-candidate-expressions requires divergence output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+
+        divergence = divergence_result.data.get("divergence")
+        if not isinstance(divergence, dict):
+            raise StageExecutionError(
+                "divergence output is not a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        step1_path = context.attempt_directory / "step1.json"
+        atomic_write_json(
+            step1_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: divergence,
+                }
+            },
+        )
+        output_path = context.attempt_directory / "step2.json"
+        arguments = [
+            "--agent",
+            context.submission_id,
+            "--instance-ids",
+            context.instance.instance_id,
+            "--step1-path",
+            str(step1_path),
+            "--output-path",
+            str(output_path),
+            "--predictions-path",
+            str(context.workspace / "input" / "predictions.json"),
+            "--changed-candidates",
+            str(context.config.candidate_generation_changed_candidates),
+            "--unchanged-candidates",
+            str(context.config.candidate_generation_unchanged_candidates),
+            "--instance-workers",
+            str(context.config.candidate_generation_instance_workers),
+            "--agent-workers",
+            str(context.config.candidate_generation_agent_workers),
+            "--model",
+            context.config.candidate_generation_model,
+            "--reasoning-effort",
+            context.config.candidate_generation_reasoning_effort,
+            "--max-retries",
+            str(context.config.candidate_generation_model_retries),
+            "--inference"
+            if context.config.candidate_generation_inference
+            else "--no-inference",
+        ]
+        if context.config.candidate_generation_env_file is not None:
+            arguments.extend(
+                [
+                    "--env-file",
+                    str(context.config.candidate_generation_env_file),
+                ]
+            )
+
+        run_canonical_module(
+            BUILD_STEP2_MODULE,
+            arguments,
+            context,
+            timeout=context.config.candidate_generation_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        payload = _read_json(output_path)
+        if not isinstance(payload, dict):
+            raise StageExecutionError(
+                "candidate output must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        agent_results = payload.get(context.submission_id)
+        if not isinstance(agent_results, dict):
+            raise StageExecutionError(
+                "candidate output does not contain the submission ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        if context.instance.instance_id not in agent_results:
+            raise StageExecutionError(
+                "candidate output does not contain the instance ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        candidates = agent_results[context.instance.instance_id]
+        if candidates is None:
+            raise StageExecutionError(
+                "canonical candidate generation returned null",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        if not isinstance(candidates, dict):
+            raise StageExecutionError(
+                "candidate result must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        result_data = {
+            "instance_id": context.instance.instance_id,
+            "candidates": candidates,
+            "inference": context.config.candidate_generation_inference,
+        }
+        if not candidates:
+            result_data["fallback_reason"] = "no_usable_agent_divergence"
+        result = StageResult.completed(result_data)
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        candidates = result.data.get("candidates")
+        inference = result.data.get("inference")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError(
+                "candidate result requires a nonempty instance_id"
+            )
+        if not isinstance(candidates, dict):
+            raise ValueError("candidate result must be an object")
+        if not isinstance(inference, bool):
+            raise ValueError("candidate result inference must be a boolean")
+        if not candidates:
+            if result.data.get("fallback_reason") != (
+                "no_usable_agent_divergence"
+            ):
+                raise ValueError(
+                    "empty candidate result requires an explicit fallback"
+                )
+            return
+
+        prompt_length = candidates.get("prompt_length_chars")
+        if not isinstance(prompt_length, int) or isinstance(prompt_length, bool):
+            raise ValueError(
+                "candidate result prompt_length_chars must be an integer"
+            )
+        if prompt_length < 0:
+            raise ValueError(
+                "candidate result prompt_length_chars must be nonnegative"
+            )
+        if not inference:
+            return
+
+        missing = sorted(CANDIDATE_REQUIRED_METADATA - candidates.keys())
+        if missing:
+            raise StageExecutionError(
+                "candidate generation did not produce complete metadata: "
+                + ", ".join(missing),
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        for key in ("changed_candidates", "unchanged_candidates"):
+            values = candidates.get(key)
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) and value.strip() for value in values
+            ):
+                raise StageExecutionError(
+                    f"candidate result {key} must be a list of nonempty strings",
+                    category="canonical_output_invalid",
+                    retryable=True,
+                )
+        for key in (
+            "instance_id",
+            "agent",
+            "file_path",
+            "function_name",
+            "before_or_after",
+            "function_code_before_patch",
+        ):
+            if not isinstance(candidates.get(key), str) or not candidates[key]:
+                raise StageExecutionError(
+                    f"candidate result {key} must be a nonempty string",
+                    category="canonical_output_invalid",
+                    retryable=True,
+                )

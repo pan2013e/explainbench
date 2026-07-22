@@ -15,6 +15,14 @@ from explainbench.schemas import StrictModel
 DEFAULT_WORKERS = 1
 DEFAULT_MAX_ATTEMPTS = 3
 DEFAULT_CANDIDATE_GENERATION_MODEL = "gpt-5.2-2025-12-11"
+DEFAULT_CANDIDATE_GENERATION_CHANGED_CANDIDATES = 10
+DEFAULT_CANDIDATE_GENERATION_UNCHANGED_CANDIDATES = 10
+DEFAULT_CANDIDATE_GENERATION_INFERENCE = True
+DEFAULT_CANDIDATE_GENERATION_INSTANCE_WORKERS = 1
+DEFAULT_CANDIDATE_GENERATION_AGENT_WORKERS = 1
+DEFAULT_CANDIDATE_GENERATION_REASONING_EFFORT = "medium"
+DEFAULT_CANDIDATE_GENERATION_MODEL_RETRIES = 5
+DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS = 3600
 DEFAULT_DATASET_NAME = "SWE-bench/SWE-bench_Verified"
 DEFAULT_REPOSITORY_REMOTE = "https://github.com"
 DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
@@ -31,6 +39,9 @@ DEFAULT_DIVERGENCE_AGENT_WORKERS = 1
 DEFAULT_DIVERGENCE_SIMPLIFY = True
 DEFAULT_DIVERGENCE_VARIABLE_MAX_DEPTH = 4
 DEFAULT_DIVERGENCE_PARAMETER_MAX_DEPTH = 3
+_CANDIDATE_REASONING_EFFORTS = frozenset(
+    {"minimal", "low", "medium", "high"}
+)
 
 
 class LocalBuilderConfigError(ValueError):
@@ -54,6 +65,22 @@ class ExecutionFileConfig(StrictModel):
     divergence_simplify: bool | None = None
     divergence_variable_max_depth: int | None = Field(default=None, ge=0)
     divergence_parameter_max_depth: int | None = Field(default=None, ge=0)
+    candidate_generation_changed_candidates: int | None = Field(
+        default=None, ge=1
+    )
+    candidate_generation_unchanged_candidates: int | None = Field(
+        default=None, ge=1
+    )
+    candidate_generation_inference: bool | None = None
+    candidate_generation_instance_workers: int | None = Field(
+        default=None, ge=1
+    )
+    candidate_generation_agent_workers: int | None = Field(default=None, ge=1)
+    candidate_generation_model_retries: int | None = Field(default=None, ge=1)
+    candidate_generation_command_timeout_seconds: int | None = Field(
+        default=None, ge=1
+    )
+    candidate_generation_reasoning_effort: str | None = None
 
 
 class ModelsFileConfig(StrictModel):
@@ -71,8 +98,14 @@ class PathsFileConfig(StrictModel):
     workspace: str | None = None
     output: str | None = None
     repository_cache: str | None = None
+    candidate_generation_env_file: str | None = None
 
-    @field_validator("workspace", "output", "repository_cache")
+    @field_validator(
+        "workspace",
+        "output",
+        "repository_cache",
+        "candidate_generation_env_file",
+    )
     @classmethod
     def reject_blank_path(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
@@ -129,6 +162,29 @@ class LocalBuilderConfig:
     divergence_variable_max_depth: int = DEFAULT_DIVERGENCE_VARIABLE_MAX_DEPTH
     divergence_parameter_max_depth: int = DEFAULT_DIVERGENCE_PARAMETER_MAX_DEPTH
     source: Path | None = None
+    candidate_generation_changed_candidates: int = (
+        DEFAULT_CANDIDATE_GENERATION_CHANGED_CANDIDATES
+    )
+    candidate_generation_unchanged_candidates: int = (
+        DEFAULT_CANDIDATE_GENERATION_UNCHANGED_CANDIDATES
+    )
+    candidate_generation_inference: bool = DEFAULT_CANDIDATE_GENERATION_INFERENCE
+    candidate_generation_instance_workers: int = (
+        DEFAULT_CANDIDATE_GENERATION_INSTANCE_WORKERS
+    )
+    candidate_generation_agent_workers: int = (
+        DEFAULT_CANDIDATE_GENERATION_AGENT_WORKERS
+    )
+    candidate_generation_reasoning_effort: str = (
+        DEFAULT_CANDIDATE_GENERATION_REASONING_EFFORT
+    )
+    candidate_generation_model_retries: int = (
+        DEFAULT_CANDIDATE_GENERATION_MODEL_RETRIES
+    )
+    candidate_generation_command_timeout_seconds: int = (
+        DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS
+    )
+    candidate_generation_env_file: Path | None = None
 
 
 def _validation_message(error: ValidationError) -> str:
@@ -193,6 +249,15 @@ def resolve_local_builder_config(
     workers: int | None = None,
     max_attempts: int | None = None,
     candidate_generation_model: str | None = None,
+    candidate_generation_changed_candidates: int | None = None,
+    candidate_generation_unchanged_candidates: int | None = None,
+    candidate_generation_inference: bool | None = None,
+    candidate_generation_instance_workers: int | None = None,
+    candidate_generation_agent_workers: int | None = None,
+    candidate_generation_reasoning_effort: str | None = None,
+    candidate_generation_model_retries: int | None = None,
+    candidate_generation_command_timeout_seconds: int | None = None,
+    candidate_generation_env_file: str | Path | None = None,
     repository_cache: str | Path | None = None,
     dataset_name: str | None = None,
     repository_remote: str | None = None,
@@ -243,6 +308,16 @@ def resolve_local_builder_config(
     if repository_cache_path is None:
         repository_cache_path = workspace_path / "repositories"
 
+    if candidate_generation_env_file is not None:
+        candidate_generation_env_path = (
+            Path(candidate_generation_env_file).expanduser().resolve()
+        )
+    else:
+        candidate_generation_env_path = _config_path(
+            file_config.paths.candidate_generation_env_file,
+            source,
+        )
+
     try:
         resolved_workers = int(
             _pick(workers, file_config.execution.workers, DEFAULT_WORKERS)
@@ -258,6 +333,60 @@ def resolve_local_builder_config(
             candidate_generation_model,
             file_config.models.candidate_generation,
             DEFAULT_CANDIDATE_GENERATION_MODEL,
+        )
+        resolved_candidate_changed = int(
+            _pick(
+                candidate_generation_changed_candidates,
+                file_config.execution.candidate_generation_changed_candidates,
+                DEFAULT_CANDIDATE_GENERATION_CHANGED_CANDIDATES,
+            )
+        )
+        resolved_candidate_unchanged = int(
+            _pick(
+                candidate_generation_unchanged_candidates,
+                file_config.execution.candidate_generation_unchanged_candidates,
+                DEFAULT_CANDIDATE_GENERATION_UNCHANGED_CANDIDATES,
+            )
+        )
+        resolved_candidate_inference = bool(
+            _pick(
+                candidate_generation_inference,
+                file_config.execution.candidate_generation_inference,
+                DEFAULT_CANDIDATE_GENERATION_INFERENCE,
+            )
+        )
+        resolved_candidate_instance_workers = int(
+            _pick(
+                candidate_generation_instance_workers,
+                file_config.execution.candidate_generation_instance_workers,
+                DEFAULT_CANDIDATE_GENERATION_INSTANCE_WORKERS,
+            )
+        )
+        resolved_candidate_agent_workers = int(
+            _pick(
+                candidate_generation_agent_workers,
+                file_config.execution.candidate_generation_agent_workers,
+                DEFAULT_CANDIDATE_GENERATION_AGENT_WORKERS,
+            )
+        )
+        resolved_candidate_reasoning = _pick(
+            candidate_generation_reasoning_effort,
+            file_config.execution.candidate_generation_reasoning_effort,
+            DEFAULT_CANDIDATE_GENERATION_REASONING_EFFORT,
+        )
+        resolved_candidate_retries = int(
+            _pick(
+                candidate_generation_model_retries,
+                file_config.execution.candidate_generation_model_retries,
+                DEFAULT_CANDIDATE_GENERATION_MODEL_RETRIES,
+            )
+        )
+        resolved_candidate_command_timeout = int(
+            _pick(
+                candidate_generation_command_timeout_seconds,
+                file_config.execution.candidate_generation_command_timeout_seconds,
+                DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS,
+            )
         )
         resolved_dataset_name = _pick(
             dataset_name,
@@ -377,6 +506,35 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "candidate generation model must be a nonempty string"
         )
+    if resolved_candidate_changed < 1:
+        raise LocalBuilderConfigError(
+            "candidate changed count must be at least 1"
+        )
+    if resolved_candidate_unchanged < 1:
+        raise LocalBuilderConfigError(
+            "candidate unchanged count must be at least 1"
+        )
+    if resolved_candidate_instance_workers < 1:
+        raise LocalBuilderConfigError(
+            "candidate instance workers must be at least 1"
+        )
+    if resolved_candidate_agent_workers < 1:
+        raise LocalBuilderConfigError(
+            "candidate agent workers must be at least 1"
+        )
+    if resolved_candidate_reasoning not in _CANDIDATE_REASONING_EFFORTS:
+        raise LocalBuilderConfigError(
+            "candidate reasoning effort must be one of: "
+            + ", ".join(sorted(_CANDIDATE_REASONING_EFFORTS))
+        )
+    if resolved_candidate_retries < 1:
+        raise LocalBuilderConfigError(
+            "candidate model retries must be at least 1"
+        )
+    if resolved_candidate_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "candidate command timeout must be at least 1 second"
+        )
     if (
         not isinstance(resolved_dataset_name, str)
         or not resolved_dataset_name.strip()
@@ -448,6 +606,17 @@ def resolve_local_builder_config(
         max_workers=resolved_workers,
         max_attempts=resolved_attempts,
         candidate_generation_model=model,
+        candidate_generation_changed_candidates=resolved_candidate_changed,
+        candidate_generation_unchanged_candidates=resolved_candidate_unchanged,
+        candidate_generation_inference=resolved_candidate_inference,
+        candidate_generation_instance_workers=resolved_candidate_instance_workers,
+        candidate_generation_agent_workers=resolved_candidate_agent_workers,
+        candidate_generation_reasoning_effort=resolved_candidate_reasoning,
+        candidate_generation_model_retries=resolved_candidate_retries,
+        candidate_generation_command_timeout_seconds=(
+            resolved_candidate_command_timeout
+        ),
+        candidate_generation_env_file=candidate_generation_env_path,
         repository_cache=repository_cache_path,
         dataset_name=resolved_dataset_name,
         repository_remote=resolved_repository_remote,

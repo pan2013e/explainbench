@@ -11,6 +11,7 @@ from explainbench.question_builders.common.orchestration import (
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
+    GenerateCandidateExpressionsRunner,
     FindFirstDivergenceRunner,
     IdentifyPatchedFunctionsRunner,
     SelectTraceFunctionsRunner,
@@ -38,8 +39,36 @@ class UnconnectedStageRunner:
             raise ValueError("stage result data must be an object")
 
 
-def _candidate_model(config: LocalBuilderConfig) -> dict[str, str]:
-    return {"candidate_generation_model": config.candidate_generation_model}
+def _candidate_semantic(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool]:
+    return {
+        "model": config.candidate_generation_model,
+        "changed_candidates": config.candidate_generation_changed_candidates,
+        "unchanged_candidates": (
+            config.candidate_generation_unchanged_candidates
+        ),
+        "inference": config.candidate_generation_inference,
+        "reasoning_effort": config.candidate_generation_reasoning_effort,
+    }
+
+
+def _candidate_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool | None]:
+    return {
+        "command_timeout_seconds": (
+            config.candidate_generation_command_timeout_seconds
+        ),
+        "instance_workers": config.candidate_generation_instance_workers,
+        "agent_workers": config.candidate_generation_agent_workers,
+        "model_retries": config.candidate_generation_model_retries,
+        "env_file": (
+            str(config.candidate_generation_env_file)
+            if config.candidate_generation_env_file is not None
+            else None
+        ),
+    }
 
 
 def _identify_resources(config: LocalBuilderConfig) -> dict[str, str]:
@@ -176,11 +205,14 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             semantic_inputs=_divergence_semantic,
             execution_inputs=_divergence_execution,
         ),
-        _stage(
-            "generate-candidate-expressions",
-            "generate expressions that may or may not change",
-            "find-first-divergence",
-            semantic_inputs=_candidate_model,
+        StageDefinition(
+            name="generate-candidate-expressions",
+            description="generate expressions that may or may not change",
+            dependencies=("find-first-divergence",),
+            implementation_version="1-canonical-cli",
+            runner=GenerateCandidateExpressionsRunner(),
+            semantic_inputs=_candidate_semantic,
+            execution_inputs=_candidate_execution,
         ),
         _stage(
             "execute-candidate-expressions",
