@@ -37,6 +37,12 @@ TRACE_PROGRAM_STATE_MODULE = "execution.trace"
 BUILD_STEP1_MODULE = "dataset.extract_ground_truths.effect.build_step1"
 BUILD_STEP2_MODULE = "dataset.extract_ground_truths.effect.build_step2"
 BUILD_STEP3_MODULE = "dataset.extract_ground_truths.effect.build_step3"
+BUILD_STEP4_MODULE = "dataset.extract_ground_truths.effect.build_step4"
+
+NONE_OF_THE_ABOVE_CHOICE = (
+    "The patch has no effect and none of the above expressions change in value"
+)
+CANNOT_INFER_CHOICE = "Cannot be answered by the explanation alone"
 
 
 DIVERGENCE_REQUIRED_FIELDS = frozenset(
@@ -1316,3 +1322,241 @@ class ValidateCandidateExpressionsRunner:
             raise ValueError(
                 "unchanged expression classification was not generated"
             )
+
+
+class BuildAnswerChoicesRunner:
+    """Invoke canonical step 4 to construct local-effect answer choices."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        validation_result = context.upstream_results.get(
+            "validate-candidate-expressions"
+        )
+        if validation_result is None:
+            raise StageExecutionError(
+                "build-answer-choices requires validated candidate output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+        if validation_result.outcome == "skipped":
+            result = StageResult.skipped(
+                validation_result.reason or "no_candidate_expressions",
+                {
+                    "instance_id": context.instance.instance_id,
+                    "changed_count": 0,
+                    "unchanged_count": 0,
+                },
+            )
+            self.validate_result(result.to_stored())
+            return result
+
+        validated = validation_result.data.get("validated_candidates")
+        if not isinstance(validated, dict):
+            raise StageExecutionError(
+                "validated candidate output is not a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        changed = validated.get("valid_changed_expressions")
+        unchanged = validated.get("valid_unchanged_expressions")
+        if not isinstance(changed, list) or not isinstance(unchanged, list):
+            raise StageExecutionError(
+                "validated candidate output has no expression pools",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        changed_count = len(changed)
+        unchanged_count = len(unchanged)
+        if (
+            changed_count < context.config.choice_minimum_changed
+            or unchanged_count < context.config.choice_minimum_unchanged
+        ):
+            result = StageResult.skipped(
+                "insufficient_expression_pool",
+                {
+                    "instance_id": context.instance.instance_id,
+                    "changed_count": changed_count,
+                    "unchanged_count": unchanged_count,
+                },
+            )
+            self.validate_result(result.to_stored())
+            return result
+
+        step3_path = context.attempt_directory / "step3.json"
+        atomic_write_json(
+            step3_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: validated,
+                }
+            },
+        )
+        output_path = context.attempt_directory / "step4.json"
+        run_canonical_module(
+            BUILD_STEP4_MODULE,
+            (
+                "--agent",
+                context.submission_id,
+                "--instance-ids",
+                context.instance.instance_id,
+                "--step3-path",
+                str(step3_path),
+                "--output-path",
+                str(output_path),
+                "--correct-choices",
+                str(context.config.choice_correct_count),
+                "--incorrect-choices",
+                str(context.config.choice_incorrect_count),
+                "--minimum-changed",
+                str(context.config.choice_minimum_changed),
+                "--minimum-unchanged",
+                str(context.config.choice_minimum_unchanged),
+                "--mmr-weight",
+                str(context.config.choice_mmr_weight),
+                "--random-seed",
+                str(context.config.choice_random_seed),
+                "--agent-workers",
+                str(context.config.choice_agent_workers),
+                "--no-prepare-intent",
+            ),
+            context,
+            timeout=context.config.choice_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        payload = _read_json(output_path)
+        if not isinstance(payload, dict):
+            raise StageExecutionError(
+                "answer-choice output must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        agent_results = payload.get(context.submission_id)
+        if not isinstance(agent_results, dict):
+            raise StageExecutionError(
+                "answer-choice output lacks the submission ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        question = agent_results.get(context.instance.instance_id)
+        if not isinstance(question, dict):
+            raise StageExecutionError(
+                "answer-choice output lacks a valid instance result",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+
+        answer_values = self._answer_values(question)
+        is_fallback = bool(validated.get("is_fallback_to_gold", False))
+        if is_fallback:
+            if answer_values != [NONE_OF_THE_ABOVE_CHOICE]:
+                raise StageExecutionError(
+                    "gold fallback must select the no-effect choice",
+                    category="canonical_output_invalid",
+                    retryable=False,
+                )
+        elif not set(answer_values).issubset(set(changed)):
+            raise StageExecutionError(
+                "answer-choice output selects an expression that did not change",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        result = StageResult.completed(
+            {
+                "instance_id": context.instance.instance_id,
+                "question": question,
+                "correct_expressions": answer_values,
+                "is_fallback_to_gold": is_fallback,
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    @staticmethod
+    def _answer_values(question: dict) -> list[str]:
+        choices = question.get("choices")
+        answers = question.get("answer")
+        if not isinstance(choices, list) or not all(
+            isinstance(choice, str) and choice.strip() for choice in choices
+        ):
+            raise StageExecutionError(
+                "answer choices must contain nonempty strings",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        if len(choices) != len(set(choices)):
+            raise StageExecutionError(
+                "answer choices must be unique",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        if choices[-2:] != [NONE_OF_THE_ABOVE_CHOICE, CANNOT_INFER_CHOICE]:
+            raise StageExecutionError(
+                "local-effect answer choices lack the required special choices",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        if not isinstance(answers, list) or not answers:
+            raise StageExecutionError(
+                "answer-choice output requires at least one answer",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        if len(answers) != len(set(answers)) or not all(
+            isinstance(answer, str)
+            and len(answer) == 1
+            and "a" <= answer <= "z"
+            for answer in answers
+        ):
+            raise StageExecutionError(
+                "answer labels must be unique lowercase letters",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        indices = [ord(answer) - ord("a") for answer in answers]
+        if any(index >= len(choices) for index in indices):
+            raise StageExecutionError(
+                "answer label is outside the answer-choice list",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        return [choices[index] for index in indices]
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError("answer-choice result requires a nonempty instance_id")
+        if result.outcome == "skipped":
+            if result.reason not in {
+                "candidate_inference_disabled",
+                "no_candidate_expressions",
+                "insufficient_expression_pool",
+            }:
+                raise ValueError("answer-choice result has an unknown skip reason")
+            for key in ("changed_count", "unchanged_count"):
+                value = result.data.get(key)
+                if (
+                    not isinstance(value, int)
+                    or isinstance(value, bool)
+                    or value < 0
+                ):
+                    raise ValueError(
+                        f"skipped answer-choice {key} must be nonnegative"
+                    )
+            return
+
+        question = result.data.get("question")
+        if not isinstance(question, dict):
+            raise ValueError("answer-choice question must be an object")
+        try:
+            answer_values = self._answer_values(question)
+        except StageExecutionError as error:
+            raise ValueError(str(error)) from error
+        correct_expressions = result.data.get("correct_expressions")
+        if correct_expressions != answer_values:
+            raise ValueError("stored correct expressions do not match the answers")
+        is_fallback = result.data.get("is_fallback_to_gold")
+        if not isinstance(is_fallback, bool):
+            raise ValueError("answer-choice fallback state must be a boolean")
+        if is_fallback and answer_values != [NONE_OF_THE_ABOVE_CHOICE]:
+            raise ValueError("gold fallback must select the no-effect choice")

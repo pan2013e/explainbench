@@ -11,6 +11,7 @@ from explainbench.question_builders.common.orchestration import (
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
+    BuildAnswerChoicesRunner,
     ExecuteCandidateExpressionsRunner,
     GenerateCandidateExpressionsRunner,
     FindFirstDivergenceRunner,
@@ -20,6 +21,24 @@ from explainbench.question_builders.local.runners import (
     TrackTestCallsRunner,
     ValidateCandidateExpressionsRunner,
 )
+
+
+def _choice_semantic(config: LocalBuilderConfig) -> dict[str, int | float]:
+    return {
+        "correct_count": config.choice_correct_count,
+        "incorrect_count": config.choice_incorrect_count,
+        "minimum_changed": config.choice_minimum_changed,
+        "minimum_unchanged": config.choice_minimum_unchanged,
+        "mmr_weight": config.choice_mmr_weight,
+        "random_seed": config.choice_random_seed,
+    }
+
+
+def _choice_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "agent_workers": config.choice_agent_workers,
+        "command_timeout_seconds": config.choice_command_timeout_seconds,
+    }
 
 
 class UnconnectedStageRunner:
@@ -278,10 +297,14 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             semantic_inputs=_inspection_semantic,
             execution_inputs=_candidate_validation_execution,
         ),
-        _stage(
-            "build-answer-choices",
-            "select and shuffle the final answer choices",
-            "validate-candidate-expressions",
+        StageDefinition(
+            name="build-answer-choices",
+            description="select and shuffle the final answer choices",
+            dependencies=("validate-candidate-expressions",),
+            implementation_version="1-canonical-cli",
+            runner=BuildAnswerChoicesRunner(),
+            semantic_inputs=_choice_semantic,
+            execution_inputs=_choice_execution,
         ),
         _stage(
             "export-question-artifacts",

@@ -39,6 +39,14 @@ DEFAULT_INSPECTION_INSTANCE_IMAGE_TAG = "latest"
 DEFAULT_INSPECTION_ENV_IMAGE_TAG = "latest"
 DEFAULT_INSPECTION_SPLIT = "test"
 DEFAULT_INSPECTION_NAMESPACE = "swebench"
+DEFAULT_CHOICE_CORRECT_COUNT = 1
+DEFAULT_CHOICE_INCORRECT_COUNT = 3
+DEFAULT_CHOICE_MINIMUM_CHANGED = 1
+DEFAULT_CHOICE_MINIMUM_UNCHANGED = 3
+DEFAULT_CHOICE_MMR_WEIGHT = 0.7
+DEFAULT_CHOICE_RANDOM_SEED = 42
+DEFAULT_CHOICE_AGENT_WORKERS = 1
+DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS = 3600
 DEFAULT_DATASET_NAME = "SWE-bench/SWE-bench_Verified"
 DEFAULT_REPOSITORY_REMOTE = "https://github.com"
 DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
@@ -113,6 +121,14 @@ class ExecutionFileConfig(StrictModel):
     inspection_env_image_tag: str | None = None
     inspection_split: str | None = None
     inspection_namespace: str | None = None
+    choice_correct_count: int | None = Field(default=None, ge=1)
+    choice_incorrect_count: int | None = Field(default=None, ge=0)
+    choice_minimum_changed: int | None = Field(default=None, ge=1)
+    choice_minimum_unchanged: int | None = Field(default=None, ge=0)
+    choice_mmr_weight: float | None = Field(default=None, ge=0.0, le=1.0)
+    choice_random_seed: int | None = None
+    choice_agent_workers: int | None = Field(default=None, ge=1)
+    choice_command_timeout_seconds: int | None = Field(default=None, ge=1)
 
 
 class ModelsFileConfig(StrictModel):
@@ -235,6 +251,14 @@ class LocalBuilderConfig:
     inspection_env_image_tag: str = DEFAULT_INSPECTION_ENV_IMAGE_TAG
     inspection_split: str = DEFAULT_INSPECTION_SPLIT
     inspection_namespace: str = DEFAULT_INSPECTION_NAMESPACE
+    choice_correct_count: int = DEFAULT_CHOICE_CORRECT_COUNT
+    choice_incorrect_count: int = DEFAULT_CHOICE_INCORRECT_COUNT
+    choice_minimum_changed: int = DEFAULT_CHOICE_MINIMUM_CHANGED
+    choice_minimum_unchanged: int = DEFAULT_CHOICE_MINIMUM_UNCHANGED
+    choice_mmr_weight: float = DEFAULT_CHOICE_MMR_WEIGHT
+    choice_random_seed: int = DEFAULT_CHOICE_RANDOM_SEED
+    choice_agent_workers: int = DEFAULT_CHOICE_AGENT_WORKERS
+    choice_command_timeout_seconds: int = DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS
 
 
 def _validation_message(error: ValidationError) -> str:
@@ -324,6 +348,14 @@ def resolve_local_builder_config(
     inspection_env_image_tag: str | None = None,
     inspection_split: str | None = None,
     inspection_namespace: str | None = None,
+    choice_correct_count: int | None = None,
+    choice_incorrect_count: int | None = None,
+    choice_minimum_changed: int | None = None,
+    choice_minimum_unchanged: int | None = None,
+    choice_mmr_weight: float | None = None,
+    choice_random_seed: int | None = None,
+    choice_agent_workers: int | None = None,
+    choice_command_timeout_seconds: int | None = None,
     repository_cache: str | Path | None = None,
     dataset_name: str | None = None,
     repository_remote: str | None = None,
@@ -556,6 +588,62 @@ def resolve_local_builder_config(
             file_config.execution.inspection_namespace,
             DEFAULT_INSPECTION_NAMESPACE,
         )
+        resolved_choice_correct_count = int(
+            _pick(
+                choice_correct_count,
+                file_config.execution.choice_correct_count,
+                DEFAULT_CHOICE_CORRECT_COUNT,
+            )
+        )
+        resolved_choice_incorrect_count = int(
+            _pick(
+                choice_incorrect_count,
+                file_config.execution.choice_incorrect_count,
+                DEFAULT_CHOICE_INCORRECT_COUNT,
+            )
+        )
+        resolved_choice_minimum_changed = int(
+            _pick(
+                choice_minimum_changed,
+                file_config.execution.choice_minimum_changed,
+                DEFAULT_CHOICE_MINIMUM_CHANGED,
+            )
+        )
+        resolved_choice_minimum_unchanged = int(
+            _pick(
+                choice_minimum_unchanged,
+                file_config.execution.choice_minimum_unchanged,
+                DEFAULT_CHOICE_MINIMUM_UNCHANGED,
+            )
+        )
+        resolved_choice_mmr_weight = float(
+            _pick(
+                choice_mmr_weight,
+                file_config.execution.choice_mmr_weight,
+                DEFAULT_CHOICE_MMR_WEIGHT,
+            )
+        )
+        resolved_choice_random_seed = int(
+            _pick(
+                choice_random_seed,
+                file_config.execution.choice_random_seed,
+                DEFAULT_CHOICE_RANDOM_SEED,
+            )
+        )
+        resolved_choice_agent_workers = int(
+            _pick(
+                choice_agent_workers,
+                file_config.execution.choice_agent_workers,
+                DEFAULT_CHOICE_AGENT_WORKERS,
+            )
+        )
+        resolved_choice_command_timeout = int(
+            _pick(
+                choice_command_timeout_seconds,
+                file_config.execution.choice_command_timeout_seconds,
+                DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS,
+            )
+        )
         resolved_dataset_name = _pick(
             dataset_name,
             file_config.benchmark.dataset_name,
@@ -738,6 +826,24 @@ def resolve_local_builder_config(
     ):
         if not isinstance(value, str) or not value.strip():
             raise LocalBuilderConfigError(f"{label} must be a nonempty string")
+    if resolved_choice_correct_count < 1:
+        raise LocalBuilderConfigError("choice correct count must be at least 1")
+    if resolved_choice_incorrect_count < 0:
+        raise LocalBuilderConfigError("choice incorrect count must be nonnegative")
+    if resolved_choice_minimum_changed < 1:
+        raise LocalBuilderConfigError("choice minimum changed must be at least 1")
+    if resolved_choice_minimum_unchanged < 0:
+        raise LocalBuilderConfigError(
+            "choice minimum unchanged must be nonnegative"
+        )
+    if not 0.0 <= resolved_choice_mmr_weight <= 1.0:
+        raise LocalBuilderConfigError("choice MMR weight must be between 0 and 1")
+    if resolved_choice_agent_workers < 1:
+        raise LocalBuilderConfigError("choice agent workers must be at least 1")
+    if resolved_choice_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "choice command timeout must be at least 1 second"
+        )
     if (
         not isinstance(resolved_dataset_name, str)
         or not resolved_dataset_name.strip()
@@ -836,6 +942,14 @@ def resolve_local_builder_config(
         inspection_env_image_tag=resolved_inspection_env_image_tag,
         inspection_split=resolved_inspection_split,
         inspection_namespace=resolved_inspection_namespace,
+        choice_correct_count=resolved_choice_correct_count,
+        choice_incorrect_count=resolved_choice_incorrect_count,
+        choice_minimum_changed=resolved_choice_minimum_changed,
+        choice_minimum_unchanged=resolved_choice_minimum_unchanged,
+        choice_mmr_weight=resolved_choice_mmr_weight,
+        choice_random_seed=resolved_choice_random_seed,
+        choice_agent_workers=resolved_choice_agent_workers,
+        choice_command_timeout_seconds=resolved_choice_command_timeout,
         repository_cache=repository_cache_path,
         dataset_name=resolved_dataset_name,
         repository_remote=resolved_repository_remote,

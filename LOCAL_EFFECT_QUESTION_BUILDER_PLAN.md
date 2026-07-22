@@ -495,6 +495,7 @@ The full fast test suite passes.
 - [x] Connect `generate-candidate-expressions` to the canonical `build_step2.py` CLI.
 - [x] Connect `execute-candidate-expressions` to canonical `build_step3.py --execute`.
 - [x] Connect `validate-candidate-expressions` to canonical `build_step3.py --validate`.
+- [x] Connect `build-answer-choices` to canonical `build_step4.py`.
 - Replace each remaining pending package runner with a thin subprocess wrapper over its canonical module.
 - [x] Validate the `identify-patched-functions` output before marking its instance-stage checkpoint complete.
 - [x] Validate the per-instance function whitelist produced by `select-trace-functions`.
@@ -503,6 +504,7 @@ The full fast test suite passes.
 - [x] Validate candidate metadata, candidate lists, prompt-only mode, and fallback state.
 - [x] Validate and checksum buggy and patched expression-inspection artifacts.
 - [x] Validate changed and unchanged expression classifications and preserve upstream semantic skips.
+- [x] Validate final choices, answer labels, special choices, and insufficient-pool skips.
 - Add output validation for every remaining stage as each wrapper is connected.
 - Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
@@ -513,6 +515,7 @@ The full fast test suite passes.
 - [x] Test candidate-generation command construction and checkpoint reuse without model calls.
 - [x] Test expression execution, semantic skips, checkpoint reuse, and artifact corruption without Docker.
 - [x] Test expression validation, semantic skip propagation, and checkpoint reuse without Docker.
+- [x] Test answer-choice command construction, semantic skips, and checkpoint reuse without Docker.
 - Test each remaining wrapper's command construction without Docker or model calls.
 - [x] Test retry-budget reset across separate resume invocations.
 - [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
@@ -549,7 +552,7 @@ These values affect benchmark compatibility or internal implementation rather th
 
 Status of the CLI-only phase: completed.
 Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
-The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first eight canonical stage integrations are implemented.
+The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first nine canonical stage integrations are implemented.
 The shared artifact manifest records relative paths, sizes, and SHA-256 checksums.
 Resume validates the full recorded file set before it reuses a checkpoint.
 The remaining canonical stage wrappers are not yet implemented.
@@ -635,6 +638,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Connect and validate `generate-candidate-expressions` as the sixth canonical stage.
 - [x] Connect and validate `execute-candidate-expressions` as the seventh canonical stage.
 - [x] Connect and validate `validate-candidate-expressions` as the eighth canonical stage.
+- [x] Connect and validate `build-answer-choices` as the ninth canonical stage.
 - [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
@@ -642,7 +646,7 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 
 ## Next step
 
-Connect `build-answer-choices` to canonical `build_step4.py` next.
-The wrapper will consume the validated changed and unchanged expression pools from the previous stage.
-It will pass the configured choice counts, minimum pool sizes, MMR weight, random seed, and worker settings to the canonical command.
-It will validate the selected choices and correct answer before it records a reusable checkpoint.
+Connect `export-question-artifacts` to canonical `build_step5.py` next.
+The wrapper will consume each completed answer-choice result and preserve semantic skips.
+A single-writer finalizer will publish evaluator-compatible context and ground-truth files atomically in the configured artifact directory.
+It will record checksums and the published artifact location so resume can verify the final deliverable.

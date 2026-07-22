@@ -667,6 +667,47 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
                 )
             return
 
+        if module == runners.BUILD_STEP4_MODULE:
+            step3 = json.loads(
+                Path(
+                    _argument_value(arguments, "--step3-path")
+                ).read_text(encoding="utf-8")
+            )
+            metadata = step3[context.submission_id][
+                context.instance.instance_id
+            ]
+            Path(_argument_value(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: {
+                                "choices": [
+                                    "value",
+                                    "other",
+                                    runners.NONE_OF_THE_ABOVE_CHOICE,
+                                    runners.CANNOT_INFER_CHOICE,
+                                ],
+                                "answer": ["a"],
+                                **{
+                                    key: value
+                                    for key, value in metadata.items()
+                                    if key
+                                    not in {
+                                        "valid_changed_expressions",
+                                        "valid_unchanged_expressions",
+                                        "prompt_length_chars",
+                                        "changed_candidates",
+                                        "unchanged_candidates",
+                                    }
+                                },
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+
         assert module == runners.TRACE_PROGRAM_STATE_MODULE
         allowed_functions = json.loads(
             Path(
@@ -707,6 +748,14 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         inspection_max_workers=0,
         inspection_force_rebuild=True,
         inspection_clean=True,
+        choice_correct_count=1,
+        choice_incorrect_count=1,
+        choice_minimum_changed=1,
+        choice_minimum_unchanged=1,
+        choice_mmr_weight=0.6,
+        choice_random_seed=17,
+        choice_agent_workers=2,
+        choice_command_timeout_seconds=246,
         trace_test_timeout_seconds=432,
         trace_command_timeout_seconds=876,
     )
@@ -943,6 +992,39 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         "valid_changed_expressions"
     ] == ["value"]
 
+    choices = run_local_stage(
+        "build-answer-choices",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed_choices = run_local_stage(
+        "build-answer-choices",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert choices.completed == 1
+    assert resumed_choices.reused == 1
+    choice_calls = [
+        item for item in calls if item[0] == runners.BUILD_STEP4_MODULE
+    ]
+    assert len(choice_calls) == 1
+    choice_arguments = choice_calls[0][1]
+    assert _argument_value(choice_arguments, "--correct-choices") == "1"
+    assert _argument_value(choice_arguments, "--incorrect-choices") == "1"
+    assert _argument_value(choice_arguments, "--minimum-changed") == "1"
+    assert _argument_value(choice_arguments, "--minimum-unchanged") == "1"
+    assert _argument_value(choice_arguments, "--mmr-weight") == "0.6"
+    assert _argument_value(choice_arguments, "--random-seed") == "17"
+    assert _argument_value(choice_arguments, "--agent-workers") == "2"
+    assert "--no-prepare-intent" in choice_arguments
+    assert choice_calls[0][2]["timeout"] == 246
+    result = workspace.read_result("build-answer-choices", INSTANCE_ID)
+    assert result.data["question"]["answer"] == ["a"]
+    assert result.data["correct_expressions"] == ["value"]
+
 
 @pytest.mark.parametrize(
     ("candidate_data", "expected_reason"),
@@ -965,6 +1047,10 @@ def test_expression_execution_skips_without_executable_candidates(
 ):
     context = replace(
         make_context(tmp_path),
+        config=SimpleNamespace(
+            choice_minimum_changed=1,
+            choice_minimum_unchanged=3,
+        ),
         upstream_results={
             "generate-candidate-expressions": StoredStageResult(
                 outcome="completed",
@@ -996,3 +1082,43 @@ def test_expression_execution_skips_without_executable_candidates(
 
     assert validation.outcome == "skipped"
     assert validation.reason == expected_reason
+
+    choice_context = replace(
+        validation_context,
+        upstream_results={
+            "validate-candidate-expressions": validation.to_stored(),
+        },
+    )
+    choices = runners.BuildAnswerChoicesRunner().run_instance(choice_context)
+
+    assert choices.outcome == "skipped"
+    assert choices.reason == expected_reason
+
+
+def test_answer_choices_skip_when_expression_pool_is_too_small(tmp_path):
+    context = replace(
+        make_context(tmp_path),
+        config=SimpleNamespace(
+            choice_minimum_changed=1,
+            choice_minimum_unchanged=3,
+        ),
+        upstream_results={
+            "validate-candidate-expressions": StoredStageResult(
+                outcome="completed",
+                data={
+                    "instance_id": INSTANCE_ID,
+                    "validated_candidates": {
+                        "valid_changed_expressions": ["changed"],
+                        "valid_unchanged_expressions": ["unchanged"],
+                    },
+                },
+            )
+        },
+    )
+
+    result = runners.BuildAnswerChoicesRunner().run_instance(context)
+
+    assert result.outcome == "skipped"
+    assert result.reason == "insufficient_expression_pool"
+    assert result.data["changed_count"] == 1
+    assert result.data["unchanged_count"] == 1

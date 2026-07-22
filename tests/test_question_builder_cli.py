@@ -242,13 +242,8 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'build-answer-choices' is not yet connected" in (
-        status_output.out
-    )
-    assert "retryable=no" in status_output.out
-    assert "retry_cycle=1" in status_output.out
-    assert "cycle_attempt=1" in status_output.out
-    assert "total_attempts=1" in status_output.out
+    assert "build-answer-choices: skipped=1" in status_output.out
+    assert "export-question-artifacts: pending=1" in status_output.out
     assert "Artifacts: not exported" in status_output.out
 
 
@@ -326,6 +321,14 @@ inspection_instance_image_tag = "latest"
 inspection_env_image_tag = "latest"
 inspection_split = "test"
 inspection_namespace = "swebench"
+choice_correct_count = 1
+choice_incorrect_count = 3
+choice_minimum_changed = 1
+choice_minimum_unchanged = 3
+choice_mmr_weight = 0.7
+choice_random_seed = 42
+choice_agent_workers = 2
+choice_command_timeout_seconds = 321
 
 [models]
 candidate_generation = "test-model"

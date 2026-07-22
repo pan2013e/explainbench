@@ -357,6 +357,46 @@ def _add_local_builder_run_options(
         help="Docker namespace used by expression inspection",
     )
     parser.add_argument(
+        "--choice-correct-count",
+        type=int,
+        help="number of changed-expression answer choices",
+    )
+    parser.add_argument(
+        "--choice-incorrect-count",
+        type=int,
+        help="number of unchanged-expression answer choices",
+    )
+    parser.add_argument(
+        "--choice-minimum-changed",
+        type=int,
+        help="minimum changed-expression pool size",
+    )
+    parser.add_argument(
+        "--choice-minimum-unchanged",
+        type=int,
+        help="minimum unchanged-expression pool size",
+    )
+    parser.add_argument(
+        "--choice-mmr-weight",
+        type=float,
+        help="relevance weight used to select answer choices",
+    )
+    parser.add_argument(
+        "--choice-random-seed",
+        type=int,
+        help="random seed used to shuffle answer choices",
+    )
+    parser.add_argument(
+        "--choice-agent-workers",
+        type=int,
+        help="worker threads used by answer-choice construction",
+    )
+    parser.add_argument(
+        "--choice-command-timeout",
+        type=int,
+        help="timeout in seconds for answer-choice construction",
+    )
+    parser.add_argument(
         "--repository-cache",
         type=Path,
         help="repository cache used by canonical local-effect stages",
@@ -628,6 +668,14 @@ def _resolved_local_builder_config(
         inspection_env_image_tag=arguments.inspection_env_image_tag,
         inspection_split=arguments.inspection_split,
         inspection_namespace=arguments.inspection_namespace,
+        choice_correct_count=arguments.choice_correct_count,
+        choice_incorrect_count=arguments.choice_incorrect_count,
+        choice_minimum_changed=arguments.choice_minimum_changed,
+        choice_minimum_unchanged=arguments.choice_minimum_unchanged,
+        choice_mmr_weight=arguments.choice_mmr_weight,
+        choice_random_seed=arguments.choice_random_seed,
+        choice_agent_workers=arguments.choice_agent_workers,
+        choice_command_timeout_seconds=arguments.choice_command_timeout,
         repository_cache=arguments.repository_cache,
         dataset_name=arguments.dataset_name,
         repository_remote=arguments.repository_remote,
