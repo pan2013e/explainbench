@@ -33,6 +33,7 @@ SELECT_TRACE_FUNCTIONS_MODULE = (
     "dataset.extract_ground_truths.effect."
     "trace_step2_generate_call_stack_whitelist"
 )
+TRACE_PROGRAM_STATE_MODULE = "execution.trace"
 
 
 def _read_json(path: Path) -> object:
@@ -129,6 +130,12 @@ def _tracking_run_id(context: StageContext) -> str:
     return f"explainbench-track-{digest}-attempt-{context.total_attempt}"
 
 
+def _tracing_run_id(context: StageContext) -> str:
+    identity = f"{context.submission_id}\0{context.instance.instance_id}"
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
+    return f"explainbench-trace-{digest}-attempt-{context.total_attempt}"
+
+
 def _require_trace_files(root: Path, directory_name: str) -> None:
     directory = root / directory_name
     if not directory.is_dir():
@@ -143,6 +150,27 @@ def _require_trace_files(root: Path, directory_name: str) -> None:
             category="canonical_output_missing",
             retryable=True,
         )
+
+
+def _validate_trace_artifact_result(
+    result: StoredStageResult,
+    *,
+    label: str,
+) -> None:
+    instance_id = result.data.get("instance_id")
+    run_id = result.data.get("run_id")
+    if not isinstance(instance_id, str) or not instance_id:
+        raise ValueError(f"{label} result requires a nonempty instance_id")
+    if not isinstance(run_id, str) or not run_id:
+        raise ValueError(f"{label} result requires a nonempty run_id")
+    manifest = ArtifactManifest.model_validate(
+        result.data.get("artifact_manifest")
+    )
+    paths = {item.path for item in manifest.files}
+    if not any(path.startswith("buggy_traces/") for path in paths):
+        raise ValueError(f"{label} manifest requires buggy trace files")
+    if not any(path.startswith("patched_traces/") for path in paths):
+        raise ValueError(f"{label} manifest requires patched trace files")
 
 
 class TrackTestCallsRunner:
@@ -245,20 +273,7 @@ class TrackTestCallsRunner:
         return result
 
     def validate_result(self, result: StoredStageResult) -> None:
-        instance_id = result.data.get("instance_id")
-        run_id = result.data.get("run_id")
-        if not isinstance(instance_id, str) or not instance_id:
-            raise ValueError("tracking result requires a nonempty instance_id")
-        if not isinstance(run_id, str) or not run_id:
-            raise ValueError("tracking result requires a nonempty run_id")
-        manifest = ArtifactManifest.model_validate(
-            result.data.get("artifact_manifest")
-        )
-        paths = {item.path for item in manifest.files}
-        if not any(path.startswith("buggy_traces/") for path in paths):
-            raise ValueError("tracking manifest requires buggy trace files")
-        if not any(path.startswith("patched_traces/") for path in paths):
-            raise ValueError("tracking manifest requires patched trace files")
+        _validate_trace_artifact_result(result, label="tracking")
 
 
 class SelectTraceFunctionsRunner:
@@ -372,3 +387,104 @@ class SelectTraceFunctionsRunner:
             raise ValueError(
                 "trace-function result functions must be sorted and unique"
             )
+
+
+class TraceProgramStateRunner:
+    """Invoke the canonical detailed state-tracing command."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        select_result = context.upstream_results.get("select-trace-functions")
+        if select_result is None:
+            raise StageExecutionError(
+                "trace-program-state requires select-trace-functions output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+        allowed_functions_path = (
+            context.attempt_directory / "allowed_functions.json"
+        )
+        atomic_write_json(
+            allowed_functions_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: select_result.data.get(
+                        "functions"
+                    ),
+                }
+            },
+        )
+
+        tracing_work_directory = context.attempt_directory / "tracing"
+        report_directory = context.attempt_directory / "reports"
+        run_id = _tracing_run_id(context)
+        run_canonical_module(
+            TRACE_PROGRAM_STATE_MODULE,
+            (
+                "--agent",
+                context.submission_id,
+                "--instance-ids",
+                context.instance.instance_id,
+                "--predictions-path",
+                str(context.workspace / "input" / "predictions.json"),
+                "--allowed-functions-path",
+                str(allowed_functions_path),
+                "--run-id",
+                run_id,
+                "--max-workers",
+                "1",
+                "--timeout",
+                str(context.config.trace_test_timeout_seconds),
+                "--dataset-name",
+                context.config.dataset_name,
+                "--split",
+                "test",
+                "--no-force-rebuild",
+                "--cache-level",
+                "env",
+                "--no-clean",
+                "--open-file-limit",
+                "4096",
+                "--namespace",
+                "swebench",
+                "--no-rewrite-reports",
+                "--no-modal",
+                "--instance-image-tag",
+                "latest",
+                "--env-image-tag",
+                "latest",
+                "--report-dir",
+                str(report_directory),
+                "--work-dir",
+                str(tracing_work_directory),
+            ),
+            context,
+            timeout=context.config.trace_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        tracing_root = (
+            tracing_work_directory
+            / "logs"
+            / "run_evaluation"
+            / run_id
+            / context.submission_id.replace("/", "__")
+            / context.instance.instance_id
+        )
+        _require_trace_files(tracing_root, "buggy_traces")
+        _require_trace_files(tracing_root, "patched_traces")
+        manifest = build_artifact_manifest(
+            tracing_root,
+            relative_to=context.work_directory.parent,
+        )
+        result = StageResult.completed(
+            {
+                "instance_id": context.instance.instance_id,
+                "run_id": run_id,
+                "artifact_manifest": manifest.model_dump(mode="json"),
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        _validate_trace_artifact_result(result, label="detailed tracing")

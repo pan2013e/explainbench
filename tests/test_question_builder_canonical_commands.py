@@ -508,3 +508,149 @@ def test_select_trace_functions_uses_tracking_artifacts_and_reuses_result(
         "instance_id": INSTANCE_ID,
         "functions": ["callee", "caller"],
     }
+
+
+def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
+    tmp_path,
+    monkeypatch,
+):
+    calls = []
+
+    def write_harness_output(arguments, context, payload):
+        root = (
+            Path(_argument_value(arguments, "--work-dir"))
+            / "logs/run_evaluation"
+            / _argument_value(arguments, "--run-id")
+            / context.submission_id
+            / context.instance.instance_id
+        )
+        for name in ("buggy_traces", "patched_traces"):
+            directory = root / name
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / "test.jsonl").write_text(
+                f"{json.dumps(payload)}\n",
+                encoding="utf-8",
+            )
+
+    def fake_command(module, arguments, context, **kwargs):
+        arguments = tuple(arguments)
+        calls.append((module, arguments, kwargs))
+        if module == runners.IDENTIFY_PATCHED_FUNCTIONS_MODULE:
+            Path(_argument_value(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: ["example:changed"]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+        if module == runners.TRACK_TEST_CALLS_MODULE:
+            write_harness_output(
+                arguments,
+                context,
+                {"target": "example:changed", "stack": []},
+            )
+            return
+        if module == runners.SELECT_TRACE_FUNCTIONS_MODULE:
+            Path(_argument_value(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: ["example:called"]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+
+        assert module == runners.TRACE_PROGRAM_STATE_MODULE
+        allowed_functions = json.loads(
+            Path(
+                _argument_value(arguments, "--allowed-functions-path")
+            ).read_text(encoding="utf-8")
+        )
+        assert allowed_functions == {
+            context.submission_id: {
+                context.instance.instance_id: ["example:called"]
+            }
+        }
+        write_harness_output(
+            arguments,
+            context,
+            {"event": "line", "function": "example:called"},
+        )
+
+    monkeypatch.setattr(runners, "run_canonical_module", fake_command)
+    config = LocalBuilderConfig(
+        workspace=tmp_path / "workspace",
+        artifact_output=None,
+        max_workers=1,
+        max_attempts=1,
+        candidate_generation_model="candidate-model",
+        trace_test_timeout_seconds=432,
+        trace_command_timeout_seconds=876,
+    )
+    submission = make_submission()
+    run_local_stage("identify-patched-functions", submission, config)
+    run_local_stage("track-test-calls", submission, config, resume=True)
+    run_local_stage("select-trace-functions", submission, config, resume=True)
+
+    traced = run_local_stage(
+        "trace-program-state",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed = run_local_stage(
+        "trace-program-state",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert traced.completed == 1
+    assert resumed.reused == 1
+    trace_calls = [
+        item for item in calls if item[0] == runners.TRACE_PROGRAM_STATE_MODULE
+    ]
+    assert len(trace_calls) == 1
+    trace_arguments = trace_calls[0][1]
+    assert _argument_value(trace_arguments, "--max-workers") == "1"
+    assert _argument_value(trace_arguments, "--timeout") == "432"
+    assert trace_calls[0][2]["timeout"] == 876
+
+    workspace = LocalBuilderWorkspace.inspect(config.workspace)
+    result = workspace.read_result("trace-program-state", INSTANCE_ID)
+    manifest = result.data["artifact_manifest"]
+    stage_instance = (
+        config.workspace
+        / "stages"
+        / "trace-program-state"
+        / "instances"
+        / INSTANCE_ID
+    )
+    corrupt_path = (
+        stage_instance / manifest["root"] / manifest["files"][0]["path"]
+    )
+    corrupt_path.write_text("corrupt\n", encoding="utf-8")
+
+    rerun = run_local_stage(
+        "trace-program-state",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert rerun.completed == 1
+    trace_calls = [
+        item for item in calls if item[0] == runners.TRACE_PROGRAM_STATE_MODULE
+    ]
+    assert len(trace_calls) == 2
+    assert workspace.read_status(
+        "trace-program-state",
+        INSTANCE_ID,
+    ).total_attempts == 2

@@ -56,7 +56,10 @@ def install_fake_identify(monkeypatch):
                 encoding="utf-8",
             )
             return
-        if module == runners.TRACK_TEST_CALLS_MODULE:
+        if module in {
+            runners.TRACK_TEST_CALLS_MODULE,
+            runners.TRACE_PROGRAM_STATE_MODULE,
+        }:
             tracking_root = (
                 Path(option(arguments, "--work-dir"))
                 / "logs/run_evaluation"
@@ -72,17 +75,19 @@ def install_fake_identify(monkeypatch):
                     encoding="utf-8",
                 )
             return
-        assert module == runners.SELECT_TRACE_FUNCTIONS_MODULE
-        Path(option(arguments, "--output-path")).write_text(
-            json.dumps(
-                {
-                    context.submission_id: {
-                        context.instance.instance_id: ["example:called"]
+        if module == runners.SELECT_TRACE_FUNCTIONS_MODULE:
+            Path(option(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: ["example:called"]
+                        }
                     }
-                }
-            ),
-            encoding="utf-8",
-        )
+                ),
+                encoding="utf-8",
+            )
+            return
+        raise AssertionError(f"unexpected canonical module: {module}")
 
     monkeypatch.setattr(runners, "run_canonical_module", fake_identify)
 
@@ -142,7 +147,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'trace-program-state' is not yet connected" in (
+    assert "stage 'find-first-divergence' is not yet connected" in (
         status_output.out
     )
     assert "retryable=no" in status_output.out
@@ -192,6 +197,8 @@ identify_timeout_seconds = 123
 track_test_timeout_seconds = 456
 track_command_timeout_seconds = 789
 select_trace_timeout_seconds = 234
+trace_test_timeout_seconds = 345
+trace_command_timeout_seconds = 890
 
 [models]
 candidate_generation = "test-model"

@@ -265,6 +265,16 @@ def _add_local_builder_run_options(
         help="timeout in seconds for call-stack function selection",
     )
     parser.add_argument(
+        "--trace-test-timeout",
+        type=int,
+        help="timeout in seconds for each detailed in-container test run",
+    )
+    parser.add_argument(
+        "--trace-command-timeout",
+        type=int,
+        help="timeout in seconds for the complete detailed tracing command",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="reuse compatible completed instance-stage checkpoints",
@@ -422,6 +432,8 @@ def _resolved_local_builder_config(
         track_test_timeout_seconds=arguments.track_test_timeout,
         track_command_timeout_seconds=arguments.track_command_timeout,
         select_trace_timeout_seconds=arguments.select_trace_timeout,
+        trace_test_timeout_seconds=arguments.trace_test_timeout,
+        trace_command_timeout_seconds=arguments.trace_command_timeout,
         require_output=require_output,
     )
 

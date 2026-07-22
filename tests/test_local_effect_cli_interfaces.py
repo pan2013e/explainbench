@@ -179,29 +179,39 @@ def test_execution_cli_dispatches_explicit_harness_options(
     assert captured["clean"] is True
 
 
-def test_tracking_runs_harness_in_explicit_work_directory(
+@pytest.mark.parametrize(
+    ("module", "runner_name", "whitelist_option"),
+    [
+        (track_cli, "run_tracking", "--allowed-qualnames-path"),
+        (trace_cli, "run_tracing", "--allowed-functions-path"),
+    ],
+)
+def test_execution_runs_harness_in_explicit_work_directory(
     tmp_path,
     monkeypatch,
+    module,
+    runner_name,
+    whitelist_option,
 ):
     captured = {}
     predictions = tmp_path / "predictions.json"
     predictions.write_text("{}\n", encoding="utf-8")
-    qualnames = tmp_path / "qualnames.json"
-    qualnames.write_text("{}\n", encoding="utf-8")
-    work_dir = tmp_path / "tracking"
+    whitelist = tmp_path / "whitelist.json"
+    whitelist.write_text("{}\n", encoding="utf-8")
+    work_dir = tmp_path / runner_name
     report_dir = tmp_path / "reports"
     original_work_dir = Path.cwd()
 
-    monkeypatch.setattr(track_cli, "monkey_patch_execution", lambda **kwargs: None)
-    monkeypatch.setattr(track_cli, "prepare_tracer", lambda: None)
+    monkeypatch.setattr(module, "monkey_patch_execution", lambda **kwargs: None)
+    monkeypatch.setattr(module, "prepare_tracer", lambda: None)
     monkeypatch.setattr(
-        track_cli,
+        module,
         "run_evaluation_main",
         lambda **kwargs: captured.update(
             {"cwd": Path.cwd(), "report_dir": kwargs["report_dir"]}
         ),
     )
-    arguments = track_cli.build_parser().parse_args(
+    arguments = module.build_parser().parse_args(
         [
             "--instance-ids",
             INSTANCE_ID,
@@ -209,8 +219,8 @@ def test_tracking_runs_harness_in_explicit_work_directory(
             AGENT,
             "--predictions-path",
             str(predictions),
-            "--allowed-qualnames-path",
-            str(qualnames),
+            whitelist_option,
+            str(whitelist),
             "--work-dir",
             str(work_dir),
             "--report-dir",
@@ -218,7 +228,7 @@ def test_tracking_runs_harness_in_explicit_work_directory(
         ]
     )
 
-    track_cli.run_tracking(**vars(arguments))
+    getattr(module, runner_name)(**vars(arguments))
 
     assert captured["cwd"] == work_dir.resolve()
     assert captured["report_dir"] == str(report_dir.resolve())

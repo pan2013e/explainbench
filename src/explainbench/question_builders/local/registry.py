@@ -13,6 +13,7 @@ from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
     IdentifyPatchedFunctionsRunner,
     SelectTraceFunctionsRunner,
+    TraceProgramStateRunner,
     TrackTestCallsRunner,
 )
 
@@ -73,6 +74,21 @@ def _select_trace_execution(config: LocalBuilderConfig) -> dict[str, int]:
     return {"timeout_seconds": config.select_trace_timeout_seconds}
 
 
+def _trace_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
+    return {
+        "test_timeout_seconds": config.trace_test_timeout_seconds,
+        "command_timeout_seconds": config.trace_command_timeout_seconds,
+        "harness_workers": 1,
+        "cache_level": "env",
+        "force_rebuild": False,
+        "clean": False,
+        "open_file_limit": 4096,
+        "namespace": "swebench",
+        "instance_image_tag": "latest",
+        "env_image_tag": "latest",
+    }
+
+
 def _stage(
     name: str,
     description: str,
@@ -123,10 +139,14 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             runner=SelectTraceFunctionsRunner(),
             execution_inputs=_select_trace_execution,
         ),
-        _stage(
-            "trace-program-state",
-            "record detailed buggy and patched program state",
-            "select-trace-functions",
+        StageDefinition(
+            name="trace-program-state",
+            description="record detailed buggy and patched program state",
+            dependencies=("select-trace-functions",),
+            implementation_version="1-canonical-cli",
+            runner=TraceProgramStateRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_trace_execution,
         ),
         _stage(
             "find-first-divergence",
