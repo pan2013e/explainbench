@@ -51,6 +51,8 @@ class LocalWorkspaceManifest(StrictModel):
         default_factory=dict
     )
     artifact_output: str | None = None
+    artifact_fingerprint: str | None = None
+    artifact_files: dict[str, str] = Field(default_factory=dict)
 
 
 def _now() -> str:
@@ -449,6 +451,21 @@ class LocalBuilderWorkspace:
                 if status is not None and status.state == "failed":
                     failures.append(status)
         return failures
+
+    def record_artifact_publication(
+        self,
+        *,
+        output: Path,
+        fingerprint: str,
+        files: dict[str, str],
+    ) -> None:
+        """Record one complete evaluator artifact publication."""
+
+        self.manifest.artifact_output = str(output)
+        self.manifest.artifact_fingerprint = fingerprint
+        self.manifest.artifact_files = dict(files)
+        self.manifest.updated_at = _now()
+        self._write_manifest()
 
     def _write_manifest(self) -> None:
         atomic_write_json(

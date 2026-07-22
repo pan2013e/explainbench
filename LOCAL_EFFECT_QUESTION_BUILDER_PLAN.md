@@ -496,7 +496,8 @@ The full fast test suite passes.
 - [x] Connect `execute-candidate-expressions` to canonical `build_step3.py --execute`.
 - [x] Connect `validate-candidate-expressions` to canonical `build_step3.py --validate`.
 - [x] Connect `build-answer-choices` to canonical `build_step4.py`.
-- Replace each remaining pending package runner with a thin subprocess wrapper over its canonical module.
+- [x] Connect `export-question-artifacts` to canonical `build_step5.py`.
+- [x] Replace each pending package runner with a thin subprocess wrapper over its canonical module.
 - [x] Validate the `identify-patched-functions` output before marking its instance-stage checkpoint complete.
 - [x] Validate the per-instance function whitelist produced by `select-trace-functions`.
 - [x] Validate detailed buggy and patched trace artifacts before checkpoint completion and reuse.
@@ -505,8 +506,8 @@ The full fast test suite passes.
 - [x] Validate and checksum buggy and patched expression-inspection artifacts.
 - [x] Validate changed and unchanged expression classifications and preserve upstream semantic skips.
 - [x] Validate final choices, answer labels, special choices, and insufficient-pool skips.
-- Add output validation for every remaining stage as each wrapper is connected.
-- Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
+- [x] Validate evaluator-compatible context and ground-truth records before publication.
+- [x] Add a single-writer finalizer that merges per-instance export records and publishes the evaluator artifacts atomically.
 - [x] Test the canonical CLI parsing and dispatch without Docker or model calls.
 - [x] Test the first wrapper's command construction without Docker or model calls.
 - [x] Test the tracking and trace-function wrapper command construction without Docker or model calls.
@@ -516,7 +517,8 @@ The full fast test suite passes.
 - [x] Test expression execution, semantic skips, checkpoint reuse, and artifact corruption without Docker.
 - [x] Test expression validation, semantic skip propagation, and checkpoint reuse without Docker.
 - [x] Test answer-choice command construction, semantic skips, and checkpoint reuse without Docker.
-- Test each remaining wrapper's command construction without Docker or model calls.
+- [x] Test export command construction, semantic skips, checkpoint reuse, and atomic publication without Docker.
+- [x] Test each wrapper's command construction without Docker or model calls.
 - [x] Test retry-budget reset across separate resume invocations.
 - [x] Test that non-retryable failures do not restart without a compatible input or implementation change.
 - [x] Test interruption recovery and attempt isolation.
@@ -552,10 +554,11 @@ These values affect benchmark compatibility or internal implementation rather th
 
 Status of the CLI-only phase: completed.
 Import-time SWE-bench dataset loading was also made lazy, so `--help` and argument validation do not require network or dataset-cache access.
-The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and first nine canonical stage integrations are implemented.
+The generic resume foundation, revised retry-cycle behavior, submission adapter, shared subprocess runner, and all ten canonical stage integrations are implemented.
 The shared artifact manifest records relative paths, sizes, and SHA-256 checksums.
 Resume validates the full recorded file set before it reuses a checkpoint.
-The remaining canonical stage wrappers are not yet implemented.
+All canonical stage wrappers are implemented.
+Final publication merges completed instance checkpoints, validates them with the evaluator artifact loader, and switches the public output path to an immutable generation atomically.
 
 ### Milestone 3: Docker execution stages
 
@@ -606,6 +609,218 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - Atomic-publication tests ensuring the evaluator never observes a half-written artifact bundle.
 - Optional Docker and model-backed integration tests, excluded from the default fast suite.
 
+## Real-data validation plan
+
+The real-data tests will run after the offline implementation tests are complete.
+They will run one scenario at a time so that failures can be assigned to one stage and resumed without discarding earlier evidence.
+
+### Selected real examples
+
+| Case | Submission source | Purpose |
+|---|---|---|
+| `R1` | `examples/submission-full.json`, instance `sympy__sympy-15349` | Primary one-instance success path with a small patch and existing historical local-effect artifacts for structural comparison. |
+| `R2` | `dataset/explanations` records for `pydata__xarray-6744` and `sympy__sympy-20801` from `openhands_gpt-5-mini` | Multi-instance execution, partial progress, and independent resume behavior. |
+| `R3` | `dataset/explanations` record for `pydata__xarray-6721` from `openhands_gpt-5-mini` | Historical no-effect or gold-fallback behavior, subject to confirmation from newly generated intermediate checkpoints. |
+
+Generated questions do not need to match historical choices byte for byte because model generation can vary.
+The comparison will check the instance ID, function, divergence location, effect direction, artifact schema, choice validity, and correct-answer consistency.
+
+### Scenario matrix
+
+| ID | Scenario | Real input | Expected outcome | Status |
+|---|---|---|---|---|
+| `S01` | Validate the primary submission. | `R1` | `checker` accepts the submission, preserves the patch, and reports one valid instance. | Not started |
+| `S02` | Run patched-function identification alone. | `R1` | The checkpoint names `sympy/algebras/quaternion.py` and `Quaternion.to_rotation_matrix`, and resume reuses it. | Not started |
+| `S03` | Run lightweight test-call tracking. | `R1` | Buggy and patched tracking logs are present, nonempty, checksummed, and reusable. | Not started |
+| `S04` | Select detailed trace functions. | `R1` | The selected whitelist is nonempty, includes the relevant call path, and is stable on resume. | Not started |
+| `S05` | Run detailed buggy and patched tracing. | `R1` | Both trace sets are present, nonempty, checksummed, and reusable. | Not started |
+| `S06` | Find the first useful divergence. | `R1` | The result identifies a useful state or control-flow difference related to the quaternion rotation change. | Not started |
+| `S07` | Run candidate generation with inference disabled. | `R1` | The prompt and metadata are durable, execution is skipped with `candidate_inference_disabled`, and no model API is called. | Not started |
+| `S08` | Run model-backed candidate generation. | `R1` | Changed and unchanged candidate lists are nonempty, validated, and checkpointed before later paid work begins. | Not started |
+| `S09` | Execute and validate candidate expressions. | `R1` | Buggy and patched inspection logs are checksummed, and usable expressions are classified without overlap. | Not started |
+| `S10` | Build choices and export artifacts. | `R1` | The context and ground-truth pair passes the evaluator artifact loader and the public output points to one complete immutable generation. | Not started |
+| `S11` | Evaluate the generated local-effect artifact. | `R1` | `explainbench evaluate` accepts the generated pair for `local.effect` and writes one result record. | Not started |
+| `S12` | Run the complete command from a fresh workspace. | `R1` | All ten stages finish and the final output matches the artifacts produced by the individual-stage sequence. | Not started |
+| `S13` | Resume a completed complete run. | `R1` | Every compatible stage is reused, no Docker or model work repeats, and the artifact generation remains valid. | Not started |
+| `S14` | Interrupt one expensive process and resume. | `R1` | The running attempt becomes interrupted, a new attempt directory is used, and completed upstream work is reused. | Not started |
+| `S15` | Exhaust a retry cycle and resume again. | `R1` with an injected retryable command failure | The first invocation exhausts its attempt budget, and the next resume invocation starts with cycle attempt one while preserving total attempts. | Not started |
+| `S16` | Corrupt one tracked external artifact and resume. | `R1` | The owning stage becomes stale, it and its downstream stages rerun, and unaffected upstream stages remain reusable. | Not started |
+| `S17` | Change a semantic setting. | `R1` with a changed candidate count, expression-set ID, or choice seed | The affected stage and downstream stages rerun, while earlier compatible stages are reused. | Not started |
+| `S18` | Change only concurrency or timeout settings. | `R1` | Completed semantic results are reused, and the operational changes apply only to new attempts. | Not started |
+| `S19` | Produce no executable candidates. | `R1` with candidate inference disabled or empty generated lists | The later stages preserve a clear semantic skip and do not report an infrastructure failure. | Not started |
+| `S20` | Use an insufficient validated expression pool. | `R1` with a deliberately high minimum pool size | Choice construction and export record `insufficient_expression_pool`, and no invalid artifact pair is published. | Not started |
+| `S21` | Exercise historical no-effect behavior. | `R3` | The result either confirms gold fallback and selects the no-effect choice, or records the newly observed semantic outcome with supporting checkpoints. | Not started |
+| `S22` | Run multiple real instances. | `R2` | Each instance has independent checkpoints, one instance can finish while another retries or skips, and the exported pair contains only successful questions. | Not started |
+| `S23` | Reject an invalid real submission variant. | `R1` with a missing patch, malformed patch, or unsafe submission ID | Validation fails before expensive work and reports the exact invalid field or unsafe identifier. | Not started |
+| `S24` | Handle a conflicting output location. | `R1` with a nonempty unmanaged output directory | Publication refuses to overwrite the directory and retains all workspace checkpoints. | Not started |
+| `S25` | Recover the public artifact link. | Completed `R1` workspace with a deleted or redirected output link | Resume verifies the checkpoints and atomically restores the public link without repeating scientific work. | Not started |
+
+### Execution order
+
+1. Run `S01` through `S07` first because they do not require a model API call.
+2. Review the divergence and prompt checkpoints before any paid inference.
+3. Run `S08` through `S11` to complete one real local-effect question and evaluation.
+4. Run `S12` and `S13` to compare individual-stage execution with the complete `run` command.
+5. Run `S14` through `S20` to validate recovery, invalidation, and semantic skips.
+6. Run `S21` through `S25` for fallback, multi-instance, validation, and publication edge cases.
+
+### First real test sequence
+
+The first sequence uses the following fixed input and workspace:
+
+```text
+Submission: examples/submission-full.json
+Submission ID: example-full
+Instance: sympy__sympy-15349
+Patch target: Quaternion.to_rotation_matrix
+Workspace: .explainbench/real-tests/sympy-15349
+```
+
+#### S01: Validate the submission
+
+```bash
+explainbench checker examples/submission-full.json
+```
+
+Expected outcome:
+
+- The command exits successfully.
+- The submission ID is `example-full`.
+- One instance is accepted.
+- The explanation and patch are present.
+- No question-builder workspace or Docker process is created.
+
+#### S02: Identify patched functions
+
+```bash
+explainbench question-builder local stage identify-patched-functions \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349
+```
+
+Expected outcome:
+
+- One instance completes.
+- The output identifies `sympy/algebras/quaternion.py`.
+- The output identifies `Quaternion.to_rotation_matrix`.
+- The workspace contains a command record, attempt record, status, and result.
+
+Run the same stage again with resume:
+
+```bash
+explainbench question-builder local stage identify-patched-functions \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --resume
+```
+
+The second invocation should report one reused result and should not repeat repository work.
+
+#### S03: Track relevant test calls
+
+```bash
+explainbench question-builder local stage track-test-calls \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --resume
+```
+
+Expected outcome:
+
+- Docker runs the relevant SWE-bench tests.
+- Buggy and patched tracking logs are present and nonempty.
+- The stage records file sizes and checksums.
+- A second invocation reuses the completed checkpoint.
+
+#### S04: Select functions for detailed tracing
+
+```bash
+explainbench question-builder local stage select-trace-functions \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --resume
+```
+
+Expected outcome:
+
+- The selected function list is nonempty.
+- It contains functions from the relevant quaternion execution path.
+- The result passes validation and can be reused.
+
+#### S05: Record detailed program state
+
+```bash
+explainbench question-builder local stage trace-program-state \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --resume
+```
+
+Expected outcome:
+
+- Buggy and patched detailed traces are present and nonempty.
+- Both trace sets pass checksum validation.
+- The checkpoint contains an external-artifact manifest.
+
+#### S06: Find the first useful divergence
+
+```bash
+explainbench question-builder local stage find-first-divergence \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --resume
+```
+
+Expected outcome:
+
+- The result contains file, function, line, event, and variable metadata.
+- The divergence relates to the quaternion rotation behavior.
+- The outcome is a useful divergence rather than an infrastructure failure.
+
+#### S07: Prepare candidate-generation metadata without inference
+
+```bash
+explainbench question-builder local stage generate-candidate-expressions \
+  examples/submission-full.json \
+  --workspace .explainbench/real-tests/sympy-15349 \
+  --no-candidate-inference \
+  --resume
+```
+
+Expected outcome:
+
+- No model API is called.
+- Source and divergence metadata are processed.
+- Prompt length and function metadata are checkpointed.
+- Candidate execution is not started.
+- A later expression-execution request preserves `candidate_inference_disabled` as a semantic skip.
+
+Inspect the accumulated workspace after each scenario:
+
+```bash
+explainbench question-builder local status \
+  --workspace .explainbench/real-tests/sympy-15349
+```
+
+### Prompt persistence gap
+
+The current canonical candidate-generation output records `prompt_length_chars`, but it does not store the complete prompt text.
+This is sufficient to confirm that prompt construction occurred, but it is not sufficient for manual prompt review or a complete paid-inference audit.
+Before `S08`, add durable raw-prompt persistence without moving or duplicating the canonical prompt-building logic.
+The saved prompt should belong to the stage attempt, have a checksum, and be reusable independently of the model response.
+
+### Evidence recorded for every scenario
+
+- Exact command and resolved configuration.
+- Start and finish time.
+- Exit status.
+- Stage summary counts.
+- Checkpoint status and attempt counters.
+- Paths and checksums of relevant outputs.
+- Whether Docker or a model API was invoked.
+- Expected outcome and observed outcome.
+- Failure analysis and follow-up action when they differ.
+
 ## Out of scope for the first local implementation
 
 - Automatic installation or validation of Docker and system dependencies.
@@ -639,14 +854,14 @@ Expected outcome: an installed ExplainBench package can construct and evaluate l
 - [x] Connect and validate `execute-candidate-expressions` as the seventh canonical stage.
 - [x] Connect and validate `validate-candidate-expressions` as the eighth canonical stage.
 - [x] Connect and validate `build-answer-choices` as the ninth canonical stage.
-- [ ] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
+- [x] Connect and validate `export-question-artifacts` as the tenth canonical stage.
+- [x] Complete Milestone 2 with the submission adapter, thin package wrappers, and output validation.
 - [ ] Implement Milestone 3: Docker execution stages.
 - [ ] Implement Milestone 4: model-backed candidate generation.
 - [ ] Implement Milestone 5: compatibility, packaging, and documentation.
 
 ## Next step
 
-Connect `export-question-artifacts` to canonical `build_step5.py` next.
-The wrapper will consume each completed answer-choice result and preserve semantic skips.
-A single-writer finalizer will publish evaluator-compatible context and ground-truth files atomically in the configured artifact directory.
-It will record checksums and the published artifact location so resume can verify the final deliverable.
+Start the real-data validation plan with `S01` through `S07` next.
+Use `sympy__sympy-15349` and stop after the prompt-only candidate stage so the first sequence does not require a model API call.
+Review the recorded divergence and prompt evidence before enabling paid inference for `S08`.

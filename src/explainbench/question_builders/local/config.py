@@ -47,6 +47,8 @@ DEFAULT_CHOICE_MMR_WEIGHT = 0.7
 DEFAULT_CHOICE_RANDOM_SEED = 42
 DEFAULT_CHOICE_AGENT_WORKERS = 1
 DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS = 3600
+DEFAULT_EXPORT_PARAMETER_MAX_CHARACTERS = 20000
+DEFAULT_EXPORT_COMMAND_TIMEOUT_SECONDS = 3600
 DEFAULT_DATASET_NAME = "SWE-bench/SWE-bench_Verified"
 DEFAULT_REPOSITORY_REMOTE = "https://github.com"
 DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
@@ -129,6 +131,8 @@ class ExecutionFileConfig(StrictModel):
     choice_random_seed: int | None = None
     choice_agent_workers: int | None = Field(default=None, ge=1)
     choice_command_timeout_seconds: int | None = Field(default=None, ge=1)
+    export_parameter_max_characters: int | None = Field(default=None, ge=1)
+    export_command_timeout_seconds: int | None = Field(default=None, ge=1)
 
 
 class ModelsFileConfig(StrictModel):
@@ -259,6 +263,8 @@ class LocalBuilderConfig:
     choice_random_seed: int = DEFAULT_CHOICE_RANDOM_SEED
     choice_agent_workers: int = DEFAULT_CHOICE_AGENT_WORKERS
     choice_command_timeout_seconds: int = DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS
+    export_parameter_max_characters: int = DEFAULT_EXPORT_PARAMETER_MAX_CHARACTERS
+    export_command_timeout_seconds: int = DEFAULT_EXPORT_COMMAND_TIMEOUT_SECONDS
 
 
 def _validation_message(error: ValidationError) -> str:
@@ -356,6 +362,8 @@ def resolve_local_builder_config(
     choice_random_seed: int | None = None,
     choice_agent_workers: int | None = None,
     choice_command_timeout_seconds: int | None = None,
+    export_parameter_max_characters: int | None = None,
+    export_command_timeout_seconds: int | None = None,
     repository_cache: str | Path | None = None,
     dataset_name: str | None = None,
     repository_remote: str | None = None,
@@ -644,6 +652,20 @@ def resolve_local_builder_config(
                 DEFAULT_CHOICE_COMMAND_TIMEOUT_SECONDS,
             )
         )
+        resolved_export_parameter_max_characters = int(
+            _pick(
+                export_parameter_max_characters,
+                file_config.execution.export_parameter_max_characters,
+                DEFAULT_EXPORT_PARAMETER_MAX_CHARACTERS,
+            )
+        )
+        resolved_export_command_timeout = int(
+            _pick(
+                export_command_timeout_seconds,
+                file_config.execution.export_command_timeout_seconds,
+                DEFAULT_EXPORT_COMMAND_TIMEOUT_SECONDS,
+            )
+        )
         resolved_dataset_name = _pick(
             dataset_name,
             file_config.benchmark.dataset_name,
@@ -844,6 +866,14 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "choice command timeout must be at least 1 second"
         )
+    if resolved_export_parameter_max_characters < 1:
+        raise LocalBuilderConfigError(
+            "export parameter limit must be at least 1 character"
+        )
+    if resolved_export_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "export command timeout must be at least 1 second"
+        )
     if (
         not isinstance(resolved_dataset_name, str)
         or not resolved_dataset_name.strip()
@@ -950,6 +980,10 @@ def resolve_local_builder_config(
         choice_random_seed=resolved_choice_random_seed,
         choice_agent_workers=resolved_choice_agent_workers,
         choice_command_timeout_seconds=resolved_choice_command_timeout,
+        export_parameter_max_characters=(
+            resolved_export_parameter_max_characters
+        ),
+        export_command_timeout_seconds=resolved_export_command_timeout,
         repository_cache=repository_cache_path,
         dataset_name=resolved_dataset_name,
         repository_remote=resolved_repository_remote,

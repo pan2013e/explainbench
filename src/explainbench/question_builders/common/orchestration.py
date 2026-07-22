@@ -118,6 +118,7 @@ class StageDefinition:
     semantic_inputs: SemanticInputs = _no_semantic_inputs
     resource_inputs: ResourceInputs = _no_semantic_inputs
     execution_inputs: ResourceInputs = _no_semantic_inputs
+    accepts_skipped_dependencies: bool = False
 
 
 class StageRegistry:
@@ -415,7 +416,10 @@ class BuilderOrchestrator:
             result = self._compatible_result(dependency, instance)
             if result is None:
                 return None
-            if result.outcome == "skipped":
+            if (
+                result.outcome == "skipped"
+                and not definition.accepts_skipped_dependencies
+            ):
                 return None
             results[dependency] = result
         return results

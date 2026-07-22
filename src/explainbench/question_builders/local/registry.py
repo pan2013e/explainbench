@@ -13,6 +13,7 @@ from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
     BuildAnswerChoicesRunner,
     ExecuteCandidateExpressionsRunner,
+    ExportQuestionArtifactsRunner,
     GenerateCandidateExpressionsRunner,
     FindFirstDivergenceRunner,
     IdentifyPatchedFunctionsRunner,
@@ -39,6 +40,16 @@ def _choice_execution(config: LocalBuilderConfig) -> dict[str, int]:
         "agent_workers": config.choice_agent_workers,
         "command_timeout_seconds": config.choice_command_timeout_seconds,
     }
+
+
+def _export_semantic(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "parameter_max_characters": config.export_parameter_max_characters,
+    }
+
+
+def _export_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"command_timeout_seconds": config.export_command_timeout_seconds}
 
 
 class UnconnectedStageRunner:
@@ -305,11 +316,19 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             runner=BuildAnswerChoicesRunner(),
             semantic_inputs=_choice_semantic,
             execution_inputs=_choice_execution,
+            accepts_skipped_dependencies=True,
         ),
-        _stage(
-            "export-question-artifacts",
-            "write evaluator-compatible context and ground truth artifacts",
-            "build-answer-choices",
+        StageDefinition(
+            name="export-question-artifacts",
+            description=(
+                "write evaluator-compatible context and ground truth artifacts"
+            ),
+            dependencies=("build-answer-choices",),
+            implementation_version="1-canonical-cli",
+            runner=ExportQuestionArtifactsRunner(),
+            semantic_inputs=_export_semantic,
+            execution_inputs=_export_execution,
+            accepts_skipped_dependencies=True,
         ),
     ]
 )

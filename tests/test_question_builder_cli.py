@@ -120,8 +120,14 @@ def install_fake_identify(monkeypatch):
                                 "function_code_before_patch": (
                                     "def changed():\\n    return old"
                                 ),
+                                "buggy_function_param": {"value": 1},
+                                "location": "before return old",
                                 "changed_candidates": ["value"],
-                                "unchanged_candidates": ["other"],
+                                "unchanged_candidates": [
+                                    "other_1",
+                                    "other_2",
+                                    "other_3",
+                                ],
                             }
                         }
                     }
@@ -146,7 +152,11 @@ def install_fake_identify(monkeypatch):
                                 context.instance.instance_id: {
                                     **metadata,
                                     "valid_changed_expressions": ["value"],
-                                    "valid_unchanged_expressions": ["other"],
+                                    "valid_unchanged_expressions": [
+                                        "other_1",
+                                        "other_2",
+                                        "other_3",
+                                    ],
                                 }
                             }
                         }
@@ -169,6 +179,91 @@ def install_fake_identify(monkeypatch):
                     "{}\n",
                     encoding="utf-8",
                 )
+            return
+        if module == runners.BUILD_STEP4_MODULE:
+            step3 = json.loads(
+                Path(option(arguments, "--step3-path")).read_text(
+                    encoding="utf-8"
+                )
+            )
+            metadata = step3[context.submission_id][
+                context.instance.instance_id
+            ]
+            Path(option(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: {
+                                "choices": [
+                                    "value",
+                                    "other_1",
+                                    "other_2",
+                                    "other_3",
+                                    runners.NONE_OF_THE_ABOVE_CHOICE,
+                                    runners.CANNOT_INFER_CHOICE,
+                                ],
+                                "answer": ["a"],
+                                **{
+                                    key: value
+                                    for key, value in metadata.items()
+                                    if key
+                                    not in {
+                                        "valid_changed_expressions",
+                                        "valid_unchanged_expressions",
+                                        "prompt_length_chars",
+                                        "changed_candidates",
+                                        "unchanged_candidates",
+                                    }
+                                },
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+        if module == runners.BUILD_STEP5_MODULE:
+            step4 = json.loads(
+                Path(option(arguments, "--effect-step4-path")).read_text(
+                    encoding="utf-8"
+                )
+            )
+            question = step4[context.submission_id][
+                context.instance.instance_id
+            ]
+            filename = f"local_effect__{context.submission_id}.json"
+            context_directory = Path(option(arguments, "--context-dir"))
+            ground_truth_directory = Path(
+                option(arguments, "--ground-truth-dir")
+            )
+            context_directory.mkdir(parents=True, exist_ok=True)
+            ground_truth_directory.mkdir(parents=True, exist_ok=True)
+            (context_directory / filename).write_text(
+                json.dumps(
+                    {
+                        context.instance.instance_id: {
+                            "function_code_before_patch": question[
+                                "function_code_before_patch"
+                            ],
+                            "function_parameters_before_patch": "{'value': 1}\\n",
+                            "line": question["location"],
+                            "choices": question["choices"],
+                            "before_or_after": question["before_or_after"],
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (ground_truth_directory / filename).write_text(
+                json.dumps(
+                    {
+                        context.instance.instance_id: {
+                            "answer": question["answer"]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
             return
         if module == runners.SELECT_TRACE_FUNCTIONS_MODULE:
             Path(option(arguments, "--output-path")).write_text(
@@ -199,7 +294,7 @@ def test_stages_lists_meaningful_names_in_dependency_order(capsys):
     assert "export-question-artifacts" in lines[-1]
 
 
-def test_pending_stage_fails_explicitly_and_status_is_inspectable(
+def test_complete_pipeline_publishes_artifacts_and_status_is_inspectable(
     tmp_path,
     capsys,
     monkeypatch,
@@ -223,11 +318,18 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
     )
     run_output = capsys.readouterr()
 
-    assert status == 1
-    assert "stage_not_connected" not in run_output.err
-    assert "checkpoints and logs were retained" in run_output.err
+    assert status == 0
+    assert run_output.err == ""
+    assert "Local question building complete" in run_output.out
     assert "identify-patched-functions" in run_output.out
     assert (workspace / "manifest.json").is_file()
+    assert artifacts.is_symlink()
+    assert (
+        artifacts / "context" / "local_effect__test-agent.json"
+    ).is_file()
+    assert (
+        artifacts / "ground_truths" / "local_effect__test-agent.json"
+    ).is_file()
 
     status = cli.main(
         [
@@ -242,9 +344,9 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "build-answer-choices: skipped=1" in status_output.out
-    assert "export-question-artifacts: pending=1" in status_output.out
-    assert "Artifacts: not exported" in status_output.out
+    assert "build-answer-choices: completed=1" in status_output.out
+    assert "export-question-artifacts: completed=1" in status_output.out
+    assert f"Artifacts: {artifacts}" in status_output.out
 
 
 def test_individual_later_stage_reports_missing_prerequisite(tmp_path, capsys):
@@ -329,6 +431,8 @@ choice_mmr_weight = 0.7
 choice_random_seed = 42
 choice_agent_workers = 2
 choice_command_timeout_seconds = 321
+export_parameter_max_characters = 1234
+export_command_timeout_seconds = 432
 
 [models]
 candidate_generation = "test-model"
@@ -357,9 +461,10 @@ repository_remote = "https://example.invalid"
     )
 
     capsys.readouterr()
-    assert status == 1
+    assert status == 0
     assert (tmp_path / "configured-workspace" / "manifest.json").is_file()
     assert (tmp_path / "configured-workspace" / "input/predictions.json").is_file()
+    assert (tmp_path / "configured-artifacts").is_symlink()
 
 
 def test_local_registry_has_the_documented_stage_names():

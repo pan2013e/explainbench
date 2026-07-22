@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
 from pathlib import Path
 
+from pydantic import ValidationError
+
+from explainbench.evaluation.schemas import AnswerGroundTruth, LocalEffectContext
 from explainbench.question_builders.common.artifacts import (
     ArtifactManifest,
     build_artifact_manifest,
@@ -38,11 +42,13 @@ BUILD_STEP1_MODULE = "dataset.extract_ground_truths.effect.build_step1"
 BUILD_STEP2_MODULE = "dataset.extract_ground_truths.effect.build_step2"
 BUILD_STEP3_MODULE = "dataset.extract_ground_truths.effect.build_step3"
 BUILD_STEP4_MODULE = "dataset.extract_ground_truths.effect.build_step4"
+BUILD_STEP5_MODULE = "dataset.extract_ground_truths.effect.build_step5"
 
 NONE_OF_THE_ABOVE_CHOICE = (
     "The patch has no effect and none of the above expressions change in value"
 )
 CANNOT_INFER_CHOICE = "Cannot be answered by the explanation alone"
+SAFE_ARTIFACT_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 
 
 DIVERGENCE_REQUIRED_FIELDS = frozenset(
@@ -1560,3 +1566,131 @@ class BuildAnswerChoicesRunner:
             raise ValueError("answer-choice fallback state must be a boolean")
         if is_fallback and answer_values != [NONE_OF_THE_ABOVE_CHOICE]:
             raise ValueError("gold fallback must select the no-effect choice")
+
+
+class ExportQuestionArtifactsRunner:
+    """Invoke canonical step 5 for one local-effect question."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        if not SAFE_ARTIFACT_ID.fullmatch(context.submission_id):
+            raise StageExecutionError(
+                "submission ID is unsafe for artifact filenames",
+                category="invalid_submission_id",
+                retryable=False,
+            )
+        choice_result = context.upstream_results.get("build-answer-choices")
+        if choice_result is None:
+            raise StageExecutionError(
+                "export-question-artifacts requires answer-choice output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+        if choice_result.outcome == "skipped":
+            result = StageResult.skipped(
+                choice_result.reason or "no_candidate_expressions",
+                {"instance_id": context.instance.instance_id},
+            )
+            self.validate_result(result.to_stored())
+            return result
+
+        question = choice_result.data.get("question")
+        if not isinstance(question, dict):
+            raise StageExecutionError(
+                "answer-choice output has no question object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        step4_path = context.attempt_directory / "step4.json"
+        atomic_write_json(
+            step4_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: question,
+                }
+            },
+        )
+        export_root = context.attempt_directory / "artifacts"
+        context_directory = export_root / "context"
+        ground_truth_directory = export_root / "ground_truths"
+        run_canonical_module(
+            BUILD_STEP5_MODULE,
+            (
+                "--kind",
+                "effect",
+                "--agent",
+                context.submission_id,
+                "--instance-ids",
+                context.instance.instance_id,
+                "--effect-step4-path",
+                str(step4_path),
+                "--context-dir",
+                str(context_directory),
+                "--ground-truth-dir",
+                str(ground_truth_directory),
+                "--parameter-max-characters",
+                str(context.config.export_parameter_max_characters),
+            ),
+            context,
+            timeout=context.config.export_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        filename = f"local_effect__{context.submission_id}.json"
+        raw_context = _read_json(context_directory / filename)
+        raw_ground_truth = _read_json(ground_truth_directory / filename)
+        if not isinstance(raw_context, dict) or not isinstance(
+            raw_ground_truth, dict
+        ):
+            raise StageExecutionError(
+                "exported context and ground truth must be JSON objects",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        instance_id = context.instance.instance_id
+        if set(raw_context) != {instance_id} or set(raw_ground_truth) != {
+            instance_id
+        }:
+            raise StageExecutionError(
+                "exported artifacts do not contain exactly the requested instance",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        result = StageResult.completed(
+            {
+                "instance_id": instance_id,
+                "context": raw_context[instance_id],
+                "ground_truth": raw_ground_truth[instance_id],
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError("export result requires a nonempty instance_id")
+        if result.outcome == "skipped":
+            if result.reason not in {
+                "candidate_inference_disabled",
+                "no_candidate_expressions",
+                "insufficient_expression_pool",
+            }:
+                raise ValueError("export result has an unknown skip reason")
+            return
+        try:
+            context = LocalEffectContext.model_validate(
+                result.data.get("context")
+            )
+            ground_truth = AnswerGroundTruth.model_validate(
+                result.data.get("ground_truth")
+            )
+        except ValidationError as error:
+            raise ValueError(f"exported local-effect artifact is invalid: {error}") from error
+        choice_count = len(context.choices)
+        if any(
+            ord(answer) - ord("a") >= choice_count
+            for answer in ground_truth.answer
+        ):
+            raise ValueError("exported answer refers to a missing choice")

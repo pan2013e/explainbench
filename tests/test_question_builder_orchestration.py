@@ -83,6 +83,15 @@ class FailingRunner(RecordingRunner):
         )
 
 
+class SkippingRunner(RecordingRunner):
+    def run_instance(self, context):
+        self.calls.append(context.instance.instance_id)
+        return StageResult.skipped(
+            "not_applicable",
+            {"instance_id": context.instance.instance_id},
+        )
+
+
 def make_submission(instance_count=2):
     return Submission.model_validate(
         {
@@ -115,6 +124,7 @@ def make_definition(
     *,
     dependencies=(),
     semantic_inputs=None,
+    accepts_skipped_dependencies=False,
 ):
     keywords = {}
     if semantic_inputs is not None:
@@ -125,8 +135,39 @@ def make_definition(
         dependencies=dependencies,
         implementation_version="test-v1",
         runner=runner,
+        accepts_skipped_dependencies=accepts_skipped_dependencies,
         **keywords,
     )
+
+
+def test_stage_can_explicitly_accept_skipped_dependencies(tmp_path):
+    first = SkippingRunner()
+    strict = RecordingRunner()
+    accepting = RecordingRunner()
+    registry = StageRegistry(
+        [
+            make_definition("first", first),
+            make_definition("strict", strict, dependencies=("first",)),
+            make_definition(
+                "accepting",
+                accepting,
+                dependencies=("first",),
+                accepts_skipped_dependencies=True,
+            ),
+        ]
+    )
+
+    summaries = run_local_pipeline(
+        make_submission(instance_count=1),
+        make_config(tmp_path),
+        registry=registry,
+    )
+
+    assert summaries[0].skipped == 1
+    assert summaries[1].blocked == 1
+    assert summaries[2].completed == 1
+    assert strict.calls == []
+    assert accepting.calls == ["repo__project-0"]
 
 
 def test_pipeline_runs_dependencies_then_reuses_completed_results(tmp_path):

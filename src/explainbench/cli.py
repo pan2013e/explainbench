@@ -397,6 +397,16 @@ def _add_local_builder_run_options(
         help="timeout in seconds for answer-choice construction",
     )
     parser.add_argument(
+        "--export-parameter-max-characters",
+        type=int,
+        help="maximum serialized function-parameter length in context",
+    )
+    parser.add_argument(
+        "--export-command-timeout",
+        type=int,
+        help="timeout in seconds for artifact export",
+    )
+    parser.add_argument(
         "--repository-cache",
         type=Path,
         help="repository cache used by canonical local-effect stages",
@@ -676,6 +686,10 @@ def _resolved_local_builder_config(
         choice_random_seed=arguments.choice_random_seed,
         choice_agent_workers=arguments.choice_agent_workers,
         choice_command_timeout_seconds=arguments.choice_command_timeout,
+        export_parameter_max_characters=(
+            arguments.export_parameter_max_characters
+        ),
+        export_command_timeout_seconds=arguments.export_command_timeout,
         repository_cache=arguments.repository_cache,
         dataset_name=arguments.dataset_name,
         repository_remote=arguments.repository_remote,

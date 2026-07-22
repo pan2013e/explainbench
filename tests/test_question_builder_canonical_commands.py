@@ -615,6 +615,8 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
                                 "function_code_before_patch": (
                                     "def changed():\\n    return old"
                                 ),
+                                "buggy_function_param": {"value": 1},
+                                "location": "before return old",
                                 "changed_candidates": ["value"],
                                 "unchanged_candidates": ["other"],
                             }
@@ -708,6 +710,52 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
             )
             return
 
+        if module == runners.BUILD_STEP5_MODULE:
+            step4 = json.loads(
+                Path(
+                    _argument_value(arguments, "--effect-step4-path")
+                ).read_text(encoding="utf-8")
+            )
+            question = step4[context.submission_id][
+                context.instance.instance_id
+            ]
+            filename = f"local_effect__{context.submission_id}.json"
+            context_directory = Path(
+                _argument_value(arguments, "--context-dir")
+            )
+            ground_truth_directory = Path(
+                _argument_value(arguments, "--ground-truth-dir")
+            )
+            context_directory.mkdir(parents=True, exist_ok=True)
+            ground_truth_directory.mkdir(parents=True, exist_ok=True)
+            (context_directory / filename).write_text(
+                json.dumps(
+                    {
+                        context.instance.instance_id: {
+                            "function_code_before_patch": question[
+                                "function_code_before_patch"
+                            ],
+                            "function_parameters_before_patch": "{'value': 1}\\n",
+                            "line": question["location"],
+                            "choices": question["choices"],
+                            "before_or_after": question["before_or_after"],
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (ground_truth_directory / filename).write_text(
+                json.dumps(
+                    {
+                        context.instance.instance_id: {
+                            "answer": question["answer"]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+
         assert module == runners.TRACE_PROGRAM_STATE_MODULE
         allowed_functions = json.loads(
             Path(
@@ -728,7 +776,7 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
     monkeypatch.setattr(runners, "run_canonical_module", fake_command)
     config = LocalBuilderConfig(
         workspace=tmp_path / "workspace",
-        artifact_output=None,
+        artifact_output=tmp_path / "artifacts",
         max_workers=1,
         max_attempts=1,
         candidate_generation_model="candidate-model",
@@ -756,6 +804,8 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         choice_random_seed=17,
         choice_agent_workers=2,
         choice_command_timeout_seconds=246,
+        export_parameter_max_characters=1234,
+        export_command_timeout_seconds=135,
         trace_test_timeout_seconds=432,
         trace_command_timeout_seconds=876,
     )
@@ -1024,6 +1074,54 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
     result = workspace.read_result("build-answer-choices", INSTANCE_ID)
     assert result.data["question"]["answer"] == ["a"]
     assert result.data["correct_expressions"] == ["value"]
+
+    exported = run_local_stage(
+        "export-question-artifacts",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed_export = run_local_stage(
+        "export-question-artifacts",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert exported.completed == 1
+    assert resumed_export.reused == 1
+    export_calls = [
+        item for item in calls if item[0] == runners.BUILD_STEP5_MODULE
+    ]
+    assert len(export_calls) == 1
+    export_arguments = export_calls[0][1]
+    assert _argument_value(export_arguments, "--kind") == "effect"
+    assert _argument_value(export_arguments, "--agent") == "test-agent"
+    assert _argument_value(
+        export_arguments,
+        "--parameter-max-characters",
+    ) == "1234"
+    assert export_calls[0][2]["timeout"] == 135
+    context_path = (
+        config.artifact_output
+        / "context"
+        / "local_effect__test-agent.json"
+    )
+    ground_truth_path = (
+        config.artifact_output
+        / "ground_truths"
+        / "local_effect__test-agent.json"
+    )
+    assert config.artifact_output.is_symlink()
+    assert json.loads(context_path.read_text(encoding="utf-8"))[
+        INSTANCE_ID
+    ]["line"] == "before return old"
+    assert json.loads(ground_truth_path.read_text(encoding="utf-8"))[
+        INSTANCE_ID
+    ]["answer"] == ["a"]
+    refreshed = LocalBuilderWorkspace.inspect(config.workspace)
+    assert refreshed.manifest.artifact_output == str(config.artifact_output)
+    assert refreshed.manifest.artifact_fingerprint
 
 
 @pytest.mark.parametrize(

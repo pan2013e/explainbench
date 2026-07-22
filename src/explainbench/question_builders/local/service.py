@@ -12,6 +12,9 @@ from explainbench.question_builders.common.orchestration import (
 )
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
+from explainbench.question_builders.local.publication import (
+    publish_local_effect_artifacts,
+)
 from explainbench.question_builders.local.submission_adapter import (
     write_predictions_file,
 )
@@ -67,13 +70,29 @@ def run_local_pipeline(
     """Run the complete registered local-effect pipeline."""
 
     with WorkspaceLock(config.workspace):
-        _, orchestrator = _prepare_orchestrator(
+        workspace, orchestrator = _prepare_orchestrator(
             submission,
             config,
             resume=resume,
             registry=registry,
         )
-        return orchestrator.run_all()
+        summaries = orchestrator.run_all()
+        export_summary = next(
+            (
+                summary
+                for summary in summaries
+                if summary.stage == "export-question-artifacts"
+            ),
+            None,
+        )
+        if export_summary is not None and not export_summary.has_failures:
+            if config.artifact_output is None:
+                raise ValueError("artifact output is required for a complete run")
+            publish_local_effect_artifacts(
+                workspace,
+                output=config.artifact_output,
+            )
+        return summaries
 
 
 def run_local_stage(
@@ -87,16 +106,24 @@ def run_local_stage(
     """Run one local-effect stage after strict prerequisite checks."""
 
     with WorkspaceLock(config.workspace):
-        _, orchestrator = _prepare_orchestrator(
+        workspace, orchestrator = _prepare_orchestrator(
             submission,
             config,
             resume=resume,
             registry=registry,
         )
-        return orchestrator.run_stage(
+        summary = orchestrator.run_stage(
             stage_name,
             require_all_prerequisites=True,
         )
+        if stage_name == "export-question-artifacts" and not summary.has_failures:
+            if config.artifact_output is None:
+                raise ValueError("artifact output is required for export")
+            publish_local_effect_artifacts(
+                workspace,
+                output=config.artifact_output,
+            )
+        return summary
 
 
 def inspect_local_workspace(
