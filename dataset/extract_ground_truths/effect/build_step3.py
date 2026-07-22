@@ -467,6 +467,11 @@ def build_parser():
     parser.add_argument("--inspection-env-image-tag", default="latest")
     parser.add_argument("--inspection-report-dir", default=".")
     parser.add_argument(
+        "--inspection-work-dir",
+        default=".",
+        help="Working directory that contains SWE-bench inspection logs.",
+    )
+    parser.add_argument(
         "--process-gold",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -526,6 +531,7 @@ def main(argv=None):
         "--instance-image-tag", args.inspection_instance_image_tag,
         "--env-image-tag", args.inspection_env_image_tag,
         "--report-dir", args.inspection_report_dir,
+        "--work-dir", args.inspection_work_dir,
         "--force-rebuild" if args.inspection_force_rebuild else "--no-force-rebuild",
         "--clean" if args.inspection_clean else "--no-clean",
         "--rewrite-reports" if args.inspection_rewrite_reports else "--no-rewrite-reports",

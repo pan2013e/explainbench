@@ -11,12 +11,14 @@ from explainbench.question_builders.common.orchestration import (
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
+    ExecuteCandidateExpressionsRunner,
     GenerateCandidateExpressionsRunner,
     FindFirstDivergenceRunner,
     IdentifyPatchedFunctionsRunner,
     SelectTraceFunctionsRunner,
     TraceProgramStateRunner,
     TrackTestCallsRunner,
+    ValidateCandidateExpressionsRunner,
 )
 
 
@@ -68,6 +70,42 @@ def _candidate_execution(
             if config.candidate_generation_env_file is not None
             else None
         ),
+    }
+
+
+def _inspection_semantic(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"expression_set_id": config.expression_set_id}
+
+
+def _inspection_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool]:
+    return {
+        "timeout_seconds": config.inspection_timeout_seconds,
+        "command_timeout_seconds": config.inspection_command_timeout_seconds,
+        "instance_workers": config.inspection_instance_workers,
+        "agent_workers": config.inspection_agent_workers,
+        "harness_workers": config.inspection_max_workers,
+        "force_rebuild": config.inspection_force_rebuild,
+        "cache_level": config.inspection_cache_level,
+        "clean": config.inspection_clean,
+        "open_file_limit": config.inspection_open_file_limit,
+        "rewrite_reports": config.inspection_rewrite_reports,
+        "modal": config.inspection_modal,
+        "instance_image_tag": config.inspection_instance_image_tag,
+        "env_image_tag": config.inspection_env_image_tag,
+        "split": config.inspection_split,
+        "namespace": config.inspection_namespace,
+    }
+
+
+def _candidate_validation_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, int]:
+    return {
+        "command_timeout_seconds": config.inspection_command_timeout_seconds,
+        "instance_workers": config.inspection_instance_workers,
+        "agent_workers": config.inspection_agent_workers,
     }
 
 
@@ -214,15 +252,31 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             semantic_inputs=_candidate_semantic,
             execution_inputs=_candidate_execution,
         ),
-        _stage(
-            "execute-candidate-expressions",
-            "evaluate candidate expressions in buggy and patched executions",
-            "generate-candidate-expressions",
+        StageDefinition(
+            name="execute-candidate-expressions",
+            description=(
+                "evaluate candidate expressions in buggy and patched executions"
+            ),
+            dependencies=("generate-candidate-expressions",),
+            implementation_version="1-canonical-cli",
+            runner=ExecuteCandidateExpressionsRunner(),
+            semantic_inputs=_inspection_semantic,
+            resource_inputs=_identify_resources,
+            execution_inputs=_inspection_execution,
         ),
-        _stage(
-            "validate-candidate-expressions",
-            "classify candidate expressions from their recorded values",
-            "execute-candidate-expressions",
+        StageDefinition(
+            name="validate-candidate-expressions",
+            description=(
+                "classify candidate expressions from their recorded values"
+            ),
+            dependencies=(
+                "generate-candidate-expressions",
+                "execute-candidate-expressions",
+            ),
+            implementation_version="1-canonical-cli",
+            runner=ValidateCandidateExpressionsRunner(),
+            semantic_inputs=_inspection_semantic,
+            execution_inputs=_candidate_validation_execution,
         ),
         _stage(
             "build-answer-choices",

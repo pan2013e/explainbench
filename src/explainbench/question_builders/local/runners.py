@@ -36,6 +36,7 @@ SELECT_TRACE_FUNCTIONS_MODULE = (
 TRACE_PROGRAM_STATE_MODULE = "execution.trace"
 BUILD_STEP1_MODULE = "dataset.extract_ground_truths.effect.build_step1"
 BUILD_STEP2_MODULE = "dataset.extract_ground_truths.effect.build_step2"
+BUILD_STEP3_MODULE = "dataset.extract_ground_truths.effect.build_step3"
 
 
 DIVERGENCE_REQUIRED_FIELDS = frozenset(
@@ -66,6 +67,7 @@ CANDIDATE_REQUIRED_METADATA = frozenset(
         "patched_lineno",
         "buggy_line_count",
         "patched_line_count",
+        "test_id",
         "before_or_after",
         "prompt_length_chars",
         "function_code_before_patch",
@@ -171,6 +173,12 @@ def _tracing_run_id(context: StageContext) -> str:
     identity = f"{context.submission_id}\0{context.instance.instance_id}"
     digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
     return f"explainbench-trace-{digest}-attempt-{context.total_attempt}"
+
+
+def _inspection_run_id(context: StageContext) -> str:
+    identity = f"{context.submission_id}\0{context.instance.instance_id}"
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
+    return f"explainbench-inspect-{digest}-attempt-{context.total_attempt}"
 
 
 def _require_trace_files(root: Path, directory_name: str) -> None:
@@ -854,3 +862,457 @@ class GenerateCandidateExpressionsRunner:
                     category="canonical_output_invalid",
                     retryable=True,
                 )
+        for key in (
+            "buggy_lineno",
+            "patched_lineno",
+            "buggy_line_count",
+            "patched_line_count",
+            "test_id",
+        ):
+            value = candidates.get(key)
+            if (
+                not isinstance(value, int)
+                or isinstance(value, bool)
+                or value < 0
+            ):
+                raise StageExecutionError(
+                    f"candidate result {key} must be a nonnegative integer",
+                    category="canonical_output_invalid",
+                    retryable=True,
+                )
+
+
+class ExecuteCandidateExpressionsRunner:
+    """Invoke canonical step 3 execution and retain inspection artifacts."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        candidate_result = context.upstream_results.get(
+            "generate-candidate-expressions"
+        )
+        if candidate_result is None:
+            raise StageExecutionError(
+                "execute-candidate-expressions requires candidate output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+
+        candidates = candidate_result.data.get("candidates")
+        if not isinstance(candidates, dict):
+            raise StageExecutionError(
+                "candidate output is not a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        changed = candidates.get("changed_candidates")
+        unchanged = candidates.get("unchanged_candidates")
+        if not isinstance(changed, list) or not isinstance(unchanged, list):
+            skip_reason = (
+                "no_candidate_expressions"
+                if not candidates
+                else "candidate_inference_disabled"
+            )
+            result = StageResult.skipped(
+                skip_reason,
+                {
+                    "instance_id": context.instance.instance_id,
+                    "candidate_count": 0,
+                },
+            )
+            self.validate_result(result.to_stored())
+            return result
+        candidate_count = len(changed) + len(unchanged)
+        if candidate_count == 0:
+            result = StageResult.skipped(
+                "no_candidate_expressions",
+                {
+                    "instance_id": context.instance.instance_id,
+                    "candidate_count": 0,
+                },
+            )
+            self.validate_result(result.to_stored())
+            return result
+
+        step2_path = context.attempt_directory / "step2.json"
+        atomic_write_json(
+            step2_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: candidates,
+                }
+            },
+        )
+        gold_step2_path = context.attempt_directory / "step2.gold.json"
+        atomic_write_json(gold_step2_path, {"gold": {}})
+
+        inspection_work_directory = (
+            context.attempt_directory / "inspection"
+        )
+        report_directory = context.attempt_directory / "reports"
+        output_path = context.attempt_directory / "step3.json"
+        gold_output_path = context.attempt_directory / "step3.gold.json"
+        run_id = _inspection_run_id(context)
+        arguments = [
+            "--execute",
+            "--agent",
+            context.submission_id,
+            "--instance-ids",
+            context.instance.instance_id,
+            "--step2-path",
+            str(step2_path),
+            "--gold-step2-path",
+            str(gold_step2_path),
+            "--output-path",
+            str(output_path),
+            "--gold-output-path",
+            str(gold_output_path),
+            "--predictions-path",
+            str(context.workspace / "input" / "predictions.json"),
+            "--inspection-run-id-template",
+            run_id,
+            "--logs-root",
+            str(inspection_work_directory),
+            "--expression-set-id",
+            str(context.config.expression_set_id),
+            "--instance-workers",
+            str(context.config.inspection_instance_workers),
+            "--agent-workers",
+            str(context.config.inspection_agent_workers),
+            "--inspection-timeout",
+            str(context.config.inspection_timeout_seconds),
+            "--inspection-dataset-name",
+            context.config.dataset_name,
+            "--inspection-split",
+            context.config.inspection_split,
+            "--inspection-namespace",
+            context.config.inspection_namespace,
+            "--inspection-max-workers",
+            str(context.config.inspection_max_workers),
+            "--inspection-cache-level",
+            context.config.inspection_cache_level,
+            "--inspection-open-file-limit",
+            str(context.config.inspection_open_file_limit),
+            "--inspection-instance-image-tag",
+            context.config.inspection_instance_image_tag,
+            "--inspection-env-image-tag",
+            context.config.inspection_env_image_tag,
+            "--inspection-report-dir",
+            str(report_directory),
+            "--inspection-work-dir",
+            str(inspection_work_directory),
+            "--inspection-force-rebuild"
+            if context.config.inspection_force_rebuild
+            else "--no-inspection-force-rebuild",
+            "--inspection-clean"
+            if context.config.inspection_clean
+            else "--no-inspection-clean",
+            "--inspection-rewrite-reports"
+            if context.config.inspection_rewrite_reports
+            else "--no-inspection-rewrite-reports",
+            "--inspection-modal"
+            if context.config.inspection_modal
+            else "--no-inspection-modal",
+            "--no-process-gold",
+        ]
+        run_canonical_module(
+            BUILD_STEP3_MODULE,
+            arguments,
+            context,
+            timeout=context.config.inspection_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        inspection_root = (
+            inspection_work_directory
+            / "logs"
+            / "run_evaluation"
+            / run_id
+            / context.submission_id
+            / context.instance.instance_id
+        )
+        _require_trace_files(inspection_root, "buggy_traces")
+        _require_trace_files(inspection_root, "patched_traces")
+        manifest = build_artifact_manifest(
+            inspection_root,
+            relative_to=context.work_directory.parent,
+        )
+        result = StageResult.completed(
+            {
+                "instance_id": context.instance.instance_id,
+                "candidate_count": candidate_count,
+                "run_id": run_id,
+                "artifact_manifest": manifest.model_dump(mode="json"),
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        candidate_count = result.data.get("candidate_count")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError(
+                "expression execution result requires a nonempty instance_id"
+            )
+        if (
+            not isinstance(candidate_count, int)
+            or isinstance(candidate_count, bool)
+            or candidate_count < 0
+        ):
+            raise ValueError(
+                "expression execution candidate_count must be nonnegative"
+            )
+        if result.outcome == "skipped":
+            if candidate_count != 0:
+                raise ValueError(
+                    "skipped expression execution must have zero candidates"
+                )
+            if result.reason not in {
+                "candidate_inference_disabled",
+                "no_candidate_expressions",
+            }:
+                raise ValueError(
+                    "expression execution has an unknown skip reason"
+                )
+            return
+        if candidate_count == 0:
+            raise ValueError(
+                "completed expression execution requires candidates"
+            )
+        _validate_trace_artifact_result(result, label="expression inspection")
+
+
+class ValidateCandidateExpressionsRunner:
+    """Invoke canonical step 3 validation on saved inspection artifacts."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        candidate_result = context.upstream_results.get(
+            "generate-candidate-expressions"
+        )
+        execution_result = context.upstream_results.get(
+            "execute-candidate-expressions"
+        )
+        if candidate_result is None or execution_result is None:
+            raise StageExecutionError(
+                "validate-candidate-expressions requires candidate and "
+                "execution output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+        if execution_result.outcome == "skipped":
+            result = StageResult.skipped(
+                execution_result.reason or "no_candidate_expressions",
+                {
+                    "instance_id": context.instance.instance_id,
+                    "candidate_count": execution_result.data.get(
+                        "candidate_count", 0
+                    ),
+                },
+            )
+            self.validate_result(result.to_stored())
+            return result
+
+        candidates = candidate_result.data.get("candidates")
+        if not isinstance(candidates, dict):
+            raise StageExecutionError(
+                "candidate output is not a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        run_id = execution_result.data.get("run_id")
+        if not isinstance(run_id, str) or not run_id:
+            raise StageExecutionError(
+                "expression execution output has no run ID",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        execution_instance_directory = (
+            context.workspace
+            / "stages"
+            / "execute-candidate-expressions"
+            / "instances"
+            / context.instance.instance_id
+        )
+        try:
+            _, inspection_root = resolve_artifact_root(
+                execution_result.data.get("artifact_manifest"),
+                relative_to=execution_instance_directory,
+            )
+        except (TypeError, ValueError) as error:
+            raise StageExecutionError(
+                f"inspection artifact manifest is invalid: {error}",
+                category="canonical_output_invalid",
+                retryable=False,
+            ) from error
+        if not inspection_root.is_dir():
+            raise StageExecutionError(
+                f"inspection artifact root is missing: {inspection_root}",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        logs_root = inspection_root.parents[2]
+
+        step2_path = context.attempt_directory / "step2.json"
+        atomic_write_json(
+            step2_path,
+            {
+                context.submission_id: {
+                    context.instance.instance_id: candidates,
+                }
+            },
+        )
+        gold_step2_path = context.attempt_directory / "step2.gold.json"
+        atomic_write_json(gold_step2_path, {"gold": {}})
+        output_path = context.attempt_directory / "step3.json"
+        gold_output_path = context.attempt_directory / "step3.gold.json"
+        atomic_write_json(gold_output_path, {"gold": {}})
+
+        run_canonical_module(
+            BUILD_STEP3_MODULE,
+            (
+                "--validate",
+                "--agent",
+                context.submission_id,
+                "--instance-ids",
+                context.instance.instance_id,
+                "--step2-path",
+                str(step2_path),
+                "--gold-step2-path",
+                str(gold_step2_path),
+                "--output-path",
+                str(output_path),
+                "--gold-output-path",
+                str(gold_output_path),
+                "--predictions-path",
+                str(context.workspace / "input" / "predictions.json"),
+                "--inspection-run-id-template",
+                run_id,
+                "--logs-root",
+                str(logs_root),
+                "--expression-set-id",
+                str(context.config.expression_set_id),
+                "--instance-workers",
+                str(context.config.inspection_instance_workers),
+                "--agent-workers",
+                str(context.config.inspection_agent_workers),
+                "--no-process-gold",
+            ),
+            context,
+            timeout=context.config.inspection_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        payload = _read_json(output_path)
+        if not isinstance(payload, dict):
+            raise StageExecutionError(
+                "validated candidate output must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        agent_results = payload.get(context.submission_id)
+        if not isinstance(agent_results, dict):
+            raise StageExecutionError(
+                "validated candidate output lacks the submission ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        if context.instance.instance_id not in agent_results:
+            raise StageExecutionError(
+                "validated candidate output lacks the instance ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        validated = agent_results[context.instance.instance_id]
+        if validated is None:
+            raise StageExecutionError(
+                "canonical candidate validation returned null",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        if not isinstance(validated, dict):
+            raise StageExecutionError(
+                "validated candidate result must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        result = StageResult.completed(
+            {
+                "instance_id": context.instance.instance_id,
+                "validated_candidates": validated,
+            }
+        )
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError(
+                "candidate validation result requires a nonempty instance_id"
+            )
+        if result.outcome == "skipped":
+            if result.reason not in {
+                "candidate_inference_disabled",
+                "no_candidate_expressions",
+            }:
+                raise ValueError("candidate validation has an unknown skip reason")
+            if result.data.get("candidate_count") != 0:
+                raise ValueError(
+                    "skipped candidate validation must have zero candidates"
+                )
+            return
+
+        validated = result.data.get("validated_candidates")
+        if not isinstance(validated, dict):
+            raise ValueError("validated candidate result must be an object")
+        missing = sorted(CANDIDATE_REQUIRED_METADATA - validated.keys())
+        if missing:
+            raise ValueError(
+                "validated candidate result is missing metadata: "
+                + ", ".join(missing)
+            )
+        generated = []
+        for key in ("changed_candidates", "unchanged_candidates"):
+            values = validated.get(key)
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) and value.strip() for value in values
+            ):
+                raise ValueError(
+                    f"validated candidate {key} must contain strings"
+                )
+            generated.extend(values)
+        classified = {}
+        for key in (
+            "valid_changed_expressions",
+            "valid_unchanged_expressions",
+        ):
+            values = validated.get(key)
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) and value.strip() for value in values
+            ):
+                raise ValueError(
+                    f"validated candidate {key} must contain strings"
+                )
+            if len(values) != len(set(values)):
+                raise ValueError(
+                    f"validated candidate {key} must be unique"
+                )
+            classified[key] = values
+        overlap = set(classified["valid_changed_expressions"]) & set(
+            classified["valid_unchanged_expressions"]
+        )
+        if overlap:
+            raise ValueError(
+                "changed and unchanged expression classifications overlap"
+            )
+        if not set(classified["valid_changed_expressions"]).issubset(generated):
+            raise ValueError(
+                "changed expression classification was not generated"
+            )
+        if not set(classified["valid_unchanged_expressions"]).issubset(
+            generated
+        ):
+            raise ValueError(
+                "unchanged expression classification was not generated"
+            )

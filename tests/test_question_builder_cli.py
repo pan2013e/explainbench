@@ -114,6 +114,7 @@ def install_fake_identify(monkeypatch):
                                 "patched_lineno": 11,
                                 "buggy_line_count": 4,
                                 "patched_line_count": 4,
+                                "test_id": 0,
                                 "before_or_after": "before",
                                 "prompt_length_chars": 123,
                                 "function_code_before_patch": (
@@ -127,6 +128,47 @@ def install_fake_identify(monkeypatch):
                 ),
                 encoding="utf-8",
             )
+            return
+        if module == runners.BUILD_STEP3_MODULE:
+            if "--validate" in arguments:
+                step2 = json.loads(
+                    Path(option(arguments, "--step2-path")).read_text(
+                        encoding="utf-8"
+                    )
+                )
+                metadata = step2[context.submission_id][
+                    context.instance.instance_id
+                ]
+                Path(option(arguments, "--output-path")).write_text(
+                    json.dumps(
+                        {
+                            context.submission_id: {
+                                context.instance.instance_id: {
+                                    **metadata,
+                                    "valid_changed_expressions": ["value"],
+                                    "valid_unchanged_expressions": ["other"],
+                                }
+                            }
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                return
+            inspection_root = (
+                Path(option(arguments, "--inspection-work-dir"))
+                / "logs"
+                / "run_evaluation"
+                / option(arguments, "--inspection-run-id-template")
+                / context.submission_id
+                / context.instance.instance_id
+            )
+            for name in ("buggy_traces", "patched_traces"):
+                directory = inspection_root / name
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / "test.jsonl").write_text(
+                    "{}\n",
+                    encoding="utf-8",
+                )
             return
         if module == runners.SELECT_TRACE_FUNCTIONS_MODULE:
             Path(option(arguments, "--output-path")).write_text(
@@ -200,7 +242,7 @@ def test_pending_stage_fails_explicitly_and_status_is_inspectable(
 
     assert status == 0
     assert "Submission ID: test-agent" in status_output.out
-    assert "stage 'execute-candidate-expressions' is not yet connected" in (
+    assert "stage 'build-answer-choices' is not yet connected" in (
         status_output.out
     )
     assert "retryable=no" in status_output.out
@@ -268,6 +310,22 @@ candidate_generation_agent_workers = 3
 candidate_generation_reasoning_effort = "high"
 candidate_generation_model_retries = 6
 candidate_generation_command_timeout_seconds = 765
+expression_set_id = 7
+inspection_timeout_seconds = 543
+inspection_command_timeout_seconds = 987
+inspection_instance_workers = 2
+inspection_agent_workers = 3
+inspection_max_workers = 0
+inspection_force_rebuild = true
+inspection_cache_level = "env"
+inspection_clean = true
+inspection_open_file_limit = 4096
+inspection_rewrite_reports = false
+inspection_modal = false
+inspection_instance_image_tag = "latest"
+inspection_env_image_tag = "latest"
+inspection_split = "test"
+inspection_namespace = "swebench"
 
 [models]
 candidate_generation = "test-model"

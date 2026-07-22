@@ -1,6 +1,7 @@
 import json
 import sys
 
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -11,6 +12,7 @@ from explainbench.question_builders.common.orchestration import (
     StageExecutionError,
 )
 from explainbench.question_builders.common.subprocess_runner import run_command
+from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local import runners
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
@@ -607,6 +609,7 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
                                 "patched_lineno": 11,
                                 "buggy_line_count": 4,
                                 "patched_line_count": 4,
+                                "test_id": 0,
                                 "before_or_after": "before",
                                 "prompt_length_chars": 123,
                                 "function_code_before_patch": (
@@ -620,6 +623,48 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
                 ),
                 encoding="utf-8",
             )
+            return
+
+        if module == runners.BUILD_STEP3_MODULE:
+            if "--validate" in arguments:
+                step2 = json.loads(
+                    Path(
+                        _argument_value(arguments, "--step2-path")
+                    ).read_text(encoding="utf-8")
+                )
+                metadata = step2[context.submission_id][
+                    context.instance.instance_id
+                ]
+                Path(_argument_value(arguments, "--output-path")).write_text(
+                    json.dumps(
+                        {
+                            context.submission_id: {
+                                context.instance.instance_id: {
+                                    **metadata,
+                                    "valid_changed_expressions": ["value"],
+                                    "valid_unchanged_expressions": ["other"],
+                                }
+                            }
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                return
+            inspection_root = (
+                Path(_argument_value(arguments, "--inspection-work-dir"))
+                / "logs"
+                / "run_evaluation"
+                / _argument_value(arguments, "--inspection-run-id-template")
+                / context.submission_id
+                / context.instance.instance_id
+            )
+            for name in ("buggy_traces", "patched_traces"):
+                directory = inspection_root / name
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / "test.jsonl").write_text(
+                    '{"expr":["value","other"],"value":[1,2]}\n',
+                    encoding="utf-8",
+                )
             return
 
         assert module == runners.TRACE_PROGRAM_STATE_MODULE
@@ -654,6 +699,14 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         candidate_generation_model_retries=6,
         candidate_generation_command_timeout_seconds=765,
         candidate_generation_inference=True,
+        expression_set_id=7,
+        inspection_timeout_seconds=543,
+        inspection_command_timeout_seconds=987,
+        inspection_instance_workers=2,
+        inspection_agent_workers=3,
+        inspection_max_workers=0,
+        inspection_force_rebuild=True,
+        inspection_clean=True,
         trace_test_timeout_seconds=432,
         trace_command_timeout_seconds=876,
     )
@@ -789,3 +842,157 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         INSTANCE_ID,
     )
     assert result.data["candidates"]["changed_candidates"] == ["value"]
+
+    executed = run_local_stage(
+        "execute-candidate-expressions",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed_execution = run_local_stage(
+        "execute-candidate-expressions",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert executed.completed == 1
+    assert resumed_execution.reused == 1
+    execution_calls = [
+        item for item in calls if item[0] == runners.BUILD_STEP3_MODULE
+    ]
+    assert len(execution_calls) == 1
+    execution_arguments = execution_calls[0][1]
+    assert "--execute" in execution_arguments
+    assert "--no-process-gold" in execution_arguments
+    assert _argument_value(execution_arguments, "--expression-set-id") == "7"
+    assert _argument_value(execution_arguments, "--inspection-timeout") == "543"
+    assert _argument_value(execution_arguments, "--instance-workers") == "2"
+    assert _argument_value(execution_arguments, "--agent-workers") == "3"
+    assert "--inspection-force-rebuild" in execution_arguments
+    assert "--inspection-clean" in execution_arguments
+    assert execution_calls[0][2]["timeout"] == 987
+
+    result = workspace.read_result(
+        "execute-candidate-expressions",
+        INSTANCE_ID,
+    )
+    manifest = result.data["artifact_manifest"]
+    manifest_paths = {item["path"] for item in manifest["files"]}
+    assert manifest_paths == {
+        "buggy_traces/test.jsonl",
+        "patched_traces/test.jsonl",
+    }
+    execution_instance = (
+        config.workspace
+        / "stages"
+        / "execute-candidate-expressions"
+        / "instances"
+        / INSTANCE_ID
+    )
+    corrupt_path = (
+        execution_instance / manifest["root"] / manifest["files"][0]["path"]
+    )
+    corrupt_path.write_text("corrupt\n", encoding="utf-8")
+
+    rerun_execution = run_local_stage(
+        "execute-candidate-expressions",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert rerun_execution.completed == 1
+    execution_calls = [
+        item for item in calls if item[0] == runners.BUILD_STEP3_MODULE
+    ]
+    assert len(execution_calls) == 2
+
+    validated = run_local_stage(
+        "validate-candidate-expressions",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed_validation = run_local_stage(
+        "validate-candidate-expressions",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert validated.completed == 1
+    assert resumed_validation.reused == 1
+    validation_calls = [
+        item
+        for item in calls
+        if item[0] == runners.BUILD_STEP3_MODULE
+        and "--validate" in item[1]
+    ]
+    assert len(validation_calls) == 1
+    validation_arguments = validation_calls[0][1]
+    assert "--execute" not in validation_arguments
+    assert "--no-process-gold" in validation_arguments
+    assert _argument_value(validation_arguments, "--expression-set-id") == "7"
+    assert validation_calls[0][2]["timeout"] == 987
+    result = workspace.read_result(
+        "validate-candidate-expressions",
+        INSTANCE_ID,
+    )
+    assert result.data["validated_candidates"][
+        "valid_changed_expressions"
+    ] == ["value"]
+
+
+@pytest.mark.parametrize(
+    ("candidate_data", "expected_reason"),
+    [
+        ({}, "no_candidate_expressions"),
+        ({"prompt_length_chars": 123}, "candidate_inference_disabled"),
+        (
+            {
+                "changed_candidates": [],
+                "unchanged_candidates": [],
+            },
+            "no_candidate_expressions",
+        ),
+    ],
+)
+def test_expression_execution_skips_without_executable_candidates(
+    tmp_path,
+    candidate_data,
+    expected_reason,
+):
+    context = replace(
+        make_context(tmp_path),
+        upstream_results={
+            "generate-candidate-expressions": StoredStageResult(
+                outcome="completed",
+                data={
+                    "instance_id": INSTANCE_ID,
+                    "candidates": candidate_data,
+                    "inference": bool(candidate_data),
+                },
+            )
+        },
+    )
+
+    result = runners.ExecuteCandidateExpressionsRunner().run_instance(context)
+
+    assert result.outcome == "skipped"
+    assert result.reason == expected_reason
+    assert result.data["candidate_count"] == 0
+
+    validation_context = replace(
+        context,
+        upstream_results={
+            **context.upstream_results,
+            "execute-candidate-expressions": result.to_stored(),
+        },
+    )
+    validation = runners.ValidateCandidateExpressionsRunner().run_instance(
+        validation_context
+    )
+
+    assert validation.outcome == "skipped"
+    assert validation.reason == expected_reason

@@ -23,6 +23,22 @@ DEFAULT_CANDIDATE_GENERATION_AGENT_WORKERS = 1
 DEFAULT_CANDIDATE_GENERATION_REASONING_EFFORT = "medium"
 DEFAULT_CANDIDATE_GENERATION_MODEL_RETRIES = 5
 DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS = 3600
+DEFAULT_EXPRESSION_SET_ID = 0
+DEFAULT_INSPECTION_TIMEOUT_SECONDS = 3600
+DEFAULT_INSPECTION_COMMAND_TIMEOUT_SECONDS = 21600
+DEFAULT_INSPECTION_INSTANCE_WORKERS = 1
+DEFAULT_INSPECTION_AGENT_WORKERS = 1
+DEFAULT_INSPECTION_MAX_WORKERS = 0
+DEFAULT_INSPECTION_FORCE_REBUILD = False
+DEFAULT_INSPECTION_CACHE_LEVEL = "env"
+DEFAULT_INSPECTION_CLEAN = False
+DEFAULT_INSPECTION_OPEN_FILE_LIMIT = 4096
+DEFAULT_INSPECTION_REWRITE_REPORTS = False
+DEFAULT_INSPECTION_MODAL = False
+DEFAULT_INSPECTION_INSTANCE_IMAGE_TAG = "latest"
+DEFAULT_INSPECTION_ENV_IMAGE_TAG = "latest"
+DEFAULT_INSPECTION_SPLIT = "test"
+DEFAULT_INSPECTION_NAMESPACE = "swebench"
 DEFAULT_DATASET_NAME = "SWE-bench/SWE-bench_Verified"
 DEFAULT_REPOSITORY_REMOTE = "https://github.com"
 DEFAULT_IDENTIFY_TIMEOUT_SECONDS = 3600
@@ -81,6 +97,22 @@ class ExecutionFileConfig(StrictModel):
         default=None, ge=1
     )
     candidate_generation_reasoning_effort: str | None = None
+    expression_set_id: int | None = Field(default=None, ge=0)
+    inspection_timeout_seconds: int | None = Field(default=None, ge=1)
+    inspection_command_timeout_seconds: int | None = Field(default=None, ge=1)
+    inspection_instance_workers: int | None = Field(default=None, ge=1)
+    inspection_agent_workers: int | None = Field(default=None, ge=1)
+    inspection_max_workers: int | None = Field(default=None, ge=0)
+    inspection_force_rebuild: bool | None = None
+    inspection_cache_level: str | None = None
+    inspection_clean: bool | None = None
+    inspection_open_file_limit: int | None = Field(default=None, ge=1)
+    inspection_rewrite_reports: bool | None = None
+    inspection_modal: bool | None = None
+    inspection_instance_image_tag: str | None = None
+    inspection_env_image_tag: str | None = None
+    inspection_split: str | None = None
+    inspection_namespace: str | None = None
 
 
 class ModelsFileConfig(StrictModel):
@@ -185,6 +217,24 @@ class LocalBuilderConfig:
         DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS
     )
     candidate_generation_env_file: Path | None = None
+    expression_set_id: int = DEFAULT_EXPRESSION_SET_ID
+    inspection_timeout_seconds: int = DEFAULT_INSPECTION_TIMEOUT_SECONDS
+    inspection_command_timeout_seconds: int = (
+        DEFAULT_INSPECTION_COMMAND_TIMEOUT_SECONDS
+    )
+    inspection_instance_workers: int = DEFAULT_INSPECTION_INSTANCE_WORKERS
+    inspection_agent_workers: int = DEFAULT_INSPECTION_AGENT_WORKERS
+    inspection_max_workers: int = DEFAULT_INSPECTION_MAX_WORKERS
+    inspection_force_rebuild: bool = DEFAULT_INSPECTION_FORCE_REBUILD
+    inspection_cache_level: str = DEFAULT_INSPECTION_CACHE_LEVEL
+    inspection_clean: bool = DEFAULT_INSPECTION_CLEAN
+    inspection_open_file_limit: int = DEFAULT_INSPECTION_OPEN_FILE_LIMIT
+    inspection_rewrite_reports: bool = DEFAULT_INSPECTION_REWRITE_REPORTS
+    inspection_modal: bool = DEFAULT_INSPECTION_MODAL
+    inspection_instance_image_tag: str = DEFAULT_INSPECTION_INSTANCE_IMAGE_TAG
+    inspection_env_image_tag: str = DEFAULT_INSPECTION_ENV_IMAGE_TAG
+    inspection_split: str = DEFAULT_INSPECTION_SPLIT
+    inspection_namespace: str = DEFAULT_INSPECTION_NAMESPACE
 
 
 def _validation_message(error: ValidationError) -> str:
@@ -258,6 +308,22 @@ def resolve_local_builder_config(
     candidate_generation_model_retries: int | None = None,
     candidate_generation_command_timeout_seconds: int | None = None,
     candidate_generation_env_file: str | Path | None = None,
+    expression_set_id: int | None = None,
+    inspection_timeout_seconds: int | None = None,
+    inspection_command_timeout_seconds: int | None = None,
+    inspection_instance_workers: int | None = None,
+    inspection_agent_workers: int | None = None,
+    inspection_max_workers: int | None = None,
+    inspection_force_rebuild: bool | None = None,
+    inspection_cache_level: str | None = None,
+    inspection_clean: bool | None = None,
+    inspection_open_file_limit: int | None = None,
+    inspection_rewrite_reports: bool | None = None,
+    inspection_modal: bool | None = None,
+    inspection_instance_image_tag: str | None = None,
+    inspection_env_image_tag: str | None = None,
+    inspection_split: str | None = None,
+    inspection_namespace: str | None = None,
     repository_cache: str | Path | None = None,
     dataset_name: str | None = None,
     repository_remote: str | None = None,
@@ -387,6 +453,108 @@ def resolve_local_builder_config(
                 file_config.execution.candidate_generation_command_timeout_seconds,
                 DEFAULT_CANDIDATE_GENERATION_COMMAND_TIMEOUT_SECONDS,
             )
+        )
+        resolved_expression_set_id = int(
+            _pick(
+                expression_set_id,
+                file_config.execution.expression_set_id,
+                DEFAULT_EXPRESSION_SET_ID,
+            )
+        )
+        resolved_inspection_timeout = int(
+            _pick(
+                inspection_timeout_seconds,
+                file_config.execution.inspection_timeout_seconds,
+                DEFAULT_INSPECTION_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_inspection_command_timeout = int(
+            _pick(
+                inspection_command_timeout_seconds,
+                file_config.execution.inspection_command_timeout_seconds,
+                DEFAULT_INSPECTION_COMMAND_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_inspection_instance_workers = int(
+            _pick(
+                inspection_instance_workers,
+                file_config.execution.inspection_instance_workers,
+                DEFAULT_INSPECTION_INSTANCE_WORKERS,
+            )
+        )
+        resolved_inspection_agent_workers = int(
+            _pick(
+                inspection_agent_workers,
+                file_config.execution.inspection_agent_workers,
+                DEFAULT_INSPECTION_AGENT_WORKERS,
+            )
+        )
+        resolved_inspection_max_workers = int(
+            _pick(
+                inspection_max_workers,
+                file_config.execution.inspection_max_workers,
+                DEFAULT_INSPECTION_MAX_WORKERS,
+            )
+        )
+        resolved_inspection_force_rebuild = bool(
+            _pick(
+                inspection_force_rebuild,
+                file_config.execution.inspection_force_rebuild,
+                DEFAULT_INSPECTION_FORCE_REBUILD,
+            )
+        )
+        resolved_inspection_cache_level = _pick(
+            inspection_cache_level,
+            file_config.execution.inspection_cache_level,
+            DEFAULT_INSPECTION_CACHE_LEVEL,
+        )
+        resolved_inspection_clean = bool(
+            _pick(
+                inspection_clean,
+                file_config.execution.inspection_clean,
+                DEFAULT_INSPECTION_CLEAN,
+            )
+        )
+        resolved_inspection_open_file_limit = int(
+            _pick(
+                inspection_open_file_limit,
+                file_config.execution.inspection_open_file_limit,
+                DEFAULT_INSPECTION_OPEN_FILE_LIMIT,
+            )
+        )
+        resolved_inspection_rewrite_reports = bool(
+            _pick(
+                inspection_rewrite_reports,
+                file_config.execution.inspection_rewrite_reports,
+                DEFAULT_INSPECTION_REWRITE_REPORTS,
+            )
+        )
+        resolved_inspection_modal = bool(
+            _pick(
+                inspection_modal,
+                file_config.execution.inspection_modal,
+                DEFAULT_INSPECTION_MODAL,
+            )
+        )
+        resolved_inspection_instance_image_tag = _pick(
+            inspection_instance_image_tag,
+            file_config.execution.inspection_instance_image_tag,
+            DEFAULT_INSPECTION_INSTANCE_IMAGE_TAG,
+        )
+        resolved_inspection_env_image_tag = _pick(
+            inspection_env_image_tag,
+            file_config.execution.inspection_env_image_tag,
+            DEFAULT_INSPECTION_ENV_IMAGE_TAG,
+        )
+        resolved_inspection_split = _pick(
+            inspection_split,
+            file_config.execution.inspection_split,
+            DEFAULT_INSPECTION_SPLIT,
+        )
+        resolved_inspection_namespace = _pick(
+            inspection_namespace,
+            file_config.execution.inspection_namespace,
+            DEFAULT_INSPECTION_NAMESPACE,
         )
         resolved_dataset_name = _pick(
             dataset_name,
@@ -535,6 +703,41 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "candidate command timeout must be at least 1 second"
         )
+    if resolved_expression_set_id < 0:
+        raise LocalBuilderConfigError("expression set ID must be nonnegative")
+    if resolved_inspection_timeout < 1:
+        raise LocalBuilderConfigError(
+            "inspection timeout must be at least 1 second"
+        )
+    if resolved_inspection_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "inspection command timeout must be at least 1 second"
+        )
+    if resolved_inspection_instance_workers < 1:
+        raise LocalBuilderConfigError(
+            "inspection instance workers must be at least 1"
+        )
+    if resolved_inspection_agent_workers < 1:
+        raise LocalBuilderConfigError(
+            "inspection agent workers must be at least 1"
+        )
+    if resolved_inspection_max_workers < 0:
+        raise LocalBuilderConfigError(
+            "inspection max workers must be nonnegative"
+        )
+    if resolved_inspection_open_file_limit < 1:
+        raise LocalBuilderConfigError(
+            "inspection open file limit must be at least 1"
+        )
+    for label, value in (
+        ("inspection cache level", resolved_inspection_cache_level),
+        ("inspection instance image tag", resolved_inspection_instance_image_tag),
+        ("inspection env image tag", resolved_inspection_env_image_tag),
+        ("inspection split", resolved_inspection_split),
+        ("inspection namespace", resolved_inspection_namespace),
+    ):
+        if not isinstance(value, str) or not value.strip():
+            raise LocalBuilderConfigError(f"{label} must be a nonempty string")
     if (
         not isinstance(resolved_dataset_name, str)
         or not resolved_dataset_name.strip()
@@ -617,6 +820,22 @@ def resolve_local_builder_config(
             resolved_candidate_command_timeout
         ),
         candidate_generation_env_file=candidate_generation_env_path,
+        expression_set_id=resolved_expression_set_id,
+        inspection_timeout_seconds=resolved_inspection_timeout,
+        inspection_command_timeout_seconds=resolved_inspection_command_timeout,
+        inspection_instance_workers=resolved_inspection_instance_workers,
+        inspection_agent_workers=resolved_inspection_agent_workers,
+        inspection_max_workers=resolved_inspection_max_workers,
+        inspection_force_rebuild=resolved_inspection_force_rebuild,
+        inspection_cache_level=resolved_inspection_cache_level,
+        inspection_clean=resolved_inspection_clean,
+        inspection_open_file_limit=resolved_inspection_open_file_limit,
+        inspection_rewrite_reports=resolved_inspection_rewrite_reports,
+        inspection_modal=resolved_inspection_modal,
+        inspection_instance_image_tag=resolved_inspection_instance_image_tag,
+        inspection_env_image_tag=resolved_inspection_env_image_tag,
+        inspection_split=resolved_inspection_split,
+        inspection_namespace=resolved_inspection_namespace,
         repository_cache=repository_cache_path,
         dataset_name=resolved_dataset_name,
         repository_remote=resolved_repository_remote,

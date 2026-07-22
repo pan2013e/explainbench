@@ -269,6 +269,8 @@ def test_inspection_cli_dispatches_predictions_run_id_and_timeout(monkeypatch):
             "--clean",
             "--report-dir",
             "reports",
+            "--work-dir",
+            "inspection-work",
         ]
     )
 
@@ -280,6 +282,66 @@ def test_inspection_cli_dispatches_predictions_run_id_and_timeout(monkeypatch):
     assert captured["force_rebuild"] is True
     assert captured["clean"] is True
     assert captured["report_dir"] == Path("reports")
+    assert captured["work_dir"] == Path("inspection-work")
+
+
+def test_inspection_runs_harness_in_explicit_work_directory(
+    tmp_path,
+    monkeypatch,
+):
+    captured = {}
+    predictions = tmp_path / "predictions.json"
+    predictions.write_text("{}\n", encoding="utf-8")
+    work_dir = tmp_path / "inspection-work"
+    report_dir = tmp_path / "reports"
+    original_work_dir = Path.cwd()
+
+    monkeypatch.setattr(
+        inspect_cli,
+        "monkey_patch_execution",
+        lambda **kwargs: None,
+    )
+    monkeypatch.setattr(inspect_cli, "prepare_tracer", lambda: None)
+    monkeypatch.setattr(
+        inspect_cli,
+        "run_evaluation_main",
+        lambda **kwargs: captured.update(
+            {
+                "cwd": Path.cwd(),
+                "predictions_path": kwargs["predictions_path"],
+                "report_dir": kwargs["report_dir"],
+            }
+        ),
+    )
+    arguments = inspect_cli.build_parser().parse_args(
+        [
+            "--instance-id",
+            INSTANCE_ID,
+            "--agent",
+            AGENT,
+            "--bp-file",
+            "/testbed/example.py",
+            "--pre-bp-line",
+            "10",
+            "--post-bp-line",
+            "11",
+            "--expr",
+            "value",
+            "--predictions-path",
+            str(predictions),
+            "--report-dir",
+            str(report_dir),
+            "--work-dir",
+            str(work_dir),
+        ]
+    )
+
+    inspect_cli.inspect(**vars(arguments))
+
+    assert captured["cwd"] == work_dir.resolve()
+    assert captured["predictions_path"] == str(predictions.resolve())
+    assert captured["report_dir"] == str(report_dir.resolve())
+    assert Path.cwd() == original_work_dir
 
 
 def test_build_step_parsers_expose_a_consistent_single_agent_contract():
@@ -310,6 +372,8 @@ def test_build_step_parsers_expose_a_consistent_single_agent_contract():
             "--inspection-timeout",
             "789",
             "--inspection-clean",
+            "--inspection-work-dir",
+            "inspection-work",
         ]
     )
     step4 = build_step4.build_parser().parse_args(
@@ -327,6 +391,7 @@ def test_build_step_parsers_expose_a_consistent_single_agent_contract():
     assert step3.inspection_run_id_template == "inspect.{agent}.{expr_id}"
     assert step3.inspection_timeout == 789
     assert step3.inspection_clean is True
+    assert step3.inspection_work_dir == "inspection-work"
 
 
 def test_build_step3_requires_exactly_one_operation():

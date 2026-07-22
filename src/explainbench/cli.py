@@ -278,6 +278,85 @@ def _add_local_builder_run_options(
         help="dotenv credentials file for candidate-expression inference",
     )
     parser.add_argument(
+        "--expression-set-id",
+        type=int,
+        help="candidate-expression set identifier used during inspection",
+    )
+    parser.add_argument(
+        "--inspection-timeout",
+        type=int,
+        help="timeout in seconds for each in-container inspection run",
+    )
+    parser.add_argument(
+        "--inspection-command-timeout",
+        type=int,
+        help="timeout in seconds for the complete inspection command",
+    )
+    parser.add_argument(
+        "--inspection-instance-workers",
+        type=int,
+        help="worker processes used for inspection instances",
+    )
+    parser.add_argument(
+        "--inspection-agent-workers",
+        type=int,
+        help="worker threads used for inspection agents",
+    )
+    parser.add_argument(
+        "--inspection-max-workers",
+        type=int,
+        help="SWE-bench workers used by each inspection run",
+    )
+    parser.add_argument(
+        "--inspection-force-rebuild",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="force rebuilding SWE-bench inspection images",
+    )
+    parser.add_argument(
+        "--inspection-cache-level",
+        help="SWE-bench cache level for expression inspection",
+    )
+    parser.add_argument(
+        "--inspection-clean",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="clean inspection images after the run",
+    )
+    parser.add_argument(
+        "--inspection-open-file-limit",
+        type=int,
+        help="open file limit for expression inspection",
+    )
+    parser.add_argument(
+        "--inspection-rewrite-reports",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="rewrite SWE-bench inspection reports",
+    )
+    parser.add_argument(
+        "--inspection-modal",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="run expression inspection through Modal",
+    )
+    parser.add_argument(
+        "--inspection-instance-image-tag",
+        help="instance image tag used by expression inspection",
+    )
+    parser.add_argument(
+        "--inspection-env-image-tag",
+        help="environment image tag used by expression inspection",
+    )
+    parser.add_argument(
+        "--inspection-split",
+        help="dataset split used by expression inspection",
+    )
+    parser.add_argument(
+        "--inspection-namespace",
+        help="Docker namespace used by expression inspection",
+    )
+    parser.add_argument(
         "--repository-cache",
         type=Path,
         help="repository cache used by canonical local-effect stages",
@@ -531,6 +610,24 @@ def _resolved_local_builder_config(
             arguments.candidate_command_timeout
         ),
         candidate_generation_env_file=arguments.candidate_env_file,
+        expression_set_id=arguments.expression_set_id,
+        inspection_timeout_seconds=arguments.inspection_timeout,
+        inspection_command_timeout_seconds=(
+            arguments.inspection_command_timeout
+        ),
+        inspection_instance_workers=arguments.inspection_instance_workers,
+        inspection_agent_workers=arguments.inspection_agent_workers,
+        inspection_max_workers=arguments.inspection_max_workers,
+        inspection_force_rebuild=arguments.inspection_force_rebuild,
+        inspection_cache_level=arguments.inspection_cache_level,
+        inspection_clean=arguments.inspection_clean,
+        inspection_open_file_limit=arguments.inspection_open_file_limit,
+        inspection_rewrite_reports=arguments.inspection_rewrite_reports,
+        inspection_modal=arguments.inspection_modal,
+        inspection_instance_image_tag=arguments.inspection_instance_image_tag,
+        inspection_env_image_tag=arguments.inspection_env_image_tag,
+        inspection_split=arguments.inspection_split,
+        inspection_namespace=arguments.inspection_namespace,
         repository_cache=arguments.repository_cache,
         dataset_name=arguments.dataset_name,
         repository_remote=arguments.repository_remote,
