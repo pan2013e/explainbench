@@ -23,6 +23,14 @@ DEFAULT_TRACK_COMMAND_TIMEOUT_SECONDS = 4500
 DEFAULT_SELECT_TRACE_TIMEOUT_SECONDS = 1800
 DEFAULT_TRACE_TEST_TIMEOUT_SECONDS = 21600
 DEFAULT_TRACE_COMMAND_TIMEOUT_SECONDS = 45000
+DEFAULT_DIVERGENCE_DEPTH_THRESHOLD = 3
+DEFAULT_DIVERGENCE_TIMEOUT_SECONDS = 600
+DEFAULT_DIVERGENCE_COMMAND_TIMEOUT_SECONDS = 3600
+DEFAULT_DIVERGENCE_INSTANCE_WORKERS = 1
+DEFAULT_DIVERGENCE_AGENT_WORKERS = 1
+DEFAULT_DIVERGENCE_SIMPLIFY = True
+DEFAULT_DIVERGENCE_VARIABLE_MAX_DEPTH = 4
+DEFAULT_DIVERGENCE_PARAMETER_MAX_DEPTH = 3
 
 
 class LocalBuilderConfigError(ValueError):
@@ -38,6 +46,14 @@ class ExecutionFileConfig(StrictModel):
     select_trace_timeout_seconds: int | None = Field(default=None, ge=1)
     trace_test_timeout_seconds: int | None = Field(default=None, ge=1)
     trace_command_timeout_seconds: int | None = Field(default=None, ge=1)
+    divergence_depth_threshold: int | None = Field(default=None, ge=0)
+    divergence_timeout_seconds: int | None = Field(default=None, ge=1)
+    divergence_command_timeout_seconds: int | None = Field(default=None, ge=1)
+    divergence_instance_workers: int | None = Field(default=None, ge=1)
+    divergence_agent_workers: int | None = Field(default=None, ge=1)
+    divergence_simplify: bool | None = None
+    divergence_variable_max_depth: int | None = Field(default=None, ge=0)
+    divergence_parameter_max_depth: int | None = Field(default=None, ge=0)
 
 
 class ModelsFileConfig(StrictModel):
@@ -102,6 +118,16 @@ class LocalBuilderConfig:
     select_trace_timeout_seconds: int = DEFAULT_SELECT_TRACE_TIMEOUT_SECONDS
     trace_test_timeout_seconds: int = DEFAULT_TRACE_TEST_TIMEOUT_SECONDS
     trace_command_timeout_seconds: int = DEFAULT_TRACE_COMMAND_TIMEOUT_SECONDS
+    divergence_depth_threshold: int = DEFAULT_DIVERGENCE_DEPTH_THRESHOLD
+    divergence_timeout_seconds: int = DEFAULT_DIVERGENCE_TIMEOUT_SECONDS
+    divergence_command_timeout_seconds: int = (
+        DEFAULT_DIVERGENCE_COMMAND_TIMEOUT_SECONDS
+    )
+    divergence_instance_workers: int = DEFAULT_DIVERGENCE_INSTANCE_WORKERS
+    divergence_agent_workers: int = DEFAULT_DIVERGENCE_AGENT_WORKERS
+    divergence_simplify: bool = DEFAULT_DIVERGENCE_SIMPLIFY
+    divergence_variable_max_depth: int = DEFAULT_DIVERGENCE_VARIABLE_MAX_DEPTH
+    divergence_parameter_max_depth: int = DEFAULT_DIVERGENCE_PARAMETER_MAX_DEPTH
     source: Path | None = None
 
 
@@ -176,6 +202,14 @@ def resolve_local_builder_config(
     select_trace_timeout_seconds: int | None = None,
     trace_test_timeout_seconds: int | None = None,
     trace_command_timeout_seconds: int | None = None,
+    divergence_depth_threshold: int | None = None,
+    divergence_timeout_seconds: int | None = None,
+    divergence_command_timeout_seconds: int | None = None,
+    divergence_instance_workers: int | None = None,
+    divergence_agent_workers: int | None = None,
+    divergence_simplify: bool | None = None,
+    divergence_variable_max_depth: int | None = None,
+    divergence_parameter_max_depth: int | None = None,
     require_output: bool = False,
 ) -> LocalBuilderConfig:
     """Merge command-line overrides over config values and safe defaults."""
@@ -277,6 +311,62 @@ def resolve_local_builder_config(
                 DEFAULT_TRACE_COMMAND_TIMEOUT_SECONDS,
             )
         )
+        resolved_divergence_depth_threshold = int(
+            _pick(
+                divergence_depth_threshold,
+                file_config.execution.divergence_depth_threshold,
+                DEFAULT_DIVERGENCE_DEPTH_THRESHOLD,
+            )
+        )
+        resolved_divergence_timeout = int(
+            _pick(
+                divergence_timeout_seconds,
+                file_config.execution.divergence_timeout_seconds,
+                DEFAULT_DIVERGENCE_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_divergence_command_timeout = int(
+            _pick(
+                divergence_command_timeout_seconds,
+                file_config.execution.divergence_command_timeout_seconds,
+                DEFAULT_DIVERGENCE_COMMAND_TIMEOUT_SECONDS,
+            )
+        )
+        resolved_divergence_instance_workers = int(
+            _pick(
+                divergence_instance_workers,
+                file_config.execution.divergence_instance_workers,
+                DEFAULT_DIVERGENCE_INSTANCE_WORKERS,
+            )
+        )
+        resolved_divergence_agent_workers = int(
+            _pick(
+                divergence_agent_workers,
+                file_config.execution.divergence_agent_workers,
+                DEFAULT_DIVERGENCE_AGENT_WORKERS,
+            )
+        )
+        resolved_divergence_simplify = bool(
+            _pick(
+                divergence_simplify,
+                file_config.execution.divergence_simplify,
+                DEFAULT_DIVERGENCE_SIMPLIFY,
+            )
+        )
+        resolved_divergence_variable_max_depth = int(
+            _pick(
+                divergence_variable_max_depth,
+                file_config.execution.divergence_variable_max_depth,
+                DEFAULT_DIVERGENCE_VARIABLE_MAX_DEPTH,
+            )
+        )
+        resolved_divergence_parameter_max_depth = int(
+            _pick(
+                divergence_parameter_max_depth,
+                file_config.execution.divergence_parameter_max_depth,
+                DEFAULT_DIVERGENCE_PARAMETER_MAX_DEPTH,
+            )
+        )
     except (TypeError, ValueError) as error:
         raise LocalBuilderConfigError(str(error)) from error
     if resolved_workers < 1:
@@ -323,6 +413,34 @@ def resolve_local_builder_config(
         raise LocalBuilderConfigError(
             "trace command timeout must be at least 1 second"
         )
+    if resolved_divergence_depth_threshold < 0:
+        raise LocalBuilderConfigError(
+            "divergence depth threshold must be nonnegative"
+        )
+    if resolved_divergence_timeout < 1:
+        raise LocalBuilderConfigError(
+            "divergence timeout must be at least 1 second"
+        )
+    if resolved_divergence_command_timeout < 1:
+        raise LocalBuilderConfigError(
+            "divergence command timeout must be at least 1 second"
+        )
+    if resolved_divergence_instance_workers < 1:
+        raise LocalBuilderConfigError(
+            "divergence instance workers must be at least 1"
+        )
+    if resolved_divergence_agent_workers < 1:
+        raise LocalBuilderConfigError(
+            "divergence agent workers must be at least 1"
+        )
+    if resolved_divergence_variable_max_depth < 0:
+        raise LocalBuilderConfigError(
+            "divergence variable max depth must be nonnegative"
+        )
+    if resolved_divergence_parameter_max_depth < 0:
+        raise LocalBuilderConfigError(
+            "divergence parameter max depth must be nonnegative"
+        )
 
     return LocalBuilderConfig(
         workspace=workspace_path,
@@ -339,5 +457,13 @@ def resolve_local_builder_config(
         select_trace_timeout_seconds=resolved_select_trace_timeout,
         trace_test_timeout_seconds=resolved_trace_test_timeout,
         trace_command_timeout_seconds=resolved_trace_command_timeout,
+        divergence_depth_threshold=resolved_divergence_depth_threshold,
+        divergence_timeout_seconds=resolved_divergence_timeout,
+        divergence_command_timeout_seconds=resolved_divergence_command_timeout,
+        divergence_instance_workers=resolved_divergence_instance_workers,
+        divergence_agent_workers=resolved_divergence_agent_workers,
+        divergence_simplify=resolved_divergence_simplify,
+        divergence_variable_max_depth=resolved_divergence_variable_max_depth,
+        divergence_parameter_max_depth=resolved_divergence_parameter_max_depth,
         source=source,
     )

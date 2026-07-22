@@ -11,6 +11,7 @@ from explainbench.question_builders.common.orchestration import (
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local.config import LocalBuilderConfig
 from explainbench.question_builders.local.runners import (
+    FindFirstDivergenceRunner,
     IdentifyPatchedFunctionsRunner,
     SelectTraceFunctionsRunner,
     TraceProgramStateRunner,
@@ -89,6 +90,24 @@ def _trace_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
     }
 
 
+def _divergence_semantic(config: LocalBuilderConfig) -> dict[str, int | bool]:
+    return {
+        "depth_threshold": config.divergence_depth_threshold,
+        "simplify": config.divergence_simplify,
+        "variable_max_depth": config.divergence_variable_max_depth,
+        "parameter_max_depth": config.divergence_parameter_max_depth,
+    }
+
+
+def _divergence_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "timeout_seconds": config.divergence_timeout_seconds,
+        "command_timeout_seconds": config.divergence_command_timeout_seconds,
+        "instance_workers": config.divergence_instance_workers,
+        "agent_workers": config.divergence_agent_workers,
+    }
+
+
 def _stage(
     name: str,
     description: str,
@@ -148,10 +167,14 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             resource_inputs=_identify_resources,
             execution_inputs=_trace_execution,
         ),
-        _stage(
-            "find-first-divergence",
-            "locate the first useful state or control-flow difference",
-            "trace-program-state",
+        StageDefinition(
+            name="find-first-divergence",
+            description="locate the first useful state or control-flow difference",
+            dependencies=("trace-program-state",),
+            implementation_version="1-canonical-cli",
+            runner=FindFirstDivergenceRunner(),
+            semantic_inputs=_divergence_semantic,
+            execution_inputs=_divergence_execution,
         ),
         _stage(
             "generate-candidate-expressions",

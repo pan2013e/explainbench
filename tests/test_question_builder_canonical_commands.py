@@ -567,6 +567,32 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
             )
             return
 
+        if module == runners.BUILD_STEP1_MODULE:
+            Path(_argument_value(arguments, "--output-path")).write_text(
+                json.dumps(
+                    {
+                        context.submission_id: {
+                            context.instance.instance_id: {
+                                "file_path": "example.py",
+                                "function_name": "example:changed",
+                                "buggy_event_type": "Line",
+                                "patched_event_type": "Line",
+                                "buggy_statement": "return old",
+                                "patched_statement": "return new",
+                                "before_or_after": "before",
+                                "buggy_lineno": 10,
+                                "patched_lineno": 11,
+                                "diff": {"values_changed": {}},
+                                "buggy_variables": {},
+                                "patched_variables": {},
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return
+
         assert module == runners.TRACE_PROGRAM_STATE_MODULE
         allowed_functions = json.loads(
             Path(
@@ -654,3 +680,37 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         "trace-program-state",
         INSTANCE_ID,
     ).total_attempts == 2
+
+    divergence = run_local_stage(
+        "find-first-divergence",
+        submission,
+        config,
+        resume=True,
+    )
+    resumed_divergence = run_local_stage(
+        "find-first-divergence",
+        submission,
+        config,
+        resume=True,
+    )
+
+    assert divergence.completed == 1
+    assert resumed_divergence.reused == 1
+    divergence_calls = [
+        item for item in calls if item[0] == runners.BUILD_STEP1_MODULE
+    ]
+    assert len(divergence_calls) == 1
+    divergence_arguments = divergence_calls[0][1]
+    assert _argument_value(divergence_arguments, "--agent") == "test-agent"
+    assert _argument_value(divergence_arguments, "--instance-ids") == INSTANCE_ID
+    assert _argument_value(divergence_arguments, "--depth-threshold") == "3"
+    assert _argument_value(divergence_arguments, "--timeout") == "600"
+    assert _argument_value(divergence_arguments, "--instance-workers") == "1"
+    assert _argument_value(divergence_arguments, "--agent-workers") == "1"
+    assert _argument_value(divergence_arguments, "--variable-max-depth") == "4"
+    assert _argument_value(divergence_arguments, "--parameter-max-depth") == "3"
+    assert "--simplify" in divergence_arguments
+    assert divergence_calls[0][2]["timeout"] == 3600
+
+    result = workspace.read_result("find-first-divergence", INSTANCE_ID)
+    assert result.data["divergence"]["function_name"] == "example:changed"

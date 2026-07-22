@@ -275,6 +275,47 @@ def _add_local_builder_run_options(
         help="timeout in seconds for the complete detailed tracing command",
     )
     parser.add_argument(
+        "--divergence-depth-threshold",
+        type=int,
+        help="maximum serialized-state path depth retained for divergence",
+    )
+    parser.add_argument(
+        "--divergence-timeout",
+        type=int,
+        help="timeout in seconds for one divergence computation",
+    )
+    parser.add_argument(
+        "--divergence-command-timeout",
+        type=int,
+        help="timeout in seconds for the complete divergence command",
+    )
+    parser.add_argument(
+        "--divergence-instance-workers",
+        type=int,
+        help="worker processes used for instances in divergence computation",
+    )
+    parser.add_argument(
+        "--divergence-agent-workers",
+        type=int,
+        help="worker processes used for agents in divergence computation",
+    )
+    parser.add_argument(
+        "--divergence-simplify",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="simplify serialized variables and parameters",
+    )
+    parser.add_argument(
+        "--divergence-variable-max-depth",
+        type=int,
+        help="maximum variable serialization depth",
+    )
+    parser.add_argument(
+        "--divergence-parameter-max-depth",
+        type=int,
+        help="maximum function-parameter serialization depth",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="reuse compatible completed instance-stage checkpoints",
@@ -434,6 +475,14 @@ def _resolved_local_builder_config(
         select_trace_timeout_seconds=arguments.select_trace_timeout,
         trace_test_timeout_seconds=arguments.trace_test_timeout,
         trace_command_timeout_seconds=arguments.trace_command_timeout,
+        divergence_depth_threshold=arguments.divergence_depth_threshold,
+        divergence_timeout_seconds=arguments.divergence_timeout,
+        divergence_command_timeout_seconds=arguments.divergence_command_timeout,
+        divergence_instance_workers=arguments.divergence_instance_workers,
+        divergence_agent_workers=arguments.divergence_agent_workers,
+        divergence_simplify=arguments.divergence_simplify,
+        divergence_variable_max_depth=arguments.divergence_variable_max_depth,
+        divergence_parameter_max_depth=arguments.divergence_parameter_max_depth,
         require_output=require_output,
     )
 

@@ -34,6 +34,25 @@ SELECT_TRACE_FUNCTIONS_MODULE = (
     "trace_step2_generate_call_stack_whitelist"
 )
 TRACE_PROGRAM_STATE_MODULE = "execution.trace"
+BUILD_STEP1_MODULE = "dataset.extract_ground_truths.effect.build_step1"
+
+
+DIVERGENCE_REQUIRED_FIELDS = frozenset(
+    {
+        "file_path",
+        "function_name",
+        "buggy_event_type",
+        "patched_event_type",
+        "buggy_statement",
+        "patched_statement",
+        "before_or_after",
+        "buggy_lineno",
+        "patched_lineno",
+        "diff",
+        "buggy_variables",
+        "patched_variables",
+    }
+)
 
 
 def _read_json(path: Path) -> object:
@@ -488,3 +507,143 @@ class TraceProgramStateRunner:
 
     def validate_result(self, result: StoredStageResult) -> None:
         _validate_trace_artifact_result(result, label="detailed tracing")
+
+
+class FindFirstDivergenceRunner:
+    """Invoke canonical step 1 to locate the first trace divergence."""
+
+    def run_instance(self, context: StageContext) -> StageResult:
+        trace_result = context.upstream_results.get("trace-program-state")
+        if trace_result is None:
+            raise StageExecutionError(
+                "find-first-divergence requires trace-program-state output",
+                category="missing_upstream_result",
+                retryable=False,
+            )
+
+        trace_instance_directory = (
+            context.workspace
+            / "stages"
+            / "trace-program-state"
+            / "instances"
+            / context.instance.instance_id
+        )
+        try:
+            _, trace_root = resolve_artifact_root(
+                trace_result.data.get("artifact_manifest"),
+                relative_to=trace_instance_directory,
+            )
+        except (TypeError, ValueError) as error:
+            raise StageExecutionError(
+                f"detailed trace artifact manifest is invalid: {error}",
+                category="canonical_output_invalid",
+                retryable=False,
+            ) from error
+        if not trace_root.is_dir():
+            raise StageExecutionError(
+                f"detailed trace artifact root is missing: {trace_root}",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+
+        output_path = context.attempt_directory / "step1.json"
+        arguments = [
+            "--agent",
+            context.submission_id,
+            "--instance-ids",
+            context.instance.instance_id,
+            "--trace-root-template",
+            str(trace_root.parent),
+            "--output-path",
+            str(output_path),
+            "--depth-threshold",
+            str(context.config.divergence_depth_threshold),
+            "--timeout",
+            str(context.config.divergence_timeout_seconds),
+            "--instance-workers",
+            str(context.config.divergence_instance_workers),
+            "--agent-workers",
+            str(context.config.divergence_agent_workers),
+            "--variable-max-depth",
+            str(context.config.divergence_variable_max_depth),
+            "--parameter-max-depth",
+            str(context.config.divergence_parameter_max_depth),
+            "--simplify"
+            if context.config.divergence_simplify
+            else "--no-simplify",
+        ]
+        run_canonical_module(
+            BUILD_STEP1_MODULE,
+            arguments,
+            context,
+            timeout=context.config.divergence_command_timeout_seconds,
+            retryable_nonzero=True,
+        )
+
+        payload = _read_json(output_path)
+        if not isinstance(payload, dict):
+            raise StageExecutionError(
+                "divergence output must be a JSON object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+        agent_results = payload.get(context.submission_id)
+        if not isinstance(agent_results, dict):
+            raise StageExecutionError(
+                "divergence output does not contain the submission ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        if context.instance.instance_id not in agent_results:
+            raise StageExecutionError(
+                "divergence output does not contain the instance ID",
+                category="canonical_output_missing",
+                retryable=True,
+            )
+        divergence = agent_results[context.instance.instance_id]
+        if divergence is None:
+            raise StageExecutionError(
+                "canonical divergence computation returned null",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        if not isinstance(divergence, dict):
+            raise StageExecutionError(
+                "divergence result must be an object or an empty object",
+                category="canonical_output_invalid",
+                retryable=False,
+            )
+
+        result_data = {
+            "instance_id": context.instance.instance_id,
+            "divergence": divergence,
+        }
+        if not divergence:
+            result_data["fallback_reason"] = "no_usable_agent_divergence"
+        result = StageResult.completed(result_data)
+        self.validate_result(result.to_stored())
+        return result
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        instance_id = result.data.get("instance_id")
+        divergence = result.data.get("divergence")
+        if not isinstance(instance_id, str) or not instance_id:
+            raise ValueError(
+                "divergence result requires a nonempty instance_id"
+            )
+        if not isinstance(divergence, dict):
+            raise ValueError("divergence result must be an object")
+        if not divergence:
+            if result.data.get("fallback_reason") != (
+                "no_usable_agent_divergence"
+            ):
+                raise ValueError(
+                    "empty divergence result requires an explicit fallback"
+                )
+            return
+        missing = sorted(DIVERGENCE_REQUIRED_FIELDS - divergence.keys())
+        if missing:
+            raise ValueError(
+                "divergence result is missing required fields: "
+                + ", ".join(missing)
+            )
