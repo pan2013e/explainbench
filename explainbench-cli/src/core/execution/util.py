@@ -1,0 +1,446 @@
+import os
+import json
+import atexit
+import importlib.util
+import io
+import tarfile
+import datasets
+
+from functools import lru_cache
+from io import RawIOBase, BufferedReader
+from pathlib import PurePosixPath, Path
+from datasets import load_dataset
+from docker.models.containers import Container
+from tracer_plugin.django_plugin import FAIL_TO_PASS_TESTS as DJANGO_FAIL_TO_PASS_TESTS
+
+datasets.disable_progress_bars()
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+AGENT_PATCH_DIR = os.path.join(DIR, "../dataset/explanations/agent_patches")
+
+EXCLUDED_IDS = [
+    # Whatever reasons, the offical SWE-bench test harness (Release v4.1.0)
+    # reports failures on developer patches (without tracker/tracer injected)
+    # (Based on developer patches)
+    "astropy__astropy-7606",
+    "astropy__astropy-8707",
+    "astropy__astropy-8872",
+    "django__django-10097",
+    "psf__requests-1724",
+    "psf__requests-1766",
+    "psf__requests-1921",
+    "psf__requests-2317",
+    "pylint-dev__pylint-6528",
+    "pylint-dev__pylint-7277",
+    "sphinx-doc__sphinx-8595",
+    "sphinx-doc__sphinx-8621",
+    "sphinx-doc__sphinx-9711",
+    # Tests consume ~100% CPU resources, making concurrent
+    # tests/docker operations in other containers timeout
+    # (Based on developer patches)
+    "scikit-learn__scikit-learn-14710",
+    # For patched code, tests fail before test function is even reached
+    # In other words, call stack does not include test function
+    # (Based on developer and agent patches)
+    "django__django-11333",
+    "django__django-14011",
+    "django__django-14672",
+    "django__django-15375",
+    "django__django-15973",
+    "django__django-16116",
+    "django__django-16256",
+    "django__django-16315",
+    "pylint-dev__pylint-4551",
+    "pylint-dev__pylint-4604",
+    "pylint-dev__pylint-4661",
+    "pylint-dev__pylint-8898",
+    "sphinx-doc__sphinx-9602",
+    "sympy__sympy-14248",
+    # Intrusiveness of tracker/injection plugin 
+    # causes incorrect patched behavior (should pass, but failed)
+    # (Based on developer patches)
+    "astropy__astropy-13398",
+    "django__django-11276",
+    "pytest-dev__pytest-5631",
+    "pytest-dev__pytest-5787",
+    "pytest-dev__pytest-6197",
+    "pytest-dev__pytest-6202",
+    "sphinx-doc__sphinx-10435",
+    "sphinx-doc__sphinx-10614",
+    "sphinx-doc__sphinx-8120",
+    "sphinx-doc__sphinx-8721",
+    "sphinx-doc__sphinx-9229",
+    # Intrusiveness of tracer/serializer 
+    # causes incorrect patched behavior (should pass, but failed)
+    # (Based on developer patches)
+    "django__django-11066",
+    "django__django-11087",
+    "django__django-11211",
+    "django__django-11265",
+    "django__django-11734",
+    "django__django-11885",
+    "django__django-11951",
+    "django__django-12209",
+    "django__django-12419",
+    "django__django-12965",
+    "django__django-13028",
+    "django__django-13128",
+    "django__django-13158",
+    "django__django-13406",
+    "django__django-13590",
+    "django__django-13658",
+    "django__django-15128",
+    "django__django-15280",
+    "django__django-15554",
+    "django__django-15957",
+    "django__django-16032",
+    "django__django-16255",
+    "django__django-16263",
+    "matplotlib__matplotlib-14623",
+    "matplotlib__matplotlib-20488",
+    "matplotlib__matplotlib-23314",
+    "matplotlib__matplotlib-23412",
+    "matplotlib__matplotlib-24026",
+    "matplotlib__matplotlib-24149",
+    "matplotlib__matplotlib-24870",
+    "matplotlib__matplotlib-25311",
+    "matplotlib__matplotlib-25332",
+    "matplotlib__matplotlib-25775",
+    "matplotlib__matplotlib-26113",
+    "matplotlib__matplotlib-26342",
+    "matplotlib__matplotlib-26466",
+    "pytest-dev__pytest-8399",
+    "scikit-learn__scikit-learn-12682",
+    "sphinx-doc__sphinx-8056",
+    # Intrusiveness of tracer/serializer 
+    # causes incorrect buggy behavior (should fail, but passed)
+    # (Based on developer patches)
+    "django__django-14351",
+    # Intrusiveness of tracer/serializer 
+    # causes pipeline errors
+    # (Based on developer and agent patches)
+    "astropy__astropy-14539",
+    "django__django-7530",
+    "django__django-11095",
+    "django__django-11149",
+    "django__django-11400",
+    "django__django-11749",
+    "django__django-11790",
+    "django__django-12143",
+    "django__django-13297",
+    "django__django-13315",
+    "django__django-13417",
+    "django__django-14170",
+    "django__django-14608",
+    "django__django-16877",
+    "matplotlib__matplotlib-20826",
+    "matplotlib__matplotlib-20859",
+    # Timeout after reasonable time limit
+    # (Based on developer and agent patches)
+    "django__django-14559",
+    "django__django-15022",
+    "django__django-15814",
+    "django__django-16612",
+    "django__django-16631",
+    "pytest-dev__pytest-7205",
+    "pytest-dev__pytest-7571",
+    "pytest-dev__pytest-7982",
+    "pytest-dev__pytest-10081",
+    "sympy__sympy-15599",
+    "sympy__sympy-15976",
+    "sympy__sympy-19954",
+    # Custom test framework: Use of internal context manager 
+    # in `self.subTest` or `self.assertNumQueries`
+    # causes exceptions not raised in test functions
+    # (Based on developer patches)
+    "django__django-11451",
+    "django__django-11964",
+    "django__django-14315",
+    "django__django-14792",
+    "django__django-14999",
+    "django__django-15561",
+    "django__django-16429",
+    # Gigantic trace files, very high memory consumption
+    # (Based on developer patches)
+    "django__django-13401",
+    "django__django-14855",
+    "matplotlib__matplotlib-22871",
+    "sphinx-doc__sphinx-7590",
+    # (Based on agent patches)
+    "matplotlib__matplotlib-24177",
+    "pylint-dev__pylint-6903",
+    # Excluded due to the distance between 
+    # without-depth-filter and with-depth-filter
+    # is larger than 1 (not in the same function)
+    # (Based on developer patches)
+    "astropy__astropy-14182",
+    "django__django-11299",
+    "django__django-11740",
+    "django__django-12663",
+    "django__django-12754",
+    "django__django-13925",
+    "django__django-15732",
+    "django__django-15741",
+    "django__django-16145",
+    "django__django-16569",
+    "matplotlib__matplotlib-24627",
+    "matplotlib__matplotlib-25122",
+    "matplotlib__matplotlib-25287",
+    "matplotlib__matplotlib-25960",
+    "matplotlib__matplotlib-26291",
+    "mwaskom__seaborn-3069",
+    "mwaskom__seaborn-3187",
+    "psf__requests-2931",
+    "pydata__xarray-7229",
+    "scikit-learn__scikit-learn-13135",
+    "scikit-learn__scikit-learn-25747",
+    "sphinx-doc__sphinx-7440",
+    "sphinx-doc__sphinx-7757",
+    "sphinx-doc__sphinx-7985",
+    "sphinx-doc__sphinx-8459",
+    "sphinx-doc__sphinx-9461",
+    "sphinx-doc__sphinx-9591",
+    "sphinx-doc__sphinx-10449",
+    "sphinx-doc__sphinx-10673",
+    "sympy__sympy-24661",
+    # Function source code is unavailable at divergent line
+    # e.g., <lambda>, <listcomp>, <dictcomp>, <genexpr> and dynamically generated functions
+    # e.g., dynamically generated source code
+    # (Based on developer patches)
+    "django__django-11551",
+    "django__django-12039",
+    "django__django-16899",
+    "sympy__sympy-13647",
+    "sympy__sympy-20154",
+    # (Based on agent patches)
+    "django__django-13112",
+    "scikit-learn__scikit-learn-13779",
+    "scikit-learn__scikit-learn-14629",
+    "sympy__sympy-21379",
+    "sympy__sympy-21930",
+    "sympy__sympy-22456",
+    # Delta behavior is randomized or encoded
+    # (Based on developer patches)
+    "django__django-13279",
+    "django__django-13343",
+    "django__django-13551",
+    "django__django-15315",
+    "django__django-16801",
+    "pytest-dev__pytest-7236",
+    "pytest-dev__pytest-7432",
+    "pytest-dev__pytest-7490",
+    # (Based on agent patches)
+    "django__django-11555",
+    "django__django-11999",
+    "django__django-15629",
+    "django__django-16527",
+    "matplotlib__matplotlib-22719",
+    "psf__requests-5414",
+    "pylint-dev__pylint-6386",
+    "pytest-dev__pytest-5840",
+    ## timeout inspection
+    "django__django-11477",
+    "pydata__xarray-3305",
+    # Tracer/Inspector does not support async/multi-process functions
+    # (Based on developer patches)
+    "django__django-13810",
+    # Due to invalid expressions  OR n valid expressions is less than the required threshold(21 additional)
+    "django__django-10554",
+    "django__django-12273",
+    "django__django-12406",
+    "django__django-13033",
+    "django__django-14017",
+    "django__django-14053",
+    "django__django-14122",
+    "django__django-14155",
+    "django__django-15503",
+    "django__django-16333",
+    "matplotlib__matplotlib-23476",
+    "pydata__xarray-4966",
+    "pylint-dev__pylint-7080",
+    "scikit-learn__scikit-learn-14053",
+    "scikit-learn__scikit-learn-25102",
+    "sphinx-doc__sphinx-10466",
+    "sphinx-doc__sphinx-7462",
+    "sphinx-doc__sphinx-9230",
+    "sympy__sympy-15345",
+    "sympy__sympy-20428",
+    "sympy__sympy-21612",
+    ## THis is on gold
+    "django__django-16485",
+    "django__django-16938"
+]
+
+class _IterableReader(RawIOBase):
+    def __init__(self, iterable):
+        self._iter = iter(iterable)
+        self._leftover = b""
+    
+    def readable(self):
+        return True
+    
+    def readinto(self, b):
+        view = memoryview(b)
+        written = 0
+        while written < len(b):
+            if not self._leftover:
+                try:
+                    self._leftover = next(self._iter)
+                except StopIteration:
+                    break
+            n = min(len(self._leftover), len(b) - written)
+            view[written:written + n] = self._leftover[:n]
+            self._leftover = self._leftover[n:]
+            written += n
+            if written:
+                break
+        return written
+
+def get_tmp_tracer_path():
+    return f'/tmp/py-tracer.{os.getpid()}.tar'
+
+PY_TRACER_PROJECT = """\
+[project]
+name = "py-tracer"
+version = "0.1.0"
+dependencies = [
+    "jsonpickle",
+]
+
+[project.optional-dependencies]
+all = [
+    "pytest",
+    "pydantic",
+    "numpy",
+    "pandas",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["tracer", "tracer_plugin", "tracer.*", "tracer_plugin.*"]
+
+[project.entry-points.pytest11]
+tracer_plugin = "tracer_plugin.pytest_plugin"
+"""
+
+
+def _package_directory(package_name):
+    spec = importlib.util.find_spec(package_name)
+    if spec is None or spec.submodule_search_locations is None:
+        raise RuntimeError(f"Cannot locate installed package: {package_name}")
+    package_dir = Path(next(iter(spec.submodule_search_locations))).resolve()
+    if not package_dir.is_dir():
+        raise RuntimeError(
+            f"Installed package directory does not exist: {package_dir}"
+        )
+    return package_dir
+
+
+def _exclude_generated_files(tar_info):
+    path = PurePosixPath(tar_info.name)
+    if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+        return None
+    return tar_info
+
+
+def _add_text_to_tar(tar, archive_path, content):
+    data = content.encode("utf-8")
+    tar_info = tarfile.TarInfo(archive_path)
+    tar_info.size = len(data)
+    tar_info.mode = 0o644
+    tar.addfile(tar_info, io.BytesIO(data))
+
+
+def prepare_tracer():
+    tmp_dir = get_tmp_tracer_path()
+    if os.path.exists(tmp_dir):
+        try:
+            os.unlink(tmp_dir)
+        except Exception:
+            pass
+    with tarfile.open(tmp_dir, 'w') as tar:
+        tar.add(
+            _package_directory("tracer"),
+            arcname="py-tracer/tracer",
+            filter=_exclude_generated_files,
+        )
+        tar.add(
+            _package_directory("tracer_plugin"),
+            arcname="py-tracer/tracer_plugin",
+            filter=_exclude_generated_files,
+        )
+        _add_text_to_tar(
+            tar,
+            "py-tracer/pyproject.toml",
+            PY_TRACER_PROJECT,
+        )
+    atexit.register(lambda: os.unlink(tmp_dir) if os.path.exists(tmp_dir) else None)
+
+def copy_directory_from_docker(container: Container, src_path: PurePosixPath, dst_path: Path):
+    target_path = dst_path / src_path.name
+    target_path.mkdir(parents=True, exist_ok=True)
+    exec_result = container.exec_run(
+        ["tar", "-C", str(src_path), "-czf", "-", "."],
+        stream=True,
+    )
+    reader = BufferedReader(_IterableReader(exec_result.output))
+    with tarfile.open(fileobj=reader, mode="r|gz") as tar:
+        tar.extractall(path=target_path)
+
+@lru_cache
+def get_swebench_dataset():
+    """Load benchmark records only when a command needs dataset contents."""
+
+    return load_dataset("SWE-bench/SWE-bench_Verified", split="test")
+
+
+@lru_cache
+def get_fail_to_pass_tests(instance_id: str) -> list[str] | str:
+    # Patch the errors in SWE-bench dataset
+    if instance_id == "sphinx-doc__sphinx-8265":
+        return ["tests/test_pycode_ast.py::test_unparse[(1, 2, 3)-(1, 2, 3)]"]
+    if 'django__django' in instance_id:
+        return DJANGO_FAIL_TO_PASS_TESTS[instance_id]
+    swebench = get_swebench_dataset()
+    instance = swebench.filter(lambda x: x['instance_id'] == instance_id)[0]
+    return json.loads(instance['FAIL_TO_PASS'])
+
+@lru_cache
+def get_test_patch(instance_id: str) -> str:
+    swebench = get_swebench_dataset()
+    instance = swebench.filter(lambda x: x['instance_id'] == instance_id)[0]
+    return instance['test_patch'] or ""
+
+def get_instance_ids(value: list[str], apply_exclusions=True) -> list[str]:
+    if value == ["all"]:
+        return all_instances(apply_exclusions=apply_exclusions)
+    if all('__' not in v and '-' not in v for v in value):
+        return instances_by_repo(value, apply_exclusions=apply_exclusions)
+    return value
+
+def all_instances(apply_exclusions=True):
+    exclusion = EXCLUDED_IDS if apply_exclusions else []
+    return [
+        data['instance_id']
+        for data in get_swebench_dataset()
+        if data['instance_id'] not in exclusion
+    ]
+
+def instances_by_repo(repo_name: str | list[str], apply_exclusions=True):
+    if isinstance(repo_name, str):
+        repo_name = [repo_name]
+    exclusion = EXCLUDED_IDS if apply_exclusions else []
+    return [
+        data['instance_id']
+        for data in get_swebench_dataset()
+        if any(rn in data['repo'] for rn in repo_name)
+        and data['instance_id'] not in exclusion
+    ]
+
+def get_predictions_path(agent: str):
+    if agent == "gold":
+        return "gold"
+    return os.path.join(AGENT_PATCH_DIR, f"{agent}.json")

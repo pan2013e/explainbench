@@ -1,0 +1,24 @@
+schema_version = 1
+
+[selection]
+mode = "lite"
+
+[evaluator]
+model = "gpt-5-mini-2025-08-07"
+# The package default is 5. This runnable example uses 1 to limit API cost.
+num_generations = 1
+instance_workers = 10
+generation_workers = 10
+temperature = 1.0
+top_p = 1.0
+max_tokens = 8192
+max_retries = 5
+
+[paths]
+# Config paths are resolved relative to this file.
+output = "../results/lite-example.json"
+
+# Export provider credentials in your shell. Alternatively, uncomment this
+# section and create examples/.env before running the command.
+# [environment]
+# env_file = ".env"

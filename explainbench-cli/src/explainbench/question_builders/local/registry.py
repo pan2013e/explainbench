@@ -1,0 +1,334 @@
+"""Named stage registry for the local-effect question-builder pipeline."""
+
+from __future__ import annotations
+
+from explainbench.question_builders.common.orchestration import (
+    StageContext,
+    StageDefinition,
+    StageExecutionError,
+    StageRegistry,
+)
+from explainbench.question_builders.common.status import StoredStageResult
+from explainbench.question_builders.local.config import LocalBuilderConfig
+from explainbench.question_builders.local.runners import (
+    BuildAnswerChoicesRunner,
+    ExecuteCandidateExpressionsRunner,
+    ExportQuestionArtifactsRunner,
+    GenerateCandidateExpressionsRunner,
+    FindFirstDivergenceRunner,
+    IdentifyPatchedFunctionsRunner,
+    SelectTraceFunctionsRunner,
+    TraceProgramStateRunner,
+    TrackTestCallsRunner,
+    ValidateCandidateExpressionsRunner,
+)
+
+
+def _choice_semantic(config: LocalBuilderConfig) -> dict[str, int | float]:
+    return {
+        "correct_count": config.choice_correct_count,
+        "incorrect_count": config.choice_incorrect_count,
+        "minimum_changed": config.choice_minimum_changed,
+        "minimum_unchanged": config.choice_minimum_unchanged,
+        "mmr_weight": config.choice_mmr_weight,
+        "random_seed": config.choice_random_seed,
+    }
+
+
+def _choice_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "agent_workers": config.choice_agent_workers,
+        "command_timeout_seconds": config.choice_command_timeout_seconds,
+    }
+
+
+def _export_semantic(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "parameter_max_characters": config.export_parameter_max_characters,
+    }
+
+
+def _export_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"command_timeout_seconds": config.export_command_timeout_seconds}
+
+
+class UnconnectedStageRunner:
+    """Explicit placeholder until a canonical stage command is connected."""
+
+    def __init__(self, stage_name: str) -> None:
+        self.stage_name = stage_name
+
+    def run_instance(self, context: StageContext):
+        raise StageExecutionError(
+            f"stage {self.stage_name!r} is not yet connected to its "
+            "canonical command",
+            category="stage_not_connected",
+            retryable=False,
+        )
+
+    def validate_result(self, result: StoredStageResult) -> None:
+        if not isinstance(result.data, dict):
+            raise ValueError("stage result data must be an object")
+
+
+def _candidate_semantic(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool]:
+    return {
+        "model": config.candidate_generation_model,
+        "changed_candidates": config.candidate_generation_changed_candidates,
+        "unchanged_candidates": (
+            config.candidate_generation_unchanged_candidates
+        ),
+        "inference": config.candidate_generation_inference,
+        "reasoning_effort": config.candidate_generation_reasoning_effort,
+    }
+
+
+def _candidate_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool | None]:
+    return {
+        "command_timeout_seconds": (
+            config.candidate_generation_command_timeout_seconds
+        ),
+        "instance_workers": config.candidate_generation_instance_workers,
+        "agent_workers": config.candidate_generation_agent_workers,
+        "model_retries": config.candidate_generation_model_retries,
+        "env_file": (
+            str(config.candidate_generation_env_file)
+            if config.candidate_generation_env_file is not None
+            else None
+        ),
+    }
+
+
+def _inspection_semantic(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"expression_set_id": config.expression_set_id}
+
+
+def _inspection_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, str | int | bool]:
+    return {
+        "timeout_seconds": config.inspection_timeout_seconds,
+        "command_timeout_seconds": config.inspection_command_timeout_seconds,
+        "instance_workers": config.inspection_instance_workers,
+        "agent_workers": config.inspection_agent_workers,
+        "harness_workers": config.inspection_max_workers,
+        "force_rebuild": config.inspection_force_rebuild,
+        "cache_level": config.inspection_cache_level,
+        "clean": config.inspection_clean,
+        "open_file_limit": config.inspection_open_file_limit,
+        "rewrite_reports": config.inspection_rewrite_reports,
+        "modal": config.inspection_modal,
+        "instance_image_tag": config.inspection_instance_image_tag,
+        "env_image_tag": config.inspection_env_image_tag,
+        "split": config.inspection_split,
+        "namespace": config.inspection_namespace,
+    }
+
+
+def _candidate_validation_execution(
+    config: LocalBuilderConfig,
+) -> dict[str, int]:
+    return {
+        "command_timeout_seconds": config.inspection_command_timeout_seconds,
+        "instance_workers": config.inspection_instance_workers,
+        "agent_workers": config.inspection_agent_workers,
+    }
+
+
+def _identify_resources(config: LocalBuilderConfig) -> dict[str, str]:
+    return {"dataset_name": config.dataset_name}
+
+
+def _identify_execution(config: LocalBuilderConfig) -> dict[str, str | int]:
+    return {
+        "repository_cache": str(
+            config.repository_cache or config.workspace / "repositories"
+        ),
+        "repository_remote": config.repository_remote,
+        "timeout_seconds": config.identify_timeout_seconds,
+    }
+
+
+def _track_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
+    return {
+        "test_timeout_seconds": config.track_test_timeout_seconds,
+        "command_timeout_seconds": config.track_command_timeout_seconds,
+        "harness_workers": 1,
+        "cache_level": "env",
+        "force_rebuild": False,
+        "clean": False,
+        "open_file_limit": 4096,
+        "namespace": "swebench",
+        "instance_image_tag": "latest",
+        "env_image_tag": "latest",
+    }
+
+
+def _select_trace_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {"timeout_seconds": config.select_trace_timeout_seconds}
+
+
+def _trace_execution(config: LocalBuilderConfig) -> dict[str, str | int | bool]:
+    return {
+        "test_timeout_seconds": config.trace_test_timeout_seconds,
+        "command_timeout_seconds": config.trace_command_timeout_seconds,
+        "harness_workers": 1,
+        "cache_level": "env",
+        "force_rebuild": False,
+        "clean": False,
+        "open_file_limit": 4096,
+        "namespace": "swebench",
+        "instance_image_tag": "latest",
+        "env_image_tag": "latest",
+    }
+
+
+def _divergence_semantic(config: LocalBuilderConfig) -> dict[str, int | bool]:
+    return {
+        "depth_threshold": config.divergence_depth_threshold,
+        "simplify": config.divergence_simplify,
+        "variable_max_depth": config.divergence_variable_max_depth,
+        "parameter_max_depth": config.divergence_parameter_max_depth,
+    }
+
+
+def _divergence_execution(config: LocalBuilderConfig) -> dict[str, int]:
+    return {
+        "timeout_seconds": config.divergence_timeout_seconds,
+        "command_timeout_seconds": config.divergence_command_timeout_seconds,
+        "instance_workers": config.divergence_instance_workers,
+        "agent_workers": config.divergence_agent_workers,
+    }
+
+
+def _stage(
+    name: str,
+    description: str,
+    dependency: str | None,
+    *,
+    semantic_inputs=None,
+) -> StageDefinition:
+    return StageDefinition(
+        name=name,
+        description=description,
+        dependencies=() if dependency is None else (dependency,),
+        implementation_version="0-pending-migration",
+        runner=UnconnectedStageRunner(name),
+        **({} if semantic_inputs is None else {"semantic_inputs": semantic_inputs}),
+    )
+
+
+LOCAL_STAGE_REGISTRY = StageRegistry(
+    [
+        StageDefinition(
+            name="identify-patched-functions",
+            description="find Python functions changed by the submitted patch",
+            dependencies=(),
+            implementation_version="1-canonical-cli",
+            runner=IdentifyPatchedFunctionsRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_identify_execution,
+        ),
+        StageDefinition(
+            name="track-test-calls",
+            description="run relevant tests with lightweight call tracking",
+            dependencies=("identify-patched-functions",),
+            implementation_version="1-canonical-cli",
+            runner=TrackTestCallsRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_track_execution,
+        ),
+        StageDefinition(
+            name="select-trace-functions",
+            description=(
+                "select functions for detailed tracing from observed call paths"
+            ),
+            dependencies=(
+                "identify-patched-functions",
+                "track-test-calls",
+            ),
+            implementation_version="1-canonical-cli",
+            runner=SelectTraceFunctionsRunner(),
+            execution_inputs=_select_trace_execution,
+        ),
+        StageDefinition(
+            name="trace-program-state",
+            description="record detailed buggy and patched program state",
+            dependencies=("select-trace-functions",),
+            implementation_version="1-canonical-cli",
+            runner=TraceProgramStateRunner(),
+            resource_inputs=_identify_resources,
+            execution_inputs=_trace_execution,
+        ),
+        StageDefinition(
+            name="find-first-divergence",
+            description="locate the first useful state or control-flow difference",
+            dependencies=("trace-program-state",),
+            implementation_version="1-canonical-cli",
+            runner=FindFirstDivergenceRunner(),
+            semantic_inputs=_divergence_semantic,
+            execution_inputs=_divergence_execution,
+        ),
+        StageDefinition(
+            name="generate-candidate-expressions",
+            description="generate expressions that may or may not change",
+            dependencies=("find-first-divergence",),
+            implementation_version="1-canonical-cli",
+            runner=GenerateCandidateExpressionsRunner(),
+            semantic_inputs=_candidate_semantic,
+            execution_inputs=_candidate_execution,
+        ),
+        StageDefinition(
+            name="execute-candidate-expressions",
+            description=(
+                "evaluate candidate expressions in buggy and patched executions"
+            ),
+            dependencies=("generate-candidate-expressions",),
+            implementation_version="1-canonical-cli",
+            runner=ExecuteCandidateExpressionsRunner(),
+            semantic_inputs=_inspection_semantic,
+            resource_inputs=_identify_resources,
+            execution_inputs=_inspection_execution,
+        ),
+        StageDefinition(
+            name="validate-candidate-expressions",
+            description=(
+                "classify candidate expressions from their recorded values"
+            ),
+            dependencies=(
+                "generate-candidate-expressions",
+                "execute-candidate-expressions",
+            ),
+            implementation_version="1-canonical-cli",
+            runner=ValidateCandidateExpressionsRunner(),
+            semantic_inputs=_inspection_semantic,
+            execution_inputs=_candidate_validation_execution,
+        ),
+        StageDefinition(
+            name="build-answer-choices",
+            description="select and shuffle the final answer choices",
+            dependencies=("validate-candidate-expressions",),
+            implementation_version="1-canonical-cli",
+            runner=BuildAnswerChoicesRunner(),
+            semantic_inputs=_choice_semantic,
+            execution_inputs=_choice_execution,
+            accepts_skipped_dependencies=True,
+        ),
+        StageDefinition(
+            name="export-question-artifacts",
+            description=(
+                "write evaluator-compatible context and ground truth artifacts"
+            ),
+            dependencies=("build-answer-choices",),
+            implementation_version="1-canonical-cli",
+            runner=ExportQuestionArtifactsRunner(),
+            semantic_inputs=_export_semantic,
+            execution_inputs=_export_execution,
+            accepts_skipped_dependencies=True,
+        ),
+    ]
+)

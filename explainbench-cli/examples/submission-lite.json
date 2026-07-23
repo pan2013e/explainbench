@@ -1,0 +1,17 @@
+{
+  "submission_id": "example-openhands-gpt-5-mini",
+  "instances": [
+    {
+      "instance_id": "pydata__xarray-6744",
+      "explanation": "I implemented a fix to ensure DataArrayRolling iteration respects the center argument. Changed xarray/core/rolling.py (DataArrayRolling.__iter__) to compute start/stop indices using center logic (half_left/half_right) when center=True; left the non-centered behavior unchanged. Ran the rolling tests and the dedicated iteration test; all passing. See the assistant response for full details and commands used."
+    },
+    {
+      "instance_id": "sympy__sympy-15349",
+      "explanation": "I fixed the sign error in Quaternion.to_rotation_matrix (sympy/algebras/quaternion.py). Change: m12 = 2*s*(q.c*q.d + q.b*q.a) -> m12 = 2*s*(q.c*q.d - q.b*q.a). Committed as: 7a210a452. I ran local verification (using the repository copy) to confirm Quaternion(cos(x/2), sin(x/2), 0, 0) now yields the expected rotation matrix with one sin negative. See conversation for details and commands to run full tests."
+    },
+    {
+      "instance_id": "sympy__sympy-20801",
+      "explanation": "I implemented a minimal fix to make Boolean ↔ Number (Float) equality symmetric for the 0.0/False case. I updated sympy/logic/boolalg.py (added a __eq__ in BooleanAtom that delegates Number comparisons to the Number side). I tested locally by importing the edited local package and verifying that S(0.0) == S.false and S.false == S(0.0) are both True while S(0) == S.false remains False. See my detailed step-by-step report in the assistant message."
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[project]
+name = "explainbench"
+version = "0.1.0"
+description = "Command-line package for ExplainBench"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "backoff == 2.2.1",
+    "datasets == 4.2.0",
+    "deepdiff == 8.6.1",
+    "docker == 7.1.0",
+    "dowhen == 0.1.0",
+    "joblib == 1.5.2",
+    "jsonpickle",
+    "litellm == 1.80.11",
+    "numpy == 2.3.3",
+    "orjson == 3.11.3",
+    "pandas == 2.3.2",
+    "pydantic == 2.11.9",
+    "python-dotenv == 1.1.1",
+    "swebench == 4.1.0",
+    "tqdm == 4.67.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest >= 8.4, < 10",
+]
+
+[project.scripts]
+explainbench = "explainbench.cli:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = false
+packages = [
+    "dataset",
+    "dataset.extract_ground_truths",
+    "dataset.extract_ground_truths.effect",
+    "evaluation",
+    "execution",
+    "execution.monkey_patch",
+    "explainbench",
+    "explainbench.evaluation",
+    "explainbench.question_builders",
+    "explainbench.question_builders.common",
+    "explainbench.question_builders.local",
+    "tracer",
+    "tracer.serializer",
+    "tracer.serializer.ext",
+    "tracer_plugin",
+]
+
+[tool.setuptools.package-dir]
+dataset = "src/core/dataset"
+evaluation = "src/core/evaluation"
+execution = "src/core/execution"
+explainbench = "src/explainbench"
+tracer = "src/core/tracer"
+"tracer.serializer" = "src/core/tracer/serializer"
+"tracer.serializer.ext" = "src/core/tracer/serializer/ext"
+tracer_plugin = "src/core/tracer_plugin"
+
+[tool.setuptools.package-data]
+"dataset.extract_ground_truths.effect" = [
+    "prompts/template.txt",
+]
+execution = [
+    "allowed_functions.json",
+    "allowed_qualnames.json",
+]
+explainbench = [
+    "data/*.json",
+    "data/context/*.json",
+    "data/ground_truths/*.json",
+]
+
+[project.entry-points.pytest11]
+tracer_plugin = "tracer_plugin.pytest_plugin"
+
+[tool.pytest.ini_options]
+addopts = "-p no:tracer_plugin"
+testpaths = ["tests"]
+markers = [
+    "clean_wheel: isolated installed-wheel integration tests",
+    "real_local_effect: opt-in local-effect tests that use real SWE-bench execution",
+]
