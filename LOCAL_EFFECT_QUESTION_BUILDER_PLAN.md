@@ -629,13 +629,13 @@ The comparison will check the instance ID, function, divergence location, effect
 
 | ID | Scenario | Real input | Expected outcome | Status |
 |---|---|---|---|---|
-| `S01` | Validate the primary submission. | `R1` | `checker` accepts the submission, preserves the patch, and reports one valid instance. | Not started |
-| `S02` | Run patched-function identification alone. | `R1` | The checkpoint names `sympy/algebras/quaternion.py` and `Quaternion.to_rotation_matrix`, and resume reuses it. | Not started |
-| `S03` | Run lightweight test-call tracking. | `R1` | Buggy and patched tracking logs are present, nonempty, checksummed, and reusable. | Not started |
-| `S04` | Select detailed trace functions. | `R1` | The selected whitelist is nonempty, includes the relevant call path, and is stable on resume. | Not started |
-| `S05` | Run detailed buggy and patched tracing. | `R1` | Both trace sets are present, nonempty, checksummed, and reusable. | Not started |
-| `S06` | Find the first useful divergence. | `R1` | The result identifies a useful state or control-flow difference related to the quaternion rotation change. | Not started |
-| `S07` | Run candidate generation with inference disabled. | `R1` | The prompt and metadata are durable, execution is skipped with `candidate_inference_disabled`, and no model API is called. | Not started |
+| `S01` | Validate the primary submission. | `R1` | `checker` accepts the submission, preserves the patch, and reports one valid instance. | Automated test implemented, not run |
+| `S02` | Run patched-function identification alone. | `R1` | The checkpoint names `sympy/algebras/quaternion.py` and `Quaternion.to_rotation_matrix`, and resume reuses it. | Automated test implemented, not run |
+| `S03` | Run lightweight test-call tracking. | `R1` | Buggy and patched tracking logs are present, nonempty, checksummed, and reusable. | Automated test implemented, not run |
+| `S04` | Select detailed trace functions. | `R1` | The selected whitelist is nonempty, includes the relevant call path, and is stable on resume. | Automated test implemented, not run |
+| `S05` | Run detailed buggy and patched tracing. | `R1` | Both trace sets are present, nonempty, checksummed, and reusable. | Automated test implemented, not run |
+| `S06` | Find the first useful divergence. | `R1` | The result identifies a useful state or control-flow difference related to the quaternion rotation change. | Automated test implemented, not run |
+| `S07` | Run candidate generation with inference disabled. | `R1` | The prompt and metadata are durable, execution is skipped with `candidate_inference_disabled`, and no model API is called. | Automated test implemented, not run |
 | `S08` | Run model-backed candidate generation. | `R1` | Changed and unchanged candidate lists are nonempty, validated, and checkpointed before later paid work begins. | Not started |
 | `S09` | Execute and validate candidate expressions. | `R1` | Buggy and patched inspection logs are checksummed, and usable expressions are classified without overlap. | Not started |
 | `S10` | Build choices and export artifacts. | `R1` | The context and ground-truth pair passes the evaluator artifact loader and the public output points to one complete immutable generation. | Not started |
@@ -665,6 +665,9 @@ The comparison will check the instance ID, function, divergence location, effect
 6. Run `S21` through `S25` for fallback, multi-instance, validation, and publication edge cases.
 
 ### First real test sequence
+
+The automated implementation is in `tests/real_local_effect/test_s01_s07_real_pipeline.py`.
+The run instructions and evidence locations are in `tests/real_local_effect/README.md`.
 
 The first sequence uses the following fixed input and workspace:
 
