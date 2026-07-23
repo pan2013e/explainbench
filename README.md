@@ -1,10 +1,12 @@
 # Documentation for Replication Package
 
-This replication package is shared privately for double anonymous review. 
+This replication package is shared privately for double anonymous review.
 
 ## ExplainBench package CLI
 
-After installing the package from the repository or a built wheel, validate a submission with:
+[PACKAGE_HANDOFF.md](PACKAGE_HANDOFF.md) is the current information source for package architecture, implementation status, known gaps, and next work.
+
+After installing the package, validate a submission with:
 
 ```bash
 explainbench checker submission.json
@@ -105,13 +107,16 @@ explainbench evaluate examples/submission-lite.json \
 
 ### Runnable full example
 
-The repository also includes a one-instance full-mode example derived from the existing `20250807_mini-v1.7.0_gpt-5-mini` artifacts. It demonstrates the exact directory contract that `question-builder` will eventually produce:
+The repository also includes a one-instance full-mode example derived from the existing `20250807_mini-v1.7.0_gpt-5-mini` artifacts.
+It demonstrates the directory contract that the evaluator consumes.
+The local question builder now produces the local-effect pair when it runs from the repository.
+The end-to-end effect pair is still staged because the end-to-end question builder is not implemented.
 
 - [`examples/submission-full.json`](examples/submission-full.json)
 - [`examples/evaluation-full.toml`](examples/evaluation-full.toml)
 - [`examples/question-artifacts`](examples/question-artifacts)
 
-Run all four question types—local/end-to-end intent and effect—with:
+Run all four question types, which are local and end-to-end intent and effect:
 
 ```bash
 explainbench checker examples/submission-full.json
@@ -200,7 +205,7 @@ See `dataset/explanations/README.md`.
 
 Note that PBT generation is expensive. If you would like to skip PBT generation, go to step 5.
 
-1. Setup `pbt-generator` submodule. 
+1. Set up the `pbt-generator` submodule.
 2. Setup AutoCodeRover as described in pbt-generator/README.md.
 3. In the `pbt-generator` directory, run the command below to generate PBTs. (\<SWE-bench-path\> is described in pbt-generator/README.md.)
 ```bash
@@ -231,8 +236,24 @@ python -m execution.pbt.patch_runner \
 
 #### Local questions
 
-1. Run `pip install -e py-tracer[all]`
-2. Run the canonical commands in order. Every command now accepts explicit submission, instance, input, output, worker, and run-path options; the example below shows one agent and one instance.
+1. Run `pip install -e py-tracer[all]`.
+2. Use the package command to run the complete local-effect pipeline:
+
+```bash
+explainbench question-builder local run submission.json \
+    --workspace .explainbench/builds/AGENT_ID \
+    --output question-artifacts \
+    --resume
+```
+
+The local question builder currently requires the repository checkout.
+The built wheel contains the package wrappers but does not contain the canonical modules under `dataset` and `execution`.
+See [PACKAGE_HANDOFF.md](PACKAGE_HANDOFF.md) for the verified status and package blocker.
+
+The canonical commands below remain available for research reproduction and stage-level debugging.
+Every command accepts explicit submission, instance, input, output, worker, and run-path options.
+The example below shows one agent and one instance.
+
 ```bash
 python -m dataset.extract_ground_truths.effect.trace_step1_generate_qualname_whitelist \
     --agent AGENT_ID \
