@@ -236,6 +236,66 @@ Verification:
 - The stage marks the dedicated persistence failure as non-retryable.
 - Real S07 prompt preparation passed with inference disabled.
 
+## Complete real-workflow verification
+
+Phase 11 ran the complete local-effect workflow for `sympy__sympy-15349`.
+The run used the installed editable package and the retained real-test workspace.
+
+Verification:
+
+- The five existing Docker preparation stages reused their compatible checkpoints.
+- Candidate generation requested 10 changed expressions and 10 unchanged expressions.
+- Candidate generation used `gpt-5.2-2025-12-11` with medium reasoning effort.
+- The audit journal stored one 15,105-byte prompt and one 731-byte raw response.
+- Candidate execution, validation, answer-choice construction, and artifact publication completed.
+- The published files loaded as one typed `LocalEffectContext` and one typed `AnswerGroundTruth`.
+- One `local.effect` evaluation completed with `gpt-5-mini-2025-08-07`.
+- The evaluator processed one instance with no failure and produced a score of 1.
+- A repeated complete builder command reported `reused=1` for all ten stages.
+- The repeated command did not make another candidate-generation request.
+
+The first Phase 11 candidate command exposed a module-resolution conflict.
+The child process loaded the research repository's stale top-level `dataset` package instead of the installed package.
+The failure occurred before any model request.
+
+The package wrapper now starts canonical Python modules with safe-path mode.
+This prevents the current directory from shadowing installed canonical packages.
+The change affects module resolution only.
+It does not change canonical scientific logic or relative data paths.
+A regression test covers the package-shadowing case.
+
+## Release preparation verification
+
+Phase 12 confirmed these package metadata values:
+
+- Distribution name: `explainbench`.
+- Version: `0.1.0`.
+- Author: `explainbench-team`.
+- Author email: `imamnurby@gmail.com`.
+- Homepage: `https://explainbench.github.io`.
+
+The remaining direct dependency without an exact version was `jsonpickle`.
+It is now pinned to the locked version `4.1.2`.
+
+Three GitHub Actions workflows are present:
+
+- Fast tests for pushes and pull requests.
+- Isolated wheel-smoke tests for pushes and pull requests.
+- Manual unpaid real local-effect validation with Docker.
+
+Verification:
+
+- The exact fast-CI command reported 142 passed and 7 skipped.
+- The exact wheel-smoke command reported 4 passed.
+- The complete local suite reported 146 passed and 7 skipped.
+- The provisional wheel contains 113 files.
+- It contains all expected packages, resources, and entry points.
+- It contains no tests, examples, logs, results, caches, or build directories.
+- Its SHA-256 is `197f08c3f9201fa38093aceaafc9d775f57a20f7c079d376fe3541c0a9e94a9b`.
+
+The license decision remains deferred until the separate repository is initialized.
+The new workflows have not run in that separate repository.
+
 ## Ownership and synchronization
 
 After extraction, the `explainbench-cli` repository is the source of truth for future packaged core changes.
