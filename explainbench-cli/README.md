@@ -32,6 +32,83 @@ python -m pip install -e .
 python -m pip install "pytest>=8.4,<10"
 ```
 
+## Usage
+
+The CLI provides commands to validate submissions, evaluate explanations, and build local-effect question artifacts.
+Run `explainbench --help` or add `--help` after a subcommand to see all available options.
+
+### Validate a submission
+
+Check the structure and contents of a submission JSON file:
+
+```bash
+explainbench checker submission.json
+```
+
+You can validate the bundled lite example without making model requests:
+
+```bash
+explainbench checker examples/submission-lite.json
+```
+
+### Evaluate explanations
+
+Export the API credentials required by the model provider before you start an evaluation.
+The bundled lite configuration evaluates the two intent tasks and writes the results under `results/`:
+
+```bash
+explainbench evaluate examples/submission-lite.json \
+  --config examples/evaluation-lite.toml
+```
+
+This command makes paid model requests.
+To select settings directly on the command line, use:
+
+```bash
+explainbench evaluate submission.json \
+  --mode lite \
+  --model MODEL_NAME \
+  --num-generations 5 \
+  --output results.json
+```
+
+Full evaluation also requires submission-specific question artifacts:
+
+```bash
+explainbench evaluate submission.json \
+  --mode full \
+  --model MODEL_NAME \
+  --artifacts-dir question-artifacts \
+  --output results.json
+```
+
+Add `--resume` to reuse compatible completed work after an interrupted evaluation.
+
+### Build local-effect questions
+
+List the available construction stages:
+
+```bash
+explainbench question-builder local stages
+```
+
+Run the complete local-effect pipeline:
+
+```bash
+explainbench question-builder local run submission.json \
+  --workspace .explainbench/builds/my-agent \
+  --output question-artifacts \
+  --resume
+```
+
+The builder stores checkpoints, traces, and logs in the workspace directory.
+Use the status command to inspect its progress:
+
+```bash
+explainbench question-builder local status \
+  --workspace .explainbench/builds/my-agent
+```
+
 ## Repository model
 
 The source tree separates the CLI wrapper from the copied core modules:
