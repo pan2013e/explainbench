@@ -9,7 +9,7 @@ ExplainBench changes this. ExplainBench evaluates whether coding agent explanati
 
 ## Explanations from Coding Agents
 
-As coding agents take on larger tasks, their trajectories can include repository inspection, code edits, tool calls, and test execution. Reviewing every step to understand what an agent ranges from time-consuming to practically impossible. To make their work easier to review, coding agents usually provide a final explanation summarizing the task. Like a handoff from another developer, this explanation may describe what caused the bug, what changed, why the change should work, and what was tested. It can help users understand a patch quickly and decide where to focus their review.
+As coding agents take on larger tasks, their trajectories can include repository inspection, code edits, tool calls, and test execution. Reviewing every agent step to understand what an agent did ranges from time-consuming when it made small changes, to practically impossible when it autonomously changed thousands of lines. To make their work easier to review, coding agents usually provide a final explanation summarizing the task. Like a handoff from another developer, this explanation may describe what caused the bug, what changed, why the change should work, and what was tested. It can help users understand a patch quickly and decide where to focus their review.
 
 But how well do these explanations reflect what the patch actually does?
 
