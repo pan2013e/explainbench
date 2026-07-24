@@ -1,0 +1,36 @@
+name: Wheel smoke tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  wheel-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.31"
+          enable-cache: true
+
+      - name: Install locked development dependencies
+        run: uv sync --locked --dev
+
+      - name: Test an isolated installed wheel
+        run: uv run pytest tests/clean_wheel -ra

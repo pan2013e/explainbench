@@ -374,7 +374,7 @@ A phase is complete only when all required checks and acceptance criteria pass.
 | 9 | Run unpaid real validation | `complete` | Real scenarios `S01` through `S07` complete. |
 | 10 | Add paid-work persistence | `complete` | Raw prompts and responses are durable and resumable. |
 | 11 | Complete one real local-effect workflow | `complete` | A generated local-effect artifact was evaluated successfully. |
-| 12 | Prepare release and handoff | `not_started` | Release metadata, documentation, CI, and ownership are complete. |
+| 12 | Prepare release and handoff | `in_progress` | Technical release checks pass, and owner metadata remains open. |
 
 ## Phase 0: Confirm extraction decisions
 
@@ -775,40 +775,40 @@ Status: `complete`.
 
 ## Phase 12: Prepare release and handoff
 
-Status: `not_started`.
+Status: `in_progress`.
 
 ### Tasks
 
-- [ ] Add package description.
-- [ ] Add README metadata.
+- [x] Add package description.
+- [x] Add README metadata.
 - [ ] Add license metadata.
-- [ ] Add authors.
-- [ ] Add project URLs.
-- [ ] Review the distribution name.
-- [ ] Review the package version.
-- [ ] Review exact dependency pins.
-- [ ] Document optional dependencies.
-- [ ] Document Docker requirements.
-- [ ] Document disk requirements.
-- [ ] Document network requirements.
-- [ ] Document model credentials.
-- [ ] Document expected runtime.
-- [ ] Document generated-file cleanup.
-- [ ] Add fast CI.
-- [ ] Add wheel-smoke CI.
-- [ ] Add opt-in real Docker CI or a manual workflow.
-- [ ] Update `PACKAGE_HANDOFF.md`.
-- [ ] Record source ownership and synchronization rules.
-- [ ] Build the release candidate.
-- [ ] Inspect the release candidate wheel.
+- [x] Add authors.
+- [x] Add project URLs.
+- [x] Review the distribution name.
+- [x] Review the package version.
+- [x] Review exact dependency pins.
+- [x] Document optional dependencies.
+- [x] Document Docker requirements.
+- [x] Document disk requirements.
+- [x] Document network requirements.
+- [x] Document model credentials.
+- [x] Document expected runtime.
+- [x] Document generated-file cleanup.
+- [x] Add fast CI.
+- [x] Add wheel-smoke CI.
+- [x] Add opt-in real Docker CI or a manual workflow.
+- [x] Update `PACKAGE_HANDOFF.md`.
+- [x] Record source ownership and synchronization rules.
+- [x] Build the release candidate.
+- [x] Inspect the release candidate wheel.
 
 ### Acceptance criteria
 
-- [ ] A colleague can install and test the package from the documentation.
+- [x] A colleague can install and test the package from the documentation.
 - [ ] The release candidate passes all required CI checks.
-- [ ] The wheel contains only intended files.
+- [x] The wheel contains only intended files.
 - [ ] The package has a clear license and owner.
-- [ ] The copied core has one documented source of truth.
+- [x] The copied core has one documented source of truth.
 
 ## Migration manifest
 
@@ -821,11 +821,11 @@ Status: `not_started`.
 | Selected `execution` files | `src/core/execution` | Copy local-effect execution files and resources. | [x] |
 | `py-tracer/tracer` | `src/core/tracer` | Copy unchanged. | [x] |
 | `py-tracer/tracer_plugin` | `src/core/tracer_plugin` | Copy unchanged. | [x] |
-| Package tests | `tests` | Copy and update source-path checks. | [ ] |
-| Tracer tests | `tests/tracer` | Copy and preserve behavior assertions. | [ ] |
+| Package tests | `tests` | Copy and update source-path checks. | [x] |
+| Tracer tests | `tests/tracer_tests` | Copy and preserve behavior assertions. | [x] |
 | Package examples | `examples` | Copy the listed small examples. | [x] |
-| `PACKAGE_HANDOFF.md` | `PACKAGE_HANDOFF.md` | Copy and update repository context. | [ ] |
-| `README.md` | `README.md` | Rewrite for package installation and use. | [ ] |
+| `PACKAGE_HANDOFF.md` | `PACKAGE_HANDOFF.md` | Copy and update repository context. | [x] |
+| `README.md` | `README.md` | Rewrite for package installation and use. | [x] |
 
 ## Exclusion manifest
 
@@ -845,35 +845,35 @@ Status: `not_started`.
 
 | Capability | Source baseline | New source tree | Clean wheel | Real external run |
 |---|---:|---:|---:|---:|
-| CLI help | Pass | [ ] | [ ] | Not required |
-| Submission checker | Pass | [ ] | [ ] | [ ] |
-| Shared intent loading | Pass | [ ] | [ ] | Not required |
-| Mocked lite evaluation | Pass | [ ] | [ ] | Not required |
-| Mocked full evaluation | Pass | [ ] | [ ] | Not required |
-| Local stage listing | Pass | [ ] | [ ] | Not required |
-| Patched-function identification | Pass in repository | [ ] | [ ] | [ ] |
-| Docker call tracking | Not completed | [ ] | [ ] | [ ] |
-| Docker detailed tracing | Not completed | [ ] | [ ] | [ ] |
-| Divergence detection | Not completed on current real case | [ ] | [ ] | [ ] |
-| Prompt-only candidate preparation | Not completed on current real case | [ ] | [ ] | [ ] |
-| Paid candidate generation | Not validated | [ ] | [ ] | [ ] |
-| Expression inspection | Not validated | [ ] | [ ] | [ ] |
-| Artifact publication | Fast-test only | [ ] | [ ] | [ ] |
-| Generated artifact evaluation | Not validated | [ ] | [ ] | [ ] |
-| Resume after interruption | Fast-test only | [ ] | [ ] | [ ] |
+| CLI help | Pass | Pass | Pass | Not required |
+| Submission checker | Pass | Pass | Pass | Pass |
+| Shared intent loading | Pass | Pass | Pass | Not required |
+| Mocked lite evaluation | Pass | Pass | Pass | Not required |
+| Mocked full evaluation | Pass | Pass | Not tested | Not required |
+| Local stage listing | Pass | Pass | Pass | Not required |
+| Patched-function identification | Pass in repository | Pass | Pass | Pass |
+| Docker call tracking | Not completed | Pass | Not tested | Pass |
+| Docker detailed tracing | Not completed | Pass | Not tested | Pass |
+| Divergence detection | Not completed on current real case | Pass | Not tested | Pass |
+| Prompt-only candidate preparation | Not completed on current real case | Pass | Not tested | Pass |
+| Paid candidate generation | Not validated | Pass | Not tested | Pass |
+| Expression inspection | Not validated | Pass | Not tested | Pass |
+| Artifact publication | Fast-test only | Pass | Not tested | Pass |
+| Generated artifact evaluation | Not validated | Pass | Not tested | Pass |
+| Resume after interruption | Fast-test only | Pass | Not tested | Not tested |
 
 ## Risk register
 
 | Risk | Impact | Mitigation | Status |
 |---|---|---|---|
-| Copied core diverges from the research repository | Scientific behavior can differ between repositories. | Select one owner and document one synchronization direction. | Open |
+| Copied core diverges from the research repository | Scientific behavior can differ between repositories. | Select one owner and document one synchronization direction. | Closed |
 | A required transitive module is omitted | Clean-wheel imports fail. | Add import and wheel-content tests for every canonical stage. | Open |
-| A non-Python resource is omitted | A stage fails after installation. | Maintain the required resource manifest and inspect the wheel. | Open |
+| A non-Python resource is omitted | A stage fails after installation. | Maintain the required resource manifest and inspect the wheel. | Closed |
 | A repository-relative path remains | A command works only from a checkout. | Run every clean-wheel test outside the source directory. | Open |
-| The `core` directory becomes an import namespace | Existing imports break. | Do not add `src/core/__init__.py`; use explicit package mappings. | Open |
-| Tracer plugin registration changes | Docker test execution can change. | Preserve and test the pytest entry point. | Open |
+| The `core` directory becomes an import namespace | Existing imports break. | Do not add `src/core/__init__.py`; use explicit package mappings. | Closed |
+| Tracer plugin registration changes | Docker test execution can change. | Preserve and test the pytest entry point. | Closed |
 | Licenses are incompatible or incomplete | Distribution cannot be released safely. | Resolve licensing before copying core into a release branch. | Open |
-| Historical data enters the wheel | The wheel becomes large and submission-specific. | Use explicit package and resource manifests. | Open |
+| Historical data enters the wheel | The wheel becomes large and submission-specific. | Use explicit package and resource manifests. | Closed |
 | Test assertions are weakened during relocation | Behavior changes can be hidden. | Permit path-only test changes and review all assertion changes. | Open |
 | Paid inference runs before durability exists | Model work can be lost or repeated. | Complete Phase 10 before Phase 11. | Closed |
 
@@ -1199,6 +1199,41 @@ Retain the real builder workspace, model audit, published artifact generation, a
 
 Next action: Prepare release metadata, documentation, automation, and the release candidate in Phase 12.
 
+Date: 2026-07-24.
+
+Phase: 12.
+
+Completed: Added a release-focused package description.
+Pinned the remaining unpinned direct dependency, `jsonpickle`, to the locked version `4.1.2`.
+Documented Docker, disk, network, credentials, runtime, optional target libraries, generated data, and cleanup requirements.
+Added fast-test, wheel-smoke, and manual unpaid real-Docker GitHub Actions workflows.
+Updated the package handoff with current release status and removed completed Phase 11 gaps.
+Built and inspected the provisional `0.1.0` wheel.
+
+Checks: All three workflow files passed YAML parsing.
+The locked installation command completed.
+The exact fast-CI command reported 142 passed and 7 skipped.
+The exact wheel-smoke command reported 4 passed.
+The complete local suite remains 146 passed and 7 skipped.
+The wheel contains 113 files and has SHA-256 `197f08c3f9201fa38093aceaafc9d775f57a20f7c079d376fe3541c0a9e94a9b`.
+The wheel contains the expected `dataset`, `evaluation`, `execution`, `explainbench`, `tracer`, and `tracer_plugin` packages.
+It contains the expected resources, console entry point, and pytest entry point.
+It contains no tests, examples, logs, results, generated caches, or build directories.
+
+Problems: The license decision remains deferred.
+The workflows cannot run on GitHub until `explainbench-cli` becomes the root of its separate repository.
+The manual Docker workflow has not run on a GitHub-hosted runner.
+
+Decisions: Use `explainbench` as the distribution name and `0.1.0` as the first version.
+Use `explainbench-team` and `imamnurby@gmail.com` as the package author.
+Use `https://explainbench.github.io` as the project homepage.
+Keep direct runtime dependencies exact for the current application-style release.
+Keep model-backed tests out of CI.
+Use a manual unpaid workflow for real Docker validation.
+Keep license work deferred until repository initialization, as requested by the owner.
+
+Next action: Initialize the separate repository, add the license, and run the new workflows.
+
 ## Progress log template
 
 Add one entry after each work session:
@@ -1239,4 +1274,6 @@ Phase 10 is complete.
 
 Phase 11 is complete.
 
-Prepare the release and handoff in Phase 12.
+Phase 12 is in progress.
+
+Add the deferred license and run CI from the separate repository.

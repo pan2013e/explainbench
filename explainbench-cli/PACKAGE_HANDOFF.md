@@ -583,22 +583,89 @@ Another process must create or stage this pair.
 Do not describe full evaluation support as full question-builder support.
 These are separate package capabilities.
 
+## Release requirements
+
+The checker works without Docker, network access, or model credentials.
+Evaluation requires access to the configured model provider.
+The bundled evaluation configurations use OpenAI models and read `OPENAI_API_KEY`.
+
+The complete local-effect builder requires:
+
+- Python 3.12 or later.
+- A working Docker service.
+- Access to the configured source repository host.
+- Access to Hugging Face for the configured SWE-bench dataset.
+- Access to the Docker registries used by SWE-bench.
+- Access and credentials for the configured candidate-generation model.
+
+Start with at least 20 GB of free disk space.
+The retained `sympy__sympy-15349` workspace uses 238 MiB after its Docker images are already present.
+A clean Docker environment or a larger run can use much more space.
+
+The retained one-instance Docker preparation took about four minutes.
+The model-backed candidate and artifact stages took about four more minutes.
+Runtime depends on image availability, network speed, model latency, and instance complexity.
+
+The tracer supports optional serializers for target libraries such as Astropy, Django, pytest, scikit-learn, Sphinx, SymPy, and xarray.
+These target libraries are not package requirements.
+Their serializers activate when the traced target environment provides the matching library.
+
+## Generated data and cleanup
+
+Evaluation writes a result file and uses a checkpoint file during an incomplete resumable run.
+A successful evaluation removes its checkpoint.
+
+The builder workspace contains repositories, traces, logs, prompts, raw model responses, and checkpoints.
+Treat the workspace as private data.
+The public artifact output is a symbolic link to an immutable generation inside the workspace.
+Copy the published artifact directory to durable storage before workspace cleanup.
+Delete a workspace only after all builder processes stop and its resume and audit records are no longer required.
+
+## Release automation
+
+The extracted package contains three workflows under `.github/workflows`.
+Fast tests and wheel-smoke tests run for pushes to `main` and for pull requests.
+The real unpaid local-effect test is a manual Docker workflow.
+These workflows become active when `explainbench-cli` becomes the root of its separate repository.
+
+The CI environment uses Python 3.12 and the locked uv environment.
+The real workflow does not enable candidate inference and does not require a model API key.
+
+## Provisional release candidate
+
+The confirmed distribution name is `explainbench`.
+The confirmed first version is `0.1.0`.
+The package author is `explainbench-team`.
+The author email is `imamnurby@gmail.com`.
+The project homepage is `https://explainbench.github.io`.
+
+The current direct runtime dependencies use exact versions.
+`uv.lock` records the complete environment.
+The final unpinned direct dependency was `jsonpickle`.
+It is now pinned to the locked version `4.1.2`.
+
+The provisional wheel is `dist/explainbench-0.1.0-py3-none-any.whl`.
+It contains 113 files.
+Its SHA-256 is `197f08c3f9201fa38093aceaafc9d775f57a20f7c079d376fe3541c0a9e94a9b`.
+
+The wheel contains the expected six top-level packages, eight runtime resources, console entry point, and pytest entry point.
+It contains no tests, examples, logs, results, generated caches, or build directories.
+The exact fast-CI command reported 142 passed and 7 skipped.
+The exact wheel-smoke command reported 4 passed.
+The complete local suite reported 146 passed and 7 skipped.
+
 ## Known package gaps
 
 ### Release blockers
 
-- The clean-wheel tests are not in CI.
-- The complete local-effect workflow has not passed real Docker and model validation.
+- The package license decision is deferred.
+- The new CI workflows have not run in the future separate repository.
 
 ### Validation gaps
 
 - Python 3.14 installation has not been validated.
-- Paid candidate generation has not completed in the real workflow.
-- Real paid prompt and response records have not been reviewed.
-- Expression execution and validation have not completed in the real workflow.
-- Final local-effect publication has not completed in the real workflow.
-- Evaluation of a newly generated local-effect artifact has not completed.
 - Interruption, retry exhaustion, corruption, and semantic invalidation have not been validated with real external processes.
+- The complete real workflow has not run from a non-editable wheel installation.
 
 ### Feature gaps
 
@@ -621,21 +688,16 @@ They should be complete before a public package release.
 
 The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTION_PLAN.md](EXPLAINBENCH_CLI_EXTRACTION_PLAN.md).
 
-### Priority 1: Complete one real local-effect workflow
+### Priority 1: Complete deferred license metadata
 
-1. Run model-backed candidate generation.
-2. Execute candidate expressions.
-3. Validate candidate expressions.
-4. Build answer choices.
-5. Export local-effect artifacts.
-6. Run `explainbench evaluate --task local.effect` with the generated artifacts.
-7. Repeat the complete run with `--resume`.
+1. Initialize the separate repository.
+2. Add the selected license and its package metadata.
 
-### Priority 2: Complete release verification
+### Priority 2: Run release automation
 
-1. Add the fast and clean-wheel tests to CI.
-2. Add a separate opt-in Docker integration job.
-3. Complete the release metadata and installation documentation.
+1. Run fast and wheel-smoke workflows in the separate repository.
+2. Run the manual unpaid Docker workflow.
+3. Build and inspect the final release candidate.
 
 ### Priority 3: Decide the end-to-end builder scope
 

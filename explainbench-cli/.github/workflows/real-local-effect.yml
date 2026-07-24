@@ -1,0 +1,38 @@
+name: Real local-effect validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-local-effect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      EXPLAINBENCH_RUN_REAL_LOCAL_EFFECT: "1"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.31"
+          enable-cache: true
+
+      - name: Install locked development dependencies
+        run: uv sync --locked --dev
+
+      - name: Show Docker information
+        run: docker info
+
+      - name: Run real unpaid local-effect tests
+        run: uv run pytest tests/real_local_effect -ra
