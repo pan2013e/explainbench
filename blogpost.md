@@ -31,7 +31,7 @@ if app_dir in fixture_dirs:
     raise ImproperlyConfigured(...)
 ```
 
-To fix this bug, the [X] agent submitted a patch that changes the first check by normalizing entries in `fixture_dirs` before looking for duplicates:
+To fix this bug, the Refact agent submitted a patch that changes the first check by normalizing entries in `fixture_dirs` before looking for duplicates:
 
 ```diff
 - if len(fixture_dirs) != len(set(fixture_dirs)):
