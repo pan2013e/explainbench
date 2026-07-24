@@ -5,7 +5,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from threading import Lock
-from typing import TypeVar
+from typing import Callable, TypeVar
 
 import backoff
 import litellm
@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 
 PredictionModel = TypeVar("PredictionModel", bound=BaseModel)
+RawResponseCallback = Callable[[str], None]
 
 COSTINFO = {
     "gpt-5.2-2025-12-11": {
@@ -38,6 +39,10 @@ COSTINFO = {
 
 litellm.enable_json_schema_validation = True
 litellm.drop_params = True
+
+
+class InferencePersistenceError(RuntimeError):
+    """Raised when a received model response cannot be stored safely."""
 
 
 class Model:
@@ -78,6 +83,7 @@ class Model:
             backoff.expo,
             Exception,
             max_tries=self.max_retries,
+            giveup=lambda error: isinstance(error, InferencePersistenceError),
         )(self._infer_once)
 
     @staticmethod
@@ -92,6 +98,7 @@ class Model:
         self,
         messages: str | list[dict[str, str]],
         schema: type[PredictionModel],
+        raw_response_callback: RawResponseCallback | None = None,
     ) -> PredictionModel:
         if isinstance(messages, str):
             messages = [{"role": "user", "content": messages}]
@@ -111,14 +118,27 @@ class Model:
         content = response.choices[0].message.content
         if not content:
             raise ValueError("model returned an empty structured response")
+        if raw_response_callback is not None:
+            try:
+                raw_response_callback(content)
+            except Exception as error:
+                raise InferencePersistenceError(
+                    "model response was received but could not be stored"
+                ) from error
         return schema.model_validate_json(content)
 
     def infer_once(
         self,
         messages: str | list[dict[str, str]],
         schema: type[PredictionModel],
+        *,
+        raw_response_callback: RawResponseCallback | None = None,
     ) -> PredictionModel:
-        return self._infer_once_with_retry(messages, schema)
+        return self._infer_once_with_retry(
+            messages,
+            schema,
+            raw_response_callback,
+        )
 
     def infer(
         self,

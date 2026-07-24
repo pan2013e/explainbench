@@ -3,6 +3,7 @@ import os
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
+from pathlib import Path
 
 import backoff
 from tqdm.auto import tqdm
@@ -12,12 +13,17 @@ from execution.util import get_instance_ids
 from dataset.extract_ground_truths.effect.infer_expression import (
     DEFAULT_MODEL,
     DEFAULT_REASONING_EFFORT,
+    ExpressionList,
+    InferencePersistenceError,
     main as infer_main,
     build_prompt,
 )
 from dataset.extract_ground_truths.effect.source_util import (
     get_function_code,
     remove_docstrings,
+)
+from dataset.extract_ground_truths.effect.paid_inference import (
+    PaidInferenceJournal,
 )
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +42,7 @@ DEFAULT_AGENTS = [
     "openhands_minimax-m2.5",
     "gold",
 ]
+PERSISTENCE_FAILURE_EXIT_CODE = 86
 
 def read_json(path):
     with open(os.path.join(path), "r") as f:
@@ -85,6 +92,7 @@ def infer_expressions(
     reasoning_effort=DEFAULT_REASONING_EFFORT,
     env_file=None,
     max_retries=5,
+    raw_response_callback=None,
 ):
     @backoff.on_exception(
         backoff.expo,
@@ -98,6 +106,7 @@ def infer_expressions(
             reasoning_effort=reasoning_effort,
             env_file=env_file,
             max_retries=max_retries,
+            raw_response_callback=raw_response_callback,
         )
 
     return infer_once()
@@ -115,6 +124,8 @@ def process_agent(
     reasoning_effort=DEFAULT_REASONING_EFFORT,
     env_file=None,
     max_retries=5,
+    audit_dir=None,
+    resume_audit_dirs=(),
 ):
     results = {}
         
@@ -157,22 +168,56 @@ def process_agent(
             metadata.pop("buggy_variables", None)
             metadata.pop("patched_variables", None)
             instance_result = {"prompt_length_chars": len(prompt)}
+            journal = None
+            if audit_dir is not None:
+                journal = PaidInferenceJournal(
+                    audit_dir,
+                    prompt=prompt,
+                    model_id=model_id,
+                    reasoning_effort=reasoning_effort,
+                    response_schema=(
+                        f"{ExpressionList.__module__}."
+                        f"{ExpressionList.__qualname__}"
+                    ),
+                    resume_directories=tuple(
+                        Path(path) for path in resume_audit_dirs
+                    ),
+                )
             
             if do_inference:
-                expr_list = infer_expressions(
-                    prompt,
-                    model_id,
-                    reasoning_effort,
-                    env_file,
-                    max_retries,
+                expr_list = (
+                    journal.reuse_response(ExpressionList)
+                    if journal is not None
+                    else None
                 )
+                if expr_list is None:
+                    expr_list = infer_expressions(
+                        prompt,
+                        model_id,
+                        reasoning_effort,
+                        env_file,
+                        max_retries,
+                        (
+                            journal.record_response
+                            if journal is not None
+                            else None
+                        ),
+                    )
+                    if journal is not None:
+                        journal.select_latest_response()
                 if expr_list is not None:
                     expr_strings = [x.expr for x in expr_list.expressions]
                     instance_result["changed_candidates"] = expr_strings[:n_changed]
                     instance_result["unchanged_candidates"] = expr_strings[n_changed:] 
+                    if journal is not None:
+                        instance_result["_source_response"] = (
+                            journal.selected_response()
+                        )
                 instance_result.update(metadata)
                 instance_result["function_code_before_patch"] = remove_docstrings(pre_code)
             return instance_result
+        except InferencePersistenceError:
+            raise
         except Exception as e:
             import traceback, sys
             print(
@@ -256,6 +301,19 @@ def build_parser():
     )
     parser.add_argument("--env-file")
     parser.add_argument("--max-retries", type=int, default=5)
+    parser.add_argument(
+        "--audit-dir",
+        help=(
+            "Store the prompt and raw responses for one selected agent and "
+            "instance."
+        ),
+    )
+    parser.add_argument(
+        "--resume-audit-dir",
+        action="append",
+        default=[],
+        help="Prior compatible audit directory to inspect before inference.",
+    )
     return parser
 
 
@@ -272,6 +330,12 @@ def main(argv=None):
     step1 = read_json(args.step1_path)
     results = {}
     instance_ids = get_instance_ids(args.instance_ids)
+    if args.audit_dir and (
+        len(selected_agents) != 1 or len(instance_ids) != 1
+    ):
+        parser.error(
+            "--audit-dir requires exactly one selected agent and instance"
+        )
 
     def predictions_path(agent):
         if agent == "gold":
@@ -296,6 +360,8 @@ def main(argv=None):
                 args.reasoning_effort,
                 args.env_file,
                 args.max_retries,
+                args.audit_dir,
+                tuple(args.resume_audit_dir),
             ): agent
             for agent in selected_agents
         }
@@ -317,4 +383,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except InferencePersistenceError as error:
+        print(f"Paid response persistence failed: {error}")
+        raise SystemExit(PERSISTENCE_FAILURE_EXIT_CODE) from error

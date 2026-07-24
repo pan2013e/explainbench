@@ -34,19 +34,20 @@ These terms keep repository implementation status separate from release status.
 | Local-effect scientific stage wrappers | Implemented in the repository | All ten wrappers call and validate their canonical commands. |
 | Local-effect real-data validation | Implemented and validated | Real scenarios `S01` through `S07` pass from the extracted package with Docker and inference disabled. |
 | Local-effect wheel execution | Package-ready for unpaid stages | The extracted wheel contains all canonical modules, and `S01` through `S07` pass from its installed CLI. |
+| Paid inference persistence | Implemented | Tests confirm atomic prompt and response storage, checksums, source links, interruption recovery, and no repeated compatible request. |
 | Model-backed local-effect workflow | Partly validated | The wrapper exists, but paid inference and complete real-data execution have not been validated. |
 | End-to-end effect question builder | Not implemented | End-to-end effect artifacts must be prepared outside the package. |
 | Package release verification | Partly validated | Four automated clean-wheel tests and the opt-in real Docker sequence pass, but CI and paid validation are incomplete. |
 
-The extracted fast test result on 2026-07-23 was:
+The extracted test result on 2026-07-24 was:
 
 ```text
-139 passed, 7 skipped
+145 passed, 7 skipped
 ```
 
 The seven skipped tests are the opt-in real local-effect tests.
 The source baseline was 132 passed and 7 skipped.
-The seven added passing tests are two extraction checksum tests, one tracer-payload regression test, and four clean-wheel integration tests.
+The added tests cover extraction checksums, the tracer payload, clean-wheel execution, and paid-work persistence.
 The standalone tracer checks also reported 17 inspector before-mode passes, 17 inspector after-mode passes, and 12 serializer passes with 3 optional-library skips.
 
 ## Package boundary
@@ -509,16 +510,23 @@ The current default test run still skips all seven real-data tests because they 
 The fixed test instance is `sympy__sympy-15349`.
 The default real-test workspace is `.explainbench/real-tests/sympy-15349`.
 
-### Model persistence gap
+### Model persistence
 
-The candidate-generation stage stores prompt length and parsed candidate data.
-It does not store the complete raw prompt.
-It does not store each raw model response before parsing.
+Each candidate-generation attempt stores its complete prompt in `model-audit/prompt.txt` before inference.
+Each exact raw model response is stored in `model-audit/responses/` before schema parsing.
+`model-audit/manifest.json` records the model settings, schema name, file sizes, SHA-256 checksums, and selected response.
+The attempt and status records link to this manifest.
+The stage result also contains a checksummed artifact manifest and a source-response record.
 
-Add durable raw prompt and raw response records before the first paid end-to-end validation.
-Store these records in the stage attempt directory.
-Record checksums for these files.
-Do not move or copy the scientific prompt construction into the package wrapper.
+On restart, the candidate stage checks prior attempts for a compatible prompt, model, reasoning effort, and response schema.
+It verifies the saved response size and checksum before parsing.
+It copies a valid response into the current attempt and does not make another model request.
+
+If a received response cannot be stored, the model adapter does not retry the request.
+The candidate command uses a dedicated exit status, and the stage marks this failure as non-retryable.
+This prevents an automatic second paid request when durability is uncertain.
+
+The scientific prompt template and Pydantic response parser are unchanged.
 
 ### Wheel blocker
 
@@ -573,15 +581,11 @@ These are separate package capabilities.
 
 - Python 3.14 installation has not been validated.
 - Paid candidate generation has not completed in the real workflow.
+- Real paid prompt and response records have not been reviewed.
 - Expression execution and validation have not completed in the real workflow.
 - Final local-effect publication has not completed in the real workflow.
 - Evaluation of a newly generated local-effect artifact has not completed.
 - Interruption, retry exhaustion, corruption, and semantic invalidation have not been validated with real external processes.
-
-### Auditability gaps
-
-- Candidate generation does not persist the full raw prompt.
-- Candidate generation does not persist each raw model response before parsing.
 
 ### Feature gaps
 
@@ -604,14 +608,7 @@ They should be complete before a public package release.
 
 The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTION_PLAN.md](EXPLAINBENCH_CLI_EXTRACTION_PLAN.md).
 
-### Priority 1: Improve paid-work durability
-
-1. Store the raw candidate prompt before inference.
-2. Store every raw model response before parsing.
-3. Add checksums and checkpoint references.
-4. Confirm that resume can reuse paid outputs.
-
-### Priority 2: Complete one real local-effect workflow
+### Priority 1: Complete one real local-effect workflow
 
 1. Run model-backed candidate generation.
 2. Execute candidate expressions.
@@ -621,13 +618,13 @@ The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTI
 6. Run `explainbench evaluate --task local.effect` with the generated artifacts.
 7. Repeat the complete run with `--resume`.
 
-### Priority 3: Complete release verification
+### Priority 2: Complete release verification
 
 1. Add the fast and clean-wheel tests to CI.
 2. Add a separate opt-in Docker integration job.
 3. Complete the release metadata and installation documentation.
 
-### Priority 4: Decide the end-to-end builder scope
+### Priority 3: Decide the end-to-end builder scope
 
 Implement the end-to-end builder only after the local builder is package-ready.
 Reuse the common orchestration components when they match the end-to-end pipeline.

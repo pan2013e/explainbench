@@ -7,6 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
+from dataset.extract_ground_truths.effect.paid_inference import (
+    PaidInferenceJournal,
+)
 from explainbench.question_builders.common.orchestration import (
     StageContext,
     StageExecutionError,
@@ -80,6 +83,68 @@ def test_submission_adapter_produces_canonical_predictions():
             "model_name_or_path": "test-agent",
         }
     }
+
+
+def test_candidate_persistence_failure_disables_automatic_retry(
+    tmp_path,
+    monkeypatch,
+):
+    context = replace(
+        make_context(tmp_path),
+        upstream_results={
+            "find-first-divergence": StoredStageResult(
+                outcome="completed",
+                data={
+                    "instance_id": INSTANCE_ID,
+                    "divergence": {
+                        "file_path": "example.py",
+                        "function_name": "example:changed",
+                    },
+                },
+            )
+        },
+        config=SimpleNamespace(
+            candidate_generation_changed_candidates=1,
+            candidate_generation_unchanged_candidates=1,
+            candidate_generation_instance_workers=1,
+            candidate_generation_agent_workers=1,
+            candidate_generation_model="test-model",
+            candidate_generation_reasoning_effort="medium",
+            candidate_generation_model_retries=1,
+            candidate_generation_inference=True,
+            candidate_generation_env_file=None,
+            candidate_generation_command_timeout_seconds=60,
+        ),
+    )
+
+    def fail_after_paid_response(module, arguments, context, **kwargs):
+        assert module == runners.BUILD_STEP2_MODULE
+        context.attempt_directory.mkdir(parents=True, exist_ok=True)
+        (context.attempt_directory / "command.json").write_text(
+            json.dumps(
+                {
+                    "return_code": runners.PERSISTENCE_FAILURE_EXIT_CODE,
+                }
+            ),
+            encoding="utf-8",
+        )
+        raise StageExecutionError(
+            "canonical command failed",
+            category="canonical_command_failed",
+            retryable=True,
+        )
+
+    monkeypatch.setattr(
+        runners,
+        "run_canonical_module",
+        fail_after_paid_response,
+    )
+
+    with pytest.raises(StageExecutionError) as captured:
+        runners.GenerateCandidateExpressionsRunner().run_instance(context)
+
+    assert captured.value.category == "paid_response_persistence_failed"
+    assert captured.value.retryable is False
 
 
 def test_submission_adapter_rejects_missing_patch():
@@ -596,6 +661,23 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
             return
 
         if module == runners.BUILD_STEP2_MODULE:
+            journal = PaidInferenceJournal(
+                _argument_value(arguments, "--audit-dir"),
+                prompt="candidate prompt",
+                model_id=_argument_value(arguments, "--model"),
+                reasoning_effort=_argument_value(
+                    arguments,
+                    "--reasoning-effort",
+                ),
+                response_schema=(
+                    "dataset.extract_ground_truths.effect."
+                    "infer_expression.ExpressionList"
+                ),
+            )
+            source_response = journal.record_response(
+                '{"expressions":[{"expr":"value"},{"expr":"other"}]}'
+            )
+            journal.select_response(source_response)
             Path(_argument_value(arguments, "--output-path")).write_text(
                 json.dumps(
                     {
@@ -619,6 +701,9 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
                                 "location": "before return old",
                                 "changed_candidates": ["value"],
                                 "unchanged_candidates": ["other"],
+                                "_source_response": (
+                                    journal.selected_response()
+                                ),
                             }
                         }
                     }
@@ -933,6 +1018,10 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
     assert _argument_value(candidate_arguments, "--model") == "candidate-model"
     assert _argument_value(candidate_arguments, "--reasoning-effort") == "high"
     assert _argument_value(candidate_arguments, "--max-retries") == "6"
+    assert _argument_value(candidate_arguments, "--audit-dir").endswith(
+        "attempt-1/model-audit"
+    )
+    assert "--resume-audit-dir" not in candidate_arguments
     assert "--inference" in candidate_arguments
     assert candidate_calls[0][2]["timeout"] == 765
 
@@ -941,6 +1030,25 @@ def test_trace_program_state_builds_manifest_and_reruns_after_corruption(
         INSTANCE_ID,
     )
     assert result.data["candidates"]["changed_candidates"] == ["value"]
+    assert result.data["source_response"]["path"] == (
+        "responses/response-0001.txt"
+    )
+    audit_paths = {
+        item["path"] for item in result.data["artifact_manifest"]["files"]
+    }
+    assert audit_paths == {
+        "manifest.json",
+        "prompt.txt",
+        "responses/response-0001.txt",
+    }
+    attempt = json.loads(
+        (
+            config.workspace
+            / "stages/generate-candidate-expressions"
+            / f"instances/{INSTANCE_ID}/work/attempt-1/attempt.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert attempt["artifact_manifests"] == ["model-audit/manifest.json"]
 
     executed = run_local_stage(
         "execute-candidate-expressions",

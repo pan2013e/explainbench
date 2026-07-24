@@ -367,6 +367,7 @@ class LocalBuilderWorkspace:
                     finished_at=current.finished_at,
                     result_file=current.result_file,
                     result_checksum=current.result_checksum,
+                    artifact_manifests=current.artifact_manifests,
                     stale_reason=reason,
                 )
             )

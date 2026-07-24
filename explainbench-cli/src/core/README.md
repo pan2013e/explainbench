@@ -93,11 +93,20 @@ The old code had more direct reuse of existing step output.
 The current code processes the selected run and writes to the requested output paths.
 This can change restart and result reuse behavior.
 
+The package version can also receive an audit directory from the wrapper.
+It writes the complete prompt before inference.
+It writes each exact raw response before Pydantic parsing.
+It records file sizes and SHA-256 checksums in an audit manifest.
+It can reuse a compatible valid response from an earlier stage attempt.
+This storage does not change the prompt template, candidate counts, or parsed expression values.
+
 ### `infer_expression.py`
 
 The prompt construction and expression validation are unchanged.
 Model creation changed from immediate creation during import to creation when inference starts.
 The environment file, retry count, model, and reasoning effort can now be set by the caller.
+The model call can receive a response-storage callback.
+The callback completes before response parsing.
 
 ### `build_step3.py`
 

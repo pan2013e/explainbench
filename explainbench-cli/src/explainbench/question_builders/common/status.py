@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
 from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from explainbench.schemas import StrictModel
 
@@ -31,6 +32,23 @@ AttemptStateName = Literal[
 ]
 
 
+def _validate_artifact_manifests(values: list[str]) -> list[str]:
+    if values != sorted(set(values)):
+        raise ValueError("artifact manifest paths must be sorted and unique")
+    for value in values:
+        path = PurePosixPath(value)
+        if (
+            not value
+            or path.is_absolute()
+            or ".." in path.parts
+            or value != path.as_posix()
+        ):
+            raise ValueError(
+                "artifact manifest paths must be safe relative paths"
+            )
+    return values
+
+
 class StageFailure(StrictModel):
     """Structured information about one failed stage attempt."""
 
@@ -55,8 +73,14 @@ class InstanceStageStatus(StrictModel):
     finished_at: str | None = None
     result_file: str | None = None
     result_checksum: str | None = None
+    artifact_manifests: list[str] = Field(default_factory=list)
     failure: StageFailure | None = None
     stale_reason: str | None = None
+
+    @field_validator("artifact_manifests")
+    @classmethod
+    def validate_artifact_manifests(cls, values: list[str]) -> list[str]:
+        return _validate_artifact_manifests(values)
 
     @model_validator(mode="after")
     def validate_attempt_counters(self):
@@ -81,7 +105,13 @@ class InstanceStageAttempt(StrictModel):
     total_attempt: int = Field(ge=1)
     started_at: str
     finished_at: str | None = None
+    artifact_manifests: list[str] = Field(default_factory=list)
     failure: StageFailure | None = None
+
+    @field_validator("artifact_manifests")
+    @classmethod
+    def validate_artifact_manifests(cls, values: list[str]) -> list[str]:
+        return _validate_artifact_manifests(values)
 
     @model_validator(mode="after")
     def validate_terminal_state(self):

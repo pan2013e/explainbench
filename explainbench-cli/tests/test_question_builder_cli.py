@@ -2,6 +2,9 @@ import json
 
 from pathlib import Path
 
+from dataset.extract_ground_truths.effect.paid_inference import (
+    PaidInferenceJournal,
+)
 from explainbench import cli
 from explainbench.question_builders.local.registry import LOCAL_STAGE_REGISTRY
 from explainbench.question_builders.local import runners
@@ -101,6 +104,20 @@ def install_fake_identify(monkeypatch):
             )
             return
         if module == runners.BUILD_STEP2_MODULE:
+            journal = PaidInferenceJournal(
+                option(arguments, "--audit-dir"),
+                prompt="candidate prompt",
+                model_id=option(arguments, "--model"),
+                reasoning_effort=option(arguments, "--reasoning-effort"),
+                response_schema=(
+                    "dataset.extract_ground_truths.effect."
+                    "infer_expression.ExpressionList"
+                ),
+            )
+            source_response = journal.record_response(
+                '{"expressions":[{"expr":"value"}]}'
+            )
+            journal.select_response(source_response)
             Path(option(arguments, "--output-path")).write_text(
                 json.dumps(
                     {
@@ -128,6 +145,9 @@ def install_fake_identify(monkeypatch):
                                     "other_2",
                                     "other_3",
                                 ],
+                                "_source_response": (
+                                    journal.selected_response()
+                                ),
                             }
                         }
                     }

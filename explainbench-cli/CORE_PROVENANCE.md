@@ -53,7 +53,7 @@ Copied paths:
 |---|---|---|
 | `dataset/__init__.py` | `src/core/dataset/__init__.py` | Copied unchanged |
 | `dataset/extract_ground_truths/__init__.py` | `src/core/dataset/extract_ground_truths/__init__.py` | Copied unchanged |
-| `dataset/extract_ground_truths/effect` | `src/core/dataset/extract_ground_truths/effect` | Seventeen approved files copied unchanged |
+| `dataset/extract_ground_truths/effect` | `src/core/dataset/extract_ground_truths/effect` | Initially copied, with recorded Phase 10 persistence adaptations |
 
 Verification:
 
@@ -64,6 +64,16 @@ Verification:
 - The focused local-effect interface test reported 12 passed.
 - The wheel built without warnings.
 - Historical artifacts, explanation data, and agent patch collections were excluded.
+
+Phase 10 approved these package-owned adaptations:
+
+- `build_step2.py` stores and reuses candidate-inference audit records.
+- `infer_expression.py` passes a raw-response callback to the model adapter.
+- `audit_files.py` provides local atomic writes and SHA-256 checksums.
+- `paid_inference.py` manages prompt, response, and selection records.
+- `evaluation/inference.py` re-exports the persistence error through the legacy import path.
+
+The prompt template, prompt construction, expression schema, and parsing call remain unchanged.
 
 The selected `execution` package is still an external source dependency at this phase.
 Repeat fully isolated dataset validation after it is copied.
@@ -206,7 +216,25 @@ Verification:
 - The installed `dataset`, `execution`, and `tracer` packages loaded from `site-packages`.
 - The canonical `identify-patched-functions` stage completed with local external inputs.
 - Resume reused the first-stage checkpoint without a second canonical command.
-- The complete suite reported 139 passed and 7 skipped.
+- The complete suite reported 145 passed and 7 skipped after Phase 10.
+
+## Paid-work persistence verification
+
+Candidate-generation attempts now contain `model-audit/manifest.json`.
+The attempt and status records link to this manifest.
+The manifest records the full prompt, all raw responses, the selected response, file sizes, and SHA-256 checksums.
+
+Verification:
+
+- The prompt is written atomically before inference.
+- Every raw response is written atomically before Pydantic parsing.
+- A parsing failure leaves the exact raw response available for review.
+- A simulated process interruption leaves a valid response available.
+- A later attempt verifies and reuses that response without another model call.
+- Parsed candidates identify their source response.
+- A response-storage failure does not trigger a model retry.
+- The stage marks the dedicated persistence failure as non-retryable.
+- Real S07 prompt preparation passed with inference disabled.
 
 ## Ownership and synchronization
 

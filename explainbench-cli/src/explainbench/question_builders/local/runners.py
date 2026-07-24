@@ -43,6 +43,7 @@ BUILD_STEP2_MODULE = "dataset.extract_ground_truths.effect.build_step2"
 BUILD_STEP3_MODULE = "dataset.extract_ground_truths.effect.build_step3"
 BUILD_STEP4_MODULE = "dataset.extract_ground_truths.effect.build_step4"
 BUILD_STEP5_MODULE = "dataset.extract_ground_truths.effect.build_step5"
+PERSISTENCE_FAILURE_EXIT_CODE = 86
 
 NONE_OF_THE_ABOVE_CHOICE = (
     "The patch has no effect and none of the above expressions change in value"
@@ -690,6 +691,20 @@ class FindFirstDivergenceRunner:
 class GenerateCandidateExpressionsRunner:
     """Invoke canonical step 2 to generate model candidate expressions."""
 
+    @staticmethod
+    def _resume_audit_directories(context: StageContext) -> tuple[Path, ...]:
+        directories = []
+        for path in context.work_directory.glob("attempt-*/model-audit"):
+            if path.parent == context.attempt_directory:
+                continue
+            try:
+                attempt = int(path.parent.name.removeprefix("attempt-"))
+            except ValueError:
+                continue
+            if attempt < context.total_attempt and path.is_dir():
+                directories.append((attempt, path))
+        return tuple(path for _, path in sorted(directories, reverse=True))
+
     def run_instance(self, context: StageContext) -> StageResult:
         divergence_result = context.upstream_results.get(
             "find-first-divergence"
@@ -719,6 +734,7 @@ class GenerateCandidateExpressionsRunner:
             },
         )
         output_path = context.attempt_directory / "step2.json"
+        audit_directory = context.attempt_directory / "model-audit"
         arguments = [
             "--agent",
             context.submission_id,
@@ -744,10 +760,16 @@ class GenerateCandidateExpressionsRunner:
             context.config.candidate_generation_reasoning_effort,
             "--max-retries",
             str(context.config.candidate_generation_model_retries),
+            "--audit-dir",
+            str(audit_directory),
             "--inference"
             if context.config.candidate_generation_inference
             else "--no-inference",
         ]
+        for resume_directory in self._resume_audit_directories(context):
+            arguments.extend(
+                ["--resume-audit-dir", str(resume_directory)]
+            )
         if context.config.candidate_generation_env_file is not None:
             arguments.extend(
                 [
@@ -756,13 +778,33 @@ class GenerateCandidateExpressionsRunner:
                 ]
             )
 
-        run_canonical_module(
-            BUILD_STEP2_MODULE,
-            arguments,
-            context,
-            timeout=context.config.candidate_generation_command_timeout_seconds,
-            retryable_nonzero=True,
+        command_timeout = (
+            context.config.candidate_generation_command_timeout_seconds
         )
+        try:
+            run_canonical_module(
+                BUILD_STEP2_MODULE,
+                arguments,
+                context,
+                timeout=command_timeout,
+                retryable_nonzero=True,
+            )
+        except StageExecutionError as error:
+            command_record = _read_json(
+                context.attempt_directory / "command.json"
+            )
+            if (
+                isinstance(command_record, dict)
+                and command_record.get("return_code")
+                == PERSISTENCE_FAILURE_EXIT_CODE
+            ):
+                raise StageExecutionError(
+                    "a paid model response could not be stored; "
+                    "automatic retry is disabled",
+                    category="paid_response_persistence_failed",
+                    retryable=False,
+                ) from error
+            raise
 
         payload = _read_json(output_path)
         if not isinstance(payload, dict):
@@ -798,11 +840,29 @@ class GenerateCandidateExpressionsRunner:
                 retryable=False,
             )
 
+        source_response = candidates.pop("_source_response", None)
         result_data = {
             "instance_id": context.instance.instance_id,
             "candidates": candidates,
             "inference": context.config.candidate_generation_inference,
         }
+        if not audit_directory.is_dir():
+            atomic_write_json(
+                audit_directory / "manifest.json",
+                {
+                    "schema_version": 1,
+                    "request": None,
+                    "responses": [],
+                    "selected_response": None,
+                    "fallback_reason": "no_usable_agent_divergence",
+                },
+            )
+        result_data["artifact_manifest"] = build_artifact_manifest(
+            audit_directory,
+            relative_to=context.work_directory.parent,
+        ).model_dump(mode="json")
+        if source_response is not None:
+            result_data["source_response"] = source_response
         if not candidates:
             result_data["fallback_reason"] = "no_usable_agent_divergence"
         result = StageResult.completed(result_data)
@@ -841,6 +901,53 @@ class GenerateCandidateExpressionsRunner:
             )
         if not inference:
             return
+
+        source_response = result.data.get("source_response")
+        if not isinstance(source_response, dict):
+            raise StageExecutionError(
+                "candidate result does not identify its source response",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        response_path = source_response.get("path")
+        response_size = source_response.get("size")
+        response_checksum = source_response.get("sha256")
+        if (
+            not isinstance(response_path, str)
+            or not response_path
+            or not isinstance(response_size, int)
+            or isinstance(response_size, bool)
+            or response_size < 0
+            or not isinstance(response_checksum, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", response_checksum)
+        ):
+            raise StageExecutionError(
+                "candidate source response record is invalid",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
+        try:
+            manifest = ArtifactManifest.model_validate(
+                result.data.get("artifact_manifest")
+            )
+        except ValidationError as error:
+            raise StageExecutionError(
+                f"candidate audit artifact manifest is invalid: {error}",
+                category="canonical_output_invalid",
+                retryable=True,
+            ) from error
+        manifest_files = {item.path: item for item in manifest.files}
+        response_file = manifest_files.get(response_path)
+        if (
+            response_file is None
+            or response_file.size != response_size
+            or response_file.sha256 != response_checksum
+        ):
+            raise StageExecutionError(
+                "candidate source response does not match its artifact manifest",
+                category="canonical_output_invalid",
+                retryable=True,
+            )
 
         missing = sorted(CANDIDATE_REQUIRED_METADATA - candidates.keys())
         if missing:

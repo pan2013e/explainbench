@@ -372,7 +372,7 @@ A phase is complete only when all required checks and acceptance criteria pass.
 | 7 | Migrate and pass fast tests | `complete` | All fast tests pass in the new repository. |
 | 8 | Add clean-wheel tests | `complete` | Checker, resources, mocked evaluation, and the first builder stage pass outside the repository. |
 | 9 | Run unpaid real validation | `complete` | Real scenarios `S01` through `S07` complete. |
-| 10 | Add paid-work persistence | `not_started` | Raw prompts and responses are durable and resumable. |
+| 10 | Add paid-work persistence | `complete` | Raw prompts and responses are durable and resumable. |
 | 11 | Complete one real local-effect workflow | `not_started` | A generated local-effect artifact is evaluated successfully. |
 | 12 | Prepare release and handoff | `not_started` | Release metadata, documentation, CI, and ownership are complete. |
 
@@ -725,28 +725,28 @@ Status: `complete`.
 
 ## Phase 10: Add paid-work persistence
 
-Status: `not_started`.
+Status: `complete`.
 
 This phase is a post-extraction improvement.
 It must be committed separately from the copy-only extraction.
 
 ### Tasks
 
-- [ ] Persist the full candidate-generation prompt before inference.
-- [ ] Persist each raw model response before parsing.
-- [ ] Record file checksums.
-- [ ] Link prompt and response files from the stage attempt record.
-- [ ] Confirm that parsed candidates identify their source response.
-- [ ] Add interruption tests.
-- [ ] Add resume tests.
-- [ ] Confirm that completed paid responses are not requested again.
+- [x] Persist the full candidate-generation prompt before inference.
+- [x] Persist each raw model response before parsing.
+- [x] Record file checksums.
+- [x] Link prompt and response files from the stage attempt record.
+- [x] Confirm that parsed candidates identify their source response.
+- [x] Add interruption tests.
+- [x] Add resume tests.
+- [x] Confirm that completed paid responses are not requested again.
 
 ### Acceptance criteria
 
-- [ ] Paid inputs and outputs are auditable.
-- [ ] An interruption cannot lose a completed model response.
-- [ ] Resume can continue without repeating compatible paid requests.
-- [ ] Scientific prompt content and parsing behavior remain unchanged.
+- [x] Paid inputs and outputs are auditable.
+- [x] An interruption cannot lose a completed model response.
+- [x] Resume can continue without repeating compatible paid requests.
+- [x] Scientific prompt content and parsing behavior remain unchanged.
 
 ## Phase 11: Complete one real local-effect workflow
 
@@ -875,7 +875,7 @@ Status: `not_started`.
 | Licenses are incompatible or incomplete | Distribution cannot be released safely. | Resolve licensing before copying core into a release branch. | Open |
 | Historical data enters the wheel | The wheel becomes large and submission-specific. | Use explicit package and resource manifests. | Open |
 | Test assertions are weakened during relocation | Behavior changes can be hidden. | Permit path-only test changes and review all assertion changes. | Open |
-| Paid inference runs before durability exists | Model work can be lost or repeated. | Complete Phase 10 before Phase 11. | Open |
+| Paid inference runs before durability exists | Model work can be lost or repeated. | Complete Phase 10 before Phase 11. | Closed |
 
 ## Decision log
 
@@ -1137,6 +1137,34 @@ Do not start paid inference until Phase 10 stores raw prompts and raw model resp
 
 Next action: Add paid-work persistence in Phase 10.
 
+Date: 2026-07-24.
+
+Phase: 10.
+
+Completed: Added an atomic candidate-inference journal to each stage attempt.
+The journal stores the full prompt before inference and stores every exact raw response before schema parsing.
+It records file sizes and SHA-256 checksums.
+The attempt and status records link to `model-audit/manifest.json`.
+The completed stage result contains a checksummed artifact manifest and identifies the raw response used for parsed candidates.
+
+Checks: The paid-persistence tests cover exact prompt and response storage, parsing failure, process interruption, compatible response reuse, and storage failure.
+The interruption test confirms that restart parses the saved response without another inference call.
+The persistence-failure test confirms that the model adapter does not retry and that the stage disables automatic retry.
+The final complete suite reported 145 passed and 7 skipped.
+The real S07 prompt-only scenario passed with inference disabled.
+Its real prompt and audit manifest passed checksum validation.
+
+Problems: The first complete run found one old CLI test double that did not create the required audit record.
+The test double now creates the same prompt, response, and source link as the candidate stage.
+No Phase 10 blocker remains.
+
+Decisions: Keep prompt construction and Pydantic parsing in the canonical dataset modules.
+Use one audit directory per stage attempt.
+Copy a compatible prior response into the current attempt before parsing it.
+Use a dedicated process exit status when a received response cannot be stored, and do not retry that failure automatically.
+
+Next action: Complete one real model-backed local-effect workflow in Phase 11.
+
 ## Progress log template
 
 Add one entry after each work session:
@@ -1173,4 +1201,6 @@ Phase 8 is complete.
 
 Phase 9 is complete.
 
-Add paid-work persistence in Phase 10.
+Phase 10 is complete.
+
+Complete one real model-backed local-effect workflow in Phase 11.

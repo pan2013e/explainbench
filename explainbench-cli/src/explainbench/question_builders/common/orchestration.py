@@ -119,6 +119,7 @@ class StageDefinition:
     resource_inputs: ResourceInputs = _no_semantic_inputs
     execution_inputs: ResourceInputs = _no_semantic_inputs
     accepts_skipped_dependencies: bool = False
+    attempt_artifact_manifests: tuple[str, ...] = ()
 
 
 class StageRegistry:
@@ -519,6 +520,9 @@ class BuilderOrchestrator:
                 cycle_attempt=cycle_attempt,
                 total_attempt=total_attempts,
                 started_at=started_at,
+                artifact_manifests=list(
+                    definition.attempt_artifact_manifests
+                ),
             )
             self.workspace.write_status(
                 InstanceStageStatus(
@@ -531,6 +535,9 @@ class BuilderOrchestrator:
                     cycle_attempt=cycle_attempt,
                     total_attempts=total_attempts,
                     started_at=started_at,
+                    artifact_manifests=list(
+                        definition.attempt_artifact_manifests
+                    ),
                 )
             )
             self.workspace.write_attempt(attempt)
@@ -595,6 +602,9 @@ class BuilderOrchestrator:
                         finished_at=finished_at,
                         result_file=result_file,
                         result_checksum=result_checksum,
+                        artifact_manifests=list(
+                            definition.attempt_artifact_manifests
+                        ),
                     )
                 )
                 return result.outcome
@@ -663,6 +673,9 @@ class BuilderOrchestrator:
                 total_attempt=total_attempts,
                 started_at=started_at,
                 finished_at=finished_at,
+                artifact_manifests=list(
+                    definition.attempt_artifact_manifests
+                ),
                 failure=failure,
             )
         )
@@ -678,6 +691,9 @@ class BuilderOrchestrator:
                 total_attempts=total_attempts,
                 started_at=started_at,
                 finished_at=finished_at,
+                artifact_manifests=list(
+                    definition.attempt_artifact_manifests
+                ),
                 failure=failure,
             )
         )
@@ -703,6 +719,7 @@ class BuilderOrchestrator:
                 total_attempt=previous.total_attempts,
                 started_at=previous.started_at or finished_at,
                 finished_at=finished_at,
+                artifact_manifests=previous.artifact_manifests,
                 failure=failure,
             )
         )

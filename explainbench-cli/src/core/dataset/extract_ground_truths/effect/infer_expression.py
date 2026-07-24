@@ -1,9 +1,10 @@
 import os
 import ast
 from functools import lru_cache
+from typing import Callable
 from pydantic import BaseModel, field_validator
 
-from evaluation.inference import Model
+from evaluation.inference import InferencePersistenceError, Model
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_MODEL = "gpt-5.2-2025-12-11"
@@ -47,9 +48,14 @@ def main(
     reasoning_effort=DEFAULT_REASONING_EFFORT,
     env_file=None,
     max_retries=5,
+    raw_response_callback: Callable[[str], None] | None = None,
 ):
     model = get_model(model_id, reasoning_effort, env_file, max_retries)
-    expr_list = model.infer_once(prompt, ExpressionList)
+    expr_list = model.infer_once(
+        prompt,
+        ExpressionList,
+        raw_response_callback=raw_response_callback,
+    )
     return expr_list
 
 def build_prompt(code, line, diff, before, after, n_changed, n_unchanged):

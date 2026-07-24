@@ -277,10 +277,11 @@ LOCAL_STAGE_REGISTRY = StageRegistry(
             name="generate-candidate-expressions",
             description="generate expressions that may or may not change",
             dependencies=("find-first-divergence",),
-            implementation_version="1-canonical-cli",
+            implementation_version="2-paid-work-journal",
             runner=GenerateCandidateExpressionsRunner(),
             semantic_inputs=_candidate_semantic,
             execution_inputs=_candidate_execution,
+            attempt_artifact_manifests=("model-audit/manifest.json",),
         ),
         StageDefinition(
             name="execute-candidate-expressions",
