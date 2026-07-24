@@ -71,22 +71,22 @@ Phase 10 approved these package-owned adaptations:
 - `infer_expression.py` passes a raw-response callback to the model adapter.
 - `audit_files.py` provides local atomic writes and SHA-256 checksums.
 - `paid_inference.py` manages prompt, response, and selection records.
-- `evaluation/inference.py` re-exports the persistence error through the legacy import path.
+- `infer_expression.py` imports the current model adapter directly from `explainbench.evaluation.inference`.
 
 The prompt template, prompt construction, expression schema, and parsing call remain unchanged.
 
 The selected `execution` package is still an external source dependency at this phase.
 Repeat fully isolated dataset validation after it is copied.
 
-### Legacy evaluation core copy
+### Removed legacy evaluation compatibility package
 
-Copied paths:
+The initial extraction copied these compatibility modules:
 
 | Source | Target | Status |
 |---|---|---|
-| `evaluation` | `src/core/evaluation` | Six compatibility modules copied unchanged |
+| `evaluation` | `src/core/evaluation` | Initially copied, then removed from the separate package |
 
-Verification:
+The initial verification confirmed:
 
 - All six copied files matched their source files.
 - `infer_expression` imported with only the package workspace on `PYTHONPATH`.
@@ -95,6 +95,15 @@ Verification:
 - The compatibility test reported 3 passed.
 - The wheel built without warnings.
 - A clean Python 3.12 installation loaded the legacy package and dataset inference module from `site-packages`.
+
+The separate package does not need the historical top-level import API.
+The CLI evaluator already uses `explainbench.evaluation`.
+Candidate generation was the only production user of `evaluation.inference`.
+It now imports the same `Model` and `InferencePersistenceError` objects directly from `explainbench.evaluation.inference`.
+
+The six compatibility modules, their package mapping, and their three compatibility tests were removed.
+This removal does not change checker, evaluator, question-builder, execution, or tracer logic.
+Code that imports the historical top-level `evaluation` package is no longer supported.
 
 The existing dataset inference module opens its prompt through a filesystem path derived from `__file__`.
 Normal wheel installation is supported and passed.
@@ -169,7 +178,7 @@ Verification:
 - All 8 required non-Python resources are present.
 - Tests, logs, results, historical artifacts, research data, and generated caches are absent.
 - The console entry point and tracer pytest entry point are present.
-- A clean installed environment loaded all six top-level packages from `site-packages`.
+- A clean installed environment loaded all six original top-level packages from `site-packages`.
 - Python did not find an import package named `core`.
 - Package metadata declares 15 direct runtime dependencies.
 
@@ -285,16 +294,20 @@ Three GitHub Actions workflows are present:
 
 Verification:
 
-- The exact fast-CI command reported 142 passed and 7 skipped.
+- The exact fast-CI command reported 139 passed and 7 skipped.
 - The exact wheel-smoke command reported 4 passed.
-- The complete local suite reported 146 passed and 7 skipped.
-- The provisional wheel contains 113 files.
+- The complete local suite reported 143 passed and 7 skipped.
+- The real unpaid S07 candidate-preparation scenario passed in 376.84 seconds.
+- The provisional wheel contains 106 files.
 - It contains all expected packages, resources, and entry points.
 - It contains no tests, examples, logs, results, caches, or build directories.
-- Its SHA-256 is `197f08c3f9201fa38093aceaafc9d775f57a20f7c079d376fe3541c0a9e94a9b`.
+- Its SHA-256 is `3fd6edbd3753171d4795c43e627f8c498c6ca3529d4987bdb66586daf07c3e6b`.
 
 The license decision remains deferred until the separate repository is initialized.
 The new workflows have not run in that separate repository.
+
+The real-test fixture prefers the `explainbench` executable beside the Python interpreter that runs pytest.
+This prevents an outer development environment from silently selecting another repository's installation.
 
 ## Ownership and synchronization
 

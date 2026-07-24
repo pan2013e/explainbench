@@ -42,7 +42,7 @@ These terms keep repository implementation status separate from release status.
 The extracted test result on 2026-07-24 was:
 
 ```text
-146 passed, 7 skipped
+143 passed, 7 skipped
 ```
 
 The seven skipped tests are the opt-in real local-effect tests.
@@ -332,10 +332,13 @@ The source implementation and fast tests cover:
 - Result serialization.
 - Progress reporting.
 - Resume checkpoints.
-- Legacy evaluation compatibility wrappers.
 
-The current repository does not contain an automated test that builds a wheel, installs it in a clean environment, and runs the evaluator.
+The clean-wheel test builds and installs the wheel outside the repository.
+It loads all shared intent resources and runs a mocked lite evaluation.
 The wheel audit confirmed that all four shared intent files and all 297 instance IDs are present.
+
+The separate package does not install the historical top-level `evaluation` package.
+Candidate generation imports the current model adapter directly from `explainbench.evaluation`.
 
 ## Local-effect question builder
 
@@ -561,8 +564,10 @@ It copies the required canonical modules under `src/core` in a new package-focus
 The wheel maps the children of `src/core` to their current top-level package names.
 This design avoids changes to the current scientific implementation during extraction.
 
-The extraction now contains `dataset`, `evaluation`, `execution`, `tracer`, and `tracer_plugin`.
+The extraction now contains `dataset`, `execution`, `tracer`, and `tracer_plugin`.
 The built extraction wheel installs these modules as their current top-level import names.
+Evaluation remains under the public `explainbench.evaluation` package.
+The historical top-level `evaluation` compatibility package was removed.
 The `core` repository container is not an installed import package.
 The extraction also builds the Docker tracer payload from the installed tracer packages.
 
@@ -645,14 +650,15 @@ The final unpinned direct dependency was `jsonpickle`.
 It is now pinned to the locked version `4.1.2`.
 
 The provisional wheel is `dist/explainbench-0.1.0-py3-none-any.whl`.
-It contains 113 files.
-Its SHA-256 is `197f08c3f9201fa38093aceaafc9d775f57a20f7c079d376fe3541c0a9e94a9b`.
+It contains 106 files.
+Its SHA-256 is `3fd6edbd3753171d4795c43e627f8c498c6ca3529d4987bdb66586daf07c3e6b`.
 
-The wheel contains the expected six top-level packages, eight runtime resources, console entry point, and pytest entry point.
+The wheel contains the expected five top-level packages, eight runtime resources, console entry point, and pytest entry point.
 It contains no tests, examples, logs, results, generated caches, or build directories.
-The exact fast-CI command reported 142 passed and 7 skipped.
+The exact fast-CI command reported 139 passed and 7 skipped.
 The exact wheel-smoke command reported 4 passed.
-The complete local suite reported 146 passed and 7 skipped.
+The complete local suite reported 143 passed and 7 skipped.
+The real unpaid S07 candidate-preparation scenario passed in 376.84 seconds with the package CLI.
 
 ## Known package gaps
 

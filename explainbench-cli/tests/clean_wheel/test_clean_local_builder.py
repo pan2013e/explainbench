@@ -157,12 +157,21 @@ def test_clean_local_builder(clean_wheel: CleanWheel):
 
     import_result = clean_wheel.run_python(
         """
+import importlib.util
 import dataset
 import execution
 import tracer
 
 for package in (dataset, execution, tracer):
     assert "site-packages" in package.__file__
+assert importlib.util.find_spec("evaluation") is None
+
+from dataset.extract_ground_truths.effect.infer_expression import (
+    Model as CandidateModel,
+)
+from explainbench.evaluation.inference import Model
+
+assert CandidateModel is Model
 print("clean local builder passed")
 """
     )

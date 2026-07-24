@@ -19,9 +19,6 @@ SOURCE_BUILD_STEP2_SHA256 = (
 SOURCE_INFER_EXPRESSION_SHA256 = (
     "33289a327da7f5ea4bdacc453e85339510c11c4ba177400c5abccfe7f1904205"
 )
-SOURCE_EVALUATION_INFERENCE_SHA256 = (
-    "f0be57ea07363b4b3b54b6ef2f52ba16bf7fb5850106b776c3b28412023bf8b6"
-)
 DATASET_EFFECT_TARGET = Path(
     "src/core/dataset/extract_ground_truths/effect"
 )
@@ -34,12 +31,7 @@ ADAPTED_DATASET_EFFECT_FILES = {
     Path("build_step2.py"),
     Path("infer_expression.py"),
 }
-ADAPTED_COPIED_TREE_FILES = {
-    Path("src/core/evaluation"): {Path("inference.py")},
-}
-
 COPIED_TREES = {
-    Path("src/core/evaluation"): Path("evaluation"),
     Path("src/core/tracer"): Path("py-tracer/tracer"),
     Path("src/core/tracer_plugin"): Path("py-tracer/tracer_plugin"),
 }
@@ -113,8 +105,7 @@ def test_copied_core_files_match_research_source():
         source_files = files_below(source_root)
 
         assert target_files == source_files
-        adapted = ADAPTED_COPIED_TREE_FILES.get(target_relative, set())
-        for relative_path in sorted(target_files - adapted):
+        for relative_path in sorted(target_files):
             assert file_digest(target_root / relative_path) == file_digest(
                 source_root / relative_path
             )
@@ -145,16 +136,10 @@ def test_paid_inference_adapters_are_recorded():
     assert "raw_response_callback" in infer_expression.read_text(
         encoding="utf-8"
     )
+    assert (
+        "from explainbench.evaluation.inference import "
+        "InferencePersistenceError, Model"
+        in infer_expression.read_text(encoding="utf-8")
+    )
     for relative_path in ADDED_DATASET_EFFECT_FILES:
         assert (target_root / relative_path).is_file()
-
-    evaluation_inference = (
-        PACKAGE_ROOT / "src/core/evaluation/inference.py"
-    )
-    assert (
-        file_digest(evaluation_inference)
-        != SOURCE_EVALUATION_INFERENCE_SHA256
-    )
-    assert "InferencePersistenceError" in evaluation_inference.read_text(
-        encoding="utf-8"
-    )

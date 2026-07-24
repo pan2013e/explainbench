@@ -17,7 +17,7 @@ Create a new repository that builds one self-contained ExplainBench wheel.
 The new repository will:
 
 - Preserve the existing scientific implementation.
-- Preserve the existing Python import names.
+- Preserve the Python import names required by the current CLI.
 - Preserve the existing canonical module commands.
 - Add the existing `explainbench` CLI and orchestration as a thin wrapper.
 - Include only code and resources required by the package.
@@ -39,7 +39,11 @@ The first extraction must preserve:
 - Answer-choice behavior.
 - Artifact export behavior.
 - Public command behavior.
-- Existing top-level import names.
+- Top-level import names used by current canonical modules.
+
+The historical top-level `evaluation` compatibility package was initially preserved.
+It was later removed because the separate package has no compatibility requirement for that old import path.
+The current evaluator remains under `explainbench.evaluation`.
 
 Changes are allowed only when they are required for:
 
@@ -74,7 +78,6 @@ The wheel will install the children of `src/core` as top-level packages:
 |---|---|
 | `src/explainbench` | `explainbench` |
 | `src/core/dataset` | `dataset` |
-| `src/core/evaluation` | `evaluation` |
 | `src/core/execution` | `execution` |
 | `src/core/tracer` | `tracer` |
 | `src/core/tracer_plugin` | `tracer_plugin` |
@@ -83,7 +86,7 @@ This mapping preserves imports such as:
 
 ```python
 from dataset.extract_ground_truths.effect import build_step1
-from evaluation.inference import Model
+from explainbench.evaluation.inference import Model
 from execution.util import get_instance_ids
 from tracer.serializer import serialize
 ```
@@ -142,7 +145,6 @@ explainbench-cli/
 │   │   │   ├── choices.py
 │   │   │   ├── config.py
 │   │   │   ├── inference.py
-│   │   │   ├── legacy.py
 │   │   │   ├── predictions.py
 │   │   │   ├── preparation.py
 │   │   │   ├── registry.py
@@ -194,13 +196,6 @@ explainbench-cli/
 │       │           ├── trace_util.py
 │       │           └── prompts/
 │       │               └── template.txt
-│       ├── evaluation/
-│       │   ├── __init__.py
-│       │   ├── inference.py
-│       │   ├── main.py
-│       │   ├── schema.py
-│       │   ├── task.py
-│       │   └── util.py
 │       ├── execution/
 │       │   ├── __init__.py
 │       │   ├── allowed_functions.json
@@ -296,7 +291,6 @@ The first extraction includes:
 
 - The current `src/explainbench` package.
 - The local-effect modules under `dataset/extract_ground_truths/effect`.
-- The legacy top-level `evaluation` package.
 - The local tracing and inspection modules under `execution`.
 - The `tracer` package.
 - The `tracer_plugin` package.
@@ -366,7 +360,7 @@ A phase is complete only when all required checks and acceptance criteria pass.
 | 1 | Create the package workspace | `complete` | The package skeleton and provenance record exist. |
 | 2 | Copy the `explainbench` wrapper package | `complete` | Checker, evaluator, and stage listing run from the new source tree. |
 | 3 | Copy the dataset core | `complete` | All local-effect dataset modules import and their resources load. |
-| 4 | Copy legacy evaluation core | `complete` | Candidate generation can import the legacy inference API. |
+| 4 | Copy legacy evaluation core | `complete` | This historical copy was later removed under decision D015. |
 | 5 | Copy execution and tracer core | `complete` | Track, trace, inspect, tracer, and plugins import successfully. |
 | 6 | Configure one wheel | `complete` | The wheel contains every mapped package and required resource. |
 | 7 | Migrate and pass fast tests | `complete` | All fast tests pass in the new repository. |
@@ -496,6 +490,9 @@ Status: `complete`.
 
 Status: `complete`.
 
+This phase records the initial extraction history.
+Decision D015 later removed these compatibility-only files and redirected candidate generation to `explainbench.evaluation`.
+
 ### Source and target
 
 | Source | Target | Action |
@@ -571,7 +568,6 @@ The package configuration must map:
 ```text
 explainbench   -> src/explainbench
 dataset        -> src/core/dataset
-evaluation     -> src/core/evaluation
 execution      -> src/core/execution
 tracer         -> src/core/tracer
 tracer_plugin  -> src/core/tracer_plugin
@@ -590,7 +586,6 @@ explainbench.question_builders.local
 dataset
 dataset.extract_ground_truths
 dataset.extract_ground_truths.effect
-evaluation
 execution
 execution.monkey_patch
 tracer
@@ -817,7 +812,7 @@ Status: `in_progress`.
 | `src/explainbench` | `src/explainbench` | Copy package files and resources. | [x] |
 | `dataset/__init__.py` | `src/core/dataset/__init__.py` | Copy unchanged. | [x] |
 | `dataset/extract_ground_truths` | `src/core/dataset/extract_ground_truths` | Copy the listed local-effect files. | [x] |
-| `evaluation` | `src/core/evaluation` | Copy six compatibility modules. | [x] |
+| `evaluation` | Removed | Initially copy, then remove the compatibility-only package. | [x] |
 | Selected `execution` files | `src/core/execution` | Copy local-effect execution files and resources. | [x] |
 | `py-tracer/tracer` | `src/core/tracer` | Copy unchanged. | [x] |
 | `py-tracer/tracer_plugin` | `src/core/tracer_plugin` | Copy unchanged. | [x] |
@@ -885,7 +880,7 @@ Status: `in_progress`.
 | D002 | Preserve the existing scientific implementation during extraction. | Agreed | 2026-07-23 |
 | D003 | Store copied core modules under `src/core`. | Agreed | 2026-07-23 |
 | D004 | Keep `core` out of Python import names. | Agreed | 2026-07-23 |
-| D005 | Preserve `dataset`, `evaluation`, `execution`, `tracer`, and `tracer_plugin` import names. | Agreed | 2026-07-23 |
+| D005 | Preserve `dataset`, `evaluation`, `execution`, `tracer`, and `tracer_plugin` import names. | Superseded by D015 | 2026-07-23 |
 | D006 | Build one wheel containing the wrapper and required core modules. | Agreed | 2026-07-23 |
 | D007 | Exclude `audit_agent` and `pbt-generator` from the first extraction. | Agreed | 2026-07-23 |
 | D008 | Copy tracer into the wheel instead of using a separate dependency. | Agreed | 2026-07-23 |
@@ -895,6 +890,7 @@ Status: `in_progress`.
 | D012 | Set Yusuf as the owner of the future `explainbench-cli` repository. | Agreed | 2026-07-23 |
 | D013 | Defer the package license decision until Git repository initialization. | Agreed | 2026-07-23 |
 | D014 | Let the research repository consume released package versions after extraction. | Agreed | 2026-07-23 |
+| D015 | Remove the compatibility-only top-level `evaluation` package and use `explainbench.evaluation` directly. | Agreed | 2026-07-24 |
 
 ## Progress log
 
@@ -1233,6 +1229,37 @@ Use a manual unpaid workflow for real Docker validation.
 Keep license work deferred until repository initialization, as requested by the owner.
 
 Next action: Initialize the separate repository, add the license, and run the new workflows.
+
+Date: 2026-07-24.
+
+Phase: Post-extraction compatibility cleanup.
+
+Completed: Removed the historical top-level `evaluation` compatibility package.
+Removed the unused internal `explainbench.evaluation.legacy` facade.
+Changed candidate generation to import `Model` and `InferencePersistenceError` directly from `explainbench.evaluation.inference`.
+Removed the legacy package mappings and three compatibility-only tests.
+Updated clean-wheel coverage and package documentation.
+
+Checks: The focused evaluator, candidate, builder, and source-integrity selection reported 87 passed.
+The complete non-wheel suite reported 139 passed and 7 skipped.
+The isolated wheel suite reported 4 passed.
+The complete suite therefore reports 143 passed and 7 skipped.
+The isolated wheel confirms that top-level `evaluation` is absent.
+It also confirms that candidate generation uses the current `explainbench.evaluation.Model` object.
+The real unpaid S07 candidate-preparation scenario passed in 376.84 seconds with the package CLI.
+The wheel contains 106 files and has SHA-256 `3fd6edbd3753171d4795c43e627f8c498c6ca3529d4987bdb66586daf07c3e6b`.
+The wheel contains the expected `dataset`, `execution`, `explainbench`, `tracer`, and `tracer_plugin` packages.
+
+Problems: Code that imports the historical top-level `evaluation` package is no longer compatible.
+The current CLI did not use that API.
+The first real-test command selected an outer repository executable from `PATH`.
+The real-test fixture now prefers the executable beside its active Python interpreter and uses `PATH` only as a fallback.
+
+Decisions: Keep all current evaluator implementation under `explainbench.evaluation`.
+Do not retain compatibility-only import packages in the separate distribution.
+Do not change evaluator, question-builder, execution, or tracer behavior.
+
+Next action: Add the deferred license and run CI from the separate repository.
 
 ## Progress log template
 

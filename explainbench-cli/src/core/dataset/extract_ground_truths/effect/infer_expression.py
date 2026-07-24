@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Callable
 from pydantic import BaseModel, field_validator
 
-from evaluation.inference import InferencePersistenceError, Model
+from explainbench.evaluation.inference import InferencePersistenceError, Model
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_MODEL = "gpt-5.2-2025-12-11"

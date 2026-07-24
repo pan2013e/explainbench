@@ -7,6 +7,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -61,7 +62,11 @@ class RealLocalEffectCase:
 def real_case() -> RealLocalEffectCase:
     executable = os.environ.get("EXPLAINBENCH_REAL_EXECUTABLE")
     if executable is None:
-        executable = shutil.which("explainbench")
+        active_executable = Path(sys.executable).with_name("explainbench")
+        if active_executable.is_file():
+            executable = str(active_executable)
+        else:
+            executable = shutil.which("explainbench")
     if executable is None:
         pytest.fail(
             "the explainbench executable is unavailable; install the package "

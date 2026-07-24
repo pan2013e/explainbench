@@ -177,7 +177,6 @@ src/
 ├── explainbench/
 └── core/
     ├── dataset/
-    ├── evaluation/
     ├── execution/
     ├── tracer/
     └── tracer_plugin/
@@ -189,7 +188,6 @@ It is not a Python import package.
 The wheel will install its children as the existing top-level packages:
 
 - `dataset`
-- `evaluation`
 - `execution`
 - `tracer`
 - `tracer_plugin`
@@ -198,12 +196,14 @@ The CLI wrapper will remain available as `explainbench`.
 
 ## Current status
 
-The `dataset`, `evaluation`, `execution`, `explainbench`, `tracer`, and `tracer_plugin` packages are present.
+The `dataset`, `execution`, `explainbench`, `tracer`, and `tracer_plugin` packages are present.
+Evaluation is implemented only under `explainbench.evaluation`.
+The historical top-level `evaluation` compatibility package is not included.
 The approved package examples and runtime resources are present.
 All approved core modules have been copied.
 The one-wheel package mapping and resource declarations are complete.
 The final Phase 6 wheel passed archive and installed-package checks.
-The complete suite reports 146 passed and 7 documented opt-in skips.
+The complete suite reports 143 passed and 7 documented opt-in skips.
 The standalone tracer inspector and serializer suites also pass.
 Four clean-wheel tests cover the checker, resources, mocked evaluation, and the first local-builder stage with resume.
 The opt-in real Docker sequence reports seven passes for scenarios `S01` through `S07`.

@@ -17,7 +17,6 @@ The wheel installs its child directories with their existing import names:
 
 ```text
 src/core/dataset/        -> dataset
-src/core/evaluation/     -> evaluation
 src/core/execution/      -> execution
 src/core/tracer/         -> tracer
 src/core/tracer_plugin/  -> tracer_plugin
@@ -178,15 +177,14 @@ The following files match `main`:
 
 ## Evaluation changes
 
-The evaluation layout is different from `main`.
-The main evaluation code now lives under `src/explainbench/evaluation`.
+The package evaluation code lives under `src/explainbench/evaluation`.
+The separate package does not install the historical top-level `evaluation` package.
 
-The files under `src/core/evaluation` keep the old import paths.
-They import the current model, task, prediction, choice-formatting, and scoring code from `explainbench.evaluation`.
+Candidate generation imports `Model` and `InferencePersistenceError` directly from `explainbench.evaluation.inference`.
+This direct import uses the same objects that the removed compatibility module re-exported.
+It does not change candidate inference behavior.
 
-This means that `evaluation.inference`, `evaluation.schema`, `evaluation.task`, and parts of `evaluation.util` are compatibility files.
-Do not add new evaluation logic to these compatibility files.
-Add new evaluation logic to `src/explainbench/evaluation` unless an old import path also needs an update.
+Add new evaluation logic only under `src/explainbench/evaluation`.
 
 ## Tracer changes
 

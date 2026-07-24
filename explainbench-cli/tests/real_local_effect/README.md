@@ -57,6 +57,8 @@ pytest -s tests/real_local_effect/test_s01_s07_real_pipeline.py
 ```
 
 Use `EXPLAINBENCH_REAL_EXECUTABLE` to select a specific installed CLI.
+Without this setting, the tests prefer the `explainbench` executable beside the Python interpreter that runs pytest.
+They use the executable from `PATH` only when that environment does not provide one.
 Use `EXPLAINBENCH_REAL_COMMAND_TIMEOUT_SECONDS` to change the outer per-command timeout.
 
 ## Paid inference boundary

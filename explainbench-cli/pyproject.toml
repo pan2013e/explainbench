@@ -46,7 +46,6 @@ packages = [
     "dataset",
     "dataset.extract_ground_truths",
     "dataset.extract_ground_truths.effect",
-    "evaluation",
     "execution",
     "execution.monkey_patch",
     "explainbench",
@@ -62,7 +61,6 @@ packages = [
 
 [tool.setuptools.package-dir]
 dataset = "src/core/dataset"
-evaluation = "src/core/evaluation"
 execution = "src/core/execution"
 explainbench = "src/explainbench"
 tracer = "src/core/tracer"
