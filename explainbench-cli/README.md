@@ -43,6 +43,8 @@ The final Phase 6 wheel passed archive and installed-package checks.
 The complete suite reports 139 passed and 7 documented opt-in skips.
 The standalone tracer inspector and serializer suites also pass.
 Four clean-wheel tests cover the checker, resources, mocked evaluation, and the first local-builder stage with resume.
+The opt-in real Docker sequence reports seven passes for scenarios `S01` through `S07`.
+The sequence confirms artifact checksums and checkpoint reuse without a model API call.
 
 One packaging adapter in `execution.util` builds the Docker tracer payload from the installed `tracer` and `tracer_plugin` packages.
 This removes the old dependency on a sibling `py-tracer` repository directory.
@@ -54,4 +56,4 @@ See [PACKAGE_HANDOFF.md](PACKAGE_HANDOFF.md) for current implementation and vali
 ## Development state
 
 Do not publish this package yet.
-CI, real Docker validation, licensing, and release metadata are incomplete.
+Paid-work persistence, model-backed validation, CI, licensing, and release metadata are incomplete.

@@ -371,7 +371,7 @@ A phase is complete only when all required checks and acceptance criteria pass.
 | 6 | Configure one wheel | `complete` | The wheel contains every mapped package and required resource. |
 | 7 | Migrate and pass fast tests | `complete` | All fast tests pass in the new repository. |
 | 8 | Add clean-wheel tests | `complete` | Checker, resources, mocked evaluation, and the first builder stage pass outside the repository. |
-| 9 | Run unpaid real validation | `not_started` | Real scenarios `S01` through `S07` complete. |
+| 9 | Run unpaid real validation | `complete` | Real scenarios `S01` through `S07` complete. |
 | 10 | Add paid-work persistence | `not_started` | Raw prompts and responses are durable and resumable. |
 | 11 | Complete one real local-effect workflow | `not_started` | A generated local-effect artifact is evaluated successfully. |
 | 12 | Prepare release and handoff | `not_started` | Release metadata, documentation, CI, and ownership are complete. |
@@ -700,28 +700,28 @@ Each wheel test must:
 
 ## Phase 9: Run unpaid real validation
 
-Status: `not_started`.
+Status: `complete`.
 
 ### Tasks
 
-- [ ] Run `S01` submission validation.
-- [ ] Run `S02` patched-function identification.
-- [ ] Run `S03` real test-call tracking.
-- [ ] Run `S04` trace-function selection.
-- [ ] Run `S05` detailed program tracing.
-- [ ] Run `S06` divergence detection.
-- [ ] Run `S07` candidate preparation with inference disabled.
-- [ ] Review every command record.
-- [ ] Review every external artifact checksum.
-- [ ] Confirm checkpoint reuse after every stage.
-- [ ] Record the test environment and Docker versions.
+- [x] Run `S01` submission validation.
+- [x] Run `S02` patched-function identification.
+- [x] Run `S03` real test-call tracking.
+- [x] Run `S04` trace-function selection.
+- [x] Run `S05` detailed program tracing.
+- [x] Run `S06` divergence detection.
+- [x] Run `S07` candidate preparation with inference disabled.
+- [x] Review every command record.
+- [x] Review every external artifact checksum.
+- [x] Confirm checkpoint reuse after every stage.
+- [x] Record the test environment and Docker versions.
 
 ### Acceptance criteria
 
-- [ ] `S01` through `S07` complete from the new repository.
-- [ ] No model API call occurs in `S01` through `S07`.
-- [ ] Docker-backed outputs are durable and reusable.
-- [ ] The observed divergence is suitable for paid candidate generation.
+- [x] `S01` through `S07` complete from the new repository.
+- [x] No model API call occurs in `S01` through `S07`.
+- [x] Docker-backed outputs are durable and reusable.
+- [x] The observed divergence is suitable for paid candidate generation.
 
 ## Phase 10: Add paid-work persistence
 
@@ -1110,6 +1110,33 @@ Use local test inputs for the first canonical stage so the test does not require
 
 Next action: Run unpaid real validation in Phase 9.
 
+Date: 2026-07-23.
+
+Phase: 9.
+
+Completed: Ran real scenarios `S01` through `S07` from the extracted package with the fixed `sympy__sympy-15349` instance.
+Ran `S07` again after completion to confirm reuse for all six builder stages.
+
+Checks: The full opt-in module reported 7 passed in 235.83 seconds.
+The separate initial `S03` run reported 1 passed in 181.75 seconds.
+The final `S07` reuse run reported 1 passed in 16.22 seconds.
+All 36 saved command records have exit status zero.
+All six stage checkpoints reported `reused=1` in the final run.
+All 16 external files in the tracking and tracing manifests matched their saved sizes and SHA-256 checksums.
+Candidate inference was disabled, the result records `inference: false`, and the prepared prompt length is 15,095 characters.
+The divergence is in `sympy.algebras.quaternion:Quaternion.to_rotation_matrix` at the expected return statement.
+The environment used Linux 5.15.0-139-generic, Python 3.12.3, uv 0.10.0, Docker client and server 28.0.1, and Docker API 1.48.
+
+Problems: An initial environment setup selected Python 3.14 and could not build `orjson` because no Rust toolchain was configured.
+The validation environment was recreated with the supported and previously tested Python 3.12 interpreter.
+No Phase 9 blocker remains.
+
+Decisions: Keep real Docker validation opt-in.
+Use the retained workspace to verify that checkpoints remain reusable after package extraction.
+Do not start paid inference until Phase 10 stores raw prompts and raw model responses.
+
+Next action: Add paid-work persistence in Phase 10.
+
 ## Progress log template
 
 Add one entry after each work session:
@@ -1144,4 +1171,6 @@ Phase 7 is complete.
 
 Phase 8 is complete.
 
-Run unpaid real validation in Phase 9.
+Phase 9 is complete.
+
+Add paid-work persistence in Phase 10.

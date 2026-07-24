@@ -32,11 +32,11 @@ These terms keep repository implementation status separate from release status.
 | Evaluation checkpoints | Implemented | Fast tests cover compatible resume and checkpoint validation. |
 | Local-effect question-builder CLI | Implemented in the repository | The CLI exposes all ten stages, complete runs, status, configuration, checkpoints, and publication. |
 | Local-effect scientific stage wrappers | Implemented in the repository | All ten wrappers call and validate their canonical commands. |
-| Local-effect real-data validation | Partly validated | Retained evidence confirms `S01` and `S02`; `S03` through `S07` have not run successfully yet. |
-| Local-effect wheel execution | Partly validated | The extracted wheel contains all canonical modules, and their installed command help checks pass. |
+| Local-effect real-data validation | Implemented and validated | Real scenarios `S01` through `S07` pass from the extracted package with Docker and inference disabled. |
+| Local-effect wheel execution | Package-ready for unpaid stages | The extracted wheel contains all canonical modules, and `S01` through `S07` pass from its installed CLI. |
 | Model-backed local-effect workflow | Partly validated | The wrapper exists, but paid inference and complete real-data execution have not been validated. |
 | End-to-end effect question builder | Not implemented | End-to-end effect artifacts must be prepared outside the package. |
-| Package release verification | Partly validated | Four automated clean-wheel tests pass, but CI and real Docker validation are incomplete. |
+| Package release verification | Partly validated | Four automated clean-wheel tests and the opt-in real Docker sequence pass, but CI and paid validation are incomplete. |
 
 The extracted fast test result on 2026-07-23 was:
 
@@ -476,23 +476,35 @@ The repository implementation includes:
 ### Real-data validation status
 
 The opt-in test module defines scenarios `S01` through `S07`.
-The retained evidence currently contains:
+The retained evidence contains successful runs for all seven scenarios:
 
 - `S01`: submission validation completed.
 - `S02`: patched-function identification completed.
-- `S02` resume: the completed checkpoint was reused.
+- `S03`: real test-call tracking completed.
+- `S04`: trace-function selection completed.
+- `S05`: detailed program tracing completed.
+- `S06`: divergence detection completed.
+- `S07`: candidate metadata preparation completed with inference disabled.
 
-The retained evidence does not contain completed runs for `S03` through `S07`.
-The current default test run skips all seven real-data tests.
+The full opt-in test module reported 7 passed in 235.83 seconds.
+The Phase 9 acceptance review found no failed command records.
+The final reuse run confirmed `reused=1` for all six builder stages.
+All 16 files in the two Docker artifact manifests matched their recorded sizes and SHA-256 checksums.
 
-The next unpaid real-data sequence is:
+The saved divergence is in `sympy.algebras.quaternion:Quaternion.to_rotation_matrix`.
+It identifies a changed return value at the expected return statement in `sympy/algebras/quaternion.py`.
+The candidate preparation result records `inference: false` and a prompt length of 15,095 characters.
+No model API call was required.
 
-1. Run `S03` to track real test calls with Docker.
-2. Run `S04` to select trace functions.
-3. Run `S05` to record detailed traces.
-4. Run `S06` to find a real divergence.
-5. Run `S07` with candidate inference disabled.
-6. Review the saved divergence and candidate metadata.
+The validation environment was:
+
+- Linux 5.15.0-139-generic on x86-64.
+- Python 3.12.3.
+- uv 0.10.0.
+- Docker client and server 28.0.1.
+- Docker API 1.48.
+
+The current default test run still skips all seven real-data tests because they require Docker and SWE-bench resources.
 
 The fixed test instance is `sympy__sympy-15349`.
 The default real-test workspace is `.explainbench/real-tests/sympy-15349`.
@@ -559,7 +571,7 @@ These are separate package capabilities.
 
 ### Validation gaps
 
-- Real scenarios `S03` through `S07` have not completed.
+- Python 3.14 installation has not been validated.
 - Paid candidate generation has not completed in the real workflow.
 - Expression execution and validation have not completed in the real workflow.
 - Final local-effect publication has not completed in the real workflow.
@@ -592,20 +604,14 @@ They should be complete before a public package release.
 
 The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTION_PLAN.md](EXPLAINBENCH_CLI_EXTRACTION_PLAN.md).
 
-### Priority 1: Complete unpaid real validation
-
-1. Run and review `S03` through `S07`.
-2. Fix any Docker, path, timeout, or artifact problems.
-3. Confirm that resume does not repeat completed expensive work.
-
-### Priority 2: Improve paid-work durability
+### Priority 1: Improve paid-work durability
 
 1. Store the raw candidate prompt before inference.
 2. Store every raw model response before parsing.
 3. Add checksums and checkpoint references.
 4. Confirm that resume can reuse paid outputs.
 
-### Priority 3: Complete one real local-effect workflow
+### Priority 2: Complete one real local-effect workflow
 
 1. Run model-backed candidate generation.
 2. Execute candidate expressions.
@@ -615,13 +621,13 @@ The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTI
 6. Run `explainbench evaluate --task local.effect` with the generated artifacts.
 7. Repeat the complete run with `--resume`.
 
-### Priority 4: Complete release verification
+### Priority 3: Complete release verification
 
 1. Add the fast and clean-wheel tests to CI.
 2. Add a separate opt-in Docker integration job.
 3. Complete the release metadata and installation documentation.
 
-### Priority 5: Decide the end-to-end builder scope
+### Priority 4: Decide the end-to-end builder scope
 
 Implement the end-to-end builder only after the local builder is package-ready.
 Reuse the common orchestration components when they match the end-to-end pipeline.
