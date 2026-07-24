@@ -373,7 +373,7 @@ A phase is complete only when all required checks and acceptance criteria pass.
 | 8 | Add clean-wheel tests | `complete` | Checker, resources, mocked evaluation, and the first builder stage pass outside the repository. |
 | 9 | Run unpaid real validation | `complete` | Real scenarios `S01` through `S07` complete. |
 | 10 | Add paid-work persistence | `complete` | Raw prompts and responses are durable and resumable. |
-| 11 | Complete one real local-effect workflow | `not_started` | A generated local-effect artifact is evaluated successfully. |
+| 11 | Complete one real local-effect workflow | `complete` | A generated local-effect artifact was evaluated successfully. |
 | 12 | Prepare release and handoff | `not_started` | Release metadata, documentation, CI, and ownership are complete. |
 
 ## Phase 0: Confirm extraction decisions
@@ -750,28 +750,28 @@ It must be committed separately from the copy-only extraction.
 
 ## Phase 11: Complete one real local-effect workflow
 
-Status: `not_started`.
+Status: `complete`.
 
 ### Tasks
 
-- [ ] Run model-backed candidate generation.
-- [ ] Review raw prompts and responses.
-- [ ] Execute candidate expressions.
-- [ ] Validate candidate expressions.
-- [ ] Build answer choices.
-- [ ] Export local-effect artifacts.
-- [ ] Load the generated artifacts with the evaluator.
-- [ ] Run `explainbench evaluate --task local.effect`.
-- [ ] Save the evaluation result.
-- [ ] Repeat the complete builder command with `--resume`.
-- [ ] Confirm that compatible Docker and model work is reused.
+- [x] Run model-backed candidate generation.
+- [x] Review raw prompts and responses.
+- [x] Execute candidate expressions.
+- [x] Validate candidate expressions.
+- [x] Build answer choices.
+- [x] Export local-effect artifacts.
+- [x] Load the generated artifacts with the evaluator.
+- [x] Run `explainbench evaluate --task local.effect`.
+- [x] Save the evaluation result.
+- [x] Repeat the complete builder command with `--resume`.
+- [x] Confirm that compatible Docker and model work is reused.
 
 ### Acceptance criteria
 
-- [ ] One real local-effect artifact is generated from the installed package.
-- [ ] The artifact passes typed evaluator validation.
-- [ ] The evaluator produces a result for the generated artifact.
-- [ ] Resume does not repeat compatible expensive work.
+- [x] One real local-effect artifact is generated from the installed package.
+- [x] The artifact passes typed evaluator validation.
+- [x] The evaluator produces a result for the generated artifact.
+- [x] Resume does not repeat compatible expensive work.
 
 ## Phase 12: Prepare release and handoff
 
@@ -1165,6 +1165,40 @@ Use a dedicated process exit status when a received response cannot be stored, a
 
 Next action: Complete one real model-backed local-effect workflow in Phase 11.
 
+Date: 2026-07-24.
+
+Phase: 11.
+
+Completed: Ran the complete local-effect builder for `sympy__sympy-15349` with model-backed candidate generation.
+The candidate request used `gpt-5.2-2025-12-11`, medium reasoning effort, 10 changed candidates, and 10 unchanged candidates.
+The workflow executed and validated the candidates, built answer choices, and published evaluator artifacts.
+Loaded the published files as one typed `LocalEffectContext` and one typed `AnswerGroundTruth`.
+Ran one `local.effect` evaluation with `gpt-5-mini-2025-08-07`.
+Saved the evaluation result under the retained real-test workspace.
+Repeated the complete builder command with `--resume`.
+
+Checks: The candidate audit contains a 15,105-byte prompt and one 731-byte raw response.
+The prompt, response, audit manifest, stage result, and published files have recorded SHA-256 checksums.
+All ten builder stages completed.
+The repeated builder command reported `reused=1` for every stage and made no second candidate request.
+Typed evaluator loading found one context and one ground truth for `sympy__sympy-15349`.
+The evaluator processed one task instance with no failure and produced a score of 1.
+The evaluator used 996 prompt tokens and 723 completion tokens.
+The final complete suite reported 146 passed and 7 skipped.
+
+Problems: The first paid-stage attempt loaded the stale research-repository `dataset` package from the current directory.
+The child command failed before any model request because that module did not support the new audit options.
+Canonical child commands now use Python safe-path mode so the current directory cannot shadow the installed package.
+A regression test reproduces this package-shadowing case.
+The first complete test run could not download isolated wheel-build requirements because network access was restricted.
+The same suite passed when network access was allowed.
+
+Decisions: Keep canonical command data paths relative to the caller workspace.
+Use Python safe-path mode only to control module resolution.
+Retain the real builder workspace, model audit, published artifact generation, and evaluation result as Phase 11 evidence.
+
+Next action: Prepare release metadata, documentation, automation, and the release candidate in Phase 12.
+
 ## Progress log template
 
 Add one entry after each work session:
@@ -1203,4 +1237,6 @@ Phase 9 is complete.
 
 Phase 10 is complete.
 
-Complete one real model-backed local-effect workflow in Phase 11.
+Phase 11 is complete.
+
+Prepare the release and handoff in Phase 12.

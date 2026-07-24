@@ -14,7 +14,10 @@ from explainbench.question_builders.common.orchestration import (
     StageContext,
     StageExecutionError,
 )
-from explainbench.question_builders.common.subprocess_runner import run_command
+from explainbench.question_builders.common.subprocess_runner import (
+    run_canonical_module,
+    run_command,
+)
 from explainbench.question_builders.common.status import StoredStageResult
 from explainbench.question_builders.local import runners
 from explainbench.question_builders.local.config import LocalBuilderConfig
@@ -193,6 +196,46 @@ def test_subprocess_runner_classifies_nonzero_exit(tmp_path):
     )
     assert command_record["state"] == "failed"
     assert command_record["return_code"] == 7
+
+
+def test_canonical_module_ignores_shadow_package_in_current_directory(tmp_path):
+    shadow_module = (
+        tmp_path
+        / "dataset"
+        / "extract_ground_truths"
+        / "effect"
+        / "build_step2.py"
+    )
+    shadow_module.parent.mkdir(parents=True)
+    for package in (
+        shadow_module.parents[2],
+        shadow_module.parents[1],
+        shadow_module.parent,
+    ):
+        (package / "__init__.py").write_text("", encoding="utf-8")
+    shadow_module.write_text(
+        "raise SystemExit('loaded shadow package')\n",
+        encoding="utf-8",
+    )
+    context = make_context(tmp_path / "workspace")
+
+    result = run_canonical_module(
+        "dataset.extract_ground_truths.effect.build_step2",
+        ("--help",),
+        context,
+        timeout=10,
+        cwd=tmp_path,
+    )
+
+    stdout = result.stdout_path.read_text(encoding="utf-8")
+    assert "--audit-dir" in stdout
+    assert "loaded shadow package" not in stdout
+    command_record = json.loads(
+        (context.attempt_directory / "command.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert command_record["command"][1:3] == ["-P", "-m"]
 
 
 def test_subprocess_runner_terminates_timed_out_process(tmp_path):

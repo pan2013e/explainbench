@@ -192,7 +192,7 @@ def run_canonical_module(
     if not module.strip():
         raise ValueError("module must not be blank")
     return run_command(
-        (sys.executable, "-m", module, *arguments),
+        (sys.executable, "-P", "-m", module, *arguments),
         context,
         timeout=timeout,
         cwd=cwd,

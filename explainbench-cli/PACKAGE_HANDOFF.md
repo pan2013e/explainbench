@@ -35,19 +35,19 @@ These terms keep repository implementation status separate from release status.
 | Local-effect real-data validation | Implemented and validated | Real scenarios `S01` through `S07` pass from the extracted package with Docker and inference disabled. |
 | Local-effect wheel execution | Package-ready for unpaid stages | The extracted wheel contains all canonical modules, and `S01` through `S07` pass from its installed CLI. |
 | Paid inference persistence | Implemented | Tests confirm atomic prompt and response storage, checksums, source links, interruption recovery, and no repeated compatible request. |
-| Model-backed local-effect workflow | Partly validated | The wrapper exists, but paid inference and complete real-data execution have not been validated. |
+| Model-backed local-effect workflow | Implemented and validated | One complete real workflow generated, loaded, and evaluated an artifact for `sympy__sympy-15349`. |
 | End-to-end effect question builder | Not implemented | End-to-end effect artifacts must be prepared outside the package. |
-| Package release verification | Partly validated | Four automated clean-wheel tests and the opt-in real Docker sequence pass, but CI and paid validation are incomplete. |
+| Package release verification | Partly validated | Clean-wheel, real Docker, paid candidate generation, and real evaluation checks pass, but release CI is incomplete. |
 
 The extracted test result on 2026-07-24 was:
 
 ```text
-145 passed, 7 skipped
+146 passed, 7 skipped
 ```
 
 The seven skipped tests are the opt-in real local-effect tests.
 The source baseline was 132 passed and 7 skipped.
-The added tests cover extraction checksums, the tracer payload, clean-wheel execution, and paid-work persistence.
+The added tests cover extraction checksums, the tracer payload, clean-wheel execution, paid-work persistence, and safe child-module resolution.
 The standalone tracer checks also reported 17 inspector before-mode passes, 17 inspector after-mode passes, and 12 serializer passes with 3 optional-library skips.
 
 ## Package boundary
@@ -509,6 +509,19 @@ The current default test run still skips all seven real-data tests because they 
 
 The fixed test instance is `sympy__sympy-15349`.
 The default real-test workspace is `.explainbench/real-tests/sympy-15349`.
+
+The Phase 11 complete builder run enabled model inference for this instance.
+It requested 10 changed candidates and 10 unchanged candidates from `gpt-5.2-2025-12-11` with medium reasoning effort.
+All ten builder stages completed.
+The published files loaded as one typed `LocalEffectContext` and one typed `AnswerGroundTruth`.
+One `local.effect` evaluation completed with `gpt-5-mini-2025-08-07`.
+The evaluation processed one task instance with no failure and produced a score of 1.
+The repeated complete builder command reused all ten stages and made no second candidate request.
+
+Canonical child commands use Python safe-path mode.
+This prevents a package in the caller's current directory from shadowing the installed canonical package.
+The change controls module resolution only.
+It does not change canonical stage logic or relative data paths.
 
 ### Model persistence
 
