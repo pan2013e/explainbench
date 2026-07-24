@@ -5,6 +5,33 @@ This directory contains the package-focused ExplainBench implementation.
 The package workspace is under active extraction from the ExplainBench research repository.
 It is not release-ready yet.
 
+## Installation
+
+ExplainBench requires Python 3.12 or later.
+Clone the repository and install the package from the `explainbench-cli` directory:
+
+```bash
+git clone https://github.com/pan2013e/explainbench.git
+cd explainbench/explainbench-cli
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install .
+```
+
+Confirm that the command is available:
+
+```bash
+explainbench --help
+```
+
+For development, install the package in editable mode with its development dependencies:
+
+```bash
+python -m pip install -e .
+python -m pip install "pytest>=8.4,<10"
+```
+
 ## Repository model
 
 The source tree separates the CLI wrapper from the copied core modules:
