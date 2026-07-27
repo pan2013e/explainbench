@@ -32,19 +32,22 @@ These terms keep repository implementation status separate from release status.
 | Evaluation checkpoints | Implemented | Fast tests cover compatible resume and checkpoint validation. |
 | Local-effect question-builder CLI | Implemented in the repository | The CLI exposes all ten stages, complete runs, status, configuration, checkpoints, and publication. |
 | Local-effect scientific stage wrappers | Implemented in the repository | All ten wrappers call and validate their canonical commands. |
-| Local-effect real-data validation | Partly validated | Retained evidence confirms `S01` and `S02`; `S03` through `S07` have not run successfully yet. |
-| Local-effect wheel execution | Not package-ready | The wheel does not contain the canonical `dataset` and `execution` modules. |
+| Local-effect real-data validation | Implemented and validated | Real scenarios `S01` through `S07` pass from the extracted package with Docker and inference disabled. |
+| Local-effect wheel execution | Package-ready for unpaid stages | The extracted wheel contains all canonical modules, and `S01` through `S07` pass from its installed CLI. |
 | Model-backed local-effect workflow | Partly validated | The wrapper exists, but paid inference and complete real-data execution have not been validated. |
 | End-to-end effect question builder | Not implemented | End-to-end effect artifacts must be prepared outside the package. |
-| Package release verification | Incomplete | The wheel builds, but there is no automated clean-wheel integration test. |
+| Package release verification | Partly validated | Four automated clean-wheel tests and the opt-in real Docker sequence pass, but CI and paid validation are incomplete. |
 
-The fast test result on 2026-07-23 was:
+The extracted fast test result on 2026-07-23 was:
 
 ```text
-132 passed, 7 skipped
+139 passed, 7 skipped
 ```
 
 The seven skipped tests are the opt-in real local-effect tests.
+The source baseline was 132 passed and 7 skipped.
+The seven added passing tests are two extraction checksum tests, one tracer-payload regression test, and four clean-wheel integration tests.
+The standalone tracer checks also reported 17 inspector before-mode passes, 17 inspector after-mode passes, and 12 serializer passes with 3 optional-library skips.
 
 ## Package boundary
 
@@ -59,7 +62,7 @@ The console entry point is:
 explainbench = "explainbench.cli:main"
 ```
 
-The built wheel contains:
+The original research-repository wheel contains:
 
 - The `explainbench` package.
 - The evaluation implementation.
@@ -74,7 +77,7 @@ The built wheel does not contain:
 - The repository examples.
 - The end-to-end question-builder implementation.
 
-The missing canonical modules are the main local question-builder packaging blocker.
+The extracted package workspace at `explainbench-cli/` now includes the missing canonical modules.
 
 ## Current architecture
 
@@ -473,23 +476,35 @@ The repository implementation includes:
 ### Real-data validation status
 
 The opt-in test module defines scenarios `S01` through `S07`.
-The retained evidence currently contains:
+The retained evidence contains successful runs for all seven scenarios:
 
 - `S01`: submission validation completed.
 - `S02`: patched-function identification completed.
-- `S02` resume: the completed checkpoint was reused.
+- `S03`: real test-call tracking completed.
+- `S04`: trace-function selection completed.
+- `S05`: detailed program tracing completed.
+- `S06`: divergence detection completed.
+- `S07`: candidate metadata preparation completed with inference disabled.
 
-The retained evidence does not contain completed runs for `S03` through `S07`.
-The current default test run skips all seven real-data tests.
+The full opt-in test module reported 7 passed in 235.83 seconds.
+The Phase 9 acceptance review found no failed command records.
+The final reuse run confirmed `reused=1` for all six builder stages.
+All 16 files in the two Docker artifact manifests matched their recorded sizes and SHA-256 checksums.
 
-The next unpaid real-data sequence is:
+The saved divergence is in `sympy.algebras.quaternion:Quaternion.to_rotation_matrix`.
+It identifies a changed return value at the expected return statement in `sympy/algebras/quaternion.py`.
+The candidate preparation result records `inference: false` and a prompt length of 15,095 characters.
+No model API call was required.
 
-1. Run `S03` to track real test calls with Docker.
-2. Run `S04` to select trace functions.
-3. Run `S05` to record detailed traces.
-4. Run `S06` to find a real divergence.
-5. Run `S07` with candidate inference disabled.
-6. Review the saved divergence and candidate metadata.
+The validation environment was:
+
+- Linux 5.15.0-139-generic on x86-64.
+- Python 3.12.3.
+- uv 0.10.0.
+- Docker client and server 28.0.1.
+- Docker API 1.48.
+
+The current default test run still skips all seven real-data tests because they require Docker and SWE-bench resources.
 
 The fixed test instance is `sympy__sympy-15349`.
 The default real-test workspace is `.explainbench/real-tests/sympy-15349`.
@@ -507,32 +522,30 @@ Do not move or copy the scientific prompt construction into the package wrapper.
 
 ### Wheel blocker
 
-The wheel includes the local builder wrappers but excludes their canonical modules.
-A wheel-based run of `identify-patched-functions` fails with:
+The original research-repository wheel includes the local builder wrappers but excludes their canonical modules.
+A run from that original wheel fails with:
 
 ```text
 ModuleNotFoundError: No module named 'dataset'
 ```
 
-This failure occurs because the runner invokes:
+This historical failure occurs because the runner invokes:
 
 ```text
 python -m dataset.extract_ground_truths.effect.trace_step1_generate_qualname_whitelist
 ```
 
-The wheel also needs a complete and declared runtime path for the tracing code and other repository-owned dependencies.
+The selected extraction design keeps the current import names.
+It copies the required canonical modules under `src/core` in a new package-focused repository.
+The wheel maps the children of `src/core` to their current top-level package names.
+This design avoids changes to the current scientific implementation during extraction.
 
-The recommended long-term package structure is:
+The extraction now contains `dataset`, `evaluation`, `execution`, `tracer`, and `tracer_plugin`.
+The built extraction wheel installs these modules as their current top-level import names.
+The `core` repository container is not an installed import package.
+The extraction also builds the Docker tracer payload from the installed tracer packages.
 
-1. Move the canonical scientific modules into an installed namespace under `explainbench`.
-2. Keep the old repository module paths as compatibility wrappers when they are still required.
-3. Keep the subprocess boundary for expensive stages.
-4. Update every package runner to call the installed canonical module path.
-5. Include all required non-Python resources in the wheel.
-6. Declare every runtime dependency in package metadata.
-7. Add a clean-wheel test that runs outside the repository.
-
-This structure keeps one scientific implementation and avoids generic top-level package names such as `dataset` and `execution` in the installed environment.
+The complete structure, migration tracker, and acceptance criteria are in [EXPLAINBENCH_CLI_EXTRACTION_PLAN.md](EXPLAINBENCH_CLI_EXTRACTION_PLAN.md).
 
 ## End-to-end effect question builder
 
@@ -553,14 +566,12 @@ These are separate package capabilities.
 
 ### Release blockers
 
-- The installed wheel cannot run the local scientific stages.
-- A clean-wheel integration test is absent.
-- The required tracing and repository resources are not fully represented in the wheel.
+- The clean-wheel tests are not in CI.
 - The complete local-effect workflow has not passed real Docker and model validation.
 
 ### Validation gaps
 
-- Real scenarios `S03` through `S07` have not completed.
+- Python 3.14 installation has not been validated.
 - Paid candidate generation has not completed in the real workflow.
 - Expression execution and validation have not completed in the real workflow.
 - Final local-effect publication has not completed in the real workflow.
@@ -581,8 +592,7 @@ These are separate package capabilities.
 
 ### Distribution metadata gaps
 
-- The package metadata does not declare a project README.
-- The package metadata does not contain the usual release fields such as description, license, authors, and project URLs.
+- The package metadata does not contain the usual release fields such as license, authors, and project URLs.
 - The repository examples are not present in the wheel.
 - All dependencies are mandatory and exactly pinned.
 - Optional dependency groups for evaluation-only and builder workflows do not exist.
@@ -592,30 +602,16 @@ They should be complete before a public package release.
 
 ## Recommended work order
 
-### Priority 1: Make the local builder installable
+The package extraction and release work is tracked in [EXPLAINBENCH_CLI_EXTRACTION_PLAN.md](EXPLAINBENCH_CLI_EXTRACTION_PLAN.md).
 
-1. Move the canonical scientific modules into an installed `explainbench` namespace.
-2. Keep compatibility wrappers for old repository imports and commands.
-3. Move or package all required runtime resources.
-4. Declare the tracing runtime dependency.
-5. Update the ten runner module paths.
-6. Build the wheel and inspect its contents.
-7. Run `checker`, `question-builder local stages`, and the first builder stage from a clean directory.
-
-### Priority 2: Complete unpaid real validation
-
-1. Run and review `S03` through `S07`.
-2. Fix any Docker, path, timeout, or artifact problems.
-3. Confirm that resume does not repeat completed expensive work.
-
-### Priority 3: Improve paid-work durability
+### Priority 1: Improve paid-work durability
 
 1. Store the raw candidate prompt before inference.
 2. Store every raw model response before parsing.
 3. Add checksums and checkpoint references.
 4. Confirm that resume can reuse paid outputs.
 
-### Priority 4: Complete one real local-effect workflow
+### Priority 2: Complete one real local-effect workflow
 
 1. Run model-backed candidate generation.
 2. Execute candidate expressions.
@@ -625,17 +621,13 @@ They should be complete before a public package release.
 6. Run `explainbench evaluate --task local.effect` with the generated artifacts.
 7. Repeat the complete run with `--resume`.
 
-### Priority 5: Add release verification
+### Priority 3: Complete release verification
 
-1. Add an automated wheel build test.
-2. Install the wheel in a clean virtual environment.
-3. Run tests from outside the repository.
-4. Test the checker and intent resource loading.
-5. Test one mocked evaluation.
-6. Test at least the first local builder stage.
-7. Add a separate opt-in Docker integration job.
+1. Add the fast and clean-wheel tests to CI.
+2. Add a separate opt-in Docker integration job.
+3. Complete the release metadata and installation documentation.
 
-### Priority 6: Decide the end-to-end builder scope
+### Priority 4: Decide the end-to-end builder scope
 
 Implement the end-to-end builder only after the local builder is package-ready.
 Reuse the common orchestration components when they match the end-to-end pipeline.

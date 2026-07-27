@@ -46,3 +46,6 @@ explainbench = [
 addopts = "-p no:tracer_plugin"
 pythonpath = ["src", "."]
 testpaths = ["tests"]
+markers = [
+    "real_local_effect: opt-in local-effect tests that use real SWE-bench execution",
+]
