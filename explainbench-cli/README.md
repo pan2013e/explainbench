@@ -1,19 +1,19 @@
 # ExplainBench CLI
 
-This directory contains the package-focused ExplainBench implementation.
+This repository contains the package-focused ExplainBench implementation.
 The project website is [explainbench.github.io](https://explainbench.github.io).
 
-The package workspace is under active extraction from the ExplainBench research repository.
-It is not release-ready yet.
+The initial package extraction from the ExplainBench research repository is complete.
+The package is ready for repository development and release-candidate validation.
 
 ## Installation
 
 ExplainBench requires Python 3.12 or later.
-Clone the repository and install the package from the `explainbench-cli` directory:
+Clone the repository and install the package:
 
 ```bash
-git clone https://github.com/pan2013e/explainbench.git
-cd explainbench/explainbench-cli
+git clone https://github.com/explainbench/explainbench-cli.git
+cd explainbench-cli
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -166,7 +166,7 @@ The repository includes three GitHub Actions workflows:
 - Wheel smoke tests build and install the wheel in an isolated environment.
 - Real local-effect validation is a manual unpaid Docker workflow.
 
-The workflows become active when `explainbench-cli` is the root of its separate Git repository.
+The workflows run from the standalone `explainbench-cli` repository.
 
 ## Repository model
 
@@ -185,14 +185,14 @@ src/
 `src/core` is a repository container.
 It is not a Python import package.
 
-The wheel will install its children as the existing top-level packages:
+The wheel installs its children as the existing top-level packages:
 
 - `dataset`
 - `execution`
 - `tracer`
 - `tracer_plugin`
 
-The CLI wrapper will remain available as `explainbench`.
+The CLI wrapper is available as `explainbench`.
 
 ## Current status
 
@@ -223,5 +223,5 @@ See [PACKAGE_HANDOFF.md](PACKAGE_HANDOFF.md) for current implementation and vali
 
 ## Development state
 
-Do not publish this package yet.
-Model-backed validation, CI, licensing, and release metadata are incomplete.
+The package extraction and local validation are complete.
+Do not publish a public package release until the license decision is complete and the release candidate passes the required CI workflows in this repository.
