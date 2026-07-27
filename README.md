@@ -1,6 +1,7 @@
-# Documentation for Replication Package
+# ExplainBench: Evaluating Code Explanations from Agents
 
-This replication package is shared privately for double anonymous review. 
+This is the replication package for the paper "ExplainBench: Evaluating Code Explanations from Agents".
+
 
 ## Directory structure
 
